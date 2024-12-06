@@ -1,0 +1,26 @@
+@use "../../index.scss";
+
+.assetReceiving {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 20px;
+  max-height: 600px;
+  padding-top: 20px;
+  overflow: auto;
+
+  &__title {
+    color: index.$secondary;
+    font-size: 24px;
+    font-weight: 800;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+    min-width: 200px;
+    gap: 20px;
+    padding-top: 5px;
+  }
+}

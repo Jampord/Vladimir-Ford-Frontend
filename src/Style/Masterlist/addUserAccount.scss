@@ -1,0 +1,66 @@
+@use "../../index.scss";
+
+.add-userAccount {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px 10px;
+  gap: 10px;
+  min-width: 350px;
+  width: 100%;
+  overflow: overlay;
+
+  @media (max-width: 350px) {
+    flex-wrap: nowrap;
+    gap: 10px;
+    overflow: overlay;
+    min-width: 100%;
+    width: 100%;
+  }
+
+  &__title {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    position: relative;
+    gap: 5px;
+  }
+
+  // &__back {
+  //   position: absolute;
+  //   left: 0;
+  // }
+
+  &__wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 5px;
+
+    @media (max-width: 750px) {
+      flex-wrap: wrap;
+      padding: 5px;
+    }
+  }
+
+  &__employee {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 5px 10px;
+    gap: 15px;
+    overflow: auto;
+    // height: calc(100vh - 11rem);
+  }
+
+  &__buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+
+    // @media (min-width: 150px) {
+    //   padding-top: 20px;
+    // }
+  }
+}

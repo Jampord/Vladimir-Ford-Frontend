@@ -1,0 +1,97 @@
+@use "../index.scss";
+
+.parentSidebar {
+  display: flex;
+  flex-direction: column;
+  // justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  width: 100%;
+  height: 100%;
+  // height: calc(100vh - 150px);
+  margin-inline: auto;
+  padding: 3% 0;
+  overflow: overlay;
+
+  @media (max-width: 590px) {
+    justify-content: flex-start;
+    margin-inline: auto;
+    width: 90%;
+  }
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 1200px;
+
+    & .parentSidebar__wrapper {
+      display: flex;
+      justify-content: center;
+      // align-content: center;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 15px;
+
+      @media (max-width: 590px) {
+        height: 100%;
+      }
+    }
+  }
+
+  &__card {
+    // justify-self: center;
+    align-self: center;
+    padding: 10px;
+    width: min(250px, 230px);
+    max-width: 200px;
+    height: 240px;
+    max-height: 240px;
+    cursor: pointer;
+
+    @media (max-width: 590px) {
+      height: auto;
+      // max-height: auto;
+      // min-height: auto;
+      width: 80%;
+      min-width: 95%;
+      margin-right: 5px;
+    }
+  }
+
+  &__card:hover {
+    // opacity: 100%;
+    background-color: #f9d39a;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    // gap: 10px;
+    height: 100%;
+
+    & .parentSidebar__icon {
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      pointer-events: none;
+      color: index.$secondary;
+      background-color: #faba5b98;
+      border-radius: 50%;
+      height: 40px;
+      width: 40px;
+      min-width: 40px;
+    }
+
+    @media (max-width: 590px) {
+      align-items: flex-start;
+    }
+  }
+
+  &__action-area {
+    pointer-events: none;
+    height: 100%;
+  }
+}

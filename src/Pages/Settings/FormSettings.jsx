@@ -1,0 +1,55 @@
+import React, { useState } from "react";
+import { Box, MenuItem, Select, Stack, Typography } from "@mui/material";
+import UnitApprovers from "./UnitApprovers";
+import AssetTransfer from "./AssetTransfer";
+import AssetPullout from "./AssetPullout";
+import AssetDisposal from "./AssetDisposal";
+
+const FormSettings = () => {
+  const [value, setValue] = useState("option1");
+
+  const handleChange = (e) => {
+    setValue(e.target.value);
+  };
+
+  const views = {
+    option1: <UnitApprovers />,
+    option2: <AssetTransfer />,
+    option3: <AssetPullout />,
+    option4: <AssetDisposal />,
+  };
+
+  return (
+    <Box className="mcontainer">
+      <Typography className="mcontainer__title" sx={{ fontFamily: "Anton, Roboto, Helvetica", fontSize: "1.6rem" }}>
+        Form Settings
+      </Typography>
+
+      <Stack>
+        <Select
+          size="small"
+          value={value}
+          onChange={handleChange}
+          sx={{
+            minWidth: "230px",
+            width: "30%",
+            borderRadius: "10px",
+            backgroundColor: "white",
+            border: "1px solid #c7c7c70e",
+            my: "5px",
+            fontWeight: "bold",
+            color: "secondary.main",
+          }}
+        >
+          <MenuItem value="option1">Asset Requisition</MenuItem>
+          <MenuItem value="option2">Asset Transfer</MenuItem>
+          <MenuItem value="option3">Asset Pullout</MenuItem>
+          <MenuItem value="option4">Asset Disposal</MenuItem>
+        </Select>
+        {views[value]}
+      </Stack>
+    </Box>
+  );
+};
+
+export default FormSettings;
