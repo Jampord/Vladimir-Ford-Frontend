@@ -182,7 +182,7 @@ const TransferHistoryReport = () => {
                         },
                       }}
                     >
-                      <TableCell className="tbl-cell">Transfer No.</TableCell>
+                      <TableCell className="tbl-cell">ID</TableCell>
                       <TableCell className="tbl-cell">Vladimir Tag Number</TableCell>
                       <TableCell className="tbl-cell">Asset Description</TableCell>
                       <TableCell className="tbl-cell">Status</TableCell>

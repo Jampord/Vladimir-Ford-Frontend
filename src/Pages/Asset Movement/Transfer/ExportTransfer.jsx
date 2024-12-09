@@ -92,7 +92,7 @@ const ExportTransfer = () => {
 
       const newObj = res?.flatMap((item) => {
         return {
-          "Transfer Number": item?.id,
+          ID: item?.id,
           "Vladimir Tag Number": item?.vladimir_tag_number,
           "Asset Description": item?.asset_description,
           Status: item?.status,
