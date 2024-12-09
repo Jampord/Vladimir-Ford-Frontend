@@ -48,6 +48,7 @@ const ActionMenu = (props) => {
     showApprover,
     editRequestData,
     editTransferData,
+    editPulloutData,
     onDeleteReferenceHandler,
     // setShowEdit
     setUpdateToggle,
@@ -172,6 +173,18 @@ const ActionMenu = (props) => {
     });
   };
 
+  const handleEditPullout = () => {
+    // console.log(data);
+    // onUpdateHandler(data);
+    // dispatch(openDrawer() || openDialog());
+    // handleClose();
+
+    const edit = true;
+    navigate(`add-pull-out/${data.id}`, {
+      state: { ...data, edit },
+    });
+  };
+
   const handleEditNav = () => {
     navigate(`add-requisition`);
     onUpdateHandler(data);
@@ -241,6 +254,17 @@ const ActionMenu = (props) => {
 
           {editTransferData && (
             <MenuItem onClick={handleEditTransfer} dense>
+              <ListItemIcon>
+                <BorderColor />
+              </ListItemIcon>
+              <ListItemText disableTypography align="left">
+                Edit
+              </ListItemText>
+            </MenuItem>
+          )}
+
+          {editPulloutData && (
+            <MenuItem onClick={handleEditPullout} dense>
               <ListItemIcon>
                 <BorderColor />
               </ListItemIcon>
