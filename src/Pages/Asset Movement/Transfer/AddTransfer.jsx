@@ -362,7 +362,7 @@ const AddTransfer = (props) => {
     },
   });
 
-  console.log("errors", errors);
+  // console.log("errors", errors);
   // console.log("isdirty: ", isDirty);
   // console.log("💣: ", isValid);
 
@@ -741,7 +741,7 @@ const AddTransfer = (props) => {
           autoComplete="off"
           color="secondary"
           disabled={edit ? false : transactionData?.view}
-          value={value ? `${value} file(s) selected` : null}
+          value={value > 1 ? `${value} files selected` : value <= 1 ? `${value} file selected` : null}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -1269,6 +1269,15 @@ const AddTransfer = (props) => {
                   <RemoveFile title="Evaluation Form" value="attachments" />
                 )}
               </Stack>
+              <Box mt="-13px" ml="10px">
+                {watch("attachments")
+                  ? watch("attachments").map((item) => (
+                      <Typography fontSize="12px" fontWeight="bold">
+                        {item.name}
+                      </Typography>
+                    ))
+                  : null}
+              </Box>
             </Stack>
           </Stack>
 
@@ -1512,8 +1521,6 @@ const AddTransfer = (props) => {
                                 return value;
                               }}
                             /> */}
-
-                            {console.log(watch(`assets`))}
 
                             {watch(`assets.${index}.accountability`) === "Personal Issued" && (
                               <Controller

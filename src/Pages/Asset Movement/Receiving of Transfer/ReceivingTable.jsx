@@ -246,10 +246,10 @@ const ReceivingTable = ({ received }) => {
                           </Tooltip>
                         </TableCell>
                       )}
-                      <TableCell className="tbl-cell">Request #</TableCell>
+                      <TableCell className="tbl-cell">Transfer #</TableCell>
                       <TableCell className="tbl-cell">Vladimir Tag #</TableCell>
-                      <TableCell className="tbl-cell">New Custodian</TableCell>
-                      <TableCell className="tbl-cell">COA (New Custodian)</TableCell>
+                      <TableCell className="tbl-cell">Custodian</TableCell>
+                      <TableCell className="tbl-cell">Chart Of Account </TableCell>
                       <TableCell className="tbl-cell">Asset Status</TableCell>
                       <TableCell className="tbl-cell">Date Requested</TableCell>
                       {/* <TableCell className="tbl-cell">Action</TableCell> */}
