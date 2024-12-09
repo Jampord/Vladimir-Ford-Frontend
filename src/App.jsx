@@ -412,6 +412,11 @@ const router = createBrowserRouter([
                 handle: { permission: "pull-out" },
               },
               {
+                path: "pull-out/add-pull-out/:pullout_number",
+                element: <AddPullout />,
+                handle: { permission: "pull-out" },
+              },
+              {
                 path: "disposal",
                 // element: <Category />,
                 handle: { permission: "disposal" },
