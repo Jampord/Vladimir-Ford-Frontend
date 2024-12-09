@@ -5,7 +5,13 @@ import { Outlet } from "react-router";
 import { useLocation } from "react-router-dom";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import { Box, Typography, useMediaQuery } from "@mui/material";
-import { PlaylistRemoveRounded, RemoveFromQueue, RuleFolder, TransferWithinAStation } from "@mui/icons-material";
+import {
+  Addchart,
+  PlaylistRemoveRounded,
+  RemoveFromQueue,
+  RuleFolder,
+  TransferWithinAStation,
+} from "@mui/icons-material";
 import Cards from "../../Components/Reusable/Cards";
 
 const ReportList = [
@@ -16,12 +22,12 @@ const ReportList = [
     path: "/reports/pr-report",
   },
 
-  //   {
-  //     icon: <RemoveFromQueue />,
-  //     label: "Pull-Out",
-  //     description: "Requesting for Asset Pull-Out",
-  //     path: "/reports/",
-  //   },
+  {
+    icon: <Addchart />,
+    label: "Transfer History Reports",
+    description: "List of Asset Transfers",
+    path: "/reports/transfer-report",
+  },
 
   // {
   //   icon: <RuleFolder />,
