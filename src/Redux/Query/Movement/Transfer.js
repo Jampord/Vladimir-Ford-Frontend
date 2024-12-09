@@ -34,14 +34,17 @@ export const transferApi = createApi({
 
     getTransferAllApi: builder.query({
       query: () => `asset-transfer?pagination=none`,
+      providesTags: ["Transfer"],
     }),
 
     getTransferNumberApi: builder.query({
       query: (params) => `transfer/${params.transfer_number}`,
+      providesTags: ["Transfer"],
     }),
 
     getTransferNumberReceiverApi: builder.query({
       query: (params) => `transfer/${params.transfer_number}?is_receiver=1`,
+      providesTags: ["Transfer"],
     }),
 
     getFixedAssetTransferAllApi: builder.query({
@@ -75,6 +78,7 @@ export const transferApi = createApi({
 
     getNextTransfer: builder.query({
       query: () => `/get-next-transfer`,
+      providesTags: ["Transfer"],
     }),
 
     downloadAttachmentApi: builder.mutation({

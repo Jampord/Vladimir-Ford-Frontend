@@ -24,10 +24,12 @@ export const pulloutApi = createApi({
 
     getPulloutAllApi: builder.query({
       query: () => `pullout?pagination=none`,
+      providesTags: ["Pullout"],
     }),
 
     getPulloutNumberApi: builder.query({
       query: (params) => `pullout/${params.pullout_number}`,
+      providesTags: ["Pullout"],
     }),
 
     getFixedAssetPulloutAllApi: builder.query({
@@ -61,11 +63,21 @@ export const pulloutApi = createApi({
 
     getNextPullout: builder.query({
       query: () => `/next-pullout`,
+      providesTags: ["Pullout"],
     }),
 
     downloadAttachmentApi: builder.mutation({
       query: (pullout_number) => ({
         url: `pullout-attachment/${pullout_number}`,
+      }),
+      invalidatesTags: ["Pullout"],
+    }),
+
+    patchVoidPulloutApi: builder.mutation({
+      query: (body) => ({
+        url: `/void-pullout`,
+        method: "PATCH",
+        body,
       }),
       invalidatesTags: ["Pullout"],
     }),
@@ -83,4 +95,5 @@ export const {
   useArchivePulloutApiMutation,
   useLazyGetNextPulloutQuery,
   useDownloadAttachmentApiMutation,
+  usePatchVoidPulloutApiMutation,
 } = pulloutApi;
