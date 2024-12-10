@@ -35,15 +35,15 @@ export const pulloutApprovalApi = createApi({
 
     patchPulloutApprovalStatusApi: builder.mutation({
       query: (body) => ({
-        url: `/pullout-approval`,
+        url: `/handle-pullout-movement`,
         method: "PATCH",
         body,
       }),
       invalidatesTags: ["PulloutApproval"],
     }),
 
-    getNextRequest: builder.query({
-      query: () => `/next-pullout`,
+    getNextPulloutRequest: builder.query({
+      query: () => `/get-next-pullout`,
     }),
 
     dlAttachment: builder.query({
@@ -60,7 +60,7 @@ export const {
   useGetPulloutApprovalAllApiQuery,
   useGetPulloutApprovalIdApiQuery,
   usePatchPulloutApprovalStatusApiMutation,
-  useGetNextRequestQuery,
-  useLazyGetNextRequestQuery,
+  useGetNextPulloutRequestQuery,
+  useLazyGetNextPulloutRequestQuery,
   useLazyDlAttachmentQuery,
 } = pulloutApprovalApi;
