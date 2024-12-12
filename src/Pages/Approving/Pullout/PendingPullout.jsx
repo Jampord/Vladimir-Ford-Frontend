@@ -111,6 +111,8 @@ const PendingPullout = (props) => {
     { refetchOnMountOrArgChange: true }
   );
 
+  console.log("pendingPulloutData: ", pendingPulloutData);
+
   const [patchApprovalStatus, { isLoading }] = usePatchPulloutApprovalStatusApiMutation();
 
   // CONFIRMATION
@@ -251,7 +253,7 @@ const PendingPullout = (props) => {
 
   const handleViewPullout = (data) => {
     // const view = true;
-    navigate(`/approving/pullout/${data?.pullout_number}`, {
+    navigate(`/approving/pullout/${data?.id}`, {
       state: { ...data },
     });
   };
@@ -355,7 +357,7 @@ const PendingPullout = (props) => {
                       {approvalSuccess &&
                         [...pendingPulloutData.data].sort(comparator(order, orderBy))?.map((data) => (
                           <TableRow
-                            key={data?.pullout_number}
+                            key={data?.id}
                             hover={true}
                             sx={{
                               "&:last-child td, &:last-child th": {
@@ -363,7 +365,7 @@ const PendingPullout = (props) => {
                               },
                             }}
                           >
-                            <TableCell className="tbl-cell-category ">{data?.pullout_number}</TableCell>
+                            <TableCell className="tbl-cell-category text-weight">{data?.id}</TableCell>
 
                             <TableCell className="tbl-cell-category ">{data?.description}</TableCell>
 
