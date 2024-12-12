@@ -111,7 +111,7 @@ const ApprovedPullout = (props) => {
     const view = true;
     const approved = true;
 
-    navigate(`/approving/pullout/${data?.pullout_number}`, {
+    navigate(`/approving/pullout/${data?.id}`, {
       state: { ...data, view, approved },
     });
   };
@@ -215,7 +215,7 @@ const ApprovedPullout = (props) => {
                       {approvalSuccess &&
                         [...approvedPulloutData.data].sort(comparator(order, orderBy))?.map((data) => (
                           <TableRow
-                            key={data?.pullout_number}
+                            key={data?.id}
                             hover={true}
                             sx={{
                               "&:last-child td, &:last-child th": {
@@ -223,7 +223,7 @@ const ApprovedPullout = (props) => {
                               },
                             }}
                           >
-                            <TableCell className="tbl-cell-category ">{data?.pullout_number}</TableCell>
+                            <TableCell className="tbl-cell-category text-weight">{data?.id}</TableCell>
 
                             <TableCell className="tbl-cell-category ">{data?.description}</TableCell>
 
