@@ -564,8 +564,8 @@ const Transfer = () => {
                                     data={data}
                                     status={data?.status}
                                     hideArchive
-                                    showVoid
-                                    editTransferData
+                                    showVoid={data.can_delete === 1}
+                                    editTransferData={data.can_edit === 1}
                                     onVoidHandler={onVoidHandler}
                                   />
                                 )}

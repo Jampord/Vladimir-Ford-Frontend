@@ -322,7 +322,7 @@ const Pullout = () => {
                               {item?.quantity}
                             </TableCell>
                             <TableCell className="tbl-cell text-weight text-center">
-                              <Tooltip placement="top" title="View Transfer Information" arrow>
+                              <Tooltip placement="top" title="View Pullout Information" arrow>
                                 <IconButton onClick={() => handleViewTransfer(item)}>
                                   <Visibility />
                                 </IconButton>
@@ -340,8 +340,8 @@ const Pullout = () => {
                                   data={item}
                                   status={item?.status}
                                   hideArchive
-                                  showVoid
-                                  editPulloutData
+                                  showVoid={item?.can_delete === 1}
+                                  editPulloutData={item?.can_edit === 1}
                                   onVoidHandler={onVoidHandler}
                                 />
                               )}
