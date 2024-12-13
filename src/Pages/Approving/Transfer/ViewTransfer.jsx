@@ -135,7 +135,7 @@ const schema = yup.object().shape({
   ),
 });
 
-const AddTransfer = (props) => {
+const ViewTransfer = (props) => {
   const [view, setView] = useState(true);
   const [edit, setEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -209,6 +209,7 @@ const AddTransfer = (props) => {
     { transfer_number: transactionData?.id ? transactionData?.id : transactionData?.transfer_number },
     { refetchOnMountOrArgChange: true }
   );
+
   // console.log("transferData: ", transferData[0]);
 
   const [
@@ -315,7 +316,7 @@ const AddTransfer = (props) => {
     handleSubmit,
     control,
     register,
-    formState: { errors, isDirty, isValid },
+    formState: { errors, isValid },
     setError,
     reset,
     watch,
@@ -346,12 +347,10 @@ const AddTransfer = (props) => {
     },
   });
 
-  //* Append Table ---------------------------------------------------------------
   const { fields, append, remove } = useFieldArray({
     control,
     name: "assets",
   });
-  const handleAppendItem = () => append({ id: null, fixed_asset_id: null, asset_accountable: "", created_at: null });
 
   //* useEffects() ----------------------------------------------------------------
   useEffect(() => {
@@ -377,6 +376,7 @@ const AddTransfer = (props) => {
   }, [isPostError]);
 
   const transferNumberData = transferData?.at(0);
+
   useEffect(() => {
     // console.log("transferNumberData", transferNumberData);
 
@@ -432,166 +432,6 @@ const AddTransfer = (props) => {
   // console.log("asset", watch("asset"));
   // console.log("asset", data?.asset);
 
-  //* Table Sorting ----------------------------------------------------------------
-  const [order, setOrder] = useState("desc");
-  const [orderBy, setOrderBy] = useState("id");
-
-  const descendingComparator = (a, b, orderBy) => {
-    if (b[orderBy] < a[orderBy]) {
-      return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-      return 1;
-    }
-    return 0;
-  };
-
-  const comparator = (order, orderBy) => {
-    return order === "desc"
-      ? (a, b) => descendingComparator(a, b, orderBy)
-      : (a, b) => -descendingComparator(a, b, orderBy);
-  };
-
-  const onSort = (property) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
-  };
-
-  //* Form functions ----------------------------------------------------------------
-  const onSubmitHandler = (formData) => {
-    setIsLoading(true);
-    const token = localStorage.getItem("token");
-
-    const updatingCoa = (fields, name) =>
-      updateRequest ? formData?.[fields]?.id : formData?.[fields]?.[name]?.id.toString();
-    const accountableFormat =
-      formData?.accountable === null ? "" : formData?.accountable?.general_info?.full_id_number_full_name?.toString();
-
-    const data = {
-      ...formData,
-      department_id: formData?.department_id.id?.toString(),
-      company_id: updatingCoa("company_id", "company"),
-      business_unit_id: updatingCoa("business_unit_id", "business_unit"),
-      unit_id: formData.unit_id.id?.toString(),
-      subunit_id: formData.subunit_id.id?.toString(),
-      location_id: formData?.location_id.id?.toString(),
-      // account_title_id: formData?.account_title_id.id?.toString(),
-      accountability: formData?.accountability?.toString(),
-      accountable: accountableFormat,
-      attachments: formData?.attachments,
-
-      asset: formData?.assets?.map((item) => ({
-        fixed_asset_id: item.fixed_asset_id.id,
-        accountability: item?.accountability?.toString(),
-        accountable: item?.accountable?.full_id_number_full_name?.toString() || "",
-        receiver_id: item?.receiver_id?.id,
-      })),
-      receiver_id: formData?.receiver_id?.id,
-    };
-    const submitData = async () => {
-      setIsLoading(true);
-      await axios
-        .post(
-          `${process.env.VLADIMIR_BASE_URL}/${
-            edit ? `update-transfer-request/${transferNumberData?.transfer_number}` : "asset-transfer"
-          }`,
-          data,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-        .then((res) => {
-          // console.log(res);
-          setIsLoading(false);
-        })
-        .catch((err) => {
-          console.log("Error submitting form!");
-        });
-    };
-    dispatch(
-      openConfirm({
-        icon: Info,
-        iconColor: "info",
-        message: (
-          <Box>
-            <Typography> Are you sure you want to</Typography>
-            <Typography
-              sx={{
-                display: "inline-block",
-                color: "secondary.main",
-                fontWeight: "bold",
-              }}
-            >
-              {!edit ? "CREATE" : "UPDATE"}
-            </Typography>{" "}
-            this Data?
-          </Box>
-        ),
-        onConfirm: async () => {
-          try {
-            dispatch(onLoading());
-            await submitData();
-            reset();
-            navigate(-1);
-            dispatch(
-              openToast({
-                message: "Transfer Request Successfully Added",
-                duration: 5000,
-              })
-            );
-          } catch (err) {
-            console.log(err);
-            if (err?.status === 422) {
-              dispatch(
-                openToast({
-                  message: err?.data?.errors?.detail || err.data.message,
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
-            } else if (err?.status !== 422) {
-              console.error(err);
-              dispatch(
-                openToast({
-                  message: "Something went wrong. Please try again.",
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
-            }
-          }
-        },
-      })
-    );
-  };
-
-  const RemoveFile = ({ title, value }) => {
-    return (
-      <Tooltip title="attachment" arrow>
-        <IconButton
-          onClick={() => {
-            setValue(value, null);
-            // ref.current.files = [];
-          }}
-          size="small"
-          sx={{
-            backgroundColor: "error.main",
-            color: "white",
-            ":hover": { backgroundColor: "error.main" },
-            height: "25px",
-            width: "25px",
-          }}
-        >
-          <Remove />
-        </IconButton>
-      </Tooltip>
-    );
-  };
-
   const UpdateField = ({ value, label }) => {
     return (
       <Stack flexDirection="row" gap={1} alignItems="center">
@@ -602,7 +442,7 @@ const AddTransfer = (props) => {
           autoComplete="off"
           color="secondary"
           disabled={edit ? false : view}
-          value={value ? `${value} file(s) selected` : null}
+          value={value > 1 ? `${value} files selected` : value <= 1 ? `${value} file selected` : null}
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
@@ -849,20 +689,17 @@ const AddTransfer = (props) => {
               )} */}
         </Stack>
 
-        <Box className="request mcontainer__wrapper" p={2} component="form" onSubmit={handleSubmit(onSubmitHandler)}>
+        <Box className="request mcontainer__wrapper" p={2} component="form">
           <Box>
             <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem", pt: 1 }}>
-              {`${
-                view
-                  ? edit
-                    ? "EDIT INFORMATION"
-                    : `TRANSFER NO. ${transferData[0]?.movement_id}`
-                  : "ADD TRANSFER REQUEST"
-              }`}
+              TRANSFER NO. {transferData[0]?.movement_id}
             </Typography>
 
             <Box id="requestForm" className="request__form">
               <Stack gap={2} py={1}>
+                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px" }}>
+                  REQUEST DETAILS
+                </Typography>
                 <Box sx={BoxStyle}>
                   <CustomTextField
                     control={control}
@@ -903,11 +740,16 @@ const AddTransfer = (props) => {
                         helperText={errors?.attachments?.message}
                       />
                     )}
-
-                    {watch("attachments") !== null && (!view || edit) && (
-                      <RemoveFile title="Attachments" value="attachments" />
-                    )}
                   </Stack>
+                  <Box mt="-13px" ml="10px">
+                    {watch("attachments")
+                      ? watch("attachments").map((item, index) => (
+                          <Typography fontSize="12px" fontWeight="bold" color="gray" key={index}>
+                            {item.name}
+                          </Typography>
+                        ))
+                      : null}
+                  </Box>
 
                   <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "15px" }}>
                     CHART OF ACCOUNTS
@@ -963,6 +805,7 @@ const AddTransfer = (props) => {
 
                   <CustomAutoComplete
                     autoComplete
+                    freeSolo
                     control={control}
                     name="department_id"
                     disabled={edit ? false : view}
@@ -977,6 +820,7 @@ const AddTransfer = (props) => {
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                     renderInput={(params) => (
                       <TextField
+                        multiline
                         color="secondary"
                         {...params}
                         label="Department"
@@ -984,28 +828,11 @@ const AddTransfer = (props) => {
                         helperText={errors?.department_id?.message}
                       />
                     )}
-                    onChange={(_, value) => {
-                      if (value) {
-                        const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
-                        const businessUnitID = businessUnitData?.find(
-                          (item) => item.sync_id === value.business_unit.business_unit_sync_id
-                        );
-
-                        setValue("company_id", companyID);
-                        setValue("business_unit_id", businessUnitID);
-                      } else if (value === null) {
-                        setValue("company_id", null);
-                        setValue("business_unit_id", null);
-                      }
-                      setValue("unit_id", null);
-                      setValue("subunit_id", null);
-                      setValue("location_id", null);
-                      return value;
-                    }}
                   />
 
                   <CustomAutoComplete
                     name="company_id"
+                    freeSolo
                     control={control}
                     options={companyData}
                     onOpen={() => (isCompanySuccess ? null : company())}
@@ -1015,11 +842,13 @@ const AddTransfer = (props) => {
                     isOptionEqualToValue={(option, value) => option.company_id === value.company_id}
                     renderInput={(params) => (
                       <TextField
+                        multiline
+                        maxRows={2}
                         color="secondary"
                         {...params}
                         label="Company"
-                        // error={!!errors?.company_id}
-                        // helperText={errors?.company_id?.message}
+                        error={!!errors?.company_id}
+                        helperText={errors?.company_id?.message}
                       />
                     )}
                     disabled
@@ -1027,6 +856,7 @@ const AddTransfer = (props) => {
 
                   <CustomAutoComplete
                     autoComplete
+                    freeSolo
                     name="business_unit_id"
                     control={control}
                     options={businessUnitData}
@@ -1036,11 +866,12 @@ const AddTransfer = (props) => {
                     isOptionEqualToValue={(option, value) => option.business_unit_id === value.business_unit_id}
                     renderInput={(params) => (
                       <TextField
+                        multiline
                         color="secondary"
                         {...params}
                         label="Business Unit"
-                        // error={!!errors?.business_unit_id}
-                        // helperText={errors?.business_unit_id?.message}
+                        error={!!errors?.business_unit_id}
+                        helperText={errors?.business_unit_id?.message}
                       />
                     )}
                     disabled
@@ -1048,6 +879,7 @@ const AddTransfer = (props) => {
 
                   <CustomAutoComplete
                     autoComplete
+                    freeSolo
                     name="unit_id"
                     disabled={edit ? false : view}
                     control={control}
@@ -1059,6 +891,7 @@ const AddTransfer = (props) => {
                     isOptionEqualToValue={(option, value) => option?.id === value?.id}
                     renderInput={(params) => (
                       <TextField
+                        multiline
                         color="secondary"
                         {...params}
                         label="Unit"
@@ -1075,6 +908,7 @@ const AddTransfer = (props) => {
 
                   <CustomAutoComplete
                     autoComplete
+                    freeSolo
                     name="subunit_id"
                     disabled={edit ? false : view}
                     control={control}
@@ -1088,6 +922,7 @@ const AddTransfer = (props) => {
                     }}
                     renderInput={(params) => (
                       <TextField
+                        multiline
                         color="secondary"
                         {...params}
                         label="Sub Unit"
@@ -1099,6 +934,7 @@ const AddTransfer = (props) => {
 
                   <CustomAutoComplete
                     autoComplete
+                    freeSolo
                     name="location_id"
                     disabled={edit ? false : view}
                     control={control}
@@ -1188,8 +1024,8 @@ const AddTransfer = (props) => {
                     }}
                   >
                     <TableCell className="tbl-cell">Index</TableCell>
-                    <TableCell className="tbl-cell">Transfer To</TableCell>
                     <TableCell className="tbl-cell">Asset</TableCell>
+                    <TableCell className="tbl-cell">Transfer To</TableCell>
                     <TableCell className="tbl-cell">Accountability</TableCell>
                     <TableCell className="tbl-cell">Chart Of Accounts</TableCell>
                     <TableCell className="tbl-cell">Acquisition Date</TableCell>
@@ -1204,7 +1040,7 @@ const AddTransfer = (props) => {
                   ) : (
                     fields.map((item, index) => (
                       <TableRow key={item.id}>
-                        <TableCell align="center">
+                        <TableCell className="tbl-cell" align="center">
                           <Avatar
                             sx={{
                               width: 24,
@@ -1218,6 +1054,65 @@ const AddTransfer = (props) => {
                         </TableCell>
 
                         <TableCell className="tbl-cell">
+                          <Controller
+                            control={control}
+                            name={`assets.${index}.fixed_asset_id`}
+                            render={({ field: { ref, value, onChange } }) => (
+                              <Autocomplete
+                                options={vTagNumberData}
+                                onOpen={() => (isVTagNumberSuccess ? null : fixedAssetTrigger())}
+                                loading={isVTagNumberLoading}
+                                disabled={edit ? false : view}
+                                size="small"
+                                freeSolo
+                                value={value}
+                                filterOptions={filterOptions}
+                                getOptionLabel={(option) =>
+                                  `(${option.vladimir_tag_number}) - ${option.asset_description}`
+                                }
+                                isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                                renderInput={(params) => (
+                                  <TextField required color="secondary" {...params} multiline label="Tag Number" />
+                                )}
+                                getOptionDisabled={(option) =>
+                                  !!fields.find((item) => item.fixed_asset_id?.id === option.id) &&
+                                  option?.transfer === 1
+                                }
+                                // getOptionDisabled={(option) => !!fields.find((item) => console.log(item))}
+                                onChange={(_, newValue) => {
+                                  if (newValue) {
+                                    // onChange(newValue.id);
+                                    onChange(newValue);
+                                    setValue(
+                                      `assets.${index}.asset_accountable`,
+                                      newValue.accountable === "-" ? "Common" : newValue.accountable
+                                    );
+                                    setValue(`assets.${index}.created_at`, newValue.created_at);
+                                  } else {
+                                    onChange(null);
+                                    setValue(`assets.${index}.asset_accountable`, "");
+                                    setValue(`assets.${index}.created_at`, null);
+                                  }
+                                }}
+                                sx={{
+                                  ".MuiInputBase-root": {
+                                    borderRadius: "10px",
+                                  },
+                                  ".MuiInputLabel-root.Mui-disabled": {
+                                    backgroundColor: "transparent",
+                                  },
+                                  ".Mui-disabled": {
+                                    backgroundColor: "background.light",
+                                  },
+                                  minWidth: "200px",
+                                  maxWidth: "550px",
+                                }}
+                              />
+                            )}
+                          />
+                        </TableCell>
+
+                        <TableCell className="tbl-cell">
                           <Stack flexDirection="row" gap={2}>
                             <Controller
                               control={control}
@@ -1226,6 +1121,7 @@ const AddTransfer = (props) => {
                                 <Autocomplete
                                   options={["Personal Issued", "Common"]}
                                   disabled
+                                  freeSolo
                                   size="small"
                                   value={value}
                                   renderInput={(params) => (
@@ -1235,7 +1131,7 @@ const AddTransfer = (props) => {
                                       {...params}
                                       // multiline
                                       label="Accountability"
-                                      maxRows={5}
+                                      maxRows={2}
                                       sx={{
                                         "& .MuiInputBase-inputMultiline": {
                                           minHeight: "10px",
@@ -1297,6 +1193,7 @@ const AddTransfer = (props) => {
                                     value={value}
                                     options={userData}
                                     disabled
+                                    freeSolo
                                     onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
                                     loading={isUserLoading}
                                     filterOptions={filterOptions}
@@ -1331,7 +1228,7 @@ const AddTransfer = (props) => {
                                           },
 
                                           ml: "8px",
-                                          minWidth: "220px",
+                                          minWidth: "200px",
                                           maxWidth: "550px",
                                         }}
                                       />
@@ -1361,7 +1258,7 @@ const AddTransfer = (props) => {
                                       },
                                       ml: "-17px",
                                       mr: "8px",
-                                      minWidth: "220px",
+                                      minWidth: "200px",
                                       maxWidth: "550px",
                                     }}
                                   />
@@ -1379,6 +1276,7 @@ const AddTransfer = (props) => {
                                   value={value}
                                   options={userData}
                                   disabled
+                                  freeSolo
                                   onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
                                   loading={isUserLoading}
                                   filterOptions={filterOptions}
@@ -1415,7 +1313,7 @@ const AddTransfer = (props) => {
                                           top: "-10%", // Center vertically
                                         },
                                         // ml: "8px",
-                                        minWidth: "220px",
+                                        minWidth: "200px",
                                         maxWidth: "550px",
                                       }}
                                     />
@@ -1444,7 +1342,7 @@ const AddTransfer = (props) => {
                                       bgcolor: "#f5c9861c",
                                     },
                                     ml: "-8px",
-                                    minWidth: "230px",
+                                    minWidth: "200px",
                                     maxWidth: "550px",
                                   }}
                                 />
@@ -1453,69 +1351,13 @@ const AddTransfer = (props) => {
                           </Stack>
                         </TableCell>
 
-                        <TableCell>
-                          <Controller
-                            control={control}
-                            name={`assets.${index}.fixed_asset_id`}
-                            render={({ field: { ref, value, onChange } }) => (
-                              <Autocomplete
-                                options={vTagNumberData}
-                                onOpen={() => (isVTagNumberSuccess ? null : fixedAssetTrigger())}
-                                loading={isVTagNumberLoading}
-                                disabled={edit ? false : view}
-                                size="small"
-                                value={value}
-                                filterOptions={filterOptions}
-                                getOptionLabel={(option) =>
-                                  `(${option.vladimir_tag_number}) - ${option.asset_description}`
-                                }
-                                isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                                renderInput={(params) => (
-                                  <TextField required color="secondary" {...params} multiline label="Tag Number" />
-                                )}
-                                getOptionDisabled={(option) =>
-                                  !!fields.find((item) => item.fixed_asset_id?.id === option.id) &&
-                                  option?.transfer === 1
-                                }
-                                // getOptionDisabled={(option) => !!fields.find((item) => console.log(item))}
-                                onChange={(_, newValue) => {
-                                  if (newValue) {
-                                    // onChange(newValue.id);
-                                    onChange(newValue);
-                                    setValue(
-                                      `assets.${index}.asset_accountable`,
-                                      newValue.accountable === "-" ? "Common" : newValue.accountable
-                                    );
-                                    setValue(`assets.${index}.created_at`, newValue.created_at);
-                                  } else {
-                                    onChange(null);
-                                    setValue(`assets.${index}.asset_accountable`, "");
-                                    setValue(`assets.${index}.created_at`, null);
-                                  }
-                                }}
-                                sx={{
-                                  ".MuiInputBase-root": {
-                                    borderRadius: "10px",
-                                  },
-                                  ".MuiInputLabel-root.Mui-disabled": {
-                                    backgroundColor: "transparent",
-                                  },
-                                  ".Mui-disabled": {
-                                    backgroundColor: "background.light",
-                                  },
-                                  minWidth: "200px",
-                                  maxWidth: "550px",
-                                }}
-                              />
-                            )}
-                          />
-                        </TableCell>
-
-                        <TableCell>
+                        <TableCell className="tbl-cell">
                           <TextField
                             {...register(`assets.${index}.asset_accountable`)}
                             variant="outlined"
                             disabled
+                            multiline
+                            maxRows={2}
                             type="text"
                             error={!!errors?.accountableAccount}
                             helperText={errors?.accountableAccount?.message}
@@ -1530,9 +1372,19 @@ const AddTransfer = (props) => {
                               "& .MuiInputBase-input": {
                                 backgroundColor: "transparent",
                                 textOverflow: "ellipsis",
+                                fontWeight: "500",
                               },
-                              ml: "-10px",
-                              minWidth: "250px",
+                              "& .MuiInputBase-inputMultiline": {
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                // overflow: "hidden",
+                                // textOverflow: "ellipsis",
+                                // textAlign: "center",
+                              },
+
+                              ml: "-15px",
+                              minWidth: "150px",
                             }}
                             fullWidth
                           />
@@ -1712,7 +1564,7 @@ const AddTransfer = (props) => {
                           </Stack>
                         </TableCell>
 
-                        <TableCell>
+                        <TableCell className="tbl-cell">
                           <TextField
                             {...register(`assets.${index}.created_at`)}
                             variant="outlined"
@@ -1736,7 +1588,7 @@ const AddTransfer = (props) => {
                           />
                         </TableCell>
 
-                        <TableCell align="center">
+                        <TableCell align="center" className="tbl-cell">
                           <IconButton
                             onClick={() => remove(index)}
                             disabled={edit ? false : fields.length === 1 || view}
@@ -1751,33 +1603,6 @@ const AddTransfer = (props) => {
                       </TableRow>
                     ))
                   )}
-
-                  <TableRow>
-                    <TableCell colSpan={99}>
-                      <Stack flexDirection="row" gap={2}>
-                        {(!isTransferLoading || !isTransferFetching) && (
-                          <Button
-                            variant="contained"
-                            size="small"
-                            startIcon={<Add />}
-                            onClick={() => handleAppendItem()}
-                            disabled={edit ? false : view}
-                          >
-                            Add Asset
-                          </Button>
-                        )}
-                        {/* <Button
-                            variant="contained"
-                            size="small"
-                            color="warning"
-                            startIcon={<Delete />}
-                            onClick={() => reset()}
-                          >
-                            Remove All
-                          </Button> */}
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
                 </TableBody>
               </Table>
             </TableContainer>
@@ -1788,52 +1613,40 @@ const AddTransfer = (props) => {
                   Added: {fields.length > 1 ? `${fields.length} Assets` : `${fields.length} Asset`}
                 </Typography>
                 <Stack flexDirection="row" gap={2}>
-                  {!view || edit ? (
-                    <LoadingButton
-                      type="submit"
+                  <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap={2}>
+                    <Button
                       variant="contained"
                       size="small"
                       color="secondary"
-                      startIcon={<Create color={"primary"} />}
-                      loading={isPostLoading || isUpdateLoading}
-                      disabled={!isValid}
+                      disabled={isTransferLoading || isTransferFetching}
+                      onClick={() =>
+                        onApprovalApproveHandler(
+                          transactionData?.id ? transactionData?.id : transactionData?.transfer_number
+                        )
+                      }
+                      startIcon={<Check color="primary" />}
                     >
-                      {edit ? "Update" : "Create"}
-                    </LoadingButton>
-                  ) : (
-                    <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap={2}>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        color="secondary"
-                        onClick={() =>
-                          onApprovalApproveHandler(
-                            transactionData?.id ? transactionData?.id : transactionData?.transfer_number
-                          )
-                        }
-                        startIcon={<Check color="primary" />}
-                      >
-                        Approve
-                      </Button>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        onClick={() =>
-                          onApprovalReturnHandler(
-                            transactionData?.id ? transactionData?.id : transactionData?.transfer_number
-                          )
-                        }
-                        startIcon={<Undo sx={{ color: "#5f3030" }} />}
-                        sx={{
-                          color: "white",
-                          backgroundColor: "error.main",
-                          ":hover": { backgroundColor: "error.dark" },
-                        }}
-                      >
-                        Return
-                      </Button>
-                    </Stack>
-                  )}
+                      Approve
+                    </Button>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      disabled={isTransferLoading || isTransferFetching}
+                      onClick={() =>
+                        onApprovalReturnHandler(
+                          transactionData?.id ? transactionData?.id : transactionData?.transfer_number
+                        )
+                      }
+                      startIcon={<Undo sx={{ color: "#5f3030" }} />}
+                      sx={{
+                        color: "white",
+                        backgroundColor: "error.main",
+                        ":hover": { backgroundColor: "error.dark" },
+                      }}
+                    >
+                      Return
+                    </Button>
+                  </Stack>
                 </Stack>
               </Stack>
             )}
@@ -1844,4 +1657,4 @@ const AddTransfer = (props) => {
   );
 };
 
-export default AddTransfer;
+export default ViewTransfer;
