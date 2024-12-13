@@ -1271,8 +1271,8 @@ const AddTransfer = (props) => {
               </Stack>
               <Box mt="-13px" ml="10px">
                 {watch("attachments")
-                  ? watch("attachments").map((item) => (
-                      <Typography fontSize="12px" fontWeight="bold">
+                  ? watch("attachments").map((item, index) => (
+                      <Typography fontSize="12px" fontWeight="bold" key={index}>
                         {item.name}
                       </Typography>
                     ))

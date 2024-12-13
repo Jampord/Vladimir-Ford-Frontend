@@ -46,7 +46,7 @@ const TransferTimeline = (props) => {
         </Typography>
       </Stack>
 
-      <Box className="timelineSteps__timeline" alignItems="center">
+      <Box className="timelineSteps__timeline" alignItems="flex-start">
         <Stepper key={1} activeStep={transactionData ? transactionData?.process_count - 1 : 0} alternativeLabel>
           {(transactionData?.status === "Cancelled"
             ? ["Cancelled", ...transactionData?.steps]

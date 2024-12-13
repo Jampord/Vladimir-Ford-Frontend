@@ -11,7 +11,7 @@ const PulloutApproval = () => {
   const { data: notifData, refetch } = useGetNotificationApiQuery();
 
   useEffect(() => {
-    // console.log("refetched data");
+    // console.log("refetched data", notifData);
     refetch();
   }, [notifData]);
 
@@ -30,7 +30,7 @@ const PulloutApproval = () => {
           <Tabs onChange={handleChange} value={value}>
             <Tab
               label={
-                <Badge color="error" badgeContent={notifData?.toApproveCount}>
+                <Badge color="error" badgeContent={notifData?.toPulloutApproveCount}>
                   Pending Pullout{"  "}
                 </Badge>
               }

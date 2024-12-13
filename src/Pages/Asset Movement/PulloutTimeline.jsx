@@ -46,7 +46,7 @@ const PulloutTimeline = (props) => {
         </Typography>
       </Stack>
 
-      <Box className="timelineSteps__timeline" alignItems="center">
+      <Box className="timelineSteps__timeline" alignItems="flex-start">
         <Stepper key={1} activeStep={transactionData ? transactionData?.process_count - 1 : 0} alternativeLabel>
           {(transactionData?.status === "Cancelled"
             ? ["Cancelled", ...transactionData?.steps]
@@ -54,7 +54,7 @@ const PulloutTimeline = (props) => {
             ? ["Returned", ...transactionData?.steps]
             : transactionData?.steps
           )?.map((label, index) => (
-            <Step key={label} last>
+            <Step key={index} last>
               <StepLabel
                 icon={
                   (transactionData?.status === "Returned" || transactionData?.status === "Cancelled") && index === 0 ? (

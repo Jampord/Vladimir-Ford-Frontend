@@ -160,7 +160,8 @@ const AddPullout = () => {
         assets: data?.assets.map((asset) => ({
           id: asset.id,
           fixed_asset_id: asset,
-          asset_accountable: asset.accountable === "-" ? "Common" : asset.accountable,
+          asset_accountable: asset.accountable,
+          asset_accountability: asset.accountability,
           created_at: asset.created_at || asset.acquisition_date,
           company_id: asset.company?.company_name,
           business_unit_id: asset.business_unit?.business_unit_name,
@@ -305,7 +306,7 @@ const AddPullout = () => {
           label={label}
           autoComplete="off"
           color="secondary"
-          // disabled={edit ? false : transactionData?.view}
+          disabled={edit ? false : transactionData?.view}
           value={value > 1 ? `${value} files selected` : value <= 1 ? `${value} file selected` : null}
           InputProps={{
             startAdornment: (
@@ -385,7 +386,7 @@ const AddPullout = () => {
                 autoComplete
                 name="care_of"
                 control={control}
-                options={["Hardware and Maintenance (HM)", "Machinery and Equipment (MNE)"]}
+                options={["Hardware and Maintenance", "Machinery & Equipment"]}
                 disabled={edit ? false : transactionData?.view}
                 isOptionEqualToValue={(option, value) => option === value}
                 renderInput={(params) => (
@@ -892,7 +893,7 @@ const AddPullout = () => {
                     color="secondary"
                     startIcon={<Create color={"primary"} />}
                     // loading={isPostLoading || isUpdateLoading}
-                    disabled={!isValid || !isDirty}
+                    disabled={!isValid || !isDirty || isPulloutLoading || isPulloutFetching}
                     sx={{ mt: "10px" }}
                   >
                     {transactionData?.status === "Returned"
