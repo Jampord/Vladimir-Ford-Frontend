@@ -203,7 +203,7 @@ const ApprovedPullout = (props) => {
                       </TableSortLabel>
                     </TableCell>
 
-                    <TableCell className="tbl-cell-category  text-center">Action</TableCell>
+                    {/* <TableCell className="tbl-cell-category  text-center">Action</TableCell> */}
                   </TableRow>
                 </TableHead>
 
@@ -262,9 +262,9 @@ const ApprovedPullout = (props) => {
                               {Moment(data.asset_request?.date_requested).format("MMM DD, YYYY")}
                             </TableCell>
 
-                            <TableCell className="tbl-cell-category text-center">
+                            {/* <TableCell className="tbl-cell-category text-center">
                               <ActionMenu status={status} data={data} showApprover hideArchive />
-                            </TableCell>
+                            </TableCell> */}
                           </TableRow>
                         ))}
                     </>
