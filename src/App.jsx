@@ -90,7 +90,10 @@ import ReceivingOfTransfer from "./Pages/Asset Movement/Receiving of Transfer/Re
 import AssetTransferView from "./Pages/Asset Movement/Receiving of Transfer/AssetTransferView";
 import Pullout from "./Pages/Asset Movement/Pullout/Pullout";
 import AddPullout from "./Pages/Asset Movement/Pullout/AddPullout";
-import TransferHistoryReport from "./Pages/Approving/Transfer/TransferHistoryReport";
+import TransferHistoryReport from "./Pages/Reports/TransferHistoryReport";
+import EvaluationApproving from "./Pages/Approving/Evaluation/EvaluationApproving";
+import ViewEvaluation from "./Pages/Approving/Evaluation/ViewEvaluation";
+import Evaluation from "./Pages/Asset Movement/Evaluation/Evaluation.jsx";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -431,6 +434,11 @@ const router = createBrowserRouter([
                 element: <AssetTransferView />,
                 handle: { permission: "transfer-receiving" },
               },
+              {
+                path: "evaluation",
+                element: <Evaluation />,
+                handle: { permission: "evaluation" },
+              },
             ],
           },
 
@@ -477,6 +485,16 @@ const router = createBrowserRouter([
               {
                 path: "disposal/:transaction_number",
                 element: <ViewApproveRequest />,
+                handle: { permission: "approving" },
+              },
+              {
+                path: "evaluation",
+                element: <EvaluationApproving />,
+                handle: { permission: "approving" },
+              },
+              {
+                path: "evaluation/:transaction_number",
+                element: <ViewEvaluation />,
                 handle: { permission: "approving" },
               },
             ],

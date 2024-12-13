@@ -6,10 +6,12 @@ import { useLocation } from "react-router-dom";
 
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import {
+  History,
   MoveDownOutlined,
   PlaylistRemoveRounded,
   RemoveFromQueue,
   RuleFolder,
+  ScreenSearchDesktop,
   TransferWithinAStation,
 } from "@mui/icons-material";
 import Cards from "../../Components/Reusable/Cards";
@@ -53,6 +55,14 @@ const MovementList = [
     description: "List of For Receiving and Received Transfers",
     path: "/asset-movement/transfer-receiving",
     permission: "transfer-receiving",
+  },
+
+  {
+    icon: <ScreenSearchDesktop />,
+    label: "Evaluation",
+    description: "List and Details of Asset Evaluation",
+    path: "/asset-movement/evaluation",
+    permission: "evaluation",
   },
 ];
 

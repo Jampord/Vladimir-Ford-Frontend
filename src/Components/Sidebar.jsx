@@ -90,6 +90,9 @@ import {
   TableRows,
   MoveDownOutlined,
   Addchart,
+  Troubleshoot,
+  History,
+  ScreenSearchDesktop,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -513,6 +516,14 @@ const Sidebar = () => {
           notification: notifData?.toTransferReceiving,
           setter: closeCollapse,
         },
+        {
+          label: "Evaluation",
+          icon: ScreenSearchDesktop,
+          path: "/asset-movement/evaluation",
+          permission: "evaluation",
+          // notification: notifData?.toTransferReceiving,
+          setter: closeCollapse,
+        },
       ],
       open: assetMovementCollapse,
       setter: () => {
@@ -563,6 +574,13 @@ const Sidebar = () => {
           icon: PlaylistRemove,
           path: "/approving/disposal",
           permission: "approving-disposal",
+          setter: closeCollapse,
+        },
+        {
+          label: "Evaluation",
+          icon: Troubleshoot,
+          path: "/approving/evaluation",
+          permission: "approving-evaluation",
           setter: closeCollapse,
         },
       ],

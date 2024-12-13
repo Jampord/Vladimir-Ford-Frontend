@@ -186,6 +186,7 @@ const AddRole = (props) => {
     "pull-out",
     "disposal",
     "transfer-receiving",
+    "evaluation",
 
     // Approving
     "pending-request",
@@ -194,6 +195,7 @@ const AddRole = (props) => {
     "approving-transfer",
     "approving-pull-out",
     "approving-disposal",
+    "approving-evaluation",
 
     // Monitoring
     "request-monitoring",
@@ -225,8 +227,14 @@ const AddRole = (props) => {
   const userManagement = ["user-accounts", "role-management"];
   const settings = ["approver-settings", "form-settings"];
   const assetRequisition = ["requisition", "purchase-request", "requisition-received-asset", "requisition-releasing"];
-  const assetMovement = ["transfer", "evaluation", "pull-out", "disposal", "transfer-receiving"];
-  const approving = ["approving-request", "approving-transfer", "approving-pull-out", "approving-disposal"];
+  const assetMovement = ["transfer", "pull-out", "disposal", "transfer-receiving", "evaluation"];
+  const approving = [
+    "approving-request",
+    "approving-transfer",
+    "approving-pull-out",
+    "approving-disposal",
+    "approving-evaluation",
+  ];
   const reports = ["pr-report", "transfer-report"];
   const setupSettings = ["ip-setup", "token-setup"];
 
@@ -529,6 +537,18 @@ const AddRole = (props) => {
               <Checkbox
                 {...register("access_permission")}
                 checked={watch("access_permission")?.includes("approving-disposal")}
+              />
+            }
+          />
+
+          <FormControlLabel
+            disabled={data.action === "view"}
+            label="Approving Evaluation"
+            value="approving-evaluation"
+            control={
+              <Checkbox
+                {...register("access_permission")}
+                checked={watch("access_permission")?.includes("approving-evaluation")}
               />
             }
           />
@@ -944,10 +964,10 @@ const AddRole = (props) => {
                                   ...new Set([
                                     ...watch("access_permission"),
                                     "transfer",
-                                    "evaluation",
                                     "pull-out",
                                     "disposal",
                                     "transfer-receiving",
+                                    "evaluation",
                                   ]),
                                 ]);
                               } else {
@@ -1006,6 +1026,7 @@ const AddRole = (props) => {
                                     "approving-transfer",
                                     "approving-pull-out",
                                     "approving-disposal",
+                                    "approving-evaluation",
                                   ]),
                                 ]);
                               } else {

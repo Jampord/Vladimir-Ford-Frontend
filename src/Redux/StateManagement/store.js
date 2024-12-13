@@ -91,6 +91,7 @@ import { transferApi } from "../Query/Movement/Transfer";
 import { transferApprovalApi } from "../Query/Approving/TransferApproval";
 import { pulloutApi } from "../Query/Movement/Pullout";
 import { pulloutApprovalApi } from "../Query/Approving/PulloutApproval";
+import { evaluationApi } from "../Query/Movement/Evaluation";
 
 import { requisitionSmsApi } from "../Query/Request/RequisitionSms";
 
@@ -190,6 +191,7 @@ export const store = configureStore({
 
     [transferApi.reducerPath]: transferApi.reducer,
     [pulloutApi.reducerPath]: pulloutApi.reducer,
+    [evaluationApi.reducerPath]: evaluationApi.reducer,
 
     // Approval
     [approvalApi.reducerPath]: approvalApi.reducer,
@@ -278,9 +280,10 @@ export const store = configureStore({
       requestContainerApi.middleware,
       purchaseRequestApi.middleware,
 
-      // Transfer
+      // Asset Movement
       transferApi.middleware,
       pulloutApi.middleware,
+      evaluationApi.middleware,
 
       // Approval
       approvalApi.middleware,
