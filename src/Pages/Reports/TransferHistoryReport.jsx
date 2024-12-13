@@ -14,16 +14,16 @@ import {
   Typography,
 } from "@mui/material";
 import React, { useState } from "react";
-import { useGetTransferHistoryReportApiQuery } from "../../../Redux/Query/Movement/AssetMovementReports";
-import MasterlistSkeleton from "../../Skeleton/MasterlistSkeleton";
-import ErrorFetching from "../../ErrorFetching";
-import MasterlistToolbar from "../../../Components/Reusable/MasterlistToolbar";
-import NoRecordsFound from "../../../Layout/NoRecordsFound";
+import { useGetTransferHistoryReportApiQuery } from "../../Redux/Query/Movement/AssetMovementReports";
+import MasterlistSkeleton from "../Skeleton/MasterlistSkeleton";
+import ErrorFetching from "../ErrorFetching";
+import MasterlistToolbar from "../../Components/Reusable/MasterlistToolbar";
+import NoRecordsFound from "../../Layout/NoRecordsFound";
 import moment from "moment";
-import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
+import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
 import { IosShareRounded } from "@mui/icons-material";
-import { closeExport, openExport } from "../../../Redux/StateManagement/booleanStateSlice";
-import ExportTransfer from "../../Asset Movement/Transfer/ExportTransfer";
+import { closeExport, openExport } from "../../Redux/StateManagement/booleanStateSlice";
+import ExportTransfer from "../Asset Movement/Transfer/ExportTransfer";
 import { useDispatch, useSelector } from "react-redux";
 
 const TransferHistoryReport = () => {
@@ -186,8 +186,8 @@ const TransferHistoryReport = () => {
                       <TableCell className="tbl-cell">Vladimir Tag Number</TableCell>
                       <TableCell className="tbl-cell">Asset Description</TableCell>
                       <TableCell className="tbl-cell">Status</TableCell>
-                      <TableCell className="tbl-cell">Asset From</TableCell>
-                      <TableCell className="tbl-cell">Asset To</TableCell>
+                      <TableCell className="tbl-cell">Transfer From</TableCell>
+                      <TableCell className="tbl-cell">Transfer To</TableCell>
                       <TableCell className="tbl-cell">Date Created</TableCell>
                     </TableRow>
                   </TableHead>
