@@ -213,7 +213,7 @@ const Pullout = () => {
 
   console.log("data", pulloutData);
 
-  const handleViewTransfer = (data) => {
+  const handleViewPullout = (data) => {
     // console.log("data: ", data);
     const view = true;
     navigate(`add-pull-out/${data.id}`, {
@@ -323,7 +323,7 @@ const Pullout = () => {
                             </TableCell>
                             <TableCell className="tbl-cell text-weight text-center">
                               <Tooltip placement="top" title="View Pullout Information" arrow>
-                                <IconButton onClick={() => handleViewTransfer(item)}>
+                                <IconButton onClick={() => handleViewPullout(item)}>
                                   <Visibility />
                                 </IconButton>
                               </Tooltip>

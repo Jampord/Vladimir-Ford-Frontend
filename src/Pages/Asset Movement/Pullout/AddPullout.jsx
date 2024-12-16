@@ -361,7 +361,7 @@ const AddPullout = () => {
       <Box className="request request__wrapper" p={2} component="form" onSubmit={handleSubmit(addPulloutHandler)}>
         <Stack>
           <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
-            ADD PULLOUT REQUEST
+            {transactionData?.view ? "VIEW PULLOUT REQUEST" : "ADD PULLOUT REQUEST"}
           </Typography>
 
           <Stack id="requestForm" className="request__form" gap={2} pb={1}>
