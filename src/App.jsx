@@ -94,6 +94,7 @@ import TransferHistoryReport from "./Pages/Reports/TransferHistoryReport";
 import EvaluationApproving from "./Pages/Approving/Evaluation/EvaluationApproving";
 import ViewEvaluation from "./Pages/Approving/Evaluation/ViewEvaluation";
 import Evaluation from "./Pages/Asset Movement/Evaluation/Evaluation.jsx";
+import ToPickupViewing from "./Pages/Asset Movement/Evaluation/ToPickupViewing";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -437,6 +438,11 @@ const router = createBrowserRouter([
               {
                 path: "evaluation",
                 element: <Evaluation />,
+                handle: { permission: "evaluation" },
+              },
+              {
+                path: "evaluation/to-pickup/:id",
+                element: <ToPickupViewing />,
                 handle: { permission: "evaluation" },
               },
             ],

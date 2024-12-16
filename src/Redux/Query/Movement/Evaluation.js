@@ -26,7 +26,25 @@ export const evaluationApi = createApi({
       query: (params) => `item-to-pullout?per_page=${params.per_page}&page=${params.page}`,
       providesTags: ["Evaluation"],
     }),
+
+    getAssetToPickupByIdApi: builder.query({
+      query: (params) => `item-to-pullout-show/${params.id}`,
+      providesTags: ["Evaluation"],
+    }),
+
+    patchPickupAssetApi: builder.mutation({
+      query: (params) => ({
+        url: `pick-up/${params.id}`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Evaluation"],
+    }),
   }),
 });
 
-export const { useGetAssetsToEvaluateApiQuery, useGetAssetsToPickupApiQuery } = evaluationApi;
+export const {
+  useGetAssetsToEvaluateApiQuery,
+  useGetAssetsToPickupApiQuery,
+  useGetAssetToPickupByIdApiQuery,
+  usePatchPickupAssetApiMutation,
+} = evaluationApi;
