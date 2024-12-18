@@ -430,7 +430,7 @@ const Elixir = () => {
             onClick={() => handleTag()}
             size="small"
             startIcon={<LocalOffer />}
-            sx={{ position: "absolute", right: 0, top: -40, marginRight: 9.6 }}
+            sx={{ position: "absolute", right: -77, top: -40, marginRight: 9.6 }}
             disabled={!watch("tag_id") || validateSelectedItems()}
           >
             Tag

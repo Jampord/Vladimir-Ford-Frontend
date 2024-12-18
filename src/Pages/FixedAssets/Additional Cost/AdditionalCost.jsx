@@ -53,9 +53,9 @@ const AdditionalCost = () => {
               {/* <Button variant="contained" size="small" startIcon={<LocalOffer />} onClick={handleOpenAddTag}>
                 Tag
               </Button> */}
-              <Button variant="contained" size="small" startIcon={<AddBox />} onClick={handleOpenAddCost}>
+              {/* <Button variant="contained" size="small" startIcon={<AddBox />} onClick={handleOpenAddCost}>
                 Add
-              </Button>
+              </Button> */}
             </Stack>
           </Stack>
 
