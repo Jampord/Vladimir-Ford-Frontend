@@ -352,21 +352,14 @@ const Transfer = () => {
         variant = "filled";
         break;
 
-      case "Claimed":
+      case "Received":
         statusColor = "success.dark";
         hoverColor = "success.dark";
         variant = "filled";
         break;
 
-      // case "Sent to ymir for PO":
-      //   statusColor = "ymir.light";
-      //   hoverColor = "ymir.main";
-      //   variant = "filled";
-      //   break;
-
       case "Returned":
       case "Cancelled":
-      case "Returned From Ymir":
         statusColor = "error.light";
         hoverColor = "error.main";
         variant = "filled";
@@ -579,8 +572,8 @@ const Transfer = () => {
               </TableContainer>
             </Box>
 
-            <Box className="mcontainer__pagination-export">
-              <Button
+            <Box className="mcontainer__pagination-export" justifyContent="flex-end">
+              {/* <Button
                 className="mcontainer__export"
                 variant="outlined"
                 size="small"
@@ -595,7 +588,7 @@ const Transfer = () => {
                 }}
               >
                 EXPORT
-              </Button>
+              </Button> */}
 
               <CustomTablePagination
                 total={transferData?.total}
