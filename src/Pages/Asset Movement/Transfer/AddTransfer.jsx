@@ -929,7 +929,7 @@ const AddTransfer = (props) => {
 
               <Stack gap={2}>
                 <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px" }}>
-                  CHART OF ACCOUNT
+                  TRANSFER TO
                 </Typography>
 
                 <CustomAutoComplete
