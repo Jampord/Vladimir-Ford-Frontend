@@ -16,6 +16,8 @@ import { closeConfirm, openConfirm, onLoading } from "../../../Redux/StateManage
 import {
   Box,
   Chip,
+  Dialog,
+  Grow,
   IconButton,
   Stack,
   Table,
@@ -37,14 +39,17 @@ import { useGetTransferApprovalApiQuery } from "../../../Redux/Query/Movement/Tr
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
 import { usePatchTransferApprovalStatusApiMutation } from "../../../Redux/Query/Approving/TransferApproval";
 import { useDownloadTransferAttachment } from "../../../Hooks/useDownloadAttachment";
+import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
+import TransferTimeline from "../../Asset Movement/TransferTimeline";
 
 const ApprovedTransfer = (props) => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("Approved");
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
+  const [transactionIdData, setTransactionIdData] = useState("");
 
-  const drawer = useSelector((state) => state.booleanState.drawer);
+  const dialog = useSelector((state) => state.booleanState.dialog);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -144,6 +149,74 @@ const ApprovedTransfer = (props) => {
       transfer_number: value?.transfer_number?.transfer_number,
     });
 
+  const handleViewTimeline = (data) => {
+    // console.log(data);
+    dispatch(openDialog());
+    setTransactionIdData(data);
+  };
+
+  const transactionStatus = (data) => {
+    let statusColor, hoverColor, textColor, variant;
+
+    switch (data.status) {
+      case "Waiting to be Received":
+        statusColor = "success.light";
+        hoverColor = "success.main";
+        textColor = "white";
+        variant = "filled";
+        break;
+
+      case "Received":
+        statusColor = "success.dark";
+        hoverColor = "success.dark";
+        variant = "filled";
+        break;
+
+      case "Returned":
+      case "Cancelled":
+        statusColor = "error.light";
+        hoverColor = "error.main";
+        variant = "filled";
+        break;
+
+      default:
+        statusColor = "success.main";
+        hoverColor = "none";
+        textColor = "success.main";
+        variant = "outlined";
+    }
+
+    return (
+      <>
+        <Tooltip title={data?.current_approver} placement="top" arrow>
+          <Chip
+            placement="top"
+            onClick={() => handleViewTimeline(data)}
+            size="small"
+            variant={variant}
+            sx={{
+              ...(variant === "filled" && {
+                backgroundColor: statusColor,
+                color: "white",
+              }),
+              ...(variant === "outlined" && {
+                borderColor: statusColor,
+                color: textColor,
+              }),
+              fontSize: "11px",
+              px: 1,
+              ":hover": {
+                ...(variant === "filled" && { backgroundColor: hoverColor }),
+                ...(variant === "outlined" && { borderColor: hoverColor, color: textColor }),
+              },
+            }}
+            label={data.status}
+          />
+        </Tooltip>
+      </>
+    );
+  };
+
   return (
     <Stack className="category_height">
       {approvalLoading && <MasterlistSkeleton category={true} onAdd={true} />}
@@ -222,6 +295,10 @@ const ApprovedTransfer = (props) => {
                     </TableCell>
 
                     <TableCell className="tbl-cell-category" align="center">
+                      Timeline & History
+                    </TableCell>
+
+                    <TableCell className="tbl-cell-category" align="center">
                       Attachments
                     </TableCell>
 
@@ -293,6 +370,10 @@ const ApprovedTransfer = (props) => {
                               </TableCell>
 
                               <TableCell className="tbl-cell" align="center">
+                                {transactionStatus(data)}
+                              </TableCell>
+
+                              <TableCell className="tbl-cell" align="center">
                                 <DlAttachment transfer_number={data?.id} />
                               </TableCell>
 
@@ -322,6 +403,15 @@ const ApprovedTransfer = (props) => {
           />
         </Box>
       )}
+
+      <Dialog
+        open={dialog}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog())}
+        PaperProps={{ sx: { borderRadius: "10px", maxWidth: "700px" } }}
+      >
+        <TransferTimeline data={transactionIdData} />
+      </Dialog>
     </Stack>
   );
 };
