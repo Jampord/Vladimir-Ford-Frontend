@@ -93,7 +93,7 @@ const FixedAssetView = (props) => {
   const [printAssignmentMemo, setPrintAssignmentMemo] = useState(false);
   const [statusChange, setStatusChange] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const [inclusionData, setInclusionData] = useState([]);
   const [updateFixedAsset, setUpdateFixedAsset] = useState({
     status: false,
@@ -778,6 +778,64 @@ const FixedAssetView = (props) => {
                     </Box>
                   </Box>
                 </Card>
+
+                {(dataApi?.data?.total_cost || dataApi?.data?.total_adcost) && (
+                  <Card className="tableCard__cardCapex" sx={{ bgcolor: "white", py: "10.5px" }}>
+                    <Stack
+                      flexDirection="column"
+                      alignItems="center"
+                      sx={{
+                        px: 2,
+                        py: 0.5,
+                      }}
+                    >
+                      <Stack flexDirection="row" alignItems="center" justifyContent="center" gap={1}>
+                        <Typography fontSize="14px" fontWeight="bold" color="secondary.light">
+                          Main Cost :
+                        </Typography>
+                        <Typography color="secondary.light">
+                          ₱
+                          {dataApi?.data?.acquisition_cost === (0 || null)
+                            ? 0
+                            : dataApi?.data?.acquisition_cost.toLocaleString()}
+                        </Typography>
+                      </Stack>
+                      {`+`}
+                      <Stack flexDirection="row" alignItems="center" justifyContent="center" gap={1}>
+                        <Typography fontSize="14px" fontWeight="bold" color="secondary.light">
+                          Total Additional Cost :
+                        </Typography>
+                        <Typography color="secondary.light">
+                          ₱
+                          {dataApi?.data?.total_adcost === (0 || null)
+                            ? 0
+                            : dataApi?.data?.total_adcost.toLocaleString()}
+                        </Typography>
+                      </Stack>
+                    </Stack>
+                    <Stack
+                      flexDirection="row"
+                      alignItems="center"
+                      justifyContent="center"
+                      gap={1}
+                      width="100%"
+                      sx={{
+                        px: 2,
+                        py: 1,
+                        pb: 1,
+                        borderTop: "1px solid lightgray",
+                        // borderBottom: "1px solid lightgray",
+                      }}
+                    >
+                      <Typography fontSize="16px" fontFamily="Anton, Poppins, Sans Serif" color="secondary.main">
+                        TOTAL COST :
+                      </Typography>
+                      <Typography fontWeight="bold" color="secondary.main">
+                        ₱{dataApi?.data?.total_cost === (0 || null) ? 0 : dataApi?.data?.total_cost.toLocaleString()}
+                      </Typography>
+                    </Stack>
+                  </Card>
+                )}
               </Stack>
 
               <Box className="tableCard__wrapper" sx={{ pb: "2px" }}>
