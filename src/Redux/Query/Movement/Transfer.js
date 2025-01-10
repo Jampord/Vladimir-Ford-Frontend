@@ -53,6 +53,12 @@ export const transferApi = createApi({
       providesTags: ["Transfer"],
     }),
 
+    getFixedAssetTransferCoordinatorApi: builder.query({
+      query: (params) => `fixed-asset?pagination=none&movement=transfer&sub_unit_id=${params.subunit_id}`,
+      transformResponse: (response) => response.data,
+      providesTags: ["Transfer"],
+    }),
+
     getTransferApprovalApi: builder.query({
       query: (params) =>
         `transfer-approver?page=${params.page}&per_page=${params.per_page}&search=${params.search}&status=${params.status}`,
@@ -117,6 +123,7 @@ export const {
   useLazyGetTransferNumberApiQuery,
   useGetTransferNumberReceiverApiQuery,
   useLazyGetFixedAssetTransferAllApiQuery,
+  useLazyGetFixedAssetTransferCoordinatorApiQuery,
   useGetTransferAllApiQuery,
   useGetTransferApprovalApiQuery,
   usePostTransferApiMutation,

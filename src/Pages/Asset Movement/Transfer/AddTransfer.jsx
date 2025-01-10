@@ -55,8 +55,12 @@ import { useLazyGetBusinessUnitAllApiQuery } from "../../../Redux/Query/Masterli
 import {
   useGetDepartmentAllApiQuery,
   useLazyGetDepartmentAllApiQuery,
+  useLazyGetDepartmentAllCoordinatorApiQuery,
 } from "../../../Redux/Query/Masterlist/YmirCoa/Department";
-import { useLazyGetUnitAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Unit";
+import {
+  useLazyGetUnitAllApiQuery,
+  useLazyGetUnitAllCoordinatorApiQuery,
+} from "../../../Redux/Query/Masterlist/YmirCoa/Unit";
 
 import {
   useGetLocationAllApiQuery,
@@ -65,6 +69,7 @@ import {
 import {
   useGetSubUnitAllApiQuery,
   useLazyGetSubUnitAllApiQuery,
+  useLazyGetSubUnitAllCoordinatorApiQuery,
 } from "../../../Redux/Query/Masterlist/YmirCoa/SubUnit";
 import {
   useGetAccountTitleAllApiQuery,
@@ -83,6 +88,7 @@ import {
   transferApi,
   useGetTransferNumberApiQuery,
   useLazyGetFixedAssetTransferAllApiQuery,
+  useLazyGetFixedAssetTransferCoordinatorApiQuery,
   usePostTransferApiMutation,
 } from "../../../Redux/Query/Movement/Transfer";
 import { onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
@@ -106,6 +112,16 @@ const schema = yup.object().shape({
   //     then: (yup) => yup.label("Accountable").required().typeError("Accountable is a required field"),
   //   }),
 
+  //Transfer From
+  department_id_coordinator: yup.object().nullable().label("Department From"),
+
+  company_id_coordinator: yup.object().nullable().label("Company From"),
+  business_unit_id_coordinator: yup.object().nullable().label("Business Unit From"),
+  unit_id_coordinator: yup.object().nullable().label("Unit From"),
+  subunit_id_coordinator: yup.object().nullable().label("Subunit From"),
+  location_id_coordinator: yup.object().nullable().label("Location From"),
+
+  //Transfer To
   department_id: yup.object().required().label("Department").typeError("Department is a required field"),
   company_id: yup.object().required().label("Company").typeError("Company is a required field"),
   business_unit_id: yup.object().required().label("Business Unit").typeError("Business Unit is a required field"),
@@ -205,8 +221,8 @@ const AddTransfer = (props) => {
     refetch: isTransferRefetch,
   } = useGetTransferNumberApiQuery({ transfer_number: transactionData?.id }, { refetchOnMountOrArgChange: true });
 
-  // console.log("transferData: ", transferData);
   const data = transferData?.at(0);
+  console.log("transferData: ", data);
 
   const [
     companyTrigger,
@@ -243,6 +259,18 @@ const AddTransfer = (props) => {
   // console.log("deptData: ", departmentData);
 
   const [
+    departmentCoordinatorTrigger,
+    {
+      data: departmentCoordinatorData = [],
+      isLoading: isDepartmentCoordinatorLoading,
+      isSuccess: isDepartmentCoordinatorSuccess,
+      isError: isDepartmentCoordinatorError,
+      refetch: isDepartmentCoordinatorRefetch,
+    },
+  ] = useLazyGetDepartmentAllCoordinatorApiQuery();
+  // console.log("deptData: ", departmentData);
+
+  const [
     unitTrigger,
     {
       data: unitData = [],
@@ -254,6 +282,17 @@ const AddTransfer = (props) => {
   ] = useLazyGetUnitAllApiQuery();
 
   const [
+    unitCoordinatorTrigger,
+    {
+      data: unitCoordinatorData = [],
+      isLoading: isUnitCoordinatorLoading,
+      isSuccess: isUnitCoordinatorSuccess,
+      isError: isUnitCoordinatorError,
+      refetch: isUnitCoordinatorRefetch,
+    },
+  ] = useLazyGetUnitAllCoordinatorApiQuery();
+
+  const [
     subunitTrigger,
     {
       data: subUnitData = [],
@@ -263,6 +302,17 @@ const AddTransfer = (props) => {
       refetch: isSubUnitRefetch,
     },
   ] = useLazyGetSubUnitAllApiQuery();
+
+  const [
+    subunitCoordinatorTrigger,
+    {
+      data: subUnitCoordinatorData = [],
+      isLoading: isSubUnitCoordinatorLoading,
+      isSuccess: isSubUnitCoordinatorSuccess,
+      isError: isSubUnitCoordinatorError,
+      refetch: isSubUnitCoordinatorRefetch,
+    },
+  ] = useLazyGetSubUnitAllCoordinatorApiQuery();
 
   const [
     locationTrigger,
@@ -302,6 +352,18 @@ const AddTransfer = (props) => {
       error: vTagNumberError,
     },
   ] = useLazyGetFixedAssetTransferAllApiQuery({}, { refetchOnMountOrArgChange: true });
+
+  const [
+    fixedAssetCoordinatorTrigger,
+    {
+      data: vTagNumberCoordinatorData = [],
+      isLoading: isVTagNumberCoordinatorLoading,
+      isSuccess: isVTagNumberCoordinatorSuccess,
+      isError: isVTagNumberCoordinatorError,
+      error: vTagNumberCoordinatorError,
+      isFetching: isVTagNumberCoordinatorFetching,
+    },
+  ] = useLazyGetFixedAssetTransferCoordinatorApiQuery({}, { refetchOnMountOrArgChange: true });
   // console.log("vtagNumberData", vTagNumberData);
 
   const [
@@ -330,6 +392,13 @@ const AddTransfer = (props) => {
       description: "",
       // accountability: null,
       // accountable: null,
+
+      department_id_coordinator: null,
+      company_id_coordinator: null,
+      business_unit_id_coordinator: null,
+      unit_id_coordinator: null,
+      subunit_id_coordinator: null,
+      location_id_coordinator: null,
 
       department_id: null,
       company_id: null,
@@ -362,7 +431,7 @@ const AddTransfer = (props) => {
     },
   });
 
-  // console.log("errors", errors);
+  console.log("errors", errors);
   // console.log("isdirty: ", isDirty);
   // console.log("💣: ", isValid);
 
@@ -425,6 +494,12 @@ const AddTransfer = (props) => {
         description: data?.description,
         // accountability: data?.accountability,
         // accountable: data?.accountable,
+        department_id_coordinator: data?.department_from,
+        company_id_coordinator: data?.company_from,
+        business_unit_id_coordinator: data?.business_unit_from,
+        unit_id_coordinator: data?.unit_from,
+        subunit_id_coordinator: data?.subunit_from,
+        location_id_coordinator: data?.location_from,
 
         department_id: data?.department,
         company_id: data?.company,
@@ -838,6 +913,14 @@ const AddTransfer = (props) => {
     matchFrom: "any",
   });
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const isCoordinator = user.has_handle === 1;
+  const user_id = user.id;
+  const subunit_id = watch("subunit_id_coordinator")?.id || null;
+  console.log("user", user);
+  // console.log("isCoordinator", isCoordinator);
+  console.log("subunit_id", subunit_id);
+
   return (
     <>
       <Box className="mcontainer">
@@ -891,7 +974,7 @@ const AddTransfer = (props) => {
 
             <Stack id="requestForm" className="request__form" gap={2} pb={1}>
               <Stack gap={2}>
-                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px" }}>
+                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
                   REQUEST DETAILS
                 </Typography>
 
@@ -927,8 +1010,212 @@ const AddTransfer = (props) => {
                 />
               </Stack>
 
+              {isCoordinator && (
+                <Stack gap={2}>
+                  <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
+                    TRANSFER FROM
+                  </Typography>
+
+                  <CustomAutoComplete
+                    autoComplete
+                    control={control}
+                    name="department_id_coordinator"
+                    disabled={edit ? false : transactionData?.view}
+                    options={departmentCoordinatorData}
+                    onOpen={() =>
+                      isDepartmentCoordinatorSuccess
+                        ? null
+                        : (departmentCoordinatorTrigger({ user_id: user_id }), companyTrigger(), businessUnitTrigger())
+                    }
+                    loading={isDepartmentCoordinatorLoading}
+                    size="small"
+                    // clearIcon={null}
+                    getOptionLabel={(option) => option.department_code + " - " + option.department_name}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    renderInput={(params) => (
+                      <TextField
+                        color="secondary"
+                        {...params}
+                        label="Department"
+                        error={!!errors?.department_id_coordinator}
+                        helperText={errors?.department_id_coordinator?.message}
+                      />
+                    )}
+                    onChange={(_, value) => {
+                      console.log("value: ", value);
+                      if (value) {
+                        const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
+                        const businessUnitID = businessUnitData?.find(
+                          (item) => item.sync_id === value.business_unit.business_unit_sync_id
+                        );
+
+                        setValue("company_id_coordinator", companyID);
+                        setValue("business_unit_id_coordinator", businessUnitID);
+                      } else if (value === null) {
+                        setValue("company_id_coordinator", null);
+                        setValue("business_unit_id_coordinator", null);
+                      }
+                      fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
+
+                      setValue("unit_id_coordinator", null);
+                      setValue("subunit_id_coordinator", null);
+                      setValue("location_id_coordinator", null);
+                      return value;
+                    }}
+                  />
+
+                  {console.log("subunitCoordinator", watch("subunit_id_coordinator"))}
+
+                  <CustomAutoComplete
+                    name="company_id_coordinator"
+                    control={control}
+                    options={companyData}
+                    loading={isCompanyLoading}
+                    size="small"
+                    getOptionLabel={(option) => option.company_code + " - " + option.company_name}
+                    isOptionEqualToValue={(option, value) => option.company_id === value.company_id}
+                    renderInput={(params) => (
+                      <TextField
+                        color="secondary"
+                        {...params}
+                        label="Company"
+                        // error={!!errors?.company_id}
+                        // helperText={errors?.company_id?.message}
+                      />
+                    )}
+                    disabled
+                  />
+
+                  <CustomAutoComplete
+                    autoComplete
+                    name="business_unit_id_coordinator"
+                    control={control}
+                    options={businessUnitData}
+                    // loading={isBusinessUnitLoading}
+                    size="small"
+                    getOptionLabel={(option) => option.business_unit_code + " - " + option.business_unit_name}
+                    isOptionEqualToValue={(option, value) => option.business_unit_id === value.business_unit_id}
+                    renderInput={(params) => (
+                      <TextField
+                        color="secondary"
+                        {...params}
+                        label="Business Unit"
+                        // error={!!errors?.business_unit_id}
+                        // helperText={errors?.business_unit_id?.message}
+                      />
+                    )}
+                    disabled
+                  />
+
+                  <CustomAutoComplete
+                    autoComplete
+                    name="unit_id_coordinator"
+                    disabled={edit ? false : transactionData?.view}
+                    control={control}
+                    options={
+                      departmentCoordinatorData?.filter((obj) => obj?.id === watch("department_id_coordinator")?.id)[0]
+                        ?.unit || []
+                    }
+                    onOpen={() =>
+                      isUnitCoordinatorSuccess
+                        ? null
+                        : (unitCoordinatorTrigger({ user_id: user_id }),
+                          subunitCoordinatorTrigger({ user_id: user_id }),
+                          locationTrigger())
+                    }
+                    // onChange={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
+                    loading={isUnitCoordinatorLoading}
+                    size="small"
+                    getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
+                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                    renderInput={(params) => (
+                      <TextField
+                        color="secondary"
+                        {...params}
+                        label="Unit"
+                        error={!!errors?.unit_id_coordinator}
+                        helperText={errors?.unit_id_coordinator?.message}
+                      />
+                    )}
+                    onChange={(_, value) => {
+                      fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
+
+                      setValue("subunit_id_coordinator", null);
+                      setValue("location_id_coordinator", null);
+
+                      return value;
+                    }}
+                  />
+
+                  <CustomAutoComplete
+                    autoComplete
+                    name="subunit_id_coordinator"
+                    disabled={edit ? false : transactionData?.view}
+                    control={control}
+                    options={
+                      unitCoordinatorData?.filter((obj) => obj?.id === watch("unit_id_coordinator")?.id)[0]?.subunit ||
+                      []
+                    }
+                    loading={isSubUnitCoordinatorLoading}
+                    size="small"
+                    getOptionLabel={(option) => option.subunit_code + " - " + option.subunit_name}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    renderInput={(params) => (
+                      <TextField
+                        color="secondary"
+                        {...params}
+                        label="Sub Unit"
+                        error={!!errors?.subunit_id_coordinator}
+                        helperText={errors?.subunit_id_coordinator?.message}
+                      />
+                    )}
+                  />
+
+                  <CustomAutoComplete
+                    autoComplete
+                    name="location_id_coordinator"
+                    disabled={edit ? false : transactionData?.view}
+                    control={control}
+                    options={locationData?.filter((item) => {
+                      return item.subunit.some((subunit) => {
+                        return subunit?.sync_id === watch("subunit_id_coordinator")?.sync_id;
+                      });
+                    })}
+                    loading={isLocationLoading}
+                    size="small"
+                    getOptionLabel={(option) => option.location_code + " - " + option.location_name}
+                    isOptionEqualToValue={(option, value) => option.location_id === value.location_id}
+                    renderInput={(params) => (
+                      <TextField
+                        color="secondary"
+                        {...params}
+                        label="Location"
+                        error={!!errors?.location_id_coordinator}
+                        helperText={errors?.location_id_coordinator?.message}
+                      />
+                    )}
+                  />
+                </Stack>
+              )}
+
               <Stack gap={2}>
-                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px" }}>
+                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
                   TRANSFER TO
                 </Typography>
 
@@ -1326,100 +1613,203 @@ const AddTransfer = (props) => {
                         </TableCell>
 
                         <TableCell className="tbl-cell">
-                          <Controller
-                            control={control}
-                            name={`assets.${index}.fixed_asset_id`}
-                            render={({ field: { ref, value, onChange } }) => (
-                              <Autocomplete
-                                options={vTagNumberData}
-                                onOpen={() => (isVTagNumberSuccess ? null : fixedAssetTrigger())}
-                                loading={isVTagNumberLoading}
-                                disabled={edit ? false : transactionData?.view}
-                                size="small"
-                                value={value}
-                                filterOptions={filterOptions}
-                                getOptionLabel={(option) =>
-                                  `(${option.vladimir_tag_number}) - ${option.asset_description}`
-                                }
-                                isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                                renderInput={(params) => (
-                                  <TextField
-                                    required
-                                    color="secondary"
-                                    {...params}
-                                    label="Tag Number"
-                                    multiline
-                                    maxRows={3}
-                                    sx={{
-                                      "& .MuiInputBase-inputMultiline": {
-                                        minHeight: "10px",
-                                      },
-                                    }}
-                                  />
-                                )}
-                                getOptionDisabled={
-                                  (option) => !!fields.find((item) => item?.fixed_asset_id?.id === option.id)
-                                  // ||
-                                  // option.transfer === 1
-                                }
-                                onChange={(_, newValue) => {
-                                  if (newValue) {
-                                    // onChange(newValue);
-                                    // console.log("newValue: ", newValue);
-                                    onChange(newValue);
-                                    setValue(
-                                      `assets.${index}.asset_accountable`,
-                                      newValue.accountable === "-" ? "Common" : newValue.accountable
-                                    );
-                                    setValue(`assets.${index}.id`, newValue.id);
-                                    setValue(`assets.${index}.created_at`, newValue.created_at);
-                                    setValue(`assets.${index}.company_id`, newValue.company?.company_name);
-                                    setValue(
-                                      `assets.${index}.business_unit_id`,
-                                      newValue.business_unit?.business_unit_name
-                                    );
-                                    setValue(`assets.${index}.department_id`, newValue.department?.department_name);
-                                    setValue(`assets.${index}.unit_id`, newValue.unit?.unit_name);
-                                    setValue(`assets.${index}.sub_unit_id`, newValue.subunit?.subunit_name);
-                                    setValue(`assets.${index}.location_id`, newValue.location?.location_name);
-                                  } else {
-                                    onChange(null);
-                                    setValue(`assets.${index}.asset_accountable`, "");
-                                    setValue(`assets.${index}.created_at`, null);
+                          {isCoordinator ? (
+                            <Controller
+                              control={control}
+                              name={`assets.${index}.fixed_asset_id`}
+                              render={({ field: { ref, value, onChange } }) => (
+                                <Autocomplete
+                                  options={
+                                    isVTagNumberCoordinatorLoading || isVTagNumberCoordinatorFetching
+                                      ? []
+                                      : vTagNumberCoordinatorData
                                   }
+                                  onOpen={() => fixedAssetCoordinatorTrigger({ subunit_id: subunit_id })}
+                                  loading={isVTagNumberCoordinatorLoading || isVTagNumberCoordinatorFetching}
+                                  disabled={
+                                    edit ? false : transactionData?.view || watch("location_id_coordinator") === null
+                                  }
+                                  size="small"
+                                  value={value}
+                                  filterOptions={filterOptions}
+                                  getOptionLabel={(option) =>
+                                    `(${option.vladimir_tag_number}) - ${option.asset_description}`
+                                  }
+                                  isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      required
+                                      color="secondary"
+                                      {...params}
+                                      label="Tag Number"
+                                      multiline
+                                      maxRows={3}
+                                      sx={{
+                                        "& .MuiInputBase-inputMultiline": {
+                                          minHeight: "10px",
+                                        },
+                                      }}
+                                    />
+                                  )}
+                                  getOptionDisabled={
+                                    (option) => !!fields.find((item) => item?.fixed_asset_id?.id === option.id)
+                                    // ||
+                                    // option.transfer === 1
+                                  }
+                                  onChange={(_, newValue) => {
+                                    if (newValue) {
+                                      // onChange(newValue);
+                                      // console.log("newValue: ", newValue);
+                                      onChange(newValue);
+                                      setValue(
+                                        `assets.${index}.asset_accountable`,
+                                        newValue.accountable === "-" ? "Common" : newValue.accountable
+                                      );
+                                      setValue(`assets.${index}.id`, newValue.id);
+                                      setValue(`assets.${index}.created_at`, newValue.created_at);
+                                      setValue(`assets.${index}.company_id`, newValue.company?.company_name);
+                                      setValue(
+                                        `assets.${index}.business_unit_id`,
+                                        newValue.business_unit?.business_unit_name
+                                      );
+                                      setValue(`assets.${index}.department_id`, newValue.department?.department_name);
+                                      setValue(`assets.${index}.unit_id`, newValue.unit?.unit_name);
+                                      setValue(`assets.${index}.sub_unit_id`, newValue.subunit?.subunit_name);
+                                      setValue(`assets.${index}.location_id`, newValue.location?.location_name);
+                                    } else {
+                                      onChange(null);
+                                      setValue(`assets.${index}.asset_accountable`, "");
+                                      setValue(`assets.${index}.created_at`, null);
+                                    }
 
-                                  return newValue;
-                                }}
-                                sx={{
-                                  ".MuiInputBase-root": {
-                                    borderRadius: "10px",
-                                    minHeight: "63px",
-                                  },
-                                  ".MuiInputLabel-root.Mui-disabled": {
-                                    backgroundColor: "transparent",
-                                  },
-                                  ".Mui-disabled": {
-                                    backgroundColor: "background.light",
-                                  },
-                                  ".MuiOutlinedInput-notchedOutline": {
-                                    bgcolor: "#f5c9861c",
-                                  },
-                                  "& .MuiFormLabel-root": {
-                                    lineHeight: "43px", // Adjust based on the height of the input
-                                  },
-                                  "& .Mui-focused": {
-                                    top: "-10%", // Center vertically
-                                  },
-                                  "& .MuiFormLabel-filled": {
-                                    top: "-10%", // Center vertically
-                                  },
-                                  ml: "-15px",
-                                  minWidth: "230px",
-                                  maxWidth: "550px",
-                                }}
-                              />
-                            )}
-                          />
+                                    return newValue;
+                                  }}
+                                  sx={{
+                                    ".MuiInputBase-root": {
+                                      borderRadius: "10px",
+                                      minHeight: "63px",
+                                    },
+                                    ".MuiInputLabel-root.Mui-disabled": {
+                                      backgroundColor: "transparent",
+                                    },
+                                    ".Mui-disabled": {
+                                      backgroundColor: "background.light",
+                                    },
+                                    ".MuiOutlinedInput-notchedOutline": {
+                                      bgcolor: "#f5c9861c",
+                                    },
+                                    "& .MuiFormLabel-root": {
+                                      lineHeight: "43px", // Adjust based on the height of the input
+                                    },
+                                    "& .Mui-focused": {
+                                      top: "-10%", // Center vertically
+                                    },
+                                    "& .MuiFormLabel-filled": {
+                                      top: "-10%", // Center vertically
+                                    },
+                                    ml: "-15px",
+                                    minWidth: "230px",
+                                    maxWidth: "550px",
+                                  }}
+                                />
+                              )}
+                            />
+                          ) : (
+                            <Controller
+                              control={control}
+                              name={`assets.${index}.fixed_asset_id`}
+                              render={({ field: { ref, value, onChange } }) => (
+                                <Autocomplete
+                                  options={vTagNumberData}
+                                  onOpen={() => (isVTagNumberSuccess ? null : fixedAssetTrigger())}
+                                  loading={isVTagNumberLoading}
+                                  disabled={edit ? false : transactionData?.view}
+                                  size="small"
+                                  value={value}
+                                  filterOptions={filterOptions}
+                                  getOptionLabel={(option) =>
+                                    `(${option.vladimir_tag_number}) - ${option.asset_description}`
+                                  }
+                                  isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                                  renderInput={(params) => (
+                                    <TextField
+                                      required
+                                      color="secondary"
+                                      {...params}
+                                      label="Tag Number"
+                                      multiline
+                                      maxRows={3}
+                                      sx={{
+                                        "& .MuiInputBase-inputMultiline": {
+                                          minHeight: "10px",
+                                        },
+                                      }}
+                                    />
+                                  )}
+                                  getOptionDisabled={
+                                    (option) => !!fields.find((item) => item?.fixed_asset_id?.id === option.id)
+                                    // ||
+                                    // option.transfer === 1
+                                  }
+                                  onChange={(_, newValue) => {
+                                    if (newValue) {
+                                      // onChange(newValue);
+                                      // console.log("newValue: ", newValue);
+                                      onChange(newValue);
+                                      setValue(
+                                        `assets.${index}.asset_accountable`,
+                                        newValue.accountable === "-" ? "Common" : newValue.accountable
+                                      );
+                                      setValue(`assets.${index}.id`, newValue.id);
+                                      setValue(`assets.${index}.created_at`, newValue.created_at);
+                                      setValue(`assets.${index}.company_id`, newValue.company?.company_name);
+                                      setValue(
+                                        `assets.${index}.business_unit_id`,
+                                        newValue.business_unit?.business_unit_name
+                                      );
+                                      setValue(`assets.${index}.department_id`, newValue.department?.department_name);
+                                      setValue(`assets.${index}.unit_id`, newValue.unit?.unit_name);
+                                      setValue(`assets.${index}.sub_unit_id`, newValue.subunit?.subunit_name);
+                                      setValue(`assets.${index}.location_id`, newValue.location?.location_name);
+                                    } else {
+                                      onChange(null);
+                                      setValue(`assets.${index}.asset_accountable`, "");
+                                      setValue(`assets.${index}.created_at`, null);
+                                    }
+
+                                    return newValue;
+                                  }}
+                                  sx={{
+                                    ".MuiInputBase-root": {
+                                      borderRadius: "10px",
+                                      minHeight: "63px",
+                                    },
+                                    ".MuiInputLabel-root.Mui-disabled": {
+                                      backgroundColor: "transparent",
+                                    },
+                                    ".Mui-disabled": {
+                                      backgroundColor: "background.light",
+                                    },
+                                    ".MuiOutlinedInput-notchedOutline": {
+                                      bgcolor: "#f5c9861c",
+                                    },
+                                    "& .MuiFormLabel-root": {
+                                      lineHeight: "43px", // Adjust based on the height of the input
+                                    },
+                                    "& .Mui-focused": {
+                                      top: "-10%", // Center vertically
+                                    },
+                                    "& .MuiFormLabel-filled": {
+                                      top: "-10%", // Center vertically
+                                    },
+                                    ml: "-15px",
+                                    minWidth: "230px",
+                                    maxWidth: "550px",
+                                  }}
+                                />
+                              )}
+                            />
+                          )}
                         </TableCell>
 
                         <TableCell className="tbl-cell">

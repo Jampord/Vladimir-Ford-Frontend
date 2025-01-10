@@ -30,6 +30,12 @@ export const fixedAssetApi = createApi({
       providesTags: ["FixedAsset"],
     }),
 
+    getFixedAssetAddCostAllApi: builder.query({
+      query: () => `fixed-asset?pagination=none&add_cost=1`,
+      transformResponse: (response) => response.data,
+      providesTags: ["FixedAsset"],
+    }),
+
     getFixedAssetIdApi: builder.query({
       query: ({ vladimir_tag_number: tagNumber, is_additional_cost, id: additionalCostID }) => {
         if (is_additional_cost) {
@@ -201,6 +207,8 @@ export const fixedAssetApi = createApi({
 export const {
   useGetFixedAssetApiQuery,
   useLazyGetFixedAssetAllApiQuery,
+  useLazyGetFixedAssetAddCostAllApiQuery,
+  useGetFixedAssetAddCostAllApiQuery,
   useGetFixedAssetAllApiQuery,
   useGetFixedAssetIdApiQuery,
   useLazyGetVoucherFaApiQuery,
