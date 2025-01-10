@@ -27,6 +27,11 @@ export const unitApi = createApi({
       query: () => `/unit?pagination=none`,
     }),
 
+    getUnitAllCoordinatorApi: builder.query({
+      query: (params) => `/unit?pagination=none&user_id=${params.user_id}`,
+      providesTags: ["Unit"],
+    }),
+
     postUnitApi: builder.mutation({
       query: (data) => ({
         url: `/unit`,
@@ -38,4 +43,10 @@ export const unitApi = createApi({
   }),
 });
 
-export const { useGetUnitApiQuery, useLazyGetUnitAllApiQuery, useGetUnitAllApiQuery, usePostUnitApiMutation } = unitApi;
+export const {
+  useGetUnitApiQuery,
+  useLazyGetUnitAllApiQuery,
+  useGetUnitAllApiQuery,
+  useLazyGetUnitAllCoordinatorApiQuery,
+  usePostUnitApiMutation,
+} = unitApi;

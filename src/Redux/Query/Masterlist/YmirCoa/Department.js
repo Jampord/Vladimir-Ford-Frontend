@@ -29,6 +29,12 @@ export const departmentApi = createApi({
       providesTags: ["Department"],
     }),
 
+    getDepartmentAllCoordinatorApi: builder.query({
+      query: (params) => `/department?pagination=none&user_id=${params.user_id}`,
+      transformResponse: (response) => response,
+      providesTags: ["Department"],
+    }),
+
     postDepartmentApi: builder.mutation({
       query: (data) => ({
         url: `/department`,
@@ -44,5 +50,7 @@ export const {
   useGetDepartmentApiQuery,
   useGetDepartmentAllApiQuery,
   useLazyGetDepartmentAllApiQuery,
+  useGetDepartmentAllCoordinatorApiQuery,
+  useLazyGetDepartmentAllCoordinatorApiQuery,
   usePostDepartmentApiMutation,
 } = departmentApi;

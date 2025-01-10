@@ -27,6 +27,11 @@ export const subUnitApi = createApi({
       providesTags: ["subUnit"],
     }),
 
+    getSubUnitAllCoordinatorApi: builder.query({
+      query: (params) => `/sub-unit?pagination=none&user_id=${params.user_id}`,
+      providesTags: ["subUnit"],
+    }),
+
     getSubUnitIdApi: builder.query({
       query: (id) => `sub-unit/${id}`,
       providesTags: ["subUnit"],
@@ -67,6 +72,7 @@ export const {
   useGetSubUnitApiQuery,
   useLazyGetSubUnitAllApiQuery,
   useGetSubUnitAllApiQuery,
+  useLazyGetSubUnitAllCoordinatorApiQuery,
   useGetSubUnitIdApiQuery,
   usePostSubUnitApiMutation,
   useUpdateSubUnitApiMutation,

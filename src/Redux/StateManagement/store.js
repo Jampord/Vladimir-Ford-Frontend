@@ -10,6 +10,7 @@ import ipSetupReducer from "../StateManagement/ipSetupSlice";
 import userLoginReducer from "../StateManagement/userLogin";
 import collapseCapexReducer from "./collapseCapexSlice";
 import booleanStateReducer from "./booleanStateSlice";
+import actionMenuReducer from "../StateManagement/actionMenuSlice";
 
 // import drawerReducer from './drawerSlice'
 // import dialogReducer from './dialogSlice'
@@ -92,6 +93,7 @@ import { transferApprovalApi } from "../Query/Approving/TransferApproval";
 import { pulloutApi } from "../Query/Movement/Pullout";
 import { pulloutApprovalApi } from "../Query/Approving/PulloutApproval";
 import { evaluationApi } from "../Query/Movement/Evaluation";
+import { evaluationApprovalApi } from "../Query/Approving/EvaluationApproval";
 
 import { requisitionSmsApi } from "../Query/Request/RequisitionSms";
 
@@ -100,6 +102,8 @@ import { receivedReceiptApi } from "../Query/Request/ReceivedReceipt";
 import { assetReleasingApi } from "../Query/Request/AssetReleasing";
 import { masterlistApi } from "../Query/Masterlist/Masterlist";
 import { assetMovementReportApi } from "../Query/Movement/AssetMovementReports";
+import { coordinatorSettingsApi } from "../Query/Settings/CoordinatorSettings";
+import { actionMenuSlice } from "./actionMenuSlice";
 
 export const store = configureStore({
   reducer: {
@@ -111,6 +115,7 @@ export const store = configureStore({
     ipSetup: ipSetupReducer,
     collapseCapex: collapseCapexReducer,
     booleanState: booleanStateReducer,
+    actionMenu: actionMenuReducer,
 
     // drawer: drawerReducer,
     // dialog: dialogReducer,
@@ -182,6 +187,7 @@ export const store = configureStore({
     [assetTransferApi.reducerPath]: assetTransferApi.reducer,
     [assetPulloutApi.reducerPath]: assetPulloutApi.reducer,
     [assetDisposalApi.reducerPath]: assetDisposalApi.reducer,
+    [coordinatorSettingsApi.reducerPath]: coordinatorSettingsApi.reducer,
 
     // Request
     [requisitionApi.reducerPath]: requisitionApi.reducer,
@@ -197,6 +203,7 @@ export const store = configureStore({
     [approvalApi.reducerPath]: approvalApi.reducer,
     [transferApprovalApi.reducerPath]: transferApprovalApi.reducer,
     [pulloutApprovalApi.reducerPath]: pulloutApprovalApi.reducer,
+    [evaluationApprovalApi.reducerPath]: evaluationApprovalApi.reducer,
 
     [assetReceivingApi.reducerPath]: assetReceivingApi.reducer,
     [receivedReceiptApi.reducerPath]: receivedReceiptApi.reducer,
@@ -273,6 +280,7 @@ export const store = configureStore({
       assetTransferApi.middleware,
       assetPulloutApi.middleware,
       assetDisposalApi.middleware,
+      coordinatorSettingsApi.middleware,
 
       // Request
       requisitionApi.middleware,
@@ -288,6 +296,7 @@ export const store = configureStore({
       // Approval
       approvalApi.middleware,
       transferApprovalApi.middleware,
+      evaluationApprovalApi.middleware,
 
       assetReceivingApi.middleware,
       receivedReceiptApi.middleware,

@@ -76,6 +76,10 @@ export const userAccountsApi = createApi({
       }),
       invalidatesTags: ["User"],
     }),
+
+    getCoordinatorAccountApi: builder.query({
+      query: () => `/user?pagination=none&is_coordinator=1`,
+    }),
   }),
 });
 
@@ -89,4 +93,5 @@ export const {
   usePostUserApiMutation,
   useUpdateUserApiMutation,
   useResetUserApiMutation,
+  useLazyGetCoordinatorAccountApiQuery,
 } = userAccountsApi;
