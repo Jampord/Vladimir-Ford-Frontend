@@ -1,26 +1,34 @@
 import { Autocomplete, Box, Button, Divider, Stack, TextField, Typography } from "@mui/material";
 import CustomTextField from "../../../Components/Reusable/CustomTextField";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { LoadingButton } from "@mui/lab";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { usePostAddCostTaggingApiMutation } from "../../../Redux/Query/FixedAsset/AdditionalCost";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { useDispatch } from "react-redux";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePutElixirAssetTagMutation } from "../../../Redux/Query/Systems/Elixir";
 import { onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
-import { Info } from "@mui/icons-material";
+import { Info, Watch } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import CustomAutoComplete from "../../../Components/Reusable/CustomAutoComplete";
+import {
+  useGetFixedAssetAddCostAllApiQuery,
+  useLazyGetFixedAssetAddCostAllApiQuery,
+} from "../../../Redux/Query/FixedAsset/FixedAssets";
 
 const schema = yup.object().shape({
+  replacement_tag: yup.object().nullable(),
   added_useful_life: yup
     .number("Input must be a number!")
     .required("Add Useful Life is required!")
-    .typeError("Input must be a number!"),
+    .typeError("Add Useful Life is required!"),
 });
 
 const AddTag = ({ data, tag, handleCancel }) => {
+  // const [value, setValue] = useState();
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -34,12 +42,35 @@ const AddTag = ({ data, tag, handleCancel }) => {
     { isLoading: isPutLoading, isSuccess: isPutSuccess, isError: isPutError, error: putError },
   ] = usePutElixirAssetTagMutation();
 
+  const [
+    fixedAssetTrigger,
+    {
+      data: fixedAssetData,
+      isLoading: isFixedAssetLoading,
+      isSuccess: isFixedAssetSuccess,
+      isError: isFixedAssetError,
+      error: fixedAssetError,
+    },
+  ] = useLazyGetFixedAssetAddCostAllApiQuery();
+
+  const {
+    data: fixedAssetData1,
+    isLoading: isFixedAssetLoading1,
+    isSuccess: isFixedAssetSuccess1,
+    isError: isFixedAssetError1,
+    error: fixedAssetError1,
+  } = useGetFixedAssetAddCostAllApiQuery();
+
+  // console.log("FA", fixedAssetData);
+
   const {
     control,
     handleSubmit,
     register,
-    formState: { errors },
+    formState: { errors, isValid },
     reset,
+    watch,
+    setValue,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: { added_useful_life: "" },
@@ -51,7 +82,7 @@ const AddTag = ({ data, tag, handleCancel }) => {
       return { id: item.id };
     });
 
-  console.log("assetTagID", assetTagId);
+  // console.log("assetTagID", assetTagId);
 
   const assetTag =
     data
@@ -107,11 +138,12 @@ const AddTag = ({ data, tag, handleCancel }) => {
   // console.log("tag", tag);
 
   const onSubmitHandler = async (formData) => {
-    const body = { assetTag, ...formData };
+    const { replacement_tag, ...newFormData } = formData;
+    const body = { assetTag, replacement_tag: replacement_tag.vladimir_tag_number, ...newFormData };
 
-    // console.log("body", body);
+    console.log("body", body);
     // console.log("data", data);
-    console.log("formdata", formData);
+    // console.log("formdata", replacement_tag);
     dispatch(
       openConfirm({
         icon: Info,
@@ -222,17 +254,72 @@ const AddTag = ({ data, tag, handleCancel }) => {
         sx={{ mb: "10px" }}
       />
 
+      {console.log("meowmeow", watch("replacement_tag"))}
+
+      <CustomAutoComplete
+        autoComplete
+        name="replacement_tag"
+        control={control}
+        options={fixedAssetData}
+        getOptionLabel={(option) => `(${option.vladimir_tag_number}) - ${option.asset_description}`}
+        // disabled={edit ? false : transactionData?.view}
+        isOptionEqualToValue={(option, value) => option.vladimir_tag_number === value.vladimir_tag_number}
+        onValueChange={(e, value) => {
+          // console.log("eeeeeeeeeeeeeeeeeeeeeeee", value.vladimir_tag_number);
+
+          setValue("replacement_tag", value.vladimir_tag_number);
+        }}
+        onOpen={() => fixedAssetTrigger()}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            color="secondary"
+            label="Fixed Asset (Optional)"
+            multiline
+            // error={!!errors?.accountability}
+            // helperText={errors?.accountability?.message}
+            sx={{ mb: "10px" }}
+          />
+        )}
+      />
+
+      {/* <Controller
+        name="replacement_tag"
+        control={control}
+        render={({ fields }) => (
+          <Autocomplete
+            options={fixedAssetData}
+            getOptionLabel={(option) => `(${option.vladimir_tag_number}) - ${option.asset_description}`}
+            // disabled={edit ? false : transactionData?.view}
+            isOptionEqualToValue={(option, value) => option.vladimir_tag_number === value.vladimir_tag_number}
+            {...fields}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                color="secondary"
+                label="Fixed Asset (Optional)"
+                multiline
+                // error={!!errors?.accountability}
+                // helperText={errors?.accountability?.message}
+                sx={{ mb: "10px" }}
+              />
+            )}
+          />
+        )}
+      /> */}
+
       <CustomTextField
         control={control}
         name="added_useful_life"
-        label="Add Useful Life"
+        label="Add Useful Life (Months)"
         type="number"
         color="secondary"
         size="small"
+        InputProps={{ inputProps: { min: 1 } }}
         error={!!errors?.added_useful_life}
         helperText={errors?.added_useful_life?.message}
         fullWidth
-        onKeyDown={(e) => (e.keyCode === 69 || e.keyCode === 190) && e.preventDefault()} //prevents input of "e" and "."
+        onKeyDown={(e) => (e.keyCode === 69 || e.keyCode === 190 || e.keyCode === 189) && e.preventDefault()} //prevents input of "e", "-", and "."
       />
 
       <Stack flexDirection="row" justifyContent="flex-end" gap={2} sx={{ mb: "10px", mt: "10px" }}>
@@ -241,7 +328,7 @@ const AddTag = ({ data, tag, handleCancel }) => {
           variant="contained"
           size="small"
           // loading={isUpdateLoading || isPostLoading}
-          // disabled={!isValid}
+          disabled={!isValid}
           // sx={data.action === "view" ? { display: "none" } : null}
         >
           Tag
