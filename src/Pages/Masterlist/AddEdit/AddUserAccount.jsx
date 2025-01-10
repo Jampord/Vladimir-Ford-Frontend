@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../../../Style/Masterlist/addUserAccount.scss";
 import CustomTextField from "../../../Components/Reusable/CustomTextField";
 import CustomAutoComplete from "../../../Components/Reusable/CustomAutoComplete";
@@ -16,6 +16,8 @@ import {
   FormControlLabel,
   FormLabel,
   IconButton,
+  Radio,
+  RadioGroup,
   Stack,
   TextField,
   Typography,
@@ -112,6 +114,7 @@ const schema = yup.object().shape({
       },
       then: (yup) => yup.label("Warehouse").required().typeError("Warehouse is a required field"),
     }),
+  is_coordinator: yup.number().required().label("Coordinator"),
 });
 
 const AddUserAccount = (props) => {
@@ -256,6 +259,9 @@ const AddUserAccount = (props) => {
     },
   });
 
+  // console.log("errors:", errors);
+  // console.log("coordinator:", watch("is_coordinator"));
+
   useEffect(() => {
     const errorData = (isPostError || isUpdateError) && (postError?.status === 422 || updateError?.status === 422);
 
@@ -317,6 +323,7 @@ const AddUserAccount = (props) => {
       setValue("username", data.username);
       setValue("role_id", data.role);
       setValue("warehouse_id", data?.warehouse);
+      setValue("is_coordinator", data?.is_coordinator);
     }
   }, [data]);
 
@@ -740,6 +747,7 @@ const AddUserAccount = (props) => {
     //     </Stack>
     //   </Box>
     // </Box>
+
     <Box className="add-userAccount" p={2.5} component="form" onSubmit={handleSubmit(onSubmitHandler)}>
       <Box className="add-userAccount__title" gap={1}>
         {/* <IconButton onClick={handleCloseDrawer}>
@@ -918,6 +926,34 @@ const AddUserAccount = (props) => {
                 )}
               />
             )}
+
+            {/* <Divider sx={{ py: 0.5 }} /> */}
+
+            <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1rem" }}>
+              Coordinator
+            </Typography>
+            <Stack flexDirection="row" gap={2} alignItems="center" mt={-2.5}>
+              <RadioGroup row name="is_coordinator" defaultValue={data?.is_coordinator || 0}>
+                <FormControlLabel
+                  value={1}
+                  control={<Radio {...register("is_coordinator")} size="small" disableRipple color="secondary" />}
+                  label={
+                    <Typography color="secondary.main" sx={{ ml: -1, fontSize: 14, fontWeight: 500 }}>
+                      Yes
+                    </Typography>
+                  }
+                />
+                <FormControlLabel
+                  value={0}
+                  control={<Radio {...register("is_coordinator")} size="small" disableRipple color="secondary" />}
+                  label={
+                    <Typography color="secondary.main" sx={{ ml: -1, fontSize: 14, fontWeight: 500 }}>
+                      No
+                    </Typography>
+                  }
+                />
+              </RadioGroup>
+            </Stack>
           </Stack>
 
           <Divider flexItem orientation="vertical" sx={{ mx: 2.5, mt: 5 }} />

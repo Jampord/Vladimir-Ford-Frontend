@@ -37,7 +37,6 @@ const schema = yup.object().shape({
 
 const AddRole = (props) => {
   const { data, onUpdateResetHandler } = props;
-  console.log(data);
 
   const [masterlistChecked, setMasterlistChecked] = useState(false);
 
@@ -173,6 +172,7 @@ const AddRole = (props) => {
     // Settings
     "approver-settings",
     "form-settings",
+    "coordinator-settings",
 
     // Asset Requisition
     "requisition",
@@ -225,7 +225,7 @@ const AddRole = (props) => {
     "status-category",
   ];
   const userManagement = ["user-accounts", "role-management"];
-  const settings = ["approver-settings", "form-settings"];
+  const settings = ["approver-settings", "form-settings", "coordinator-settings"];
   const assetRequisition = ["requisition", "purchase-request", "requisition-received-asset", "requisition-releasing"];
   const assetMovement = ["transfer", "pull-out", "disposal", "transfer-receiving", "evaluation"];
   const approving = [
@@ -426,6 +426,18 @@ const AddRole = (props) => {
               <Checkbox
                 {...register("access_permission")}
                 checked={watch("access_permission")?.includes("form-settings")}
+              />
+            }
+          />
+
+          <FormControlLabel
+            disabled={data.action === "view"}
+            label="Coordinator Settings"
+            value="coordinator-settings"
+            control={
+              <Checkbox
+                {...register("access_permission")}
+                checked={watch("access_permission")?.includes("coordinator-settings")}
               />
             }
           />
@@ -851,7 +863,12 @@ const AddRole = (props) => {
                             onChange={(e) => {
                               if (e.target.checked) {
                                 setValue("access_permission", [
-                                  ...new Set([...watch("access_permission"), "approver-settings", "form-settings"]),
+                                  ...new Set([
+                                    ...watch("access_permission"),
+                                    "approver-settings",
+                                    "form-settings",
+                                    "coordinator-settings",
+                                  ]),
                                 ]);
                               } else {
                                 const settingsEmptyValue = watch("access_permission").filter(

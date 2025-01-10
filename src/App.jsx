@@ -95,6 +95,8 @@ import EvaluationApproving from "./Pages/Approving/Evaluation/EvaluationApprovin
 import ViewEvaluation from "./Pages/Approving/Evaluation/ViewEvaluation";
 import Evaluation from "./Pages/Asset Movement/Evaluation/Evaluation.jsx";
 import ToPickupViewing from "./Pages/Asset Movement/Evaluation/ToPickupViewing";
+import CoordinatorSettings from "./Pages/Settings/CoordinatorSettings";
+import AddCoordinatorSettings from "./Pages/Settings/AddEdit/AddCoordinatorSettings";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -287,12 +289,22 @@ const router = createBrowserRouter([
               {
                 path: "approver-settings",
                 element: <ApproverSettings />,
-                handle: { permission: "settings" },
+                handle: { permission: "approver-settings" },
               },
               {
                 path: "form-settings",
                 element: <FormSettings />,
-                handle: { permission: "settings" },
+                handle: { permission: "form-settings" },
+              },
+              {
+                path: "coordinator-settings",
+                element: <CoordinatorSettings />,
+                handle: { permission: "coordinator-settings" },
+              },
+              {
+                path: "coordinator-settings/add-coordinator",
+                element: <AddCoordinatorSettings />,
+                handle: { permission: "coordinator-settings" },
               },
             ],
           },
@@ -479,7 +491,7 @@ const router = createBrowserRouter([
                 handle: { permission: "approving" },
               },
               {
-                path: "pullout/:transaction_number",
+                path: "pull-out/:transaction_number",
                 element: <ViewPullout />,
                 handle: { permission: "approving" },
               },

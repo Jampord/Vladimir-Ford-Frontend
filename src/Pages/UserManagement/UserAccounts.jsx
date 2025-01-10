@@ -213,6 +213,7 @@ const UserAccounts = () => {
       role_id,
       warehouse,
       warehouse_id,
+      is_coordinator,
     } = props;
     setUpdateUser({
       status: true,
@@ -231,6 +232,7 @@ const UserAccounts = () => {
       role_id,
       warehouse,
       warehouse_id,
+      is_coordinator,
     });
   };
 
@@ -250,6 +252,7 @@ const UserAccounts = () => {
       username: "",
       role_id: null,
       warehouse_id: null,
+      is_coordinator: 0,
     });
   };
 
@@ -494,12 +497,17 @@ const UserAccounts = () => {
                               {users.subunit?.subunit_code} - {users.subunit?.subunit_name}
                             </TableCell> */}
                             <TableCell className="tbl-cell capitalized" sx={{ whiteSpace: "nowrap" }}>
-                              {users.role.role_name === "Warehouse" ? (
+                              {users.role.role_name === "Warehouse" || users.is_coordinator === 1 ? (
                                 <Stack flexDirection="column">
                                   {users.role.role_name}
                                   <Typography fontSize={10} fontWeight={500} color="secondary.main">
                                     {users.warehouse.warehouse_name}
                                   </Typography>
+                                  {users.is_coordinator === 1 && (
+                                    <Typography fontSize={10} fontWeight={500} color="secondary.main">
+                                      (Coordinator)
+                                    </Typography>
+                                  )}
                                 </Stack>
                               ) : (
                                 users.role.role_name

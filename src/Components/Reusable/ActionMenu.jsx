@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 
 import { useDispatch } from "react-redux";
-import { openDialog, openDrawer } from "../../Redux/StateManagement/booleanStateSlice";
+import { openDialog, openDialog1, openDrawer } from "../../Redux/StateManagement/booleanStateSlice";
 
 import { Box, IconButton, MenuItem, Menu, Fade, ListItemIcon, ListItemText } from "@mui/material";
 import {
@@ -17,6 +17,7 @@ import {
   Undo,
   CancelRounded,
 } from "@mui/icons-material";
+import { getData } from "../../Redux/StateManagement/actionMenuSlice";
 
 const ActionMenu = (props) => {
   const dispatch = useDispatch();
@@ -68,7 +69,13 @@ const ActionMenu = (props) => {
     // RR
     showCancelRr,
     handleCancelRR,
+
+    //Coordinator Settings
+    onUpdateCoordinatorHandler,
+    coordinatorTrigger,
   } = props;
+
+  console.log("data", data);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -83,6 +90,11 @@ const ActionMenu = (props) => {
 
   const handleArchiveRestore = () => {
     onArchiveRestoreHandler(data?.id, status);
+    handleClose();
+  };
+
+  const handleArchiveCoordinator = () => {
+    onArchiveRestoreHandler(data?.user.id, status);
     handleClose();
   };
 
@@ -209,6 +221,13 @@ const ActionMenu = (props) => {
     handleCancelRR(data);
   };
 
+  const handleUpdateCoordinatorHandler = () => {
+    console.log("👀👀👀", data);
+    dispatch(getData(data));
+    dispatch(openDialog1());
+    handleClose();
+  };
+
   return (
     <Box>
       <IconButton onClick={handleOpen}>
@@ -274,6 +293,17 @@ const ActionMenu = (props) => {
             </MenuItem>
           )}
 
+          {onUpdateCoordinatorHandler && status === "active" && (
+            <MenuItem onClick={handleUpdateCoordinatorHandler} dense>
+              <ListItemIcon>
+                <BorderColor />
+              </ListItemIcon>
+              <ListItemText disableTypography align="left">
+                Edit
+              </ListItemText>
+            </MenuItem>
+          )}
+
           {setSubCapexDialog && status === "active" && (
             <MenuItem onClick={handleSubCapexEdit} dense>
               <ListItemIcon>
@@ -299,6 +329,16 @@ const ActionMenu = (props) => {
               <ListItemIcon>{status !== "Cancelled" ? <MoveToInbox /> : <Reply />}</ListItemIcon>
               <ListItemText disableTypography align="left">
                 {status !== "Cancelled" ? "Archive" : "Restore"}
+              </ListItemText>
+            </MenuItem>
+          )}
+
+          {data?.user && (
+            <MenuItem onClick={handleArchiveCoordinator} dense>
+              {console.log("status", status)}
+              <ListItemIcon>{status !== "deactivated" ? <MoveToInbox /> : <Reply />}</ListItemIcon>
+              <ListItemText disableTypography align="left">
+                {status !== "deactivated" ? "Archive" : "Restore"}
               </ListItemText>
             </MenuItem>
           )}

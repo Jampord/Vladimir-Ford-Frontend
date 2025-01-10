@@ -398,6 +398,12 @@ const Sidebar = () => {
           path: "/settings/form-settings",
           permission: "form-settings",
         },
+        {
+          label: "Coordinator Settings",
+          icon: ManageAccounts,
+          path: "/settings/coordinator-settings",
+          permission: "coordinator-settings",
+        },
       ],
       open: settingsCollapse,
       setter: (e) => {

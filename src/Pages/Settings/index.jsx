@@ -26,6 +26,14 @@ const SettingsList = [
     path: "/settings/form-settings",
     permission: "form-settings",
   },
+
+  {
+    icon: <ManageAccountsSharp />,
+    label: "Coordinator Settings",
+    description: "Setup Settings for Coordinators",
+    path: "/settings/coordinator-settings",
+    permission: "coordinator-settings",
+  },
 ];
 
 const Settings = () => {
