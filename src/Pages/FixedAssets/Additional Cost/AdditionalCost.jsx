@@ -46,7 +46,7 @@ const AdditionalCost = () => {
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
             <Tabs onChange={handleChange} value={value}>
               <Tab label="ELIXIR ETD" value="1" className={value === "1" ? "tab__background" : null} />
-              <Tab label="GENUS ETD" value="2" className={value === "2" ? "tab__background" : null} />
+              <Tab label="FISTO" value="2" className={value === "2" ? "tab__background" : null} />
               <Tab label="YMIR" value="3" className={value === "3" ? "tab__background" : null} />
             </Tabs>
             <Stack direction="row" spacing={1}>

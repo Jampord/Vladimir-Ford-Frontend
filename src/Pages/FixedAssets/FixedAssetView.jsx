@@ -249,7 +249,7 @@ const FixedAssetView = (props) => {
               }}
             >
               PRINT
-            </Typography>
+            </Typography>{" "}
             this Barcode?
           </Box>
         ),

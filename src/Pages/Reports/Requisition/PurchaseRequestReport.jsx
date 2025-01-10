@@ -318,7 +318,7 @@ const PurchaseRequestReport = (props) => {
                           direction={orderBy === `date_needed` ? order : `asc`}
                           onClick={() => onSort(`date_needed`)}
                         >
-                          Date Needed
+                          Date Created
                         </TableSortLabel>
                       </TableCell>
                     </TableRow>

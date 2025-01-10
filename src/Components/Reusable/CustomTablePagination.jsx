@@ -8,7 +8,7 @@ const CustomTablePagination = (props) => {
     <TablePagination
       className={removeShadow ? "" : "mcontainer__pagination"}
       component="div"
-      rowsPerPageOptions={[5, 10, 15, 100]}
+      rowsPerPageOptions={[5, 10, 25, 100]}
       count={total || 0}
       page={current_page - 1 || 0}
       rowsPerPage={parseInt(per_page || perPage) || 5}

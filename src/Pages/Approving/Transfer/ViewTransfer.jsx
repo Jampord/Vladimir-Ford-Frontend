@@ -1303,9 +1303,6 @@ const ViewTransfer = (props) => {
                                         "& .MuiFormLabel-root": {
                                           lineHeight: "43px", // Adjust based on the height of the input
                                         },
-                                        "& .MuiFormLabel-root": {
-                                          lineHeight: "43px", // Adjust based on the height of the input
-                                        },
                                         "& .Mui-focused": {
                                           top: "-10%", // Center vertically
                                         },
