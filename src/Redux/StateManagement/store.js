@@ -104,6 +104,7 @@ import { masterlistApi } from "../Query/Masterlist/Masterlist";
 import { assetMovementReportApi } from "../Query/Movement/AssetMovementReports";
 import { coordinatorSettingsApi } from "../Query/Settings/CoordinatorSettings";
 import { actionMenuSlice } from "./actionMenuSlice";
+import { receiverSettingsApi } from "../Query/Settings/ReceiverSettings";
 
 export const store = configureStore({
   reducer: {
@@ -188,6 +189,7 @@ export const store = configureStore({
     [assetPulloutApi.reducerPath]: assetPulloutApi.reducer,
     [assetDisposalApi.reducerPath]: assetDisposalApi.reducer,
     [coordinatorSettingsApi.reducerPath]: coordinatorSettingsApi.reducer,
+    [receiverSettingsApi.reducerPath]: receiverSettingsApi.reducer,
 
     // Request
     [requisitionApi.reducerPath]: requisitionApi.reducer,
@@ -281,6 +283,7 @@ export const store = configureStore({
       assetPulloutApi.middleware,
       assetDisposalApi.middleware,
       coordinatorSettingsApi.middleware,
+      receiverSettingsApi.middleware,
 
       // Request
       requisitionApi.middleware,
