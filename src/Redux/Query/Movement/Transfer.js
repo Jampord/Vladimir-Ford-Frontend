@@ -18,7 +18,7 @@ export const transferApi = createApi({
 
   endpoints: (builder) => ({
     getTransferApi: builder.query({
-      query: (params) => `transfer?per_page=${params.per_page}&page=${params.page}`,
+      query: (params) => `transfer?per_page=${params.per_page}&page=${params.page}&search=${params.search}`,
       providesTags: ["Transfer"],
     }),
 

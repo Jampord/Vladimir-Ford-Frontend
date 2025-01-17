@@ -20,7 +20,7 @@ export const coordinatorSettingsApi = createApi({
   endpoints: (builder) => ({
     getCoordinatorSettingsApi: builder.query({
       query: (params) =>
-        `/coordinator-handles?pagination=none&per_page=${params.per_page}&page=${params.page}&status=${params.status}`,
+        `/coordinator-handles?pagination=none&per_page=${params.per_page}&page=${params.page}&status=${params.status}&search=${params.search}`,
       providesTags: ["CoordinatorSettings"],
     }),
 
