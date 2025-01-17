@@ -6,7 +6,7 @@ import { Outlet } from "react-router";
 import { useLocation } from "react-router-dom";
 
 import { Box, Typography, useMediaQuery } from "@mui/material";
-import { HowToReg, ManageAccountsSharp, SettingsApplications } from "@mui/icons-material";
+import { BadgeSharp, HowToReg, ManageAccountsSharp, SettingsApplications } from "@mui/icons-material";
 import Cards from "../../Components/Reusable/Cards";
 import { useSelector } from "react-redux";
 
@@ -33,6 +33,14 @@ const SettingsList = [
     description: "Setup Settings for Coordinators",
     path: "/settings/coordinator-settings",
     permission: "coordinator-settings",
+  },
+
+  {
+    icon: <BadgeSharp />,
+    label: "Receiver Settings",
+    description: "Setup Settings for Receivers",
+    path: "/settings/receiver-settings",
+    permission: "receiver-settings",
   },
 ];
 

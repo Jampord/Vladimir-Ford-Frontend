@@ -73,9 +73,12 @@ const ActionMenu = (props) => {
     //Coordinator Settings
     onUpdateCoordinatorHandler,
     coordinatorTrigger,
+
+    //Receiver Settings
+    receiverSettings,
   } = props;
 
-  console.log("data", data);
+  // console.log("data", data);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -222,7 +225,7 @@ const ActionMenu = (props) => {
   };
 
   const handleUpdateCoordinatorHandler = () => {
-    console.log("👀👀👀", data);
+    // console.log("👀👀👀", data);
     dispatch(getData(data));
     dispatch(openDialog1());
     handleClose();
@@ -333,9 +336,9 @@ const ActionMenu = (props) => {
             </MenuItem>
           )}
 
-          {data?.user && (
+          {data?.user && !receiverSettings && (
             <MenuItem onClick={handleArchiveCoordinator} dense>
-              {console.log("status", status)}
+              {/* {console.log("status", status)} */}
               <ListItemIcon>{status !== "deactivated" ? <MoveToInbox /> : <Reply />}</ListItemIcon>
               <ListItemText disableTypography align="left">
                 {status !== "deactivated" ? "Archive" : "Restore"}

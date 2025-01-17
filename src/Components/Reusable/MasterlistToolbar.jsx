@@ -52,6 +52,7 @@ import {
 import {
   AddCard,
   Archive,
+  BadgeOutlined,
   CheckBox,
   Close,
   DateRange,
@@ -85,6 +86,7 @@ const MasterlistToolbar = (props) => {
     onSyncHandler = () => {},
     scanAsset,
     onAdd,
+    onAddReceiver,
     onPrint,
     onImport,
     onSync,
@@ -448,6 +450,20 @@ const MasterlistToolbar = (props) => {
               sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
             >
               {isSmallScreen ? <LibraryAdd color="black" sx={{ fontSize: "20px" }} /> : "Add"}
+            </Button>
+          )}
+
+          {onAddReceiver && (
+            <Button
+              component={Link}
+              to={path}
+              onClick={handleOpenDrawer || handleOpenDialog}
+              variant="contained"
+              startIcon={isSmallScreen ? null : <BadgeOutlined />}
+              size="small"
+              sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+            >
+              {isSmallScreen ? <BadgeOutlined color="black" sx={{ fontSize: "20px" }} /> : "Add"}
             </Button>
           )}
 

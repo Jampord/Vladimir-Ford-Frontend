@@ -97,6 +97,7 @@ import Evaluation from "./Pages/Asset Movement/Evaluation/Evaluation.jsx";
 import ToPickupViewing from "./Pages/Asset Movement/Evaluation/ToPickupViewing";
 import CoordinatorSettings from "./Pages/Settings/CoordinatorSettings";
 import AddCoordinatorSettings from "./Pages/Settings/AddEdit/AddCoordinatorSettings";
+import ReceiverSettings from "./Pages/Settings/ReceiverSettings";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -301,10 +302,15 @@ const router = createBrowserRouter([
                 element: <CoordinatorSettings />,
                 handle: { permission: "coordinator-settings" },
               },
+              // {
+              //   path: "coordinator-settings/add-coordinator",
+              //   element: <AddCoordinatorSettings />,
+              //   handle: { permission: "coordinator-settings" },
+              // },
               {
-                path: "coordinator-settings/add-coordinator",
-                element: <AddCoordinatorSettings />,
-                handle: { permission: "coordinator-settings" },
+                path: "receiver-settings",
+                element: <ReceiverSettings />,
+                handle: { permission: "receiver-settings" },
               },
             ],
           },
