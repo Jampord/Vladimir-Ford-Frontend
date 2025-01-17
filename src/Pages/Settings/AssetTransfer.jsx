@@ -40,6 +40,7 @@ import NoRecordsFound from "../../Layout/NoRecordsFound";
 import ViewTagged from "../../Components/Reusable/ViewTagged";
 import { closeDrawer, openDrawer } from "../../Redux/StateManagement/booleanStateSlice";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
+import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 // import AddAssetTransfer from "../Masterlist/AddEdit/Settings/AddAssetTransfer";
 
 const AssetTransfer = () => {
@@ -99,6 +100,7 @@ const AssetTransfer = () => {
     isLoading: assetTransferLoading,
     isSuccess: assetTransferSuccess,
     isError: assetTransferError,
+    isFetching: assetTransferFetching,
     error: errorData,
     refetch,
   } = useGetAssetTransferApiQuery(
@@ -336,7 +338,10 @@ const AssetTransfer = () => {
                       <NoRecordsFound heightData="small" />
                     ) : (
                       <>
-                        {assetTransferSuccess &&
+                        {assetTransferFetching ? (
+                          <LoadingData />
+                        ) : (
+                          assetTransferSuccess &&
                           [...assetTransferData?.data]?.sort(comparator(order, orderBy))?.map((data, index) => (
                             <TableRow
                               key={index}
@@ -380,7 +385,8 @@ const AssetTransfer = () => {
                                 />
                               </TableCell>
                             </TableRow>
-                          ))}
+                          ))
+                        )}
                       </>
                     )}
                   </TableBody>

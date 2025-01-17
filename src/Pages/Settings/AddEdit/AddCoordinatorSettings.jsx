@@ -1,4 +1,4 @@
-import { Add, ArrowBackIosRounded, Delete, MoreVert, RemoveCircle } from "@mui/icons-material";
+import { Add, ArrowBackIosRounded, Delete, Info, MoreVert, RemoveCircle, Warning } from "@mui/icons-material";
 import {
   Autocomplete,
   Avatar,
@@ -46,6 +46,7 @@ import {
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { resetGetData } from "../../../Redux/StateManagement/actionMenuSlice";
 import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
+import { onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 
 const schema = yup.object().shape({
   user_id: yup.object().required().label("Coordinator").typeError("Coordinator is required"),
@@ -66,8 +67,8 @@ const AddCoordinatorSettings = ({ data }) => {
 
   const open = Boolean(anchorEl);
 
-  console.log("handles", handles);
-  console.log("data", data);
+  // console.log("handles", handles);
+  // console.log("data", data);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -185,7 +186,7 @@ const AddCoordinatorSettings = ({ data }) => {
     { data: postData, isLoading: isPostLoading, isSuccess: isPostSuccess, isError: isPostError, error: postError },
   ] = usePostCoordinatorSettingsApiMutation();
 
-  console.log("datauser", data?.user?.id);
+  // console.log("datauser", data?.user?.id);
 
   const [
     updateCoordinator,
@@ -226,9 +227,58 @@ const AddCoordinatorSettings = ({ data }) => {
     const newFormData = { user_id: formData.user_id.id, handles };
 
     console.log("onSubmit", newFormData);
-    {
-      data ? updateCoordinator({ id: data?.user?.id, ...newFormData }) : postCoordinator(newFormData);
-    }
+
+    dispatch(
+      openConfirm({
+        icon: Info,
+        iconColor: "info",
+        message: (
+          <Box>
+            <Typography> Are you sure you want to</Typography>
+            <Typography
+              sx={{
+                display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+              }}
+            >
+              {data ? "UPDATE" : "CREATE"}
+            </Typography>{" "}
+            this Coordinator?
+          </Box>
+        ),
+        onConfirm: async () => {
+          try {
+            dispatch(onLoading());
+            {
+              data
+                ? await updateCoordinator({ id: data?.user?.id, ...newFormData })
+                : await postCoordinator(newFormData);
+            }
+          } catch (err) {
+            // console.log(err);
+            if (err?.status === 422) {
+              dispatch(
+                openToast({
+                  message: err?.data?.errors?.detail || err?.message,
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            } else if (err?.status !== 422) {
+              console.error(err);
+              dispatch(
+                openToast({
+                  message: "Something went wrong. Please try again.",
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            }
+          }
+        },
+      })
+    );
   };
 
   const handleOpen = (event) => {
@@ -240,8 +290,39 @@ const AddCoordinatorSettings = ({ data }) => {
   };
 
   const removeIndexHandler = (index) => {
-    setHandles((prevHandles) => prevHandles.filter((_, i) => i !== index));
-    handleClose();
+    dispatch(
+      openConfirm({
+        icon: Warning,
+        iconColor: "alert",
+        message: (
+          <Box>
+            <Typography> Are you sure you want to</Typography>
+            <Typography
+              sx={{
+                display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+              }}
+            >
+              REMOVE
+            </Typography>{" "}
+            this item?
+          </Box>
+        ),
+        onConfirm: async () => {
+          // dispatch(onLoading());
+          setHandles((prevHandles) => prevHandles.filter((_, i) => i !== index));
+
+          dispatch(
+            openToast({
+              message: "Successfully Removed",
+              duration: 2500,
+            })
+          );
+          handleClose();
+        },
+      })
+    );
   };
 
   useEffect(() => {
@@ -254,6 +335,7 @@ const AddCoordinatorSettings = ({ data }) => {
         })
       );
       dispatch(closeDialog1());
+      dispatch(resetGetData());
     }
   }, [isPostSuccess, isUpdateSuccess]);
 

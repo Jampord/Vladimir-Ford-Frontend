@@ -52,6 +52,7 @@ import ActionMenu from "../../../Components/Reusable/ActionMenu";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { useDownloadAttachment, useDownloadTransferAttachment } from "../../../Hooks/useDownloadAttachment";
 import TransferTimeline from "../TransferTimeline";
+import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 
 const Transfer = () => {
   const [search, setSearch] = useState("");
@@ -113,6 +114,7 @@ const Transfer = () => {
     isLoading: transferLoading,
     isSuccess: transferSuccess,
     isError: transferError,
+    isFetching: transferFetching,
     error: errorData,
     refetch,
   } = useGetTransferApiQuery(
@@ -521,7 +523,10 @@ const Transfer = () => {
                       <NoRecordsFound heightData="medium" />
                     ) : (
                       <>
-                        {transferSuccess &&
+                        {transferFetching ? (
+                          <LoadingData />
+                        ) : (
+                          transferSuccess &&
                           [...transferData?.data]?.sort(comparator(order, orderBy))?.map((data) => (
                             <TableRow
                               key={data.id}
@@ -564,7 +569,8 @@ const Transfer = () => {
                                 )}
                               </TableCell>
                             </TableRow>
-                          ))}
+                          ))
+                        )}
                       </>
                     )}
                   </TableBody>

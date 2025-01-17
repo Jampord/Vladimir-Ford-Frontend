@@ -28,7 +28,7 @@ import ErrorFetching from "../ErrorFetching";
 import MasterlistSkeleton from "../Skeleton/MasterlistSkeleton";
 import MasterlistToolbar from "../../Components/Reusable/MasterlistToolbar";
 import ActionMenu from "../../Components/Reusable/ActionMenu";
-import { AddToPhotos, Close, Help, Report, ReportProblem, Visibility } from "@mui/icons-material";
+import { AddToPhotos, Close, Help, ManageAccounts, Report, ReportProblem, Visibility } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { closeDialog, closeDialog1, openDialog, openDialog1 } from "../../Redux/StateManagement/booleanStateSlice";
 import moment from "moment";
@@ -37,6 +37,8 @@ import AddCoordinatorSettings from "./AddEdit/AddCoordinatorSettings";
 import { closeConfirm, onLoading, openConfirm } from "../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../Redux/StateManagement/toastSlice";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
+import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
+import NoRecordsFound from "../../Layout/NoRecordsFound";
 
 const CoordinatorSettings = () => {
   const [page, setPage] = useState("1");
@@ -70,6 +72,7 @@ const CoordinatorSettings = () => {
     isLoading: coordinatorSettingsLoading,
     isSuccess: coordinatorSettingsSuccess,
     isError: coordinatorSettingsError,
+    isFetching: coordinatorSettingsFetching,
     error: errorData,
     refetch,
   } = useGetCoordinatorSettingsApiQuery(
@@ -185,11 +188,11 @@ const CoordinatorSettings = () => {
               <Button
                 onClick={() => handleOpenDialog()}
                 variant="contained"
-                startIcon={isSmallScreen ? null : <AddToPhotos />}
+                startIcon={isSmallScreen ? null : <ManageAccounts />}
                 size="small"
                 sx={isSmallScreen ? { minWidth: "50px", px: 0 } : { marginRight: "10px" }}
               >
-                {isSmallScreen ? <AddToPhotos color="black" sx={{ fontSize: "20px" }} /> : "Add"}
+                {isSmallScreen ? <ManageAccounts color="black" sx={{ fontSize: "20px" }} /> : "Add"}
               </Button>
             </Box>
             <Box>
@@ -214,6 +217,9 @@ const CoordinatorSettings = () => {
                         Employee ID
                       </TableCell>
                       <TableCell className="tbl-cell" align="center">
+                        Status
+                      </TableCell>
+                      <TableCell className="tbl-cell" align="center">
                         Coordinator Information
                       </TableCell>
                       {/* <TableCell className="tbl-cell">Date Created</TableCell> */}
@@ -224,45 +230,80 @@ const CoordinatorSettings = () => {
                   </TableHead>
 
                   <TableBody>
-                    {coordinatorSettingsData?.data.map((item) => (
-                      <TableRow key={item?.user.id}>
-                        {/* {console.log("item", item)} */}
-                        <TableCell className="tbl-cell " align="center">
-                          {item?.user?.id}
-                        </TableCell>
-                        <TableCell className="tbl-cell" align="center">
-                          <Typography fontSize={14} fontWeight={600} color="secondary.main">
-                            {item.user.first_name}
-                          </Typography>
-                          <Typography fontSize={12}>{item.user.last_name}</Typography>
-                        </TableCell>
-                        <TableCell className="tbl-cell" align="center">
-                          <Typography fontSize={12} fontWeight={500} color="secondary.main">
-                            {item.user.employee_id}
-                          </Typography>
-                        </TableCell>
-                        <TableCell className="tbl-cell" align="center">
-                          <Tooltip title="View Coordinator Information" placement="top">
-                            <IconButton size="small" onClick={() => handleViewData(item)}>
-                              <Visibility />
-                            </IconButton>
-                          </Tooltip>
-                        </TableCell>
-                        {/* <TableCell className="tbl-cell">{moment(item.created_at).format("MMM. D, YYYY")}</TableCell> */}
-                        <TableCell className="tbl-cell" align="center">
-                          <ActionMenu
-                            status={status}
-                            data={item}
-                            hideEdit
-                            hideArchive
-                            // onDeleteHandler={onDeleteHandler}
-                            onArchiveRestoreHandler={onArchiveRestoreHandler}
-                            onUpdateCoordinatorHandler={coordinatorTrigger}
-                            // onResetHandler={onResetHandler}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {coordinatorSettingsData?.data?.length === 0 ? (
+                      <NoRecordsFound heightData="medium" />
+                    ) : coordinatorSettingsFetching ? (
+                      <LoadingData />
+                    ) : (
+                      coordinatorSettingsData?.data.map((item) => (
+                        <TableRow key={item?.user.id}>
+                          {/* {console.log("item", item)} */}
+                          <TableCell className="tbl-cell " align="center">
+                            {item?.user?.id}
+                          </TableCell>
+                          <TableCell className="tbl-cell" align="center">
+                            <Typography fontSize={14} fontWeight={600} color="secondary.main">
+                              {item.user.first_name}
+                            </Typography>
+                            <Typography fontSize={12}>{item.user.last_name}</Typography>
+                          </TableCell>
+                          <TableCell className="tbl-cell" align="center">
+                            <Typography fontSize={12} fontWeight={500} color="secondary.main">
+                              {item.user.employee_id}
+                            </Typography>
+                          </TableCell>
+
+                          <TableCell className="tbl-cell text-center">
+                            {item.status === 1 ? (
+                              <Chip
+                                size="small"
+                                variant="contained"
+                                sx={{
+                                  background: "#27ff811f",
+                                  color: "active.dark",
+                                  fontSize: "0.7rem",
+                                  px: 1,
+                                }}
+                                label="ACTIVE"
+                              />
+                            ) : (
+                              <Chip
+                                size="small"
+                                variant="contained"
+                                sx={{
+                                  background: "#fc3e3e34",
+                                  color: "error.light",
+                                  fontSize: "0.7rem",
+                                  px: 1,
+                                }}
+                                label="INACTIVE"
+                              />
+                            )}
+                          </TableCell>
+
+                          <TableCell className="tbl-cell" align="center">
+                            <Tooltip title="View Coordinator Information" placement="top">
+                              <IconButton size="small" onClick={() => handleViewData(item)}>
+                                <Visibility />
+                              </IconButton>
+                            </Tooltip>
+                          </TableCell>
+                          {/* <TableCell className="tbl-cell">{moment(item.created_at).format("MMM. D, YYYY")}</TableCell> */}
+                          <TableCell className="tbl-cell" align="center">
+                            <ActionMenu
+                              status={status}
+                              data={item}
+                              hideEdit
+                              hideArchive
+                              // onDeleteHandler={onDeleteHandler}
+                              onArchiveRestoreHandler={onArchiveRestoreHandler}
+                              onUpdateCoordinatorHandler={coordinatorTrigger}
+                              // onResetHandler={onResetHandler}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
