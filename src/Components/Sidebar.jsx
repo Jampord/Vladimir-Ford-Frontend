@@ -93,6 +93,7 @@ import {
   Troubleshoot,
   History,
   ScreenSearchDesktop,
+  BadgeOutlined,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -403,6 +404,12 @@ const Sidebar = () => {
           icon: ManageAccounts,
           path: "/settings/coordinator-settings",
           permission: "coordinator-settings",
+        },
+        {
+          label: "Receiver Settings",
+          icon: BadgeOutlined,
+          path: "/settings/receiver-settings",
+          permission: "receiver-settings",
         },
       ],
       open: settingsCollapse,

@@ -99,6 +99,7 @@ import {
   useLazyGetUserAccountByUnitApiQuery,
 } from "../../../Redux/Query/UserManagement/UserAccountsApi";
 import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
+import { useLazyGetReceiverSettingsAllApiQuery } from "../../../Redux/Query/Settings/ReceiverSettings";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -222,7 +223,7 @@ const AddTransfer = (props) => {
   } = useGetTransferNumberApiQuery({ transfer_number: transactionData?.id }, { refetchOnMountOrArgChange: true });
 
   const data = transferData?.at(0);
-  console.log("transferData: ", data);
+  // console.log("transferData: ", data);
 
   const [
     companyTrigger,
@@ -372,6 +373,12 @@ const AddTransfer = (props) => {
   ] = useLazyGetUserAccountByUnitApiQuery();
   // console.log("userdata", userData);
 
+  const [
+    receiverAccountTrigger,
+    { data: receiverData = [], isLoading: isReceiverLoading, isSuccess: isReceiverSuccess, isError: isReceiverError },
+  ] = useLazyGetReceiverSettingsAllApiQuery();
+  console.log("receiverData", receiverData);
+
   //* useForm --------------------------------------------------------------------
   const {
     handleSubmit,
@@ -431,7 +438,7 @@ const AddTransfer = (props) => {
     },
   });
 
-  console.log("errors", errors);
+  // console.log("errors", errors);
   // console.log("isdirty: ", isDirty);
   // console.log("💣: ", isValid);
 
@@ -488,7 +495,7 @@ const AddTransfer = (props) => {
   useEffect(() => {
     // console.log("data", data);
     if (data) {
-      fixedAssetTrigger();
+      // fixedAssetTrigger();
       reset({
         // id: "",
         description: data?.description,
@@ -602,9 +609,11 @@ const AddTransfer = (props) => {
         fixed_asset_id: item.fixed_asset_id.id,
         accountability: item?.accountability?.toString(),
         accountable: item?.accountable?.full_id_number_full_name?.toString() || "",
-        receiver_id: item?.receiver_id?.id,
+        receiver_id: item?.receiver_id?.user?.id || item?.receiver_id?.id,
       })),
     };
+
+    console.log("data", data);
 
     const submitData = () => {
       setIsLoading(true);
@@ -688,7 +697,7 @@ const AddTransfer = (props) => {
           try {
             dispatch(onLoading());
             const test = await submitData();
-            console.log("test", test);
+            // console.log("test", test);
             dispatch(
               openToast({
                 message: "Transfer Request Successfully Added",
@@ -917,9 +926,9 @@ const AddTransfer = (props) => {
   const isCoordinator = user.has_handle === 1;
   const user_id = user.id;
   const subunit_id = watch("subunit_id_coordinator")?.id || null;
-  console.log("user", user);
+  // console.log("user", user);
   // console.log("isCoordinator", isCoordinator);
-  console.log("subunit_id", subunit_id);
+  // console.log("subunit_id", subunit_id);
 
   return (
     <>
@@ -1042,7 +1051,7 @@ const AddTransfer = (props) => {
                       />
                     )}
                     onChange={(_, value) => {
-                      console.log("value: ", value);
+                      // console.log("value: ", value);
                       if (value) {
                         const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
                         const businessUnitID = businessUnitData?.find(
@@ -1071,8 +1080,6 @@ const AddTransfer = (props) => {
                       return value;
                     }}
                   />
-
-                  {console.log("subunitCoordinator", watch("subunit_id_coordinator"))}
 
                   <CustomAutoComplete
                     name="company_id_coordinator"
@@ -1824,7 +1831,7 @@ const AddTransfer = (props) => {
                                     edit
                                       ? false
                                       : transactionData?.view ||
-                                        watch(`assets.${index}.fixed_asset_id`) === null ||
+                                        // watch(`assets.${index}.fixed_asset_id`) === null ||
                                         watch("location_id") === null
                                   }
                                   size="small"
@@ -1925,7 +1932,7 @@ const AddTransfer = (props) => {
                                       edit
                                         ? false
                                         : transactionData?.view ||
-                                          watch(`assets.${index}.fixed_asset_id`) === null ||
+                                          // watch(`assets.${index}.fixed_asset_id`) === null ||
                                           watch("location_id") === null
                                     }
                                     onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
@@ -2001,91 +2008,182 @@ const AddTransfer = (props) => {
                               />
                             )}
 
-                            <Controller
-                              control={control}
-                              name={`assets.${index}.receiver_id`}
-                              filterOptions={filterOptions}
-                              render={({ field: { ref, value, onChange } }) => (
-                                <Autocomplete
-                                  size="small"
-                                  value={value}
-                                  options={userData}
-                                  disabled={
-                                    edit
-                                      ? false
-                                      : watch(`assets.${index}.accountability`) === "Personal Issued" ||
-                                        watch(`assets.${index}.fixed_asset_id`) === null ||
-                                        watch("location_id") === null ||
-                                        transactionData?.view
-                                  }
-                                  onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
-                                  loading={isUserLoading}
-                                  filterOptions={filterOptions}
-                                  getOptionLabel={(option) => option?.full_id_number_full_name}
-                                  isOptionEqualToValue={(option, value) =>
-                                    option?.full_id_number_full_name === value?.full_id_number_full_name
-                                  }
-                                  renderInput={(params) => (
-                                    <TextField
-                                      required
-                                      color="secondary"
-                                      {...params}
-                                      multiline
-                                      label="Receiver"
-                                      maxRows={2}
-                                      sx={{
-                                        "& .MuiInputBase-inputMultiline": {
-                                          minHeight: "10px",
-                                        },
-                                        ".MuiInputBase-root": {
-                                          borderRadius: "10px",
-                                          minHeight: "63px",
-                                        },
-                                        "& .MuiFormLabel-root": {
-                                          lineHeight: "43px", // Adjust based on the height of the input
-                                        },
-                                        "& .Mui-focused": {
-                                          top: "-10%", // Center vertically
-                                        },
-                                        "& .MuiFormLabel-filled": {
-                                          top: "-10%", // Center vertically
-                                        },
-                                        // ml: "8px",
-                                        minWidth: "220px",
-                                        maxWidth: "550px",
-                                      }}
-                                    />
-                                  )}
-                                  onChange={(_, newValue) => {
-                                    // console.log("New Custodian newValue: ", newValue);
-                                    onChange(newValue);
-                                    if (newValue) {
-                                      setValue("receiver_id", newValue);
-                                    } else if (value === null) {
-                                      setValue("receiver_id", null);
+                            {console.log("receiver_iddddd", watch(`assets.${index}.receiver_id`))}
+
+                            {watch(`assets.${index}.accountability`) === "Common" ? (
+                              <Controller
+                                control={control}
+                                name={`assets.${index}.receiver_id`}
+                                filterOptions={filterOptions}
+                                render={({ field: { ref, value, onChange } }) => (
+                                  <Autocomplete
+                                    size="small"
+                                    value={value}
+                                    options={receiverData}
+                                    disabled={
+                                      edit
+                                        ? false
+                                        : watch(`assets.${index}.accountability`) === "Personal Issued" ||
+                                          // watch(`assets.${index}.fixed_asset_id`) === null ||
+                                          watch("location_id") === null ||
+                                          transactionData?.view
                                     }
-                                    return newValue;
-                                  }}
-                                  sx={{
-                                    ".MuiInputBase-root": {
-                                      borderRadius: "10px",
-                                    },
-                                    ".MuiInputLabel-root.Mui-disabled": {
-                                      backgroundColor: "transparent",
-                                    },
-                                    ".Mui-disabled": {
-                                      backgroundColor: "background.light",
-                                    },
-                                    ".MuiOutlinedInput-notchedOutline": {
-                                      bgcolor: "#f5c9861c",
-                                    },
-                                    ml: "-8px",
-                                    minWidth: "230px",
-                                    maxWidth: "550px",
-                                  }}
-                                />
-                              )}
-                            />
+                                    onOpen={() => receiverAccountTrigger({ department: watch("department_id")?.id })}
+                                    loading={isReceiverLoading}
+                                    filterOptions={filterOptions}
+                                    getOptionLabel={(option) => option?.full_id_number_full_name}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option?.full_id_number_full_name === value?.full_id_number_full_name
+                                    }
+                                    renderInput={(params) => (
+                                      <TextField
+                                        required
+                                        color="secondary"
+                                        {...params}
+                                        multiline
+                                        label="Receiver"
+                                        maxRows={2}
+                                        sx={{
+                                          "& .MuiInputBase-inputMultiline": {
+                                            minHeight: "10px",
+                                          },
+                                          ".MuiInputBase-root": {
+                                            borderRadius: "10px",
+                                            minHeight: "63px",
+                                          },
+                                          "& .MuiFormLabel-root": {
+                                            lineHeight: "43px", // Adjust based on the height of the input
+                                          },
+                                          "& .Mui-focused": {
+                                            top: "-10%", // Center vertically
+                                          },
+                                          "& .MuiFormLabel-filled": {
+                                            top: "-10%", // Center vertically
+                                          },
+                                          // ml: "8px",
+                                          minWidth: "220px",
+                                          maxWidth: "550px",
+                                        }}
+                                      />
+                                    )}
+                                    onChange={(_, newValue) => {
+                                      // console.log("New Custodian newValue: ", newValue);
+                                      onChange(newValue);
+                                      if (newValue) {
+                                        setValue("receiver_id", newValue);
+                                      } else if (value === null) {
+                                        setValue("receiver_id", null);
+                                      }
+                                      return newValue;
+                                    }}
+                                    sx={{
+                                      ".MuiInputBase-root": {
+                                        borderRadius: "10px",
+                                      },
+                                      ".MuiInputLabel-root.Mui-disabled": {
+                                        backgroundColor: "transparent",
+                                      },
+                                      ".Mui-disabled": {
+                                        backgroundColor: "background.light",
+                                      },
+                                      ".MuiOutlinedInput-notchedOutline": {
+                                        bgcolor: "#f5c9861c",
+                                      },
+                                      ml: "-8px",
+                                      minWidth: "230px",
+                                      maxWidth: "550px",
+                                    }}
+                                  />
+                                )}
+                              />
+                            ) : (
+                              <Controller
+                                control={control}
+                                name={`assets.${index}.receiver_id`}
+                                filterOptions={filterOptions}
+                                render={({ field: { ref, value, onChange } }) => (
+                                  <Autocomplete
+                                    size="small"
+                                    value={value}
+                                    options={userData}
+                                    disabled={
+                                      edit
+                                        ? false
+                                        : watch(`assets.${index}.accountability`) === "Personal Issued" ||
+                                          watch(`assets.${index}.accountability`) === null ||
+                                          watch(`assets.${index}.fixed_asset_id`) === null ||
+                                          watch("location_id") === null ||
+                                          transactionData?.view
+                                    }
+                                    onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
+                                    loading={isUserLoading}
+                                    filterOptions={filterOptions}
+                                    getOptionLabel={(option) => option?.full_id_number_full_name}
+                                    isOptionEqualToValue={(option, value) =>
+                                      option?.full_id_number_full_name === value?.full_id_number_full_name
+                                    }
+                                    renderInput={(params) => (
+                                      <TextField
+                                        required
+                                        color="secondary"
+                                        {...params}
+                                        multiline
+                                        label="Receiver"
+                                        maxRows={2}
+                                        sx={{
+                                          "& .MuiInputBase-inputMultiline": {
+                                            minHeight: "10px",
+                                          },
+                                          ".MuiInputBase-root": {
+                                            borderRadius: "10px",
+                                            minHeight: "63px",
+                                          },
+                                          "& .MuiFormLabel-root": {
+                                            lineHeight: "43px", // Adjust based on the height of the input
+                                          },
+                                          "& .Mui-focused": {
+                                            top: "-10%", // Center vertically
+                                          },
+                                          "& .MuiFormLabel-filled": {
+                                            top: "-10%", // Center vertically
+                                          },
+                                          // ml: "8px",
+                                          minWidth: "220px",
+                                          maxWidth: "550px",
+                                        }}
+                                      />
+                                    )}
+                                    onChange={(_, newValue) => {
+                                      // console.log("New Custodian newValue: ", newValue);
+                                      onChange(newValue);
+                                      if (newValue) {
+                                        setValue("receiver_id", newValue);
+                                      } else if (value === null) {
+                                        setValue("receiver_id", null);
+                                      }
+                                      return newValue;
+                                    }}
+                                    sx={{
+                                      ".MuiInputBase-root": {
+                                        borderRadius: "10px",
+                                      },
+                                      ".MuiInputLabel-root.Mui-disabled": {
+                                        backgroundColor: "transparent",
+                                      },
+                                      ".Mui-disabled": {
+                                        backgroundColor: "background.light",
+                                      },
+                                      ".MuiOutlinedInput-notchedOutline": {
+                                        bgcolor: "#f5c9861c",
+                                      },
+                                      ml: "-8px",
+                                      minWidth: "230px",
+                                      maxWidth: "550px",
+                                    }}
+                                  />
+                                )}
+                              />
+                            )}
 
                             {/* <CustomAutoComplete
                               name={`assets.${index}.receiver_id`}
