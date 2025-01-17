@@ -173,6 +173,7 @@ const AddRole = (props) => {
     "approver-settings",
     "form-settings",
     "coordinator-settings",
+    "receiver-settings",
 
     // Asset Requisition
     "requisition",
@@ -225,7 +226,7 @@ const AddRole = (props) => {
     "status-category",
   ];
   const userManagement = ["user-accounts", "role-management"];
-  const settings = ["approver-settings", "form-settings", "coordinator-settings"];
+  const settings = ["approver-settings", "form-settings", "coordinator-settings", "receiver-settings"];
   const assetRequisition = ["requisition", "purchase-request", "requisition-received-asset", "requisition-releasing"];
   const assetMovement = ["transfer", "pull-out", "disposal", "transfer-receiving", "evaluation"];
   const approving = [
@@ -438,6 +439,18 @@ const AddRole = (props) => {
               <Checkbox
                 {...register("access_permission")}
                 checked={watch("access_permission")?.includes("coordinator-settings")}
+              />
+            }
+          />
+
+          <FormControlLabel
+            disabled={data.action === "view"}
+            label="Receiver Settings"
+            value="receiver-settings"
+            control={
+              <Checkbox
+                {...register("access_permission")}
+                checked={watch("access_permission")?.includes("receiver-settings")}
               />
             }
           />
@@ -868,6 +881,7 @@ const AddRole = (props) => {
                                     "approver-settings",
                                     "form-settings",
                                     "coordinator-settings",
+                                    "receiver-settings",
                                   ]),
                                 ]);
                               } else {
