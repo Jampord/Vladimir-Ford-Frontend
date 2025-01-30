@@ -14,6 +14,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   Box,
   Chip,
+  Dialog,
+  Grow,
   IconButton,
   Stack,
   Table,
@@ -23,12 +25,15 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import { useGetApprovalApiQuery } from "../../../Redux/Query/Approving/Approval";
 import { useNavigate } from "react-router-dom";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
+import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
+import RequestTimeline from "../../Asset Requisition/RequestTimeline";
 
 const ApprovedRequest = (props) => {
   const [search, setSearch] = useState("");
@@ -36,6 +41,9 @@ const ApprovedRequest = (props) => {
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
   const approved = true;
+
+  const [transactionIdData, setTransactionIdData] = useState();
+  const dialog = useSelector((state) => state.booleanState.dialog);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -104,11 +112,86 @@ const ApprovedRequest = (props) => {
     { refetchOnMountOrArgChange: true }
   );
 
-  // console.log(approvalData);
+  console.log("aaaaaaaaaaa", approvalData);
   const handleViewRequisition = (data) => {
     navigate(`/approving/request/${data.transaction_number}`, {
       state: { ...data, approved },
     });
+  };
+
+  const transactionStatus = (data) => {
+    console.log("data", data);
+    let statusColor, hoverColor, textColor, variant;
+
+    switch (data.status) {
+      case "Approved":
+        statusColor = "success.light";
+        hoverColor = "success.main";
+        textColor = "white";
+        variant = "filled";
+        break;
+
+      case "Claimed":
+        statusColor = "success.dark";
+        hoverColor = "success.dark";
+        variant = "filled";
+        break;
+
+      case "Sent to ymir for PO":
+        statusColor = "ymir.light";
+        hoverColor = "ymir.main";
+        variant = "filled";
+        break;
+
+      case "Returned":
+      case "Cancelled":
+      case "Returned From Ymir":
+        statusColor = "error.light";
+        hoverColor = "error.main";
+        variant = "filled";
+        break;
+
+      default:
+        statusColor = "success.main";
+        hoverColor = "none";
+        textColor = "success.main";
+        variant = "outlined";
+    }
+
+    return (
+      <>
+        <Tooltip title={data?.current_approver} placement="top" arrow>
+          <Chip
+            placement="top"
+            onClick={() => handleViewTimeline(data)}
+            size="small"
+            variant={variant}
+            sx={{
+              ...(variant === "filled" && {
+                backgroundColor: statusColor,
+                color: "white",
+              }),
+              ...(variant === "outlined" && {
+                borderColor: statusColor,
+                color: textColor,
+              }),
+              fontSize: "11px",
+              px: 1,
+              ":hover": {
+                ...(variant === "filled" && { backgroundColor: hoverColor }),
+                ...(variant === "outlined" && { borderColor: hoverColor, color: textColor }),
+              },
+            }}
+            label={data.status}
+          />
+        </Tooltip>
+      </>
+    );
+  };
+
+  const handleViewTimeline = (data) => {
+    dispatch(openDialog());
+    setTransactionIdData(data);
   };
 
   return (
@@ -279,7 +362,7 @@ const ApprovedRequest = (props) => {
                             </TableCell>
 
                             <TableCell className="tbl-cell-category text-center capitalized">
-                              <Chip
+                              {/* <Chip
                                 size="small"
                                 variant="contained"
                                 sx={{
@@ -289,7 +372,8 @@ const ApprovedRequest = (props) => {
                                   px: 1,
                                 }}
                                 label="APPROVED"
-                              />
+                              /> */}
+                              {transactionStatus(data?.asset_request)}
                             </TableCell>
 
                             <TableCell className="tbl-cell-category tr-cen-pad45">
@@ -318,6 +402,15 @@ const ApprovedRequest = (props) => {
           />
         </Box>
       )}
+
+      <Dialog
+        open={dialog}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog())}
+        PaperProps={{ sx: { borderRadius: "10px", maxWidth: "700px" } }}
+      >
+        <RequestTimeline data={transactionIdData} />
+      </Dialog>
     </Stack>
   );
 };
