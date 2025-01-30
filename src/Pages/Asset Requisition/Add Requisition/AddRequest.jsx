@@ -114,7 +114,7 @@ const schema = yup.object().shape({
   // })
   cip_number: yup.string().nullable(),
   attachment_type: yup.string().required().label("Attachment Type").typeError("Attachment Type is a required field"),
-  receiving_warehouse_id: yup.object().required().label("Warehouse").typeError("Warehouse is a required field"),
+  // receiving_warehouse_id: yup.object().required().label("Warehouse").typeError("Warehouse is a required field"),
   minor_category_id: yup.object().required().label("Minor Category").typeError("Minor Category is a required field"),
 
   department_id: yup.object().required().label("Department").typeError("Department is a required field"),
@@ -177,7 +177,7 @@ const AddRequisition = (props) => {
     type_of_request_id: null,
     cip_number: "",
     attachment_type: null,
-    receiving_warehouse_id: null,
+    // receiving_warehouse_id: null,
     major_category_id: null,
     minor_category_id: null,
 
@@ -433,6 +433,9 @@ const AddRequisition = (props) => {
   } = useGetRequestContainerAllApiQuery({}, { refetchOnMountOrArgChange: true });
   // } = useGetRequestContainerAllApiQuery({ page: page, per_page: perPage }, { refetchOnMountOrArgChange: true });
 
+  const hasRequest = addRequestAllApi.length > 0;
+  console.log("hasRequest", hasRequest);
+
   const {
     data: transactionDataApi = [],
     isLoading: isTransactionLoading,
@@ -445,7 +448,7 @@ const AddRequisition = (props) => {
     { refetchOnMountOrArgChange: true }
   );
 
-  // console.log("transactiondata", transactionDataApi);
+  console.log("transactiondata", transactionDataApi);
 
   const [postRequest, { data: postRequestData }] = usePostRequestContainerApiMutation();
   const [updateDataRequest, { data: updateRequestData }] = useUpdateRequestContainerApiMutation();
@@ -470,7 +473,7 @@ const AddRequisition = (props) => {
       type_of_request_id: null,
       cip_number: "",
       attachment_type: null,
-      receiving_warehouse_id: null,
+      // receiving_warehouse_id: null,
       major_category_id: null,
       minor_category_id: null,
 
@@ -541,7 +544,7 @@ const AddRequisition = (props) => {
       setValue("type_of_request_id", updateRequest?.type_of_request);
       setValue("cip_number", updateRequest?.cip_number);
       setValue("attachment_type", updateRequest?.attachment_type);
-      setValue("receiving_warehouse_id", updateRequest?.warehouse);
+      // setValue("receiving_warehouse_id", updateRequest?.warehouse);
 
       setValue("major_category_id", updateRequest?.major_category?.id);
       setValue("minor_category_id", updateRequest?.minor_category);
@@ -611,6 +614,7 @@ const AddRequisition = (props) => {
   //  * CONTAINER
   // Adding of Request
   const addRequestHandler = (formData) => {
+    // console.log("formData👀", formData);
     const cipNumberFormat = formData?.cip_number === "" ? "" : formData?.cip_number?.toString();
     const updatingCoa = (fields, name) =>
       updateRequest ? formData?.[fields]?.id : formData?.[fields]?.[name]?.id.toString();
@@ -624,11 +628,14 @@ const AddRequisition = (props) => {
       type_of_request_id: formData?.type_of_request_id?.id?.toString(),
       cip_number: cipNumberFormat,
       attachment_type: formData?.attachment_type?.toString(),
-      receiving_warehouse_id: formData?.receiving_warehouse_id?.id?.toString(),
+      // receiving_warehouse_id: formData?.receiving_warehouse_id?.id?.toString(),
       major_category_id: !transactionData
         ? formData?.minor_category_id?.major_category?.id?.toString()
         : formData?.major_category_id?.toString(),
       minor_category_id: formData?.minor_category_id?.id?.toString(),
+
+      initial_debit_id: formData?.minor_category_id?.initial_debit?.sync_id.toString(),
+      depreciation_credit_id: formData?.minor_category_id?.depreciation_credit?.sync_id.toString(),
 
       department_id: formData?.department_id.id?.toString(),
       company_id: updatingCoa("company_id", "company"),
@@ -704,99 +711,218 @@ const AddRequisition = (props) => {
     };
 
     const submitData = () => {
-      setIsLoading(true);
-      axios
-        .post(
-          `${process.env.VLADIMIR_BASE_URL}/${
-            transactionData
-              ? `update-request/${updateRequest?.reference_number}` //transaction data - reference no.
-              : editRequest
-              ? `update-container/${updateRequest?.id}` //edit while adding
-              : "request-container" // adding
-          }`,
-          payload,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              // Authorization: `Bearer 583|KavZ7vEXyUY7FiHQGIMcTImftzyRnZorxbtn4S9a`,
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-        .then((result) => {
-          dispatch(
-            openToast({
-              message: result?.data?.message || result?.data?.message,
-              duration: 5000,
+      transactionDataApi[0]?.can_edit === 1
+        ? dispatch(
+            openConfirm({
+              icon: Info,
+              iconColor: "info",
+              message: (
+                <Box>
+                  <Typography> Are you sure you want to</Typography>
+                  <Typography
+                    sx={{
+                      display: "inline-block",
+                      color: "secondary.main",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {/* {transactionDataApi[0]?.can_edit === 1 ? "RESUBMIT" : "ADD"} */}
+                    UPDATE
+                  </Typography>{" "}
+                  this Data?
+                </Box>
+              ),
+
+              onConfirm: async () => {
+                setIsLoading(true);
+                await axios
+                  .post(
+                    `${process.env.VLADIMIR_BASE_URL}/${
+                      transactionData
+                        ? `update-request/${updateRequest?.reference_number}` //transaction data - reference no.
+                        : editRequest
+                        ? `update-container/${updateRequest?.id}` //edit while adding
+                        : "request-container" // adding
+                    }`,
+                    payload,
+                    {
+                      headers: {
+                        "Content-Type": "multipart/form-data",
+                        // Authorization: `Bearer 583|KavZ7vEXyUY7FiHQGIMcTImftzyRnZorxbtn4S9a`,
+                        Authorization: `Bearer ${token}`,
+                      },
+                    }
+                  )
+                  .then((result) => {
+                    dispatch(
+                      openToast({
+                        message: result?.data?.message || result?.data?.message,
+                        duration: 5000,
+                      })
+                    );
+                    setIsLoading(false);
+                    // reset();
+                    transactionData
+                      ? reset() // reset if edit was requested
+                      : reset({
+                          type_of_request_id: formData?.type_of_request_id,
+                          cip_number: formData?.cip_number,
+                          attachment_type: formData?.attachment_type,
+                          // receiving_warehouse_id: formData?.receiving_warehouse_id,
+                          major_category_id: formData?.major_category_id,
+                          minor_category_id: formData?.minor_category_id,
+
+                          company_id: formData?.company_id,
+                          business_unit_id: formData?.business_unit_id,
+                          department_id: formData?.department_id,
+                          unit_id: formData?.unit_id,
+                          subunit_id: formData?.subunit_id,
+                          location_id: formData?.location_id,
+                          // account_title_id: formData?.account_title_id,
+                          // small_tool_id: formData?.small_tool_id,
+                          acquisition_details: formData?.acquisition_details,
+
+                          small_tool_id: null,
+                          item_status: null,
+                          asset_description: "",
+                          asset_specification: "",
+                          date_needed: null,
+                          brand: "",
+                          accountability: null,
+                          accountable: null,
+                          cellphone_number: "",
+                          quantity: 1,
+                          uom_id: null,
+                          additional_info: "",
+
+                          letter_of_request: null,
+                          quotation: null,
+                          specification_form: null,
+                          tool_of_trade: null,
+                          other_attachments: null,
+                        });
+                  })
+                  .then(() => {
+                    transactionData ? setDisable(true) : setDisable(false);
+                    setEditRequest(false); // edit state
+                    setUpdateToggle(true); // update button state
+                    isTransactionRefetch();
+                    isRequisitionRefetch();
+                    dispatch(requisitionApi.util.invalidateTags(["Requisition"]));
+                    dispatch(requestContainerApi.util.invalidateTags(["RequestContainer"]));
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                    setIsLoading(false);
+                    dispatch(
+                      openToast({
+                        message: err?.response?.data?.errors?.detail
+                          ? err?.response?.data?.errors?.detail
+                          : Object.entries(err?.response?.data?.errors).at(0).at(1).at(0),
+                        // err?.response?.data?.errors?.detail ||
+                        // err?.response?.data?.errors[0]?.detail ||
+                        // err?.response?.data?.message,
+                        duration: 5000,
+                        variant: "error",
+                      })
+                    );
+                  });
+              },
             })
-          );
-          setIsLoading(false);
-          // reset();
-          transactionData
-            ? reset() // reset if edit was requested
-            : reset({
-                type_of_request_id: formData?.type_of_request_id,
-                cip_number: formData?.cip_number,
-                attachment_type: formData?.attachment_type,
-                receiving_warehouse_id: formData?.receiving_warehouse_id,
-                major_category_id: formData?.major_category_id,
-                minor_category_id: formData?.minor_category_id,
+          )
+        : (setIsLoading(true),
+          axios
+            .post(
+              `${process.env.VLADIMIR_BASE_URL}/${
+                transactionData
+                  ? `update-request/${updateRequest?.reference_number}` //transaction data - reference no.
+                  : editRequest
+                  ? `update-container/${updateRequest?.id}` //edit while adding
+                  : "request-container" // adding
+              }`,
+              payload,
+              {
+                headers: {
+                  "Content-Type": "multipart/form-data",
+                  // Authorization: `Bearer 583|KavZ7vEXyUY7FiHQGIMcTImftzyRnZorxbtn4S9a`,
+                  Authorization: `Bearer ${token}`,
+                },
+              }
+            )
+            .then((result) => {
+              dispatch(
+                openToast({
+                  message: result?.data?.message || result?.data?.message,
+                  duration: 5000,
+                })
+              );
+              setIsLoading(false);
+              // reset();
+              transactionData
+                ? reset() // reset if edit was requested
+                : reset({
+                    type_of_request_id: formData?.type_of_request_id,
+                    cip_number: formData?.cip_number,
+                    attachment_type: formData?.attachment_type,
+                    // receiving_warehouse_id: formData?.receiving_warehouse_id,
+                    major_category_id: formData?.major_category_id,
+                    minor_category_id: formData?.minor_category_id,
 
-                company_id: formData?.company_id,
-                business_unit_id: formData?.business_unit_id,
-                department_id: formData?.department_id,
-                unit_id: formData?.unit_id,
-                subunit_id: formData?.subunit_id,
-                location_id: formData?.location_id,
-                // account_title_id: formData?.account_title_id,
-                // small_tool_id: formData?.small_tool_id,
-                acquisition_details: formData?.acquisition_details,
+                    company_id: formData?.company_id,
+                    business_unit_id: formData?.business_unit_id,
+                    department_id: formData?.department_id,
+                    unit_id: formData?.unit_id,
+                    subunit_id: formData?.subunit_id,
+                    location_id: formData?.location_id,
+                    // account_title_id: formData?.account_title_id,
+                    // small_tool_id: formData?.small_tool_id,
+                    acquisition_details: formData?.acquisition_details,
 
-                small_tool_id: null,
-                item_status: null,
-                asset_description: "",
-                asset_specification: "",
-                date_needed: null,
-                brand: "",
-                accountability: null,
-                accountable: null,
-                cellphone_number: "",
-                quantity: 1,
-                uom_id: null,
-                additional_info: "",
+                    small_tool_id: null,
+                    item_status: null,
+                    asset_description: "",
+                    asset_specification: "",
+                    date_needed: null,
+                    brand: "",
+                    accountability: null,
+                    accountable: null,
+                    cellphone_number: "",
+                    quantity: 1,
+                    uom_id: null,
+                    additional_info: "",
 
-                letter_of_request: null,
-                quotation: null,
-                specification_form: null,
-                tool_of_trade: null,
-                other_attachments: null,
-              });
-        })
-        .then(() => {
-          transactionData ? setDisable(true) : setDisable(false);
-          setEditRequest(false); // edit state
-          setUpdateToggle(true); // update button state
-          isTransactionRefetch();
-          isRequisitionRefetch();
-          dispatch(requisitionApi.util.invalidateTags(["Requisition"]));
-          dispatch(requestContainerApi.util.invalidateTags(["RequestContainer"]));
-        })
-        .catch((err) => {
-          console.log(err);
-          setIsLoading(false);
-          dispatch(
-            openToast({
-              message: err?.response?.data?.errors?.detail
-                ? err?.response?.data?.errors?.detail
-                : Object.entries(err?.response?.data?.errors).at(0).at(1).at(0),
-              // err?.response?.data?.errors?.detail ||
-              // err?.response?.data?.errors[0]?.detail ||
-              // err?.response?.data?.message,
-              duration: 5000,
-              variant: "error",
+                    letter_of_request: null,
+                    quotation: null,
+                    specification_form: null,
+                    tool_of_trade: null,
+                    other_attachments: null,
+                  });
             })
-          );
-        });
+            .then(() => {
+              transactionData ? setDisable(true) : setDisable(false);
+              setEditRequest(false); // edit state
+              setUpdateToggle(true); // update button state
+              isTransactionRefetch();
+              isRequisitionRefetch();
+              dispatch(requisitionApi.util.invalidateTags(["Requisition"]));
+              dispatch(requestContainerApi.util.invalidateTags(["RequestContainer"]));
+            })
+            .catch((err) => {
+              console.log(err);
+              setIsLoading(false);
+              dispatch(
+                openToast({
+                  message: err?.response?.data?.errors?.detail
+                    ? err?.response?.data?.errors?.detail
+                    : Object.entries(err?.response?.data?.errors).at(0).at(1).at(0),
+                  // err?.response?.data?.errors?.detail ||
+                  // err?.response?.data?.errors[0]?.detail ||
+                  // err?.response?.data?.message,
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            }));
     };
 
     const addConfirmation = () => {
@@ -1222,7 +1348,7 @@ const AddRequisition = (props) => {
       type_of_request_id: null,
       cip_number: "",
       attachment_type: null,
-      receiving_warehouse_id: null,
+      // receiving_warehouse_id: null,
       minor_category_id: null,
 
       company_id: null,
@@ -1368,7 +1494,7 @@ const AddRequisition = (props) => {
                 )}
               />
 
-              <CustomAutoComplete
+              {/* <CustomAutoComplete
                 control={control}
                 name="receiving_warehouse_id"
                 options={warehouseData}
@@ -1389,7 +1515,7 @@ const AddRequisition = (props) => {
                     helperText={errors?.receiving_warehouse_id?.message}
                   />
                 )}
-              />
+              /> */}
             </Box>
 
             <Divider />
@@ -1408,9 +1534,9 @@ const AddRequisition = (props) => {
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 renderInput={(params) => (
                   <TextField
-                    color="secondary"
+                    color={"secondary"}
                     {...params}
-                    label="Minor Category  "
+                    label="Minor Category"
                     error={!!errors?.minor_category_id}
                     helperText={errors?.minor_category_id?.message}
                   />
@@ -1604,6 +1730,7 @@ const AddRequisition = (props) => {
               <CustomAutoComplete
                 autoComplete
                 name="accountability"
+                hasRequest={hasRequest && true}
                 control={control}
                 options={["Personal Issued", "Common"]}
                 disabled={updateRequest && disable}
@@ -1611,7 +1738,7 @@ const AddRequisition = (props) => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    color="secondary"
+                    color={hasRequest ? "primary" : "secondary"}
                     label="Accountability  "
                     error={!!errors?.accountability}
                     helperText={errors?.accountability?.message}
@@ -1625,6 +1752,7 @@ const AddRequisition = (props) => {
               {watch("accountability") === "Personal Issued" && (
                 <CustomAutoComplete
                   name="accountable"
+                  hasRequest={hasRequest && true}
                   control={control}
                   includeInputInList
                   disablePortal
@@ -1640,7 +1768,7 @@ const AddRequisition = (props) => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      color="secondary"
+                      color={hasRequest ? "primary" : "secondary"}
                       label="Accountable"
                       error={!!errors?.accountable?.message}
                       helperText={errors?.accountable?.message}
@@ -1658,6 +1786,7 @@ const AddRequisition = (props) => {
 
               <CustomAutoComplete
                 name="item_status"
+                hasRequest={hasRequest && true}
                 control={control}
                 includeInputInList
                 disablePortal
@@ -1669,7 +1798,7 @@ const AddRequisition = (props) => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    color="secondary"
+                    color={hasRequest ? "primary" : "secondary"}
                     label="Item Status"
                     error={!!errors?.item_status?.message}
                     helperText={errors?.item_status?.message}
@@ -1715,6 +1844,7 @@ const AddRequisition = (props) => {
 
               <CustomTextField
                 control={control}
+                hasRequest={hasRequest && true}
                 name="asset_description"
                 label="Asset Description"
                 type="text"
@@ -1724,10 +1854,13 @@ const AddRequisition = (props) => {
                 error={!!errors?.asset_description}
                 helperText={errors?.asset_description?.message}
                 fullWidth
+                multiline
+                maxRows={5}
               />
 
               <CustomTextField
                 control={control}
+                hasRequest={hasRequest && true}
                 name="asset_specification"
                 label="Asset Specification"
                 type="text"
@@ -1739,7 +1872,8 @@ const AddRequisition = (props) => {
                 fullWidth
                 sx={{ overscrollBehavior: "none" }}
                 multiline
-                maxRows={6}
+                // minRows={3}
+                maxRows={5}
               />
 
               <CustomTextField
@@ -1757,6 +1891,7 @@ const AddRequisition = (props) => {
               <CustomDatePicker
                 control={control}
                 name="date_needed"
+                hasRequest={hasRequest && true}
                 label="Date Needed"
                 size="small"
                 disabled={updateRequest && disable}
@@ -1768,6 +1903,7 @@ const AddRequisition = (props) => {
 
               <CustomNumberField
                 control={control}
+                hasRequest={hasRequest && true}
                 name="quantity"
                 label="Quantity"
                 type="number"
@@ -1783,6 +1919,7 @@ const AddRequisition = (props) => {
 
               <CustomAutoComplete
                 control={control}
+                hasRequest={hasRequest && true}
                 name="uom_id"
                 options={uomData}
                 onOpen={() => (isUnitOfMeasurementSuccess ? null : uomTrigger())}
@@ -1795,7 +1932,7 @@ const AddRequisition = (props) => {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    color="secondary"
+                    color={hasRequest ? "primary" : "secondary"}
                     label="UOM"
                     error={!!errors?.uom_id}
                     helperText={errors?.uom_id?.message}
@@ -1851,6 +1988,8 @@ const AddRequisition = (props) => {
                 ) : (
                   <CustomAttachment
                     control={control}
+                    hasRequest={hasRequest && true}
+                    watch={watch("attachment_type") === "Unbudgeted" && true}
                     name="letter_of_request"
                     label={`Letter of Request ${watch("attachment_type") === "Unbudgeted" ? "" : "(Optional)"}`}
                     optional={watch("attachment_type") === "Unbudgeted" ? false : true}
@@ -2118,6 +2257,8 @@ const AddRequisition = (props) => {
     );
   };
 
+  console.log("minor category", watch("minor_category_id"));
+
   return (
     <>
       {errorRequest && errorTransaction ? (
@@ -2271,14 +2412,14 @@ const AddRequisition = (props) => {
                                 Inital Debit : ({data.initial_debit?.account_title_code})-
                                 {data.initial_debit?.account_title_name}
                               </Typography>
-                              <Typography fontSize={11} color="secondary.light" noWrap>
+                              {/* <Typography fontSize={11} color="secondary.light" noWrap>
                                 Inital Credit : ({data.initial_credit?.account_title_code})-{" "}
                                 {data.initial_credit?.account_title_name}
                               </Typography>
                               <Typography fontSize={11} color="secondary.light" noWrap>
                                 Depreciation Debit : ({data.depreciation_debit?.account_title_code})-
                                 {data.depreciation_debit?.account_title_name}
-                              </Typography>
+                              </Typography> */}
                               <Typography fontSize={11} color="secondary.light" noWrap>
                                 Depreciation Credit : ({data.depreciation_credit?.account_title_code})-{" "}
                                 {data.depreciation_credit?.account_title_name}
