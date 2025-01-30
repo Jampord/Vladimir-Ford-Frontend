@@ -4,7 +4,7 @@ import { Controller } from "react-hook-form";
 import { TextField } from "@mui/material";
 import { NumericFormat } from "react-number-format";
 
-const CustomNumberField = ({ name, control, optional, keepPrefix = false, ...numberfield }) => {
+const CustomNumberField = ({ name, control, optional, keepPrefix = false, hasRequest, ...numberfield }) => {
   return (
     <Controller
       name={name}
@@ -35,7 +35,12 @@ const CustomNumberField = ({ name, control, optional, keepPrefix = false, ...num
 
               ".MuiOutlinedInput-notchedOutline": {
                 bgcolor: optional ? null : "#f5c9861c",
+                border: hasRequest ? "1px solid #f9aa33" : null,
                 // border: optional ? "1px dashed lightgray" : null,
+              },
+
+              ":hover .MuiOutlinedInput-notchedOutline": {
+                border: hasRequest ? "2px solid #f9aa40" : null,
               },
 
               ".MuiInputLabel-root.Mui-disabled": {

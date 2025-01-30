@@ -1,7 +1,16 @@
 import { Controller } from "react-hook-form";
 import { InputAdornment, Autocomplete as MuiAutocomplete, Stack, TextField } from "@mui/material";
 
-const CustomAutoComplete = ({ name, control, optional, onChange: onValueChange, onOpen, ...autocomplete }) => {
+const CustomAutoComplete = ({
+  name,
+  control,
+  hasRequest,
+  optional,
+  onChange: onValueChange,
+  onOpen,
+  optionalSolid,
+  ...autocomplete
+}) => {
   return (
     <Controller
       name={name}
@@ -28,8 +37,18 @@ const CustomAutoComplete = ({ name, control, optional, onChange: onValueChange, 
               },
 
               ".MuiOutlinedInput-notchedOutline": {
-                bgcolor: optional ? null : "#f5c9861c",
-                border: optional ? "1px dashed #c7c7c742" : null,
+                bgcolor: optional || optionalSolid ? null : "#f5c9861c",
+                border: optional
+                  ? "1px dashed #c7c7c742"
+                  : optionalSolid
+                  ? "1px solid #c7c7c742"
+                  : hasRequest
+                  ? "1px solid #f9aa33"
+                  : null,
+              },
+
+              ":hover .MuiOutlinedInput-notchedOutline": {
+                border: hasRequest ? "2px solid #f9aa40" : null,
               },
 
               ".MuiInputLabel-root.Mui-disabled": {

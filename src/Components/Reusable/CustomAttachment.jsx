@@ -5,7 +5,7 @@ import AttachmentActive from "../../Img/SVG/AttachmentActive.svg";
 import AttachmentError from "../../Img/SVG/AttachmentError.svg";
 
 const CustomAttachment = (props) => {
-  const { name, control, errors, inputRef, optional, ...textfield } = props;
+  const { name, control, errors, inputRef, optional, hasRequest, watch, ...textfield } = props;
 
   return (
     <Controller
@@ -34,7 +34,7 @@ const CustomAttachment = (props) => {
               type="text"
               size="small"
               autoComplete="off"
-              color="secondary"
+              color={hasRequest ? "primary" : "secondary"}
               value={value?.name || "No file chosen"}
               onClick={() => {
                 inputRef.current.click();
@@ -60,7 +60,12 @@ const CustomAttachment = (props) => {
 
                 ".MuiOutlinedInput-notchedOutline": {
                   bgcolor: optional ? null : "#f5c9861c",
+                  border: optional ? null : hasRequest ? "1px solid #f9aa40" : null,
                   // border: optional ? "1px dashed #c7c7c742" : null,
+                },
+
+                ":hover .MuiOutlinedInput-notchedOutline": {
+                  border: watch && hasRequest ? "2px solid #f9aa40" : null,
                 },
 
                 ".MuiInputLabel-root.Mui-disabled": {

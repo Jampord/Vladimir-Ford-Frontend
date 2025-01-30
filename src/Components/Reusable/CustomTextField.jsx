@@ -12,6 +12,7 @@ const CustomTextField = (props) => {
     errors,
     validateText,
     allowSpecialCharacters = false,
+    hasRequest,
 
     ...textfield
   } = props;
@@ -37,7 +38,7 @@ const CustomTextField = (props) => {
               inputRef={ref}
               value={value}
               size="small"
-              color="secondary"
+              color={hasRequest ? "primary" : "secondary"}
               onChange={(e) => {
                 const inputValue = e.target.value;
 
@@ -69,7 +70,16 @@ const CustomTextField = (props) => {
 
                 ".MuiOutlinedInput-notchedOutline": {
                   bgcolor: optional ? null : "#f5c9861c",
+                  border: hasRequest ? "1px solid #f9aa33" : null,
                   // border: optional ? "1px dashed lightgray" : null,
+                },
+
+                ":hover .MuiOutlinedInput-notchedOutline": {
+                  border: hasRequest ? "2px solid #f9aa40" : null,
+                },
+
+                ":hover .MuiOutlinedInput-inputMultiline": {
+                  border: hasRequest ? "2px solid #f9aa40" : null,
                 },
 
                 ".MuiInputLabel-root.Mui-disabled": {
