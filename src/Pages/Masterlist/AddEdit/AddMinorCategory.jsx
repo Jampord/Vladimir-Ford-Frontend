@@ -8,6 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
 import {
+  Autocomplete,
   Box,
   Button,
   FormControl,
@@ -52,28 +53,28 @@ const schema = yup.object().shape({
   depreciation_credit_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.sync_id.toString();
     })
     .required()
     .label("Depreciation Credit"),
-  depreciation_debit_id: yup
-    .string()
-    .transform((value) => {
-      return value?.id.toString();
-    })
-    .required()
-    .label("Depreciation Debit"),
-  initial_credit_id: yup
-    .string()
-    .transform((value) => {
-      return value?.id.toString();
-    })
-    .required()
-    .label("Initial Credit"),
+  // depreciation_debit_id: yup
+  //   .string()
+  //   .transform((value) => {
+  //     return value?.id.toString();
+  //   })
+  //   .required()
+  //   .label("Depreciation Debit"),
+  // initial_credit_id: yup
+  //   .string()
+  //   .transform((value) => {
+  //     return value?.id.toString();
+  //   })
+  //   .required()
+  //   .label("Initial Credit"),
   initial_debit_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.sync_id.toString();
     })
     .required()
     .label("Initial Debit"),
@@ -83,6 +84,8 @@ const AddMinorCategory = (props) => {
   const { data, onUpdateResetHandler } = props;
   const [filteredMajorCategoryData, setFilteredMajorCategoryData] = useState([]);
   const dispatch = useDispatch();
+
+  console.log("Data", data?.initial_debit?.depreciation_debit);
 
   const {
     data: majorCategoryData = [],
@@ -97,6 +100,8 @@ const AddMinorCategory = (props) => {
     isError: isAccountTitleError,
     refetch: isAccountTitleRefetch,
   } = useGetAccountTitleAllApiQuery();
+
+  // console.log("AccountTitleData", accountTitleData);
 
   const [
     postMinorCategory,
@@ -129,7 +134,7 @@ const AddMinorCategory = (props) => {
       major_category_id: null,
       minor_category_name: "",
       depreciation_credit_id: null,
-      depreciation_debit_id: null,
+      depreciation_debit_id: data?.initial_debit?.depreciation_debit || [],
       initial_credit_id: null,
       initial_debit_id: null,
     },
@@ -180,13 +185,18 @@ const AddMinorCategory = (props) => {
       setValue("minor_category_name", data.minor_category_name);
 
       setValue("depreciation_credit_id", data.depreciation_credit);
-      setValue("depreciation_debit_id", data.depreciation_debit);
-      setValue("initial_credit_id", data.initial_credit);
+      // setValue("depreciation_debit_id", data.depreciation_debit);
+      // setValue("initial_credit_id", data.initial_credit);
       setValue("initial_debit_id", data.initial_debit);
     }
   }, [data]);
 
+  // console.log("InitialDebit", watch("initial_debit_id"));
+  // console.log("Debitttttttttttttttttt", watch("depreciation_debit_id"));
+  // console.log("DC", watch("depreciation_credit_id"));
+
   const onSubmitHandler = (formData) => {
+    console.log("formData", formData);
     if (data.status) {
       updateMinorCategory(formData);
       return;
@@ -267,9 +277,18 @@ const AddMinorCategory = (props) => {
                 helperText={errors?.initial_debit_id?.message}
               />
             )}
+            onChange={(e, value) => {
+              console.log("value", value);
+              if (value) {
+                setValue("depreciation_debit_id", value?.depreciation_debit);
+              } else {
+                setValue("depreciation_debit_id", []);
+              }
+              return value;
+            }}
           />
 
-          <CustomAutoComplete
+          {/* <CustomAutoComplete
             autoComplete
             name="initial_credit_id"
             control={control}
@@ -307,7 +326,7 @@ const AddMinorCategory = (props) => {
                 helperText={errors?.depreciation_debit_id?.message}
               />
             )}
-          />
+          /> */}
 
           <CustomAutoComplete
             autoComplete
@@ -327,6 +346,31 @@ const AddMinorCategory = (props) => {
                 helperText={errors?.depreciation_credit_id?.message}
               />
             )}
+          />
+
+          <CustomAutoComplete
+            multiple
+            name="depreciation_debit_id"
+            control={control}
+            options={accountTitleData}
+            defaultValue={data?.initial_debit?.depreciation_debit || []}
+            getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
+            readOnly
+            freeSolo
+            fullWidth
+            // optional
+            optionalSolid
+            disabled={data?.initial_debit?.depreciation_debit.length === 0}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                color="secondary"
+                // focused={data?.initial_debit?.depreciation_debit.length === 0 && true}
+                // placeholder={data?.initial_debit?.depreciation_debit.length === 0 && "No Tagged Depreciation Debit"}
+                label={"Depreciation Debit"}
+              />
+            )}
+            sx={{ ".MuiInputBase-root": { borderRadius: "10px" } }}
           />
         </Stack>
 
