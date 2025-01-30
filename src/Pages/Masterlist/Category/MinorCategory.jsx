@@ -334,14 +334,14 @@ const MinorCategory = () => {
                                 Inital Debit : ({data.initial_debit?.account_title_code})-
                                 {data.initial_debit?.account_title_name}
                               </Typography>
-                              <Typography fontSize={11} color="secondary.light" noWrap>
+                              {/* <Typography fontSize={11} color="secondary.light" noWrap>
                                 Inital Credit : ({data.initial_credit?.account_title_code})-{" "}
                                 {data.initial_credit?.account_title_name}
                               </Typography>
                               <Typography fontSize={11} color="secondary.light" noWrap>
                                 Depreciation Debit : ({data.depreciation_debit?.account_title_code})-
                                 {data.depreciation_debit?.account_title_name}
-                              </Typography>
+                              </Typography> */}
                               <Typography fontSize={11} color="secondary.light" noWrap>
                                 Depreciation Credit : ({data.depreciation_credit?.account_title_code})-{" "}
                                 {data.depreciation_credit?.account_title_name}
