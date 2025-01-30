@@ -491,6 +491,7 @@ const FixedAssetView = (props) => {
 
   const handleDepreciation = (id) => {
     getCalcDepreApi({ id, date: moment(new Date(currentDate)).format("YYYY-MM") });
+    console.log("calcDepreApiiiiiiiiiiiiiiiiiiiii", calcDepreApi);
 
     setViewDepre(true);
 
@@ -980,9 +981,29 @@ const FixedAssetView = (props) => {
                     </Box>
 
                     <Box className="tableCard__properties">
-                      Receipt:
+                      PR Number:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {dataApi?.data?.receipt}
+                        {dataApi?.data?.ymir_pr_number}
+                      </Typography>
+                    </Box>
+
+                    <Box className="tableCard__properties">
+                      PO Number:
+                      <Typography className="tableCard__info" fontSize="14px">
+                        {dataApi?.data?.po_number}
+                      </Typography>
+                    </Box>
+
+                    <Box className="tableCard__properties">
+                      RR Number:
+                      <Typography className="tableCard__info" fontSize="14px">
+                        {dataApi?.data?.rr_number}
+                      </Typography>
+                    </Box>
+                    <Box className="tableCard__properties">
+                      Supplier:
+                      <Typography className="tableCard__info" fontSize="14px">
+                        {dataApi?.data?.supplier?.supplier_code} - {dataApi?.data?.supplier?.supplier_name}
                       </Typography>
                     </Box>
 
