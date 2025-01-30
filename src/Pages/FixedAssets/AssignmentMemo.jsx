@@ -102,6 +102,14 @@ const AssignmentMemo = (props) => {
                     {(arrayData || singleData)[0]?.location?.location_name}
                   </Typography>
                 </Stack>
+                <Stack flexDirection="row" gap={2}>
+                  <Typography fontFamily="Times New Roman" fontSize="12px" fontWeight={600} width="80px">
+                    Accountable
+                  </Typography>
+                  <Typography fontFamily="Times New Roman" fontSize="12px">
+                    {(arrayData || singleData)[0]?.accountable}
+                  </Typography>
+                </Stack>
               </Stack>
 
               <Stack>
@@ -125,19 +133,20 @@ const AssignmentMemo = (props) => {
             </Stack>
           </Stack>
 
-          <Stack justifyContent="space-between" width="100%" flex="1">
-            <Stack mt={1} alignItems="center">
+          <Stack justifyContent="space-around" width="100%" flex="1">
+            <Stack mt={1} mr={-3} ml={-3} alignItems="center">
               <TableContainer>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontSize: "10px", lineHeight: "12px", py: 1 }}>Line Nos.</TableCell>
+                      {/* <TableCell sx={{ fontSize: "10px", lineHeight: "12px", py: 1 }}>Line Nos.</TableCell> */}
                       <TableCell sx={{ fontSize: "10px", lineHeight: "12px", py: 1, textWrap: "nowrap" }}>
                         Vladimir Tag #
                       </TableCell>
+                      {/* <TableCell sx={{ fontSize: "10px", lineHeight: "12px", py: 1 }}>Accountable</TableCell> */}
                       <TableCell sx={{ fontSize: "10px", lineHeight: "12px", py: 1 }}>Supplier</TableCell>
                       <TableCell sx={{ fontSize: "10px", lineHeight: "12px", py: 1, textWrap: "nowrap" }}>
-                        Reference #
+                        Receipt #
                       </TableCell>
                       <TableCell sx={{ fontSize: "10px", lineHeight: "12px", py: 1 }}>Item Description</TableCell>
                       <TableCell sx={{ fontSize: "10px", lineHeight: "12px", py: 1 }}>Qty.</TableCell>
@@ -149,14 +158,20 @@ const AssignmentMemo = (props) => {
 
                   <TableBody>
                     {(arrayData || singleData)?.map((data, index) => {
+                      {
+                        console.log(data);
+                      }
                       return (
                         <TableRow key={index}>
-                          <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.id}</TableCell>
+                          {/* <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.id}</TableCell> */}
                           <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.vladimir_tag_number}</TableCell>
+                          {/* <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.accountable}</TableCell> */}
                           <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.supplier?.supplier_name}</TableCell>
                           <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.receipt}</TableCell>
                           <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.asset_description}</TableCell>
-                          <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.quantity}</TableCell>
+                          <TableCell sx={{ fontSize: "10px", py: 1 }} align="center">
+                            {data?.quantity}
+                          </TableCell>
                           <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.uom?.uom_name}</TableCell>
                           <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.asset_specification}</TableCell>
                           <TableCell sx={{ fontSize: "10px", py: 1, textWrap: "nowrap" }}>
@@ -177,7 +192,7 @@ const AssignmentMemo = (props) => {
                   mt: "10px",
                 }}
               >
-                Remarks : {newData?.map((item) => item?.remarks)}
+                Remarks: {newData?.map((item) => item?.remarks)}
               </Typography>
             </Stack>
 
