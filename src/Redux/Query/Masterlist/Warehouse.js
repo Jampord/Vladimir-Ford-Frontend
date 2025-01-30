@@ -61,6 +61,15 @@ export const warehouseApi = createApi({
       }),
       invalidatesTags: ["Warehouse"],
     }),
+
+    putWarehouseLocationTaggingApi: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/warehouse/location-tagging/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Warehouse"],
+    }),
   }),
 });
 
@@ -72,4 +81,5 @@ export const {
   usePostWarehouseStatusApiMutation,
   usePostWarehouseApiMutation,
   useUpdateWarehouseApiMutation,
+  usePutWarehouseLocationTaggingApiMutation,
 } = warehouseApi;

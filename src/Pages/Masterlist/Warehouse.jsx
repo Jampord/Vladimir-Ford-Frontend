@@ -20,6 +20,7 @@ import {
   Chip,
   Dialog,
   Grow,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -29,19 +30,22 @@ import {
   TableSortLabel,
   Typography,
 } from "@mui/material";
-import { Help, ReportProblem } from "@mui/icons-material";
+import { Help, ReportProblem, Visibility } from "@mui/icons-material";
 import MasterlistSkeleton from "../Skeleton/MasterlistSkeleton";
 import ErrorFetching from "../ErrorFetching";
 import AddWarehouse from "./AddEdit/AddWarehouse";
 import NoRecordsFound from "../../Layout/NoRecordsFound";
 import { openDrawer } from "../../Redux/StateManagement/booleanStateSlice";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
+import TagWarehouseLocation from "./AddEdit/TagWarehouseLocation";
 
 const Warehouse = () => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("active");
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
+
+  const [updateWarehouse, setUpdateWarehouse] = useState();
 
   const drawer = useSelector((state) => state.booleanState.drawer);
   const dispatch = useDispatch();
@@ -204,6 +208,33 @@ const Warehouse = () => {
   // console.log(warehouseData);
   console.log("wdata", warehouseData);
 
+  const onUpdateHandler = (props) => {
+    const { id, warehouse_name, location } = props;
+    setUpdateWarehouse({
+      status: true,
+      id: id,
+      location: location,
+      warehouse_name: warehouse_name,
+    });
+  };
+
+  const onViewLocationHandler = (props) => {
+    const { id, warehouse_name, location } = props;
+    setUpdateWarehouse({
+      status: true,
+      action: "view",
+      id: id,
+      location: location,
+      warehouse_name: warehouse_name,
+    });
+  };
+
+  const handleViewLocation = (data) => {
+    onViewLocationHandler(data);
+    dispatch(openDrawer());
+    dispatch(closeConfirm());
+  };
+
   return (
     <Box className="mcontainer">
       <Typography className="mcontainer__title" sx={{ fontFamily: "Anton", fontSize: "2rem" }}>
@@ -257,6 +288,8 @@ const Warehouse = () => {
 
                     <TableCell className="tbl-cell">Code</TableCell>
 
+                    <TableCell className="tbl-cell text-center">View Information</TableCell>
+
                     <TableCell className="tbl-cell text-center">Status</TableCell>
 
                     <TableCell className="tbl-cell text-center">
@@ -268,6 +301,8 @@ const Warehouse = () => {
                         Date Updated
                       </TableSortLabel>
                     </TableCell>
+
+                    <TableCell className="tbl-cell text-center">Action</TableCell>
                   </TableRow>
                 </TableHead>
 
@@ -290,7 +325,14 @@ const Warehouse = () => {
                             <TableCell className="tbl-cell tr-cen-pad45  tbl-coa">{data.id}</TableCell>
 
                             <TableCell className="tbl-cell text-weight">{data.warehouse_name}</TableCell>
+
                             <TableCell className="tbl-cell">{data.warehouse_code}</TableCell>
+
+                            <TableCell className="tbl-cell" align="center">
+                              <IconButton size="small" onClick={() => handleViewLocation(data)}>
+                                <Visibility />
+                              </IconButton>
+                            </TableCell>
 
                             <TableCell className="tbl-cell text-center">
                               {data.is_active ? (
@@ -323,6 +365,10 @@ const Warehouse = () => {
                             <TableCell className="tbl-cell tr-cen-pad45">
                               {Moment(data.created_at).format("MMM DD, YYYY")}
                             </TableCell>
+
+                            <TableCell className="tbl-cell tr-cen-pad45">
+                              <ActionMenu data={data} onUpdateHandler={onUpdateHandler} />
+                            </TableCell>
                           </TableRow>
                         ))}
                     </>
@@ -342,6 +388,10 @@ const Warehouse = () => {
           />
         </Box>
       )}
+
+      <Dialog open={drawer} TransitionComponent={Grow} PaperProps={{ sx: { borderRadius: "10px" } }}>
+        <TagWarehouseLocation data={updateWarehouse} />
+      </Dialog>
     </Box>
   );
 };
