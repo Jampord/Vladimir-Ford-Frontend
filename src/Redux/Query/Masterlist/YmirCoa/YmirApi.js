@@ -69,6 +69,10 @@ export const ymirApi = createApi({
       query: () => `/warehouses?pagination=none&per_page=5&page=1&status=active`,
     }),
 
+    getCreditAllYmir: builder.query({
+      query: () => `/credit?pagination=none&status=active`,
+    }),
+
     postPrYmirApi: builder.mutation({
       query: (data) => ({
         // url: "http://10.10.13.6:8080/api/asset_sync",
@@ -116,4 +120,6 @@ export const {
   usePatchPrYmirApiMutation,
   useGetYmirWarehouseAllApiQuery,
   useLazyGetYmirWarehouseAllApiQuery,
+  useGetCreditAllYmirQuery,
+  useLazyGetCreditAllYmirQuery,
 } = ymirApi;

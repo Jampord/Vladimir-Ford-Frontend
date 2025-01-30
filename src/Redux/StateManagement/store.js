@@ -105,6 +105,7 @@ import { assetMovementReportApi } from "../Query/Movement/AssetMovementReports";
 import { coordinatorSettingsApi } from "../Query/Settings/CoordinatorSettings";
 import { actionMenuSlice } from "./actionMenuSlice";
 import { receiverSettingsApi } from "../Query/Settings/ReceiverSettings";
+import { creditApi } from "../Query/Masterlist/YmirCoa/Credit";
 
 export const store = configureStore({
   reducer: {
@@ -135,6 +136,7 @@ export const store = configureStore({
     [capexApi.reducerPath]: capexApi.reducer,
     [subCapexApi.reducerPath]: subCapexApi.reducer,
     [warehouseApi.reducerPath]: warehouseApi.reducer,
+    [creditApi.reducerPath]: creditApi.reducer,
     // [serviceProviderApi.reducerPath]: serviceProviderApi.reducer,
 
     // [majorCategoryApi.reducerPath]: majorCategoryApi.reducer,
@@ -228,6 +230,7 @@ export const store = configureStore({
       capexApi.middleware,
       subCapexApi.middleware,
       warehouseApi.middleware,
+      creditApi.middleware,
 
       // serviceProviderApi.middleware,
       // majorCategoryApi.middleware,

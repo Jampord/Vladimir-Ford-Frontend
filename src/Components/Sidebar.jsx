@@ -94,6 +94,8 @@ import {
   History,
   ScreenSearchDesktop,
   BadgeOutlined,
+  BadgeSharp,
+  CreditCard,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -262,6 +264,12 @@ const Sidebar = () => {
           permission: "account-title",
         },
         {
+          label: "Credit",
+          icon: CreditCard,
+          path: "/masterlist/credit",
+          permission: "credit",
+        },
+        {
           label: "Supplier",
           icon: StoreRounded,
           path: "/masterlist/supplier",
@@ -407,7 +415,7 @@ const Sidebar = () => {
         },
         {
           label: "Receiver Settings",
-          icon: BadgeOutlined,
+          icon: BadgeSharp,
           path: "/settings/receiver-settings",
           permission: "receiver-settings",
         },
@@ -619,13 +627,13 @@ const Sidebar = () => {
       setter: closeCollapse,
     },
 
-    {
-      label: "Asset for Tagging",
-      icon: LocalOffer,
-      path: "/asset-for-tagging",
-      permission: "asset-for-tagging",
-      setter: closeCollapse,
-    },
+    // {
+    //   label: "Asset for Tagging",
+    //   icon: LocalOffer,
+    //   path: "/asset-for-tagging",
+    //   permission: "asset-for-tagging",
+    //   setter: closeCollapse,
+    // },
 
     // {
     //   label: "Asset List",

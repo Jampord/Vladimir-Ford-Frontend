@@ -98,6 +98,7 @@ import ToPickupViewing from "./Pages/Asset Movement/Evaluation/ToPickupViewing";
 import CoordinatorSettings from "./Pages/Settings/CoordinatorSettings";
 import AddCoordinatorSettings from "./Pages/Settings/AddEdit/AddCoordinatorSettings";
 import ReceiverSettings from "./Pages/Settings/ReceiverSettings";
+import Credit from "./Pages/Masterlist/Credit";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -179,6 +180,11 @@ const router = createBrowserRouter([
                 path: "account-title",
                 element: <AccountTitle />,
                 handle: { permission: "account-title" },
+              },
+              {
+                path: "credit",
+                element: <Credit />,
+                handle: { permission: "credit" },
               },
               {
                 path: "supplier",
