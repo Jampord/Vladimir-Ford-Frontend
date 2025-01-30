@@ -4,16 +4,20 @@ import MasterlistToolbar from "../../Components/Reusable/MasterlistToolbar";
 import ErrorFetching from "../ErrorFetching";
 
 // RTK
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { openToast } from "../../Redux/StateManagement/toastSlice";
 
 import { openConfirm, closeConfirm, onLoading } from "../../Redux/StateManagement/confirmSlice";
 
 // MUI
 import {
+  Autocomplete,
   Box,
+  Button,
   Chip,
   Dialog,
+  Grow,
+  IconButton,
   Table,
   TableBody,
   TableCell,
@@ -21,9 +25,11 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import { Help, ReportProblem } from "@mui/icons-material";
+import { Close, Help, ReportProblem, Visibility } from "@mui/icons-material";
 import MasterlistSkeleton from "../Skeleton/MasterlistSkeleton";
 import NoRecordsFound from "../../Layout/NoRecordsFound";
 import ActionMenu from "../../Components/Reusable/ActionMenu";
@@ -34,12 +40,20 @@ import {
   usePatchAccountTitleStatusApiMutation,
   usePostAccountTitleApiMutation,
 } from "../../Redux/Query/Masterlist/YmirCoa/AccountTitle";
+import CustomAutoComplete from "../../Components/Reusable/CustomAutoComplete";
+import TagAccountTitleDepDebit from "./AddEdit/TagAccountTitleDepDebit";
 
 const AccountTitle = () => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("active");
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
+  const [accountTitleData, setAccountTitleData] = useState([]);
+
+  const [open, setOpen] = useState(false);
+  const [dialogData, setDialogData] = useState();
+
+  const drawer = useSelector((state) => state.booleanState.drawer);
 
   // Table Sorting --------------------------------
 
@@ -257,6 +271,23 @@ const AccountTitle = () => {
     setPage(1);
   };
 
+  const handleViewDialog = (data) => {
+    setOpen(true);
+    setDialogData(data);
+    console.log(dialogData);
+    console.log(open);
+  };
+
+  const onUpdateHandler = (props) => {
+    const { sync_id, account_title_name, depreciation_debit } = props;
+    setAccountTitleData({
+      status: true,
+      sync_id: sync_id,
+      depreciation_debit: depreciation_debit,
+      account_title_name: account_title_name,
+    });
+  };
+
   return (
     <Box className="mcontainer">
       <Typography className="mcontainer__title" sx={{ fontFamily: "Anton", fontSize: "2rem" }}>
@@ -318,6 +349,8 @@ const AccountTitle = () => {
                         </TableSortLabel>
                       </TableCell>
 
+                      <TableCell className="tbl-cell text-center">View Information</TableCell>
+
                       <TableCell className="tbl-cell text-center">Status</TableCell>
 
                       <TableCell className="tbl-cell text-center">
@@ -330,7 +363,7 @@ const AccountTitle = () => {
                         </TableSortLabel>
                       </TableCell>
 
-                      {/* <TableCell className="tbl-cell text-center">Action</TableCell> */}
+                      <TableCell className="tbl-cell text-center">Action</TableCell>
                     </TableRow>
                   </TableHead>
 
@@ -355,6 +388,14 @@ const AccountTitle = () => {
                               <TableCell className="tbl-cell">{data.account_title_code}</TableCell>
 
                               <TableCell className="tbl-cell">{data.account_title_name}</TableCell>
+
+                              <TableCell className="tbl-cell" align="center">
+                                <Tooltip title="View Account Title Information" placement="top" arrow>
+                                  <IconButton onClick={() => handleViewDialog(data)}>
+                                    <Visibility />
+                                  </IconButton>
+                                </Tooltip>
+                              </TableCell>
 
                               <TableCell className="tbl-cell text-center">
                                 {data.is_active ? (
@@ -388,14 +429,9 @@ const AccountTitle = () => {
                                 {Moment(data.updated_at).format("MMM DD, YYYY")}
                               </TableCell>
 
-                              {/* <TableCell className="tbl-cell text-center">
-                                <ActionMenu
-                                  hideEdit={true}
-                                  data={data}
-                                  status={status}
-                                  onArchiveRestoreHandler={onArchiveRestoreHandler}
-                                />
-                              </TableCell> */}
+                              <TableCell className="tbl-cell text-center">
+                                <ActionMenu data={data} onUpdateHandler={onUpdateHandler} />
+                              </TableCell>
                             </TableRow>
                           ))}
                       </>
@@ -416,6 +452,48 @@ const AccountTitle = () => {
           </Box>
         </>
       )}
+      <Dialog
+        open={open}
+        TransitionComponent={Grow}
+        onClose={() => setOpen(false)}
+        PaperProps={{ sx: { borderRadius: "10px", maxWidth: "700px" } }}
+      >
+        <Box className="add-masterlist">
+          {/* <IconButton onClick={() => setOpen(false)} sx={{ position: "absolute", top: 10, right: 10 }}>
+            <Close />
+          </IconButton> */}
+          <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
+            View Account Title
+          </Typography>
+
+          {dialogData?.depreciation_debit?.length ? (
+            <Autocomplete
+              multiple
+              id="tags-readOnly"
+              options={accountTitleApiData?.data}
+              defaultValue={dialogData?.depreciation_debit || null}
+              getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
+              readOnly
+              freeSolo
+              fullWidth
+              // disabled
+              renderInput={(params) => <TextField {...params} color="secondary" label="Depreciation Debit" />}
+              sx={{ ".MuiInputBase-root": { borderRadius: "10px" } }}
+            />
+          ) : (
+            <>
+              <NoRecordsFound size="small" />
+            </>
+          )}
+          <Button variant="contained" color="secondary" size="small" onClick={() => setOpen(false)} fullWidth>
+            Close
+          </Button>
+        </Box>
+      </Dialog>
+
+      <Dialog open={drawer} TransitionComponent={Grow} PaperProps={{ sx: { borderRadius: "10px" } }}>
+        <TagAccountTitleDepDebit data={accountTitleData} />
+      </Dialog>
     </Box>
   );
 };

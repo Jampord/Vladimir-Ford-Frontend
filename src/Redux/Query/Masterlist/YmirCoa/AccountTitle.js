@@ -44,6 +44,15 @@ export const accountTitleApi = createApi({
       }),
       invalidatesTags: ["AccountTitle"],
     }),
+
+    putAccountTitleDepreciationDebitTaggingApi: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/account-title/depreciation-debit_tagging/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["AccountTitle"],
+    }),
   }),
 });
 
@@ -53,4 +62,5 @@ export const {
   useGetAccountTitleAllApiQuery,
   usePostAccountTitleApiMutation,
   usePatchAccountTitleStatusApiMutation,
+  usePutAccountTitleDepreciationDebitTaggingApiMutation,
 } = accountTitleApi;
