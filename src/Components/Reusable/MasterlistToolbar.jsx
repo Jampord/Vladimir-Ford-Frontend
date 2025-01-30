@@ -781,7 +781,7 @@ const MasterlistToolbar = (props) => {
                   />
                 </MenuItem>
 
-                <MenuItem dense>
+                {/* <MenuItem dense>
                   <FormControlLabel
                     control={
                       <Checkbox
@@ -792,7 +792,7 @@ const MasterlistToolbar = (props) => {
                     }
                     label="Released"
                   />
-                </MenuItem>
+                </MenuItem> */}
 
                 <MenuItem dense>
                   <FormControlLabel
