@@ -46,35 +46,32 @@ const schema = yup.object().shape({
   subunit_id: yup.object().required().label("Subunit").typeError("Subunit is a required field"),
   location_id: yup.object().required().label("Location").typeError("Location is a required field"),
   // account_title_id: yup.object().required().label("Account Title").typeError("Account Title is a required field"),
-  accountability: yup.string().required().typeError("Accountability is a required field"),
-  accountable: yup
-    .object()
-    .nullable()
-    .when("accountability", {
-      is: (value) => value === "Personal Issued",
-      then: (yup) => yup.label("Accountable").required().typeError("Accountable is a required field"),
-    }),
+  // accountability: yup.string().required().typeError("Accountability is a required field"),
+  // accountable: yup
+  //   .object()
+  //   .nullable()
+  //   .when("accountability", {
+  //     is: (value) => value === "Personal Issued",
+  //     then: (yup) => yup.label("Accountable").required().typeError("Accountable is a required field"),
+  //   }),
   received_by: yup.object().required().typeError("Received By is a required field"),
 
   receiver_img: yup.mixed().required().label("Receiver Image").typeError("Receiver Image is a required field"),
-  assignment_memo_img: yup
-    .mixed()
-    .nullable()
-    .label("Assignment Memo")
-    .typeError("Assignment Memo is a required field")
-    .when("accountability", {
-      is: (value) => value === "Personal Issued",
-      then: (yup) => yup.label("Accountable").required().typeError("Assignment Memo is a required field"),
-    }),
-  authorization_memo_img: yup
-    .mixed()
-    .nullable()
-    .label("Authorization Letter")
-    .typeError("Authorization Letter is a required field")
-    .when("accountability", {
-      is: (value) => value === "Personal Issued",
-      then: (yup) => yup.label("Accountable").required().typeError("Authorization Letter is a required field"),
-    }),
+  // assignment_memo_img: yup
+  //   .mixed()
+  //   .nullable()
+  //   .label("Assignment Memo")
+  //   .typeError("Assignment Memo is a required field")
+  //   .when("accountability", {
+  //     is: (value) => value === "Personal Issued",
+  //     then: (yup) => yup.label("Accountable").required().typeError("Assignment Memo is a required field"),
+  //   }),
+  authorization_memo_img: yup.mixed().nullable().label("Authorization Letter"),
+  // .typeError("Authorization Letter is a required field")
+  // .when("accountability", {
+  //   is: (value) => value === "Personal Issued",
+  //   then: (yup) => yup.label("Accountable").required().typeError("Authorization Letter is a required field"),
+  // }),
 });
 
 const schemaSave = yup.object().shape({
@@ -89,8 +86,11 @@ const schemaSave = yup.object().shape({
 });
 
 const AddReleasingInfo = (props) => {
-  const { data, refetch, warehouseNumber, hideWN, commonData, personalData } = props;
+  const { data, refetch, warehouseNumber, hideWN, commonData, personalData, selectedItems } = props;
+  console.log("data", data);
+  console.log("selectedItems", selectedItems.department);
   const userData = JSON.parse(localStorage.getItem("user"));
+  console.log("userData", userData);
   const [signature, setSignature] = useState();
   const [trimmedDataURL, setTrimmedDataURL] = useState(null);
   const [viewImage, setViewImage] = useState(null);
@@ -121,12 +121,12 @@ const AddReleasingInfo = (props) => {
     resolver: yupResolver(currentSchema),
     defaultValues: {
       warehouse_number_id: warehouseNumber?.warehouse_number_id,
-      department_id: null,
-      company_id: null,
-      business_unit_id: null,
-      unit_id: null,
-      subunit_id: null,
-      location_id: null,
+      department_id: selectedItems?.department || null,
+      company_id: selectedItems?.company || null,
+      business_unit_id: selectedItems?.business_unit || null,
+      unit_id: selectedItems?.unit || null,
+      subunit_id: selectedItems?.subunit || null,
+      location_id: selectedItems?.location || null,
       // account_title_id: null,
       accountability: null,
       accountable: null,
@@ -134,7 +134,7 @@ const AddReleasingInfo = (props) => {
 
       // Attachments
       receiver_img: null,
-      assignment_memo_img: null,
+      // assignment_memo_img: null,
       authorization_memo_img: null,
     },
   });
@@ -271,15 +271,15 @@ const AddReleasingInfo = (props) => {
     }
   }, [isPostSuccess]);
 
-  useEffect(() => {
-    const { department, company, business_unit, unit, subunit, location } = userData?.coa;
-    setValue("department_id", department);
-    setValue("company_id", company);
-    setValue("business_unit_id", business_unit);
-    setValue("unit_id", unit);
-    setValue("subunit_id", subunit);
-    setValue("location_id", location);
-  }, [userData]);
+  // useEffect(() => {
+  //   console.log("useeffectitems", selectedItems.department);
+  //   setValue("department_id", selectedItems.department);
+  //   setValue("company_id", selectedItems.company);
+  //   setValue("business_unit_id", selectedItems.business_unit);
+  //   setValue("unit_id", selectedItems.unit);
+  //   setValue("subunit_id", selectedItems.subunit);
+  //   setValue("location_id", selectedItems.location);
+  // }, [selectedItems]);
 
   const handleCloseDialog = () => {
     dispatch(closeDialog());
@@ -341,12 +341,18 @@ const AddReleasingInfo = (props) => {
     const newFormData = {
       ...formData,
       warehouse_number_id: warehouseNumberData,
-      department_id: handleSaveValidation() ? null : formData?.department_id?.id?.toString(),
-      company_id: handleSaveValidation() ? null : formData.company_id?.id?.toString(),
-      business_unit_id: handleSaveValidation() ? null : formData.business_unit_id?.id?.toString(),
-      unit_id: handleSaveValidation() ? null : formData.unit_id?.id?.toString(),
-      subunit_id: handleSaveValidation() ? null : formData.subunit_id?.id?.toString(),
-      location_id: handleSaveValidation() ? null : formData?.location_id?.id?.toString(),
+      // department_id: handleSaveValidation() ? null : formData?.department_id?.id?.toString(),
+      department_id: formData?.department_id?.id?.toString(),
+      // company_id: handleSaveValidation() ? null : formData.company_id?.id?.toString(),
+      company_id: formData.company_id?.id?.toString(),
+      // business_unit_id: handleSaveValidation() ? null : formData.business_unit_id?.id?.toString(),
+      business_unit_id: formData.business_unit_id?.id?.toString(),
+      // unit_id: handleSaveValidation() ? null : formData.unit_id?.id?.toString(),
+      unit_id: formData.unit_id?.id?.toString(),
+      // subunit_id: handleSaveValidation() ? null : formData.subunit_id?.id?.toString(),
+      subunit_id: formData.subunit_id?.id?.toString(),
+      // location_id: handleSaveValidation() ? null : formData?.location_id?.id?.toString(),
+      location_id: formData?.location_id?.id?.toString(),
       // account_title_id: formData?.account_title_id.id?.toString(),
       accountable: formData?.accountable?.general_info?.full_id_number_full_name?.toString(),
       received_by: formData?.received_by?.general_info?.full_id_number_full_name?.toString(),
@@ -363,6 +369,19 @@ const AddReleasingInfo = (props) => {
         icon: Info,
         iconColor: "info",
         message: (
+          // <Box>
+          //   <Typography> Are you sure you want to</Typography>
+          //   <Typography
+          //     sx={{
+          //       display: "inline-block",
+          //       color: "secondary.main",
+          //       fontWeight: "bold",
+          //     }}
+          //   >
+          //     {handleSaveValidation() ? "SAVE" : "RELEASE"}
+          //   </Typography>{" "}
+          //   this {handleSaveValidation() ? "data" : "item"}?
+          // </Box>
           <Box>
             <Typography> Are you sure you want to</Typography>
             <Typography
@@ -372,18 +391,21 @@ const AddReleasingInfo = (props) => {
                 fontWeight: "bold",
               }}
             >
-              {handleSaveValidation() ? "SAVE" : "RELEASE"}
+              {"RELEASE"}
             </Typography>{" "}
-            this {handleSaveValidation() ? "data" : "item"}?
+            {/* this {handleSaveValidation() ? "data" : "item"}? */}
+            this {"item"}?
           </Box>
         ),
 
         onConfirm: async () => {
           try {
             dispatch(onLoading());
-            let result = handleSaveValidation()
-              ? await saveData(saveFormData).unwrap()
-              : await releaseItems(newFormData).unwrap();
+            let result =
+              // handleSaveValidation()
+              //   ? await saveData(saveFormData).unwrap()
+              //   :
+              await releaseItems(newFormData).unwrap();
             dispatch(
               openToast({
                 message: result.message,
@@ -526,15 +548,18 @@ const AddReleasingInfo = (props) => {
     dispatch(closeDialog1());
   };
 
-  const handleSaveValidation = () => {
-    return !(
-      commonData === (watch("accountability") === "Common") ||
-      personalData === (watch("accountability") === "Personal Issued")
-    );
-  };
+  // const handleSaveValidation = () => {
+  //   return !(
+  //     commonData === (watch("accountability") === "Common") ||
+  //     personalData === (watch("accountability") === "Personal Issued")
+  //   );
+  // };
 
   useEffect(() => {
-    setCurrentSchema(handleSaveValidation() ? schemaSave : schema);
+    setCurrentSchema(
+      // handleSaveValidation() ? schemaSave :
+      schema
+    );
   }, [watch("accountability")]);
 
   useEffect(() => {
@@ -585,7 +610,7 @@ const AddReleasingInfo = (props) => {
         <Stack gap={2} width="220px">
           <Box sx={BoxStyle}>
             <Typography sx={sxSubtitle}>Accountability</Typography>
-            <CustomAutoComplete
+            {/* <CustomAutoComplete
               autoComplete
               name="accountability"
               control={control}
@@ -645,7 +670,7 @@ const AddReleasingInfo = (props) => {
                   />
                 )}
               />
-            )}
+            )} */}
 
             <CustomAutoComplete
               autoComplete
@@ -654,7 +679,7 @@ const AddReleasingInfo = (props) => {
               filterOptions={filterOptions}
               options={sedarData}
               loading={isSedarLoading}
-              disabled={handleSaveValidation()}
+              // disabled={handleSaveValidation()}
               size="small"
               getOptionLabel={(option) => option.general_info?.full_id_number_full_name}
               isOptionEqualToValue={(option, value) =>
@@ -662,6 +687,7 @@ const AddReleasingInfo = (props) => {
               }
               renderInput={(params) => (
                 <TextField
+                  multiline
                   color="secondary"
                   {...params}
                   label="Received By"
@@ -696,7 +722,7 @@ const AddReleasingInfo = (props) => {
                   control={control}
                   name="receiver_img"
                   label="Receiver Image"
-                  disabled={handleSaveValidation()}
+                  // disabled={handleSaveValidation()}
                   inputRef={receiverMemoRef}
                   error={!!errors?.receiver_img?.message}
                   helperText={errors?.receiver_img?.message}
@@ -705,7 +731,7 @@ const AddReleasingInfo = (props) => {
               {watch("receiver_img") !== null && <RemoveFile title="Receiver Image" value="receiver_img" />}
             </Stack>
 
-            <Stack flexDirection="row" gap={1} alignItems="center">
+            {/* <Stack flexDirection="row" gap={1} alignItems="center">
               {watch("assignment_memo_img") !== null ? (
                 <UpdateField
                   label={"Assignment Memo"}
@@ -726,7 +752,7 @@ const AddReleasingInfo = (props) => {
               {watch("assignment_memo_img") !== null && (
                 <RemoveFile title="Assignment Memo" value="assignment_memo_img" />
               )}
-            </Stack>
+            </Stack> */}
             <Stack flexDirection="row" gap={1} alignItems="center">
               {watch("authorization_memo_img") !== null ? (
                 <UpdateField
@@ -739,7 +765,7 @@ const AddReleasingInfo = (props) => {
                   control={control}
                   name="authorization_memo_img"
                   label="Authorization Letter"
-                  disabled={handleSaveValidation()}
+                  // disabled={handleSaveValidation()}
                   inputRef={authorizationLetterRef}
                   error={!!errors?.authorization_memo_img?.message}
                   helperText={errors?.authorization_memo_img?.message}
@@ -761,7 +787,8 @@ const AddReleasingInfo = (props) => {
             options={departmentData}
             onOpen={() => (isDepartmentSuccess ? null : (departmentTrigger(), companyTrigger(), businessUnitTrigger()))}
             loading={isDepartmentLoading}
-            disabled={handleSaveValidation()}
+            // disabled={handleSaveValidation()}
+            disabled
             disableClearable
             size="small"
             getOptionLabel={(option) => option.department_code + " - " + option.department_name}
@@ -845,7 +872,8 @@ const AddReleasingInfo = (props) => {
             options={departmentData?.filter((obj) => obj?.id === watch("department_id")?.id)[0]?.unit || []}
             onOpen={() => (isUnitSuccess ? null : (unitTrigger(), subunitTrigger(), locationTrigger()))}
             loading={isUnitLoading}
-            disabled={handleSaveValidation()}
+            // disabled={handleSaveValidation()}
+            disabled
             disableClearable
             size="small"
             getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
@@ -872,7 +900,8 @@ const AddReleasingInfo = (props) => {
             control={control}
             options={unitData?.filter((obj) => obj?.id === watch("unit_id")?.id)[0]?.subunit || []}
             loading={isSubUnitLoading}
-            disabled={handleSaveValidation()}
+            // disabled={handleSaveValidation()}
+            disabled
             disableClearable
             size="small"
             getOptionLabel={(option) => option.subunit_code + " - " + option.subunit_name}
@@ -898,7 +927,8 @@ const AddReleasingInfo = (props) => {
               });
             })}
             loading={isLocationLoading}
-            disabled={handleSaveValidation()}
+            // disabled={handleSaveValidation()}
+            disabled
             disableClearable
             size="small"
             getOptionLabel={(option) => option.location_code + " - " + option.location_name}
@@ -941,14 +971,20 @@ const AddReleasingInfo = (props) => {
       <Stack flexDirection="row" justifyContent="flex-end" gap={2}>
         <LoadingButton
           variant="contained"
-          color={handleSaveValidation() ? "tertiary" : "primary"}
+          color={
+            // handleSaveValidation() ? "tertiary" :
+            "primary"
+          }
           loading={isPostLoading}
           size="small"
           type="submit"
-          sx={{ color: handleSaveValidation() && "white" }}
+          // sx={{ color: handleSaveValidation() && "white" }}
           disabled={!isValid}
         >
-          {handleSaveValidation() ? "Save" : "Release"}
+          {
+            // handleSaveValidation() ? "Save" :
+            "Release"
+          }
         </LoadingButton>
 
         <Button variant="outlined" color="secondary" size="small" onClick={() => dispatch(closeDialog())}>
