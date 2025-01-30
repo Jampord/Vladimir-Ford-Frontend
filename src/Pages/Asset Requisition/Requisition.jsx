@@ -32,6 +32,8 @@ import {
   Menu,
   MenuItem,
   Slide,
+  Stack,
+  Tab,
   Table,
   TableBody,
   TableCell,
@@ -39,6 +41,7 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  Tabs,
   Tooltip,
   Typography,
   useMediaQuery,
@@ -61,6 +64,8 @@ import { closeDialog, closeExport, openDialog, openExport } from "../../Redux/St
 import RequestTimeline from "./RequestTimeline";
 import { useDeleteRequestContainerAllApiMutation } from "../../Redux/Query/Request/RequestContainer";
 import ExportRequisition from "./ExportRequisition";
+import { TabContext, TabPanel } from "@mui/lab";
+import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 
 const Requisition = () => {
   const [search, setSearch] = useState("");
@@ -69,6 +74,17 @@ const Requisition = () => {
   const [page, setPage] = useState(1);
   const [requestFilter, setRequestFilter] = useState([]);
   const viewData = true;
+
+  const [value, setValue] = useState("1");
+  const [claimed, setClaimed] = useState("");
+
+  // console.log(claimed);
+  // console.log("value", value);
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+    newValue === "1" ? setClaimed("") : setClaimed("claimed");
+  };
 
   // const enableForm = true;
 
@@ -128,6 +144,7 @@ const Requisition = () => {
     isSuccess: requisitionSuccess,
     isError: requisitionError,
     error: errorData,
+    isFetching: requisitionFetching,
     refetch,
   } = useGetRequisitionApiQuery(
     {
@@ -136,6 +153,7 @@ const Requisition = () => {
       status: status,
       search: search,
       filter: requestFilter,
+      claimed: claimed,
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -321,66 +339,82 @@ const Requisition = () => {
       <Typography className="mcontainer__title" sx={{ fontFamily: "Anton", fontSize: "2rem" }}>
         Requisition
       </Typography>
-      {requisitionLoading && <MasterlistSkeleton onAdd={true} onExport={false} />}
-      {requisitionError && <ErrorFetching refetch={refetch} error={errorData} />}
-      {requisitionData && !requisitionError && (
-        <>
-          <Box className="request__wrapper">
-            <MasterlistToolbar
-              onStatusChange={setStatus}
-              onSearchChange={setSearch}
-              onSetPage={setPage}
-              setRequestFilter={setRequestFilter}
-              requestFilter={requestFilter}
+
+      <Box>
+        <TabContext value={value}>
+          <Tabs onChange={handleChange} value={value}>
+            <Tab label="Pending Request" value="1" claimed="" className={value === "1" ? "tab__background" : null} />
+
+            <Tab
+              label="Claimed Request"
+              value="2"
+              claimed="claimed"
+              className={value === "2" ? "tab__background" : null}
             />
+          </Tabs>
 
-            <Box className="masterlist-toolbar__addBtn" sx={{ mt: "4px", mr: "10px" }}>
-              <Button
-                onClick={handleOpenAdd}
-                variant="contained"
-                startIcon={isSmallScreen ? null : <LibraryAdd />}
-                size="small"
-                sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
-              >
-                {isSmallScreen ? <LibraryAdd color="black" sx={{ fontSize: "20px" }} /> : "Add"}
-              </Button>
+          <TabPanel sx={{ p: 0 }} value="1" claimed="" index="1">
+            <Stack className="category_height">
+              {requisitionLoading && <MasterlistSkeleton onAdd={true} onExport={false} />}
+              {requisitionError && <ErrorFetching refetch={refetch} error={errorData} />}
+              {requisitionData && !requisitionError && (
+                <>
+                  <Box className="mcontainer__wrapper">
+                    <MasterlistToolbar
+                      onStatusChange={setStatus}
+                      onSearchChange={setSearch}
+                      onSetPage={setPage}
+                      setRequestFilter={setRequestFilter}
+                      requestFilter={requestFilter}
+                    />
 
-              <Menu
-                anchorEl={anchorElAdd}
-                open={openAdd}
-                onClose={handleClose}
-                TransitionComponent={Fade}
-                disablePortal
-              >
-                <MenuItem onClick={() => navigate(`add-requisition`)} dense>
-                  <ListItemIcon>
-                    <AddBox />
-                  </ListItemIcon>
-                  <ListItemText>Request</ListItemText>
-                </MenuItem>
+                    <Box className="masterlist-toolbar__addBtn" sx={{ mt: "4px", mr: "10px" }}>
+                      <Button
+                        onClick={handleOpenAdd}
+                        variant="contained"
+                        startIcon={isSmallScreen ? null : <LibraryAdd />}
+                        size="small"
+                        sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+                      >
+                        {isSmallScreen ? <LibraryAdd color="black" sx={{ fontSize: "20px" }} /> : "Add"}
+                      </Button>
 
-                <MenuItem onClick={() => navigate(`additional-cost`)} dense disabled>
-                  <ListItemIcon>
-                    <AddCircleSharp />
-                  </ListItemIcon>
-                  <ListItemText>Additional Cost</ListItemText>
-                </MenuItem>
-              </Menu>
-            </Box>
+                      <Menu
+                        anchorEl={anchorElAdd}
+                        open={openAdd}
+                        onClose={handleClose}
+                        TransitionComponent={Fade}
+                        disablePortal
+                      >
+                        <MenuItem onClick={() => navigate(`add-requisition`)} dense>
+                          <ListItemIcon>
+                            <AddBox />
+                          </ListItemIcon>
+                          <ListItemText>Request</ListItemText>
+                        </MenuItem>
 
-            <Box>
-              <TableContainer className="mcontainer__th-body">
-                <Table className="mcontainer__table" stickyHeader>
-                  <TableHead>
-                    <TableRow
-                      sx={{
-                        "& > *": {
-                          fontWeight: "bold!important",
-                          whiteSpace: "nowrap",
-                        },
-                      }}
-                    >
-                      {/* <TableCell className="tbl-cell text-center">
+                        {/* <MenuItem onClick={() => navigate(`additional-cost`)} dense disabled>
+                          <ListItemIcon>
+                            <AddCircleSharp />
+                          </ListItemIcon>
+                          <ListItemText>Additional Cost</ListItemText>
+                        </MenuItem> */}
+                      </Menu>
+                    </Box>
+
+                    <Box>
+                      <TableContainer className="mcontainer__th-body-category">
+                        <Table className="mcontainer__table" stickyHeader>
+                          <TableHead>
+                            <TableRow
+                              sx={{
+                                "& > *": {
+                                  fontWeight: "bold!important",
+                                  whiteSpace: "nowrap",
+                                },
+                              }}
+                            >
+                              {/* <TableCell className="tbl-cell text-center">
                         <TableSortLabel
                           active={orderBy === `id`}
                           direction={orderBy === `id` ? order : `asc`}
@@ -390,176 +424,429 @@ const Requisition = () => {
                         </TableSortLabel>
                       </TableCell> */}
 
-                      <TableCell className="tbl-cell">
-                        <TableSortLabel
-                          active={orderBy === `transaction_number`}
-                          direction={orderBy === `transaction_number` ? order : `asc`}
-                          onClick={() => onSort(`transaction_number`)}
-                        >
-                          Transaction No.
-                        </TableSortLabel>
-                      </TableCell>
+                              <TableCell className="tbl-cell">
+                                <TableSortLabel
+                                  active={orderBy === `transaction_number`}
+                                  direction={orderBy === `transaction_number` ? order : `asc`}
+                                  onClick={() => onSort(`transaction_number`)}
+                                >
+                                  Transaction No.
+                                </TableSortLabel>
+                              </TableCell>
 
-                      <TableCell className="tbl-cell">
-                        <TableSortLabel
-                          active={orderBy === `acquisition_details`}
-                          direction={orderBy === `acquisition_details` ? order : `asc`}
-                          onClick={() => onSort(`acquisition_details`)}
-                        >
-                          Acquisition Details
-                        </TableSortLabel>
-                      </TableCell>
+                              <TableCell className="tbl-cell">
+                                <TableSortLabel
+                                  active={orderBy === `acquisition_details`}
+                                  direction={orderBy === `acquisition_details` ? order : `asc`}
+                                  onClick={() => onSort(`acquisition_details`)}
+                                >
+                                  Acquisition Details
+                                </TableSortLabel>
+                              </TableCell>
 
-                      <TableCell className="tbl-cell text-center">
-                        <TableSortLabel
-                          active={orderBy === `pr_number`}
-                          direction={orderBy === `pr_number` ? order : `asc`}
-                          onClick={() => onSort(`pr_number`)}
-                        >
-                          PR Number
-                        </TableSortLabel>
-                      </TableCell>
+                              <TableCell className="tbl-cell text-center">
+                                <TableSortLabel
+                                  active={orderBy === `pr_number`}
+                                  direction={orderBy === `pr_number` ? order : `asc`}
+                                  onClick={() => onSort(`pr_number`)}
+                                >
+                                  PR Number
+                                </TableSortLabel>
+                              </TableCell>
 
-                      <TableCell className="tbl-cell text-center">
-                        <TableSortLabel
-                          active={orderBy === `item_count`}
-                          direction={orderBy === `item_count` ? order : `asc`}
-                          onClick={() => onSort(`item_count`)}
-                        >
-                          Quantity
-                        </TableSortLabel>
-                      </TableCell>
+                              <TableCell className="tbl-cell text-center">
+                                <TableSortLabel
+                                  active={orderBy === `item_count`}
+                                  direction={orderBy === `item_count` ? order : `asc`}
+                                  onClick={() => onSort(`item_count`)}
+                                >
+                                  Quantity
+                                </TableSortLabel>
+                              </TableCell>
 
-                      <TableCell className="tbl-cell text-center">View Information</TableCell>
+                              <TableCell className="tbl-cell text-center">View Information</TableCell>
 
-                      <TableCell className="tbl-cell text-center">
-                        <TableSortLabel
-                          active={orderBy === `status`}
-                          direction={orderBy === `status` ? order : `asc`}
-                          onClick={() => onSort(`status`)}
-                        >
-                          View Status
-                        </TableSortLabel>
-                      </TableCell>
+                              <TableCell className="tbl-cell text-center">
+                                <TableSortLabel
+                                  active={orderBy === `status`}
+                                  direction={orderBy === `status` ? order : `asc`}
+                                  onClick={() => onSort(`status`)}
+                                >
+                                  View Status
+                                </TableSortLabel>
+                              </TableCell>
 
-                      <TableCell className="tbl-cell text-center">
-                        <TableSortLabel
-                          active={orderBy === `created_at`}
-                          direction={orderBy === `created_at` ? order : `asc`}
-                          onClick={() => onSort(`created_at`)}
-                        >
-                          Date Created
-                        </TableSortLabel>
-                      </TableCell>
-                      {!isCancelled && <TableCell className="tbl-cell">Action</TableCell>}
-                    </TableRow>
-                  </TableHead>
+                              <TableCell className="tbl-cell text-center">
+                                <TableSortLabel
+                                  active={orderBy === `created_at`}
+                                  direction={orderBy === `created_at` ? order : `asc`}
+                                  onClick={() => onSort(`created_at`)}
+                                >
+                                  Date Created
+                                </TableSortLabel>
+                              </TableCell>
+                              {!isCancelled && <TableCell className="tbl-cell">Action</TableCell>}
+                            </TableRow>
+                          </TableHead>
 
-                  <TableBody>
-                    {requisitionData?.data?.length === 0 ? (
-                      <NoRecordsFound heightData="medium" />
-                    ) : (
-                      <>
-                        {requisitionSuccess &&
-                          [...requisitionData?.data]?.sort(comparator(order, orderBy))?.map((data) => (
+                          <TableBody>
+                            {requisitionFetching ? (
+                              <LoadingData />
+                            ) : requisitionData?.data?.length === 0 ? (
+                              <NoRecordsFound heightData="medium" />
+                            ) : (
+                              <>
+                                {requisitionSuccess &&
+                                  [...requisitionData?.data]?.sort(comparator(order, orderBy))?.map((data) => (
+                                    <TableRow
+                                      key={data.id}
+                                      sx={{
+                                        "&:last-child td, &:last-child th": {
+                                          borderBottom: 0,
+                                        },
+                                      }}
+                                    >
+                                      {/* <TableCell className="tbl-cell tr-cen-pad45">
+                                  {data.id}
+                                </TableCell> */}
+                                      <TableCell className="tbl-cell text-weight">{data.transaction_number}</TableCell>
+                                      <TableCell className="tbl-cell">
+                                        <Typography fontSize={14} fontWeight={600} color="secondary.main">
+                                          {data.acquisition_details}
+                                        </Typography>
+                                        <Typography fontSize={12} color="secondary.light">
+                                          ({data.warehouse?.id}) - {data.warehouse?.warehouse_name}
+                                        </Typography>
+                                        {/* <Typography fontSize={12} color="primary.main" fontWeight={400}>
+                                  {data.is_addcost === 1 && "Additional Cost"}
+                                </Typography> */}
+                                      </TableCell>
+
+                                      <TableCell className="tbl-cell text-center">
+                                        <Typography fontSize={14} fontWeight={600} color="secondary.main">
+                                          {data.ymir_pr_number}
+                                        </Typography>
+                                      </TableCell>
+
+                                      <TableCell className="tbl-cell tr-cen-pad45">{data.item_count}</TableCell>
+                                      <TableCell className="tbl-cell text-center">
+                                        <Tooltip placement="top" title="View Request Information" arrow>
+                                          <IconButton onClick={() => handleEditRequisition(data)}>
+                                            <Visibility />
+                                          </IconButton>
+                                        </Tooltip>
+                                      </TableCell>
+                                      <TableCell className="tbl-cell tr-cen-pad45">{transactionStatus(data)}</TableCell>
+                                      <TableCell className="tbl-cell tr-cen-pad45">
+                                        {data.status === "Cancelled"
+                                          ? Moment(data.deleted_at).format("MMM DD, YYYY")
+                                          : Moment(data.created_at).format("MMM DD, YYYY")}
+                                      </TableCell>
+                                      {!isCancelled && (
+                                        <TableCell className="tbl-cell ">
+                                          {(data.status === "For Approval of Approver 1" ||
+                                            data.status === "Returned" ||
+                                            data.status === "Returned From Ymir") && (
+                                            <ActionMenu
+                                              status={data.status}
+                                              data={data}
+                                              showVoid
+                                              onVoidHandler={onVoidHandler}
+                                              hideArchive
+                                            />
+                                          )}
+                                        </TableCell>
+                                      )}
+                                    </TableRow>
+                                  ))}
+                              </>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Box>
+
+                    <Box className="mcontainer__pagination-export">
+                      <Button
+                        className="mcontainer__export"
+                        variant="outlined"
+                        size="small"
+                        color="text"
+                        startIcon={<IosShareRounded color="primary" />}
+                        onClick={openExportDialog}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "10px 20px",
+                        }}
+                      >
+                        EXPORT
+                      </Button>
+
+                      <CustomTablePagination
+                        total={requisitionData?.total}
+                        success={requisitionSuccess}
+                        current_page={requisitionData?.current_page}
+                        per_page={requisitionData?.per_page}
+                        onPageChange={pageHandler}
+                        onRowsPerPageChange={perPageHandler}
+                      />
+                    </Box>
+                  </Box>
+                </>
+              )}
+            </Stack>
+          </TabPanel>
+
+          <TabPanel sx={{ p: 0 }} value="2" index="2">
+            <Stack className="category_height">
+              {requisitionLoading && <MasterlistSkeleton onAdd={true} onExport={false} />}
+              {requisitionError && <ErrorFetching refetch={refetch} error={errorData} />}
+              {requisitionData && !requisitionError && (
+                <>
+                  <Box className="mcontainer__wrapper">
+                    <MasterlistToolbar
+                      onStatusChange={setStatus}
+                      onSearchChange={setSearch}
+                      onSetPage={setPage}
+                      hideArchive
+                      // setRequestFilter={setRequestFilter}
+                      // requestFilter={requestFilter}
+                    />
+
+                    <Box className="masterlist-toolbar__addBtn" sx={{ mt: "4px", mr: "10px" }}>
+                      <Button
+                        onClick={handleOpenAdd}
+                        variant="contained"
+                        startIcon={isSmallScreen ? null : <LibraryAdd />}
+                        size="small"
+                        sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+                      >
+                        {isSmallScreen ? <LibraryAdd color="black" sx={{ fontSize: "20px" }} /> : "Add"}
+                      </Button>
+
+                      <Menu
+                        anchorEl={anchorElAdd}
+                        open={openAdd}
+                        onClose={handleClose}
+                        TransitionComponent={Fade}
+                        disablePortal
+                      >
+                        <MenuItem onClick={() => navigate(`add-requisition`)} dense>
+                          <ListItemIcon>
+                            <AddBox />
+                          </ListItemIcon>
+                          <ListItemText>Request</ListItemText>
+                        </MenuItem>
+
+                        <MenuItem onClick={() => navigate(`additional-cost`)} dense disabled>
+                          <ListItemIcon>
+                            <AddCircleSharp />
+                          </ListItemIcon>
+                          <ListItemText>Additional Cost</ListItemText>
+                        </MenuItem>
+                      </Menu>
+                    </Box>
+
+                    <Box>
+                      <TableContainer className="mcontainer__th-body-category">
+                        <Table className="mcontainer__table" stickyHeader>
+                          <TableHead>
                             <TableRow
-                              key={data.id}
                               sx={{
-                                "&:last-child td, &:last-child th": {
-                                  borderBottom: 0,
+                                "& > *": {
+                                  fontWeight: "bold!important",
+                                  whiteSpace: "nowrap",
                                 },
                               }}
                             >
-                              {/* <TableCell className="tbl-cell tr-cen-pad45">
+                              {/* <TableCell className="tbl-cell text-center">
+                        <TableSortLabel
+                          active={orderBy === `id`}
+                          direction={orderBy === `id` ? order : `asc`}
+                          onClick={() => onSort(`id`)}
+                        >
+                          ID No.
+                        </TableSortLabel>
+                      </TableCell> */}
+
+                              <TableCell className="tbl-cell">
+                                <TableSortLabel
+                                  active={orderBy === `transaction_number`}
+                                  direction={orderBy === `transaction_number` ? order : `asc`}
+                                  onClick={() => onSort(`transaction_number`)}
+                                >
+                                  Transaction No.
+                                </TableSortLabel>
+                              </TableCell>
+
+                              <TableCell className="tbl-cell">
+                                <TableSortLabel
+                                  active={orderBy === `acquisition_details`}
+                                  direction={orderBy === `acquisition_details` ? order : `asc`}
+                                  onClick={() => onSort(`acquisition_details`)}
+                                >
+                                  Acquisition Details
+                                </TableSortLabel>
+                              </TableCell>
+
+                              <TableCell className="tbl-cell text-center">
+                                <TableSortLabel
+                                  active={orderBy === `pr_number`}
+                                  direction={orderBy === `pr_number` ? order : `asc`}
+                                  onClick={() => onSort(`pr_number`)}
+                                >
+                                  PR Number
+                                </TableSortLabel>
+                              </TableCell>
+
+                              <TableCell className="tbl-cell text-center">
+                                <TableSortLabel
+                                  active={orderBy === `item_count`}
+                                  direction={orderBy === `item_count` ? order : `asc`}
+                                  onClick={() => onSort(`item_count`)}
+                                >
+                                  Quantity
+                                </TableSortLabel>
+                              </TableCell>
+
+                              <TableCell className="tbl-cell text-center">View Information</TableCell>
+
+                              <TableCell className="tbl-cell text-center">
+                                <TableSortLabel
+                                  active={orderBy === `status`}
+                                  direction={orderBy === `status` ? order : `asc`}
+                                  onClick={() => onSort(`status`)}
+                                >
+                                  View Status
+                                </TableSortLabel>
+                              </TableCell>
+
+                              <TableCell className="tbl-cell text-center">
+                                <TableSortLabel
+                                  active={orderBy === `created_at`}
+                                  direction={orderBy === `created_at` ? order : `asc`}
+                                  onClick={() => onSort(`created_at`)}
+                                >
+                                  Date Created
+                                </TableSortLabel>
+                              </TableCell>
+                              {!isCancelled && <TableCell className="tbl-cell">Action</TableCell>}
+                            </TableRow>
+                          </TableHead>
+
+                          <TableBody>
+                            {requisitionFetching ? (
+                              <LoadingData />
+                            ) : requisitionData?.data?.length === 0 ? (
+                              <NoRecordsFound heightData="medium" />
+                            ) : (
+                              <>
+                                {requisitionSuccess &&
+                                  [...requisitionData?.data]?.sort(comparator(order, orderBy))?.map((data) => (
+                                    <TableRow
+                                      key={data.id}
+                                      sx={{
+                                        "&:last-child td, &:last-child th": {
+                                          borderBottom: 0,
+                                        },
+                                      }}
+                                    >
+                                      {/* <TableCell className="tbl-cell tr-cen-pad45">
                                   {data.id}
                                 </TableCell> */}
-                              <TableCell className="tbl-cell text-weight">{data.transaction_number}</TableCell>
-                              <TableCell className="tbl-cell">
-                                <Typography fontSize={14} fontWeight={600} color="secondary.main">
-                                  {data.acquisition_details}
-                                </Typography>
-                                <Typography fontSize={12} color="secondary.light">
-                                  ({data.warehouse?.id}) - {data.warehouse?.warehouse_name}
-                                </Typography>
-                                {/* <Typography fontSize={12} color="primary.main" fontWeight={400}>
+                                      <TableCell className="tbl-cell text-weight">{data.transaction_number}</TableCell>
+                                      <TableCell className="tbl-cell">
+                                        <Typography fontSize={14} fontWeight={600} color="secondary.main">
+                                          {data.acquisition_details}
+                                        </Typography>
+                                        <Typography fontSize={12} color="secondary.light">
+                                          ({data.warehouse?.id}) - {data.warehouse?.warehouse_name}
+                                        </Typography>
+                                        {/* <Typography fontSize={12} color="primary.main" fontWeight={400}>
                                   {data.is_addcost === 1 && "Additional Cost"}
                                 </Typography> */}
-                              </TableCell>
+                                      </TableCell>
 
-                              <TableCell className="tbl-cell">
-                                <Typography fontSize={14} fontWeight={600} color="secondary.main">
-                                  {data.ymir_pr_number}
-                                </Typography>
-                              </TableCell>
+                                      <TableCell className="tbl-cell text-center">
+                                        <Typography fontSize={14} fontWeight={600} color="secondary.main">
+                                          {data.ymir_pr_number}
+                                        </Typography>
+                                      </TableCell>
 
-                              <TableCell className="tbl-cell tr-cen-pad45">{data.item_count}</TableCell>
-                              <TableCell className="tbl-cell text-center">
-                                <Tooltip placement="top" title="View Request Information" arrow>
-                                  <IconButton onClick={() => handleEditRequisition(data)}>
-                                    <Visibility />
-                                  </IconButton>
-                                </Tooltip>
-                              </TableCell>
-                              <TableCell className="tbl-cell tr-cen-pad45">{transactionStatus(data)}</TableCell>
-                              <TableCell className="tbl-cell tr-cen-pad45">
-                                {data.status === "Cancelled"
-                                  ? Moment(data.deleted_at).format("MMM DD, YYYY")
-                                  : Moment(data.created_at).format("MMM DD, YYYY")}
-                              </TableCell>
-                              {!isCancelled && (
-                                <TableCell className="tbl-cell ">
-                                  {(data.status === "For Approval of Approver 1" ||
-                                    data.status === "Returned" ||
-                                    data.status === "Returned From Ymir") && (
-                                    <ActionMenu
-                                      status={data.status}
-                                      data={data}
-                                      showVoid
-                                      onVoidHandler={onVoidHandler}
-                                      hideArchive
-                                    />
-                                  )}
-                                </TableCell>
-                              )}
-                            </TableRow>
-                          ))}
-                      </>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </Box>
+                                      <TableCell className="tbl-cell tr-cen-pad45">{data.item_count}</TableCell>
+                                      <TableCell className="tbl-cell text-center">
+                                        <Tooltip placement="top" title="View Request Information" arrow>
+                                          <IconButton onClick={() => handleEditRequisition(data)}>
+                                            <Visibility />
+                                          </IconButton>
+                                        </Tooltip>
+                                      </TableCell>
+                                      <TableCell className="tbl-cell tr-cen-pad45">{transactionStatus(data)}</TableCell>
+                                      <TableCell className="tbl-cell tr-cen-pad45">
+                                        {data.status === "Cancelled"
+                                          ? Moment(data.deleted_at).format("MMM DD, YYYY")
+                                          : Moment(data.created_at).format("MMM DD, YYYY")}
+                                      </TableCell>
+                                      {!isCancelled && (
+                                        <TableCell className="tbl-cell ">
+                                          {(data.status === "For Approval of Approver 1" ||
+                                            data.status === "Returned" ||
+                                            data.status === "Returned From Ymir") && (
+                                            <ActionMenu
+                                              status={data.status}
+                                              data={data}
+                                              showVoid
+                                              onVoidHandler={onVoidHandler}
+                                              hideArchive
+                                            />
+                                          )}
+                                        </TableCell>
+                                      )}
+                                    </TableRow>
+                                  ))}
+                              </>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Box>
 
-            <Box className="mcontainer__pagination-export">
-              <Button
-                className="mcontainer__export"
-                variant="outlined"
-                size="small"
-                color="text"
-                startIcon={<IosShareRounded color="primary" />}
-                onClick={openExportDialog}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "10px 20px",
-                }}
-              >
-                EXPORT
-              </Button>
+                    <Box className="mcontainer__pagination-export">
+                      <Button
+                        className="mcontainer__export"
+                        variant="outlined"
+                        size="small"
+                        color="text"
+                        startIcon={<IosShareRounded color="primary" />}
+                        onClick={openExportDialog}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          margin: "10px 20px",
+                        }}
+                      >
+                        EXPORT
+                      </Button>
 
-              <CustomTablePagination
-                total={requisitionData?.total}
-                success={requisitionSuccess}
-                current_page={requisitionData?.current_page}
-                per_page={requisitionData?.per_page}
-                onPageChange={pageHandler}
-                onRowsPerPageChange={perPageHandler}
-              />
-            </Box>
-          </Box>
-        </>
-      )}
+                      <CustomTablePagination
+                        total={requisitionData?.total}
+                        success={requisitionSuccess}
+                        current_page={requisitionData?.current_page}
+                        per_page={requisitionData?.per_page}
+                        onPageChange={pageHandler}
+                        onRowsPerPageChange={perPageHandler}
+                      />
+                    </Box>
+                  </Box>
+                </>
+              )}
+            </Stack>
+          </TabPanel>
+        </TabContext>
+      </Box>
 
       <Dialog
         open={dialog}
