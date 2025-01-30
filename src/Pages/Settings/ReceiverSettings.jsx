@@ -28,6 +28,7 @@ import ActionMenu from "../../Components/Reusable/ActionMenu";
 import { Help, ReportProblem } from "@mui/icons-material";
 import AddReceiverSettings from "./AddEdit/AddReceiverSettings";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
+import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
 
 const ReceiverSettings = () => {
   const [search, setSearch] = useState("");
@@ -252,6 +253,17 @@ const ReceiverSettings = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
+            </Box>
+
+            <Box className="mcontainer__pagination-export" justifyContent="flex-end">
+              <CustomTablePagination
+                total={receiverSettingsData?.total}
+                success={receiverSettingsSuccess}
+                current_page={receiverSettingsData?.current_page}
+                per_page={receiverSettingsData?.per_page}
+                onPageChange={pageHandler}
+                onRowsPerPageChange={perPageHandler}
+              />
             </Box>
           </Box>
         </>
