@@ -39,6 +39,8 @@ import {
   Add,
   AddBoxRounded,
   Close,
+  DataArrayTwoTone,
+  Delete,
   DragIndicator,
   Info,
   Remove,
@@ -47,28 +49,33 @@ import {
   Warning,
 } from "@mui/icons-material";
 import { closeDialog } from "../../../Redux/StateManagement/booleanStateSlice";
-import { usePutInclusionApiMutation } from "../../../Redux/Query/Request/AssetReceiving";
+import { usePutInclusionApiMutation, useRemoveInclusionApiMutation } from "../../../Redux/Query/Request/AssetReceiving";
 import { fixedAssetApi } from "../../../Redux/Query/FixedAsset/FixedAssets";
 
 const schema = yup.object().shape({
   id: yup.string(),
-  vladimir_tag_number: yup.string().nullable(),
-  reference_number: yup.string().required().label("Reference Number"),
+  vladimir_tag_number: yup.string().nullable().label("Vladimir Tag Number"),
+  reference_number: yup.string().nullable().label("Reference Number"),
   inclusion: yup.array().of(
     yup.object().shape({
-      description: yup.string().required("Description is a Required Field"),
+      description: yup.string().nullable().label("Description"),
+      // .required("Description is a Required Field"),
       // specification: yup.string().required("Specification is a Required Field"),
-      quantity: yup.number().required("Quantity is a Required Field"),
+      quantity: yup.number().nullable(),
+      // .required("Quantity is a Required Field"),
     })
   ),
 });
 
 const AddInclusion = (props) => {
-  const { data, fixedAsset } = props;
+  const { data, fixedAsset, receivingData } = props;
+  console.log("data", DataArrayTwoTone);
+  // console.log("receivingData", receivingData);
   const isSmallScreen = useMediaQuery("(max-width: 720px)");
   const [edit, setEdit] = useState(false);
   const [updateRequest, setUpdateRequest] = useState({
     reference_number: "",
+    vladimir_tag_number: "",
     inclusion: [
       {
         id: null,
@@ -80,6 +87,7 @@ const AddInclusion = (props) => {
   });
 
   const [updateInclusion] = usePutInclusionApiMutation();
+  const [removeInclusion] = useRemoveInclusionApiMutation();
 
   const dispatch = useDispatch();
 
@@ -97,8 +105,8 @@ const AddInclusion = (props) => {
     mode: "onChange",
     resolver: yupResolver(schema),
     defaultValues: {
-      vladimir_tag_number: fixedAsset ? data?.vladimir_tag_number : null,
-      reference_number: fixedAsset ? fixedAsset?.reference_number : data?.reference_number,
+      vladimir_tag_number: fixedAsset ? fixedAsset?.vladimir_tag_number : data?.vladimir_tag_number || null,
+      reference_number: fixedAsset ? fixedAsset?.reference_number : data?.reference_number || null,
       inclusion: [
         {
           id: null,
@@ -109,6 +117,8 @@ const AddInclusion = (props) => {
       ],
     },
   });
+
+  console.log("errors: ", errors);
 
   //* Append Table ---------------------------------------------------------------
   const { fields, append, remove } = useFieldArray({
@@ -177,12 +187,14 @@ const AddInclusion = (props) => {
     (item) =>
       item?.description === "" ||
       // item?.specification === "" ||
-      item?.quantity === null
+      item?.quantity === (null || "")
   );
 
   const onSubmitHandler = (formData) => {
+    console.log("formData", formData);
     const data = {
       reference_number: formData?.reference_number,
+      vladimir_tag_number: formData?.vladimir_tag_number,
       inclusion: formData?.inclusion?.map((item) => ({
         description: item.description,
         // specification: item.specification,
@@ -190,7 +202,7 @@ const AddInclusion = (props) => {
       })),
     };
 
-    console.log(formData);
+    // console.log(formData);
 
     dispatch(
       openConfirm({
@@ -285,6 +297,42 @@ const AddInclusion = (props) => {
     );
   };
 
+  const handleRemoveItemAll = (index) => {
+    dispatch(
+      openConfirm({
+        icon: Warning,
+        iconColor: "alert",
+        message: (
+          <Box>
+            <Typography> Are you sure you want to</Typography>
+            <Typography
+              sx={{
+                display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+              }}
+            >
+              REMOVE
+            </Typography>{" "}
+            all items?
+          </Box>
+        ),
+        onConfirm: async () => {
+          dispatch(onLoading());
+          await removeInclusion({ vladimir_tag_number: fixedAsset?.vladimir_tag_number });
+          dispatch(closeDialog());
+          dispatch(fixedAssetApi.util.invalidateTags(["FixedAsset"]));
+          dispatch(
+            openToast({
+              message: "Successfully Removed All Items",
+              duration: 5000,
+            })
+          );
+        },
+      })
+    );
+  };
+
   const customTextSx = {
     ".MuiInputBase-root": {
       borderRadius: "10px",
@@ -318,7 +366,7 @@ const AddInclusion = (props) => {
         <Stack mt={2} gap={2}>
           <Stack gap={1}>
             <Typography color="secondary.main" fontFamily="Roboto" fontSize="large" alignSelf="center">
-              REFERENCE NUMBER: {data?.reference_number || fixedAsset?.reference_number}
+              VLADIMIR TAG NUMBER: {data?.vladimir_tag_number || fixedAsset?.vladimir_tag_number}
             </Typography>
 
             <Stack className="request__table">
@@ -449,7 +497,7 @@ const AddInclusion = (props) => {
 
                     <TableRow>
                       <TableCell colSpan={99}>
-                        <Stack flexDirection="row" gap={2}>
+                        <Stack flexDirection="row" gap={2} justifyContent={"space-between"}>
                           <Button
                             variant="contained"
                             size="small"
@@ -460,15 +508,16 @@ const AddInclusion = (props) => {
                           >
                             Add Row
                           </Button>
-                          {/* <Button
+                          <Button
                             variant="contained"
                             size="small"
                             color="warning"
                             startIcon={<Delete />}
-                            onClick={() => reset()}
+                            onClick={handleRemoveItemAll}
+                            disabled={fields.length <= 0}
                           >
                             Remove All
-                          </Button> */}
+                          </Button>
                         </Stack>
                       </TableCell>
                     </TableRow>
@@ -476,16 +525,28 @@ const AddInclusion = (props) => {
                 </Table>
               </TableContainer>
             </Stack>
+
             <Stack flexDirection="row" justifyContent="flex-end" gap={2}>
+              {/* <Button
+                variant="contained"
+                size="small"
+                color="warning"
+                startIcon={<Delete />}
+                onClick={handleRemoveItemAll}
+                disabled={fields.length <= 0}
+              >
+                Remove All
+              </Button> */}
               <Button
                 variant="contained"
                 size="small"
                 type="submit"
                 startIcon={data?.inclusion ? <Update /> : <AddBoxRounded />}
-                disabled={!isValid}
+                disabled={disableBtn}
               >
                 {data?.inclusion || fixedAsset ? "Update" : "Add"}
               </Button>
+
               <Button variant="outlined" size="small" color="secondary" onClick={() => dispatch(closeDialog())}>
                 Close
               </Button>
