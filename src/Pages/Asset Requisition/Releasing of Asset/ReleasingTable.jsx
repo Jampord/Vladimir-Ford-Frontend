@@ -142,6 +142,8 @@ const ReleasingTable = (props) => {
     dispatch(openDialog());
   };
 
+  // console.log("👀👀👀", watch("warehouse_number_id"));
+
   const handleViewData = (data) => {
     navigate(`/asset-requisition/requisition-releasing/${data.warehouse_number?.warehouse_number}`, {
       state: { ...data },
@@ -168,18 +170,29 @@ const ReleasingTable = (props) => {
     watch("warehouse_number_id").includes(item.warehouse_number?.warehouse_number)
   );
 
-  const commonData = handleSelectedItems?.every((item) => item?.accountability === "Common");
-  const personalData = handleSelectedItems?.every((item) => item?.accountability !== "Common");
+  const selectedItem = handleSelectedItems ? handleSelectedItems[0] : null;
 
-  const validateSelectedItems = () => {
-    if (commonData && personalData) {
-      return true;
-    }
-    return !commonData && !personalData;
-  };
+  // console.log("handleSelectedItems", allEqual(handleSelectedItems));
+  // console.log("handleSelectedItems", handleSelectedItems);
+
+  //**Validation for Department of Selected Items
+  const commonData = [...new Set(handleSelectedItems?.map((item) => item.location.id))].length === 1;
+  //**Validation for Location of Selected Items
+  const personalData = [...new Set(handleSelectedItems?.map((item) => item.department.id))].length === 1;
+
+  // const personalData = handleSelectedItems?.every((item) => item?.accountability !== "Common");
+
+  // console.log("commonData", commonData);
+
+  // const validateSelectedItems = () => {
+  //   if (commonData && personalData) {
+  //     return true;
+  //   }
+  //   return !commonData && !personalData;
+  // };
   // * -------------------------------------------------------------------
 
-  console.log("releasingData", releasingData?.data);
+  // console.log("releasingData", releasingData?.data);
   // console.log("wnumber", wNumber);
 
   return (
@@ -197,7 +210,11 @@ const ReleasingTable = (props) => {
                 size="small"
                 startIcon={<Output />}
                 sx={{ position: "absolute", right: 0, top: -40 }}
-                disabled={!watch("warehouse_number_id") || validateSelectedItems()}
+                disabled={
+                  !watch("warehouse_number_id") ||
+                  // || validateSelectedItems()
+                  (commonData === false && personalData === false)
+                }
               >
                 Release
               </Button>
@@ -407,9 +424,9 @@ const ReleasingTable = (props) => {
                                 <Typography fontSize={10} color="gray">
                                   ({data.location?.location_code}) - {data.location?.location_name}
                                 </Typography>
-                                <Typography fontSize={10} color="gray">
+                                {/* <Typography fontSize={10} color="gray">
                                   ({data.account_title?.account_title_code}) - {data.account_title?.account_title_name}
-                                </Typography>
+                                </Typography> */}
                               </TableCell>
 
                               <TableCell onClick={() => handleViewData(data)} className="tbl-cell ">
@@ -478,7 +495,8 @@ const ReleasingTable = (props) => {
           data={releasingData?.data}
           warehouseNumber={wNumber}
           commonData={commonData}
-          personalData={personalData}
+          // personalData={personalData}
+          selectedItems={selectedItem}
         />
       </Dialog>
     </Stack>
