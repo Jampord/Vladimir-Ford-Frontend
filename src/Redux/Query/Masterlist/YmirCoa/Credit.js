@@ -39,4 +39,5 @@ export const creditApi = createApi({
   }),
 });
 
-export const { useGetCreditAllQuery, useGetCreditQuery, usePostCreditApiMutation } = creditApi;
+export const { useGetCreditAllQuery, useLazyGetCreditAllQuery, useGetCreditQuery, usePostCreditApiMutation } =
+  creditApi;
