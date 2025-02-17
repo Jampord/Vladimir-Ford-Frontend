@@ -174,7 +174,7 @@ const AddWarehouse = (props) => {
             />
           )}
         />
-        {console.log(locationData)}
+        {/* {console.log(locationData)} */}
 
         <CustomTextField
           disabled={data.action === "view"}

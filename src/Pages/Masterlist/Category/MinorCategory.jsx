@@ -109,6 +109,8 @@ const MinorCategory = () => {
     { refetchOnMountOrArgChange: true }
   );
 
+  // console.log("minorCategoryData", minorCategoryData?.data);
+
   const [putMinorCategoryStatusApi, { isLoading }] = usePutMinorCategoryStatusApiMutation();
 
   const dispatch = useDispatch();

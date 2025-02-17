@@ -87,10 +87,10 @@ const schemaSave = yup.object().shape({
 
 const AddReleasingInfo = (props) => {
   const { data, refetch, warehouseNumber, hideWN, commonData, personalData, selectedItems } = props;
-  console.log("data", data);
-  console.log("selectedItems", selectedItems.department);
+  // console.log("data", data);
+  // console.log("selectedItems", selectedItems.department);
   const userData = JSON.parse(localStorage.getItem("user"));
-  console.log("userData", userData);
+  // console.log("userData", userData);
   const [signature, setSignature] = useState();
   const [trimmedDataURL, setTrimmedDataURL] = useState(null);
   const [viewImage, setViewImage] = useState(null);
@@ -313,7 +313,7 @@ const AddReleasingInfo = (props) => {
   // console.log(warehouseNumberData);
 
   const onSubmitHandler = async (formData) => {
-    console.log(formData);
+    // console.log(formData);
     // fileToBase64
     const fileToBase64 = (file) => {
       return new Promise((resolve, reject) => {
@@ -362,7 +362,7 @@ const AddReleasingInfo = (props) => {
       authorization_memo_img: authorizationLetterImgBase64,
     };
 
-    console.log("newFormData", newFormData);
+    // console.log("newFormData", newFormData);
 
     dispatch(
       openConfirm({

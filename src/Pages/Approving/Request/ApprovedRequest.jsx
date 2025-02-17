@@ -112,7 +112,8 @@ const ApprovedRequest = (props) => {
     { refetchOnMountOrArgChange: true }
   );
 
-  console.log("aaaaaaaaaaa", approvalData);
+  // console.log("aaaaaaaaaaa", approvalData);
+
   const handleViewRequisition = (data) => {
     navigate(`/approving/request/${data.transaction_number}`, {
       state: { ...data, approved },
@@ -120,7 +121,7 @@ const ApprovedRequest = (props) => {
   };
 
   const transactionStatus = (data) => {
-    console.log("data", data);
+    // console.log("data", data);
     let statusColor, hoverColor, textColor, variant;
 
     switch (data.status) {

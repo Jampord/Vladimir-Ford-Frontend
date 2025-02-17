@@ -155,7 +155,7 @@ const RequestMonitoring = () => {
               id: id,
               transaction_number: id,
             }).unwrap();
-            console.log(result);
+            // console.log(result);
             dispatch(
               openToast({
                 message: result.message,
@@ -165,7 +165,7 @@ const RequestMonitoring = () => {
 
             dispatch(closeConfirm());
           } catch (err) {
-            console.log(err);
+            // console.log(err);
             if (err?.status === 422) {
               dispatch(
                 openToast({

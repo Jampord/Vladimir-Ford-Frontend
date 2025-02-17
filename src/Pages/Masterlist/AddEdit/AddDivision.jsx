@@ -26,6 +26,8 @@ const schema = yup.object().shape({
 
 const AddDivision = (props) => {
   const { data, onUpdateResetHandler, refetch } = props;
+
+  // console.log("data", data);
   const dispatch = useDispatch();
 
   const icon = <CheckBoxOutlineBlank fontSize="small" />;
@@ -72,6 +74,7 @@ const AddDivision = (props) => {
     refetch: isDepartmentRefetch,
   } = useGetDepartmentAllApiQuery(null, { refetchOnMountOrArgChange: true });
 
+  // console.log("departmentData: ", departmentData);
   // useEffect(() => {
   //   const errorData =
   //     (isPostError || isUpdateError) &&

@@ -21,7 +21,7 @@ const schema = yup.object().shape({
 });
 
 const TagAccountTitleDepDebit = ({ data }) => {
-  console.log("data", data);
+  // console.log("data", data);
   const dispatch = useDispatch();
   const icon = <CheckBoxOutlineBlank fontSize="small" />;
   const checkedIcon = <CheckBox fontSize="small" />;

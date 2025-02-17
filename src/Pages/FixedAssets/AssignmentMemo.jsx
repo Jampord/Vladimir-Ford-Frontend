@@ -33,7 +33,7 @@ const AssignmentMemo = (props) => {
   useEffect(() => {
     const filteredData = data?.filter((item) => selectedMemo.includes(item.vladimir_tag_number));
     setNewData(filteredData);
-    console.log("filteredData", filteredData);
+    // console.log("filteredData", filteredData);
   }, [data]);
 
   const handlePrintAssignmentMemo = useReactToPrint({
@@ -159,7 +159,7 @@ const AssignmentMemo = (props) => {
                   <TableBody>
                     {(arrayData || singleData)?.map((data, index) => {
                       {
-                        console.log(data);
+                        // console.log(data);
                       }
                       return (
                         <TableRow key={index}>
