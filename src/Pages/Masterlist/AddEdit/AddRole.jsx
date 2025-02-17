@@ -84,7 +84,8 @@ const AddRole = (props) => {
       });
       dispatch(
         openToast({
-          message: postError?.data?.errors?.access_permission[0] || updateError?.data?.errors?.access_permission[0],
+          // message: postError?.data?.errors?.access_permission[0] || updateError?.data?.errors?.access_permission[0],
+          message: postError?.data?.errors.role_name || updateError?.data?.errors.role_name,
           duration: 5000,
           variant: "error",
         })
