@@ -82,8 +82,9 @@ import useScanDetection from "use-scan-detection-react18";
 import { useGetIpApiQuery } from "../../Redux/Query/IpAddressSetup";
 import { useReactToPrint } from "react-to-print";
 import AssignmentMemo from "./AssignmentMemo";
-import { closeDialog1, openDialog } from "../../Redux/StateManagement/booleanStateSlice";
+import { closeDialog, closeDialog1, openDialog, openDialog1 } from "../../Redux/StateManagement/booleanStateSlice";
 import AddInclusion from "../Asset Requisition/Received Asset/AddInclusion";
+import EditSmallTools from "./AddEdit/EditSmallTools";
 
 const FixedAssetView = (props) => {
   const [search, setSearch] = useState(null);
@@ -95,6 +96,7 @@ const FixedAssetView = (props) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [expanded, setExpanded] = useState(false);
   const [inclusionData, setInclusionData] = useState([]);
+  const [smallToolsData, setSmallToolsData] = useState();
   const [updateFixedAsset, setUpdateFixedAsset] = useState({
     status: false,
     id: "",
@@ -161,6 +163,7 @@ const FixedAssetView = (props) => {
 
   const drawer = useSelector((state) => state.booleanState.drawer);
   const dialog = useSelector((state) => state.booleanState.dialog);
+  const dialog1 = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
 
   const {
     data: dataApi,
@@ -173,7 +176,7 @@ const FixedAssetView = (props) => {
     refetchOnMountOrArgChange: true,
   });
 
-  console.log("FAData", dataApi);
+  // console.log("FAData", dataApi);
 
   const [getCalcDepreApi, { data: calcDepreApi, refetch: calcDepreApiRefetch }] = useLazyGetCalcDepreApiQuery();
   const [postCalcDepreAddCostApi, { data: calcDepreAddCostApi }] = usePostCalcDepreAddCostApiMutation();
@@ -489,9 +492,20 @@ const FixedAssetView = (props) => {
     });
   };
 
+  const onUpdateSmallToolsHandler = (props) => {
+    const { status_description, id, item_name, quantity, fixed_asset_id } = props;
+    setSmallToolsData({
+      id: id,
+      status_description: status_description,
+      item_name: item_name,
+      quantity: quantity,
+      fixed_asset_id: fixed_asset_id,
+    });
+  };
+
   const handleDepreciation = (id) => {
     getCalcDepreApi({ id, date: moment(new Date(currentDate)).format("YYYY-MM") });
-    console.log("calcDepreApiiiiiiiiiiiiiiiiiiiii", calcDepreApi);
+    // console.log("calcDepreApiiiiiiiiiiiiiiiiiiiii", calcDepreApi);
 
     setViewDepre(true);
 
@@ -504,7 +518,7 @@ const FixedAssetView = (props) => {
       state: { ...data, tag_number },
     });
 
-    console.log("mapData", data);
+    // console.log("mapData", data);
   };
 
   useScanDetection({
@@ -524,6 +538,10 @@ const FixedAssetView = (props) => {
 
   const handleOpenInclusion = () => {
     dispatch(openDialog());
+  };
+
+  const handleOpenSmallTools = () => {
+    dispatch(openDialog1());
   };
 
   return (
@@ -1173,7 +1191,7 @@ const FixedAssetView = (props) => {
                       onClick={handleOpenInclusion}
                       sx={{ mt: 2 }}
                     >
-                      Add Item
+                      {inclusionData?.length === 0 ? "ADD ITEM" : "ADD/DELETE ITEM"}
                     </Button>
                   </AccordionDetails>
                 </Accordion>
@@ -1188,7 +1206,7 @@ const FixedAssetView = (props) => {
 
                   <Divider />
 
-                  {dataApi?.data?.small_tools?.length === 0 || !dataApi?.data?.small_tools ? (
+                  {dataApi?.data?.small_tools_item?.length === 0 || !dataApi?.data?.small_tools_item ? (
                     <AccordionDetails>
                       <Stack flexDirection="row" alignItems="center" justifyContent="center" gap="5px">
                         <img src={NoDataFile} alt="" width="35px" />
@@ -1219,7 +1237,7 @@ const FixedAssetView = (props) => {
                             >
                               <TableCell className="tbl-cell">
                                 <Typography fontWeight="bold" fontSize={14}>
-                                  Id
+                                  Item Code
                                 </Typography>
                               </TableCell>
                               <TableCell className="tbl-cell">
@@ -1227,26 +1245,89 @@ const FixedAssetView = (props) => {
                                   Item Name
                                 </Typography>
                               </TableCell>
-                              <TableCell className="tbl-cell">
+                              <TableCell className="tbl-cell" align="center">
                                 <Typography fontWeight="bold" fontSize={14}>
-                                  Item Code
+                                  Quantity
+                                </Typography>
+                              </TableCell>
+                              <TableCell className="tbl-cell" align="center">
+                                <Typography fontWeight="bold" fontSize={14}>
+                                  Status
+                                </Typography>
+                              </TableCell>
+                              <TableCell className="tbl-cell" align="center">
+                                <Typography fontWeight="bold" fontSize={14}>
+                                  Action
                                 </Typography>
                               </TableCell>
                             </TableRow>
                           </TableHead>
 
                           <TableBody>
-                            {dataApi?.data.small_tools?.map((item) => {
+                            {dataApi?.data?.small_tools_item?.map((item, index) => {
                               return (
-                                <TableRow key={item.id}>
+                                <TableRow key={index}>
                                   <TableCell className="tbl-cell">
-                                    <Typography fontSize={13}>{item.id}</Typography>
+                                    <Typography fontSize={13}>{item.item_code}</Typography>
                                   </TableCell>
                                   <TableCell className="tbl-cell">
                                     <Typography fontSize={13}>{item.item_name}</Typography>
                                   </TableCell>
-                                  <TableCell className="tbl-cell">
-                                    <Typography fontSize={13}>{item.item_code}</Typography>
+                                  <TableCell className="tbl-cell" align="center">
+                                    <Typography fontSize={13}>{item.quantity}</Typography>
+                                  </TableCell>
+                                  <TableCell className="tbl-cell" align="center">
+                                    <Typography fontSize={13}>
+                                      {item.status_description === "Good" ? (
+                                        <Chip
+                                          size="small"
+                                          variant="contained"
+                                          sx={{
+                                            background: "#27ff811f",
+                                            color: "active.dark",
+                                            fontSize: "0.7rem",
+                                            px: 1,
+                                          }}
+                                          label={item?.status_description}
+                                        />
+                                      ) : item.status_description === "For Releasing" ||
+                                        item.status_description === "For Replacement" ? (
+                                        <Chip
+                                          size="small"
+                                          variant="contained"
+                                          sx={{
+                                            // border: "1px solid #E9D502",
+                                            background: "#FFFFB3",
+                                            color: "#C29800",
+                                            fontSize: "0.7rem",
+                                            px: 1,
+                                          }}
+                                          label={item?.status_description}
+                                        />
+                                      ) : (
+                                        <Chip
+                                          size="small"
+                                          variant="contained"
+                                          sx={{
+                                            background: "#fc3e3e34",
+                                            color: "error.light",
+                                            fontSize: "0.7rem",
+                                            px: 1,
+                                          }}
+                                          label={item?.status_description}
+                                        />
+                                      )}
+                                    </Typography>
+                                  </TableCell>
+                                  <TableCell className="tbl-cell" align="center">
+                                    {item?.status_description !== "For Releasing" && (
+                                      <ActionMenu
+                                        data={item}
+                                        onUpdateSmallToolsHandler={onUpdateSmallToolsHandler}
+                                        updateSmallTools
+                                        hideEdit
+                                      />
+                                    )}
                                   </TableCell>
                                 </TableRow>
                               );
@@ -1563,7 +1644,7 @@ const FixedAssetView = (props) => {
       <Dialog
         open={dialog}
         TransitionComponent={Grow}
-        onClose={() => dispatch(closeDialog1())}
+        onClose={() => dispatch(closeDialog())}
         sx={{
           ".MuiPaper-root": {
             padding: "20px",
@@ -1577,6 +1658,15 @@ const FixedAssetView = (props) => {
         }}
       >
         <AddInclusion data={inclusionData} fixedAsset={dataApi?.data} />
+      </Dialog>
+
+      <Dialog
+        open={dialog1}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog1())}
+        PaperProps={{ sx: { borderRadius: "10px" } }}
+      >
+        <EditSmallTools data={smallToolsData} />
       </Dialog>
     </>
   );
