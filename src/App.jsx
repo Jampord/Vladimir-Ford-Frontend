@@ -99,6 +99,7 @@ import CoordinatorSettings from "./Pages/Settings/CoordinatorSettings";
 import AddCoordinatorSettings from "./Pages/Settings/AddEdit/AddCoordinatorSettings";
 import ReceiverSettings from "./Pages/Settings/ReceiverSettings";
 import Credit from "./Pages/Masterlist/Credit";
+import ReleasingOfSmallToolsReplacement from "./Pages/Asset Requisition/Releasing of Small Tools Replacement/ReleasingOfSmallToolsReplacement";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -396,6 +397,11 @@ const router = createBrowserRouter([
                 element: <ViewRequestReleasing />,
                 handle: { permission: "requisition-releasing" },
               },
+              {
+                path: "small-tools-releasing",
+                element: <ReleasingOfSmallToolsReplacement />,
+                handle: { permission: "requisition-releasing" },
+              },
             ],
           },
 
@@ -484,6 +490,11 @@ const router = createBrowserRouter([
               },
               {
                 path: "request/:transaction_number",
+                element: <ViewApproveRequest />,
+                handle: { permission: "approving" },
+              },
+              {
+                path: "request/:transaction_number/:attachments",
                 element: <ViewApproveRequest />,
                 handle: { permission: "approving" },
               },

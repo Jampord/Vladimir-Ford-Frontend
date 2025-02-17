@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const assetReleasingApi = createApi({
   reducerPath: "assetReleasing",
-  tagTypes: ["AssetReleasing"],
+  tagTypes: ["AssetReleasing", "SmallToolsReleasing", "FixedAsset"],
 
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.VLADIMIR_BASE_URL,
@@ -50,6 +50,30 @@ export const assetReleasingApi = createApi({
       }),
       invalidatesTags: ["AssetReleasing"],
     }),
+
+    getSmallToolsReleasing: builder.query({
+      query: (params) =>
+        `small-tools-replacement-release?per_page=${params.per_page}&page=${params.page}&search=${params.search}&isReleased=${params.released}`,
+      providesTags: ["SmallToolsReleasing"],
+    }),
+
+    putSmallToolsStatus: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/update-small-tool-item/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["SmallToolsReleasing", "FixedAsset"],
+    }),
+
+    putSmallToolsReleasing: builder.mutation({
+      query: (data) => ({
+        url: `/release-small-tool`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["SmallToolsReleasing"],
+    }),
   }),
 });
 
@@ -61,4 +85,7 @@ export const {
   useLazyGetAssetReleasingQuery,
   usePutAssetReleasingMutation,
   usePutSaveReleasingMutation,
+  useGetSmallToolsReleasingQuery,
+  usePutSmallToolsStatusMutation,
+  usePutSmallToolsReleasingMutation,
 } = assetReleasingApi;
