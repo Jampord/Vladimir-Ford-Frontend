@@ -124,6 +124,8 @@ const RrSummary = (props) => {
     { refetchOnMountOrArgChange: true }
   );
 
+  // console.log("recieved ", receivedReceiptData);
+
   const [cancelVladimirRr, {}] = useCancelRrVladimirApiMutation();
   const [cancelYmirRr, {}] = useCancelRrYmirApiMutation();
 
@@ -231,6 +233,8 @@ const RrSummary = (props) => {
                         },
                       }}
                     >
+                      <TableCell className="tbl-cell">RR ID No.</TableCell>
+
                       <TableCell className="tbl-cell">
                         <TableSortLabel
                           active={orderBy === `transaction_number`}
@@ -296,6 +300,18 @@ const RrSummary = (props) => {
                                   color={data?.status === "active" ? "primary" : "error"}
                                   label={
                                     <Typography fontWeight={600} fontSize="12px">
+                                      {data.rr_id}
+                                    </Typography>
+                                  }
+                                />
+                              </TableCell>
+
+                              <TableCell className="tbl-cell">
+                                <Chip
+                                  size="small"
+                                  color={data?.status === "active" ? "primary" : "error"}
+                                  label={
+                                    <Typography fontWeight={600} fontSize="12px">
                                       {data.rr_number}
                                     </Typography>
                                   }
@@ -340,7 +356,7 @@ const RrSummary = (props) => {
                                 {data?.can_cancel === 1 && (
                                   <ActionMenu
                                     hideEdit
-                                    data={data?.rr_number}
+                                    data={data?.rr_id}
                                     showCancelRr={true}
                                     handleCancelRR={handleCancelRR}
                                   />
