@@ -58,6 +58,7 @@ import { useLazyGetDepreciationStatusAllApiQuery } from "../../../Redux/Query/Ma
 import { AddBox, Close } from "@mui/icons-material";
 import { useLazyGetMajorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MajorCategory";
 import { useLazyGetUnitOfMeasurementAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/UnitOfMeasurement";
+import { useLazyGetCreditAllQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Credit";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -217,6 +218,18 @@ const schema = yup.object().shape({
   months_depreciated: yup.number().required().typeError("Months Depreciated is a required field"),
   scrap_value: yup.number().required().typeError("Scrap Value is a required field"),
   depreciable_basis: yup.number().required().typeError("Depreciable Basis is a required field"),
+  initial_debit_id: yup.object().required().label("Initial Debit").typeError("Initial Debit is a required field"),
+  initial_credit_id: yup.object().required().label("Initial Credit").typeError("Initial Credit is a required field"),
+  depreciation_debit_id: yup
+    .object()
+    .required()
+    .label("Depreciation Debit")
+    .typeError("Depreciation Debit is a required field"),
+  depreciation_credit_id: yup
+    .object()
+    .required()
+    .label("Depreciation Credit")
+    .typeError("Depreciation Credit is a required field"),
 });
 
 const AddFa = (props) => {
@@ -376,6 +389,17 @@ const AddFa = (props) => {
   ] = useLazyGetAccountTitleAllApiQuery();
 
   const [
+    creditTrigger,
+    {
+      data: creditData = [],
+      isLoading: isCreditLoading,
+      isSuccess: isCreditSuccess,
+      isError: isCreditError,
+      refetch: isCreditRefetch,
+    },
+  ] = useLazyGetCreditAllQuery();
+
+  const [
     sedarTrigger,
     { data: sedarData = [], isLoading: isSedarLoading, isSuccess: isSedarSuccess, isError: isSedarError },
   ] = useLazyGetSedarUsersApiQuery();
@@ -493,6 +517,11 @@ const AddFa = (props) => {
       months_depreciated: "",
       scrap_value: "",
       depreciable_basis: "",
+
+      initial_debit_id: null,
+      initial_credit_id: null,
+      depreciation_credit_id: null,
+      depreciation_debit_id: null,
     },
   });
 
@@ -613,8 +642,12 @@ const AddFa = (props) => {
     }
   }, [watch("acquisition_cost"), watch("scrap_value")]);
 
+  const depreciationDebit = watch("initial_debit_id")?.depreciation_debit;
+
   // SUBMIT HANDLER
   const onSubmitHandler = (formData) => {
+    // console.log("formData", formData);
+
     const newObj = {
       ...formData,
       cellphone_number: formData.cellphone_number ? "09" + formData.cellphone_number : null,
@@ -633,6 +666,11 @@ const AddFa = (props) => {
       scrap_value: formData.scrap_value === null ? 0 : formData.scrap_value,
       depreciable_basis: formData.depreciable_basis === null ? 0 : formData.depreciable_basis,
       uom_id: formData?.uom_id?.id?.toString(),
+
+      initial_debit_id: formData?.initial_debit_id?.sync_id?.toString(),
+      initial_credit_id: formData?.initial_credit_id?.sync_id?.toString(),
+      depreciation_debit_id: formData?.depreciation_debit_id?.sync_id?.toString(),
+      depreciation_credit_id: formData?.depreciation_credit_id?.sync_id?.toString(),
     };
 
     if (data.status) {
@@ -1646,6 +1684,103 @@ const AddFa = (props) => {
                   helperText={errors?.depreciable_basis?.message}
                 />
               )}
+
+              <Divider />
+
+              <Typography sx={sxSubtitle}>Accounting Entries</Typography>
+
+              <CustomAutoComplete
+                autoComplete
+                name="initial_debit_id"
+                // disabled={edit ? false : transactionData?.view}
+                control={control}
+                options={accountTitleData}
+                loading={isAccountTitleLoading}
+                onOpen={() => (isAccountTitleSuccess ? null : accountTitleTrigger())}
+                size="small"
+                getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
+                isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
+                renderInput={(params) => (
+                  <TextField
+                    color="secondary"
+                    {...params}
+                    label="Initial Debit"
+                    error={!!errors?.initial_debit_id}
+                    helperText={errors?.initial_debit_id?.message}
+                  />
+                )}
+                onChange={(e, value) => {
+                  setValue("depreciation_debit_id", null);
+                  return value;
+                }}
+              />
+
+              <CustomAutoComplete
+                autoComplete
+                name="initial_credit_id"
+                // disabled={edit ? false : transactionData?.view}
+                control={control}
+                options={creditData}
+                loading={isCreditLoading}
+                onOpen={() => (isCreditSuccess ? null : creditTrigger())}
+                size="small"
+                getOptionLabel={(option) => option.credit_code + " - " + option.credit_name}
+                isOptionEqualToValue={(option, value) => option.credit_code === value.credit_code}
+                renderInput={(params) => (
+                  <TextField
+                    color="secondary"
+                    {...params}
+                    label="Initial Credit"
+                    error={!!errors?.initial_credit_id}
+                    helperText={errors?.initial_credit_id?.message}
+                  />
+                )}
+              />
+
+              <CustomAutoComplete
+                autoComplete
+                name="depreciation_debit_id"
+                // disabled={edit ? false : transactionData?.view}
+                control={control}
+                options={depreciationDebit || []}
+                loading={isAccountTitleLoading}
+                onOpen={() => (isAccountTitleSuccess ? null : accountTitleTrigger())}
+                size="small"
+                disabled={watch("initial_debit_id") === null}
+                getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
+                isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
+                renderInput={(params) => (
+                  <TextField
+                    color="secondary"
+                    {...params}
+                    label="Depreciation Debit"
+                    error={!!errors?.depreciation_debit_id}
+                    helperText={errors?.depreciation_debit_id?.message}
+                  />
+                )}
+              />
+
+              <CustomAutoComplete
+                autoComplete
+                name="depreciation_credit_id"
+                // disabled={edit ? false : transactionData?.view}
+                control={control}
+                options={creditData}
+                loading={isCreditLoading}
+                onOpen={() => (isCreditSuccess ? null : creditTrigger())}
+                size="small"
+                getOptionLabel={(option) => option.credit_code + " - " + option.credit_name}
+                isOptionEqualToValue={(option, value) => option.credit_code === value.credit_code}
+                renderInput={(params) => (
+                  <TextField
+                    color="secondary"
+                    {...params}
+                    label="Depreciation Credit"
+                    error={!!errors?.depreciation_credit_id}
+                    helperText={errors?.depreciation_credit_id?.message}
+                  />
+                )}
+              />
             </Box>
           </Box>
         )}
