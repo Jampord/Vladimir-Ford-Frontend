@@ -63,28 +63,28 @@ const schema = yup.object().shape({
   depreciation_credit_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.sync_id.toString();
     })
     .required()
     .label("Depreciation Credit"),
   depreciation_debit_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.sync_id.toString();
     })
     .required()
     .label("Depreciation Debit"),
   initial_credit_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.sync_id.toString();
     })
     .required()
     .label("Initial Credit"),
   initial_debit_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.sync_id.toString();
     })
     .required()
     .label("Initial Debit"),
@@ -139,6 +139,9 @@ const Depreciation = (props) => {
   ] = usePostDepreciateApiMutation();
 
   const data = calcDepreApi?.data;
+  const depreciationDebit = calcDepreApi?.data?.initial_debit?.depreciation_debit;
+  // console.log("dataaaaaaaaaaa", data);
+  // console.log("👀👀👀", depreciationDebit);
   const dispatch = useDispatch();
   const dialog = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
 
@@ -161,6 +164,20 @@ const Depreciation = (props) => {
   // };
 
   // const combinedHistoryData = joinDepreciationByYear(historyData?.depreciation_history);
+
+  useEffect(() => {
+    // console.log("data", data);
+    if (data) {
+      setValue("initial_debit_id", data?.initial_debit);
+      setValue("initial_credit_id", data?.initial_credit);
+      setValue("depreciation_credit_id", data?.depreciation_credit);
+    }
+  }, [data]);
+
+  // console.log("1", watch("initial_debit_id"));
+  // console.log("2", watch("initial_credit_id"));
+  // console.log("3", watch("depreciation_debit_id"));
+  // console.log("4", watch("depreciation_credit_id"));
 
   const HistoryTable = () => {
     return (
@@ -226,6 +243,8 @@ const Depreciation = (props) => {
                         <TableCell className="tbl-cell">Remaining Book Value</TableCell>
                         <TableCell className="tbl-cell">Depreciated Amount Per Month</TableCell>
                         <TableCell className="tbl-cell">Accumulated Depreciation</TableCell>
+                        <TableCell className="tbl-cell">Accounting Entries</TableCell>
+                        <TableCell className="tbl-cell">Chart Of Accounts</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -235,6 +254,54 @@ const Depreciation = (props) => {
                           <TableCell>₱{formatCost(row?.remaining_value)}</TableCell>
                           <TableCell>₱{formatCost(row?.monthly_depreciation)}</TableCell>
                           <TableCell>₱{formatCost(row?.accumulated_depreciation)}</TableCell>
+                          <TableCell>
+                            <Typography fontSize="11px" color="gray">
+                              {row.initial_debit.account_title_code}
+                              {" - "} {row.initial_debit.account_title_name}
+                            </Typography>
+                            <Typography fontSize="11px" color="gray">
+                              {row.initial_credit.account_title_code}
+                              {" - "} {row.initial_credit.account_title_name}
+                            </Typography>
+                            <Typography fontSize="11px" color="gray">
+                              {row.depreciation_debit.account_title_code}
+                              {" - "} {row.depreciation_debit.account_title_name}
+                            </Typography>
+                            <Typography fontSize="11px" color="gray">
+                              {row.depreciation_credit.account_title_code}
+                              {" - "} {row.depreciation_credit.account_title_name}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Typography fontSize="10px" color="gray">
+                              {row.company.company_code}
+                              {" - "} {row.company.company_name}
+                            </Typography>
+                            <Typography fontSize="10px" color="gray">
+                              {row.business_unit?.business_unit_code}
+                              {" - "}
+                              {row.business_unit?.business_unit_name}
+                            </Typography>
+                            <Typography fontSize="10px" color="gray">
+                              {row.department.department_code}
+                              {" - "}
+                              {row.department.department_name}
+                            </Typography>
+                            <Typography fontSize="10px" color="gray">
+                              {row.unit?.unit_code}
+                              {" - "}
+                              {row.unit?.unit_name}
+                            </Typography>
+                            <Typography fontSize="10px" color="gray">
+                              {row.sub_unit?.sub_unit_code}
+                              {" - "}
+                              {row.sub_unit?.sub_unit_name}
+                            </Typography>
+                            <Typography fontSize="10px" color="gray">
+                              {row.location.location_code} {" - "}
+                              {row.location.location_name}
+                            </Typography>
+                          </TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -657,10 +724,11 @@ const Depreciation = (props) => {
                     <Typography fontFamily="Anton" color="secondary">
                       Depreciate Asset
                     </Typography>
-                    <CustomAutoComplete
+                    {/* <CustomAutoComplete
                       name="initial_debit_id"
                       // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
                       control={control}
+                      disabled
                       options={accountTitleData}
                       loading={isAccountTitleLoading}
                       size="small"
@@ -680,6 +748,7 @@ const Depreciation = (props) => {
                     <CustomAutoComplete
                       autoComplete
                       name="initial_credit_id"
+                      disabled
                       // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
                       control={control}
                       options={accountTitleData}
@@ -696,15 +765,15 @@ const Depreciation = (props) => {
                           helperText={errors?.initial_credit_id?.message}
                         />
                       )}
-                    />
+                    /> */}
 
                     <CustomAutoComplete
                       autoComplete
                       name="depreciation_debit_id"
                       // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
                       control={control}
-                      options={accountTitleData}
-                      loading={isAccountTitleLoading}
+                      options={depreciationDebit}
+                      // loading={isAccountTitleLoading}
                       size="small"
                       getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
                       isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
@@ -724,6 +793,7 @@ const Depreciation = (props) => {
                       name="depreciation_credit_id"
                       // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
                       control={control}
+                      disabled
                       options={accountTitleData}
                       loading={isAccountTitleLoading}
                       size="small"
