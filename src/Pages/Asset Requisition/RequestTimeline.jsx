@@ -221,7 +221,9 @@ const RequestTimeline = (props) => {
                             {item?.action}
                           </Typography>
                           <Typography fontSize={12} color="text.light">
-                            {`(${item?.causer?.employee_id}) - ${item?.causer?.firstname}  ${item?.causer?.lastname}`}
+                            {item?.ymir_causer
+                              ? item?.ymir_causer
+                              : `(${item?.causer?.employee_id}) - ${item?.causer?.firstname}  ${item?.causer?.lastname}`}
                           </Typography>
 
                           {/* --------------------------------- ADDITIONAL INFO -----------------------------------*/}
@@ -266,6 +268,15 @@ const RequestTimeline = (props) => {
                           {item?.remarks && (
                             <Typography fontSize={12} fontWeight={600}>
                               Remarks: {item?.remarks}
+                            </Typography>
+                          )}
+                          {(item?.quantity_delivered || item?.quantity_remaining) && (
+                            <Typography fontSize={12} fontWeight={500} color="secondary.light">
+                              Quantity Delivered: {item?.quantity_delivered} | Quantity Remaining:{" "}
+                              {item?.quantity_remaining}{" "}
+                              {item?.quantity_cancelled &&
+                                item?.quantity_cancelled !== null &&
+                                "| Quantity Cancelled: " + item?.quantity_cancelled}
                             </Typography>
                           )}
                         </Box>
