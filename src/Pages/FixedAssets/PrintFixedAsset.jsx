@@ -181,6 +181,8 @@ const PrintFixedAsset = (props) => {
     { refetchOnMountOrArgChange: true }
   );
 
+  // console.log("prijntingggg", fixedAssetData);
+
   const {
     handleSubmit,
     control,
@@ -203,26 +205,39 @@ const PrintFixedAsset = (props) => {
   });
 
   useEffect(() => {
-    if (isPostSuccess) {
+    if (isPostSuccess || isMemoSuccess) {
       dispatch(
         openToast({
-          message: printData?.message,
+          message: printData?.message || memoData?.message,
           duration: 5000,
         })
       );
     }
-  }, [isPostSuccess]);
+  }, [isPostSuccess, isMemoSuccess]);
 
   useEffect(() => {
-    if (isPostError && postError?.status === 422) {
+    if ((isPostError || isMemoError) && (memoError?.status || postError?.status === 422)) {
       setError("search", {
         type: "validate",
-        message: postError?.data?.message,
+        message: postError?.data?.message || memoError?.data?.message,
       });
+      // dispatch(
+      //   openToast({
+      //     message: "Printed successfully.",
+      //     duration: 5000,
+      //   })
+      // );
+      dispatch(
+        openToast({
+          message: postError?.data?.message || memoError?.data?.message,
+          duration: 5000,
+          variant: "error",
+        })
+      );
     } else if (isPostError && postError?.status === 403) {
       dispatch(
         openToast({
-          message: postError?.data?.message,
+          message: postError?.data?.message || memoError?.data?.message,
           duration: 5000,
           variant: "error",
         })
@@ -230,12 +245,12 @@ const PrintFixedAsset = (props) => {
     } else if (isPostError && postError?.status === 404) {
       dispatch(
         openToast({
-          message: postError?.data?.message,
+          message: postError?.data?.message || memoError?.data?.message,
           duration: 5000,
           variant: "error",
         })
       );
-    } else if (isPostError && postError?.status !== 422) {
+    } else if ((isPostError || isMemoError) && (memoError?.status || postError?.status !== 422)) {
       dispatch(
         openToast({
           message: "Something went wrong. Please try again.",
@@ -243,9 +258,15 @@ const PrintFixedAsset = (props) => {
           variant: "error",
         })
       );
+      // dispatch(
+      //   openToast({
+      //     message: "Printed successfully.",
+      //     duration: 5000,
+      //   })
+      // );
       // console.log(postError);
     }
-  }, [isPostError]);
+  }, [isPostError, isMemoError]);
 
   const onPrintHandler = (formData) => {
     // console.log(formData);
@@ -280,31 +301,52 @@ const PrintFixedAsset = (props) => {
 
             // console.log(result);
 
-            dispatch(
-              openToast({
-                message: result.message,
-                duration: 5000,
-              })
-            );
+            // dispatch(
+            //   openToast({
+            //     message: result.message,
+            //     duration: 5000,
+            //   })
+            // );
+            // dispatch(
+            //   openToast({
+            //     message: "Printed successfully.",
+            //     duration: 5000,
+            //   })
+            // );
             dispatch(closeConfirm());
+            reset();
           } catch (err) {
             console.log(err.data.message);
             if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
-              dispatch(
-                openToast({
-                  message: err.data?.message,
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
+              // dispatch(
+              //   openToast({
+              //     message: err.data?.message,
+              //     duration: 5000,
+              //     variant: "error",
+              //   })
+              // );
+              // dispatch(
+              //   openToast({
+              //     message: "Printed successfully.",
+              //     duration: 5000,
+              //   })
+              // );
+              reset();
             } else if (err?.status !== 422) {
-              dispatch(
-                openToast({
-                  message: "Something went wrong. Please try again.",
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
+              // dispatch(
+              //   openToast({
+              //     message: "Something went wrong. Please try again.",
+              //     duration: 5000,
+              //     variant: "error",
+              //   })
+              // );
+              // dispatch(
+              //   openToast({
+              //     message: "Printed successfully.",
+              //     duration: 5000,
+              //   })
+              // );
+              reset();
             }
           }
         },
@@ -353,6 +395,12 @@ const PrintFixedAsset = (props) => {
                   variant: "error",
                 })
               );
+              // dispatch(
+              //   openToast({
+              //     message: "Succesfully printed.",
+              //     duration: 5000,
+              //   })
+              // );
               console.log(err);
             } else if (err?.status !== 422) {
               dispatch(
@@ -362,6 +410,12 @@ const PrintFixedAsset = (props) => {
                   variant: "error",
                 })
               );
+              // dispatch(
+              //   openToast({
+              //     message: "Succesfully printed.",
+              //     duration: 5000,
+              //   })
+              // );
             }
           }
         },
@@ -613,6 +667,10 @@ const PrintFixedAsset = (props) => {
                     <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
                   </TableCell>
 
+                  <TableCell>
+                    <TableSortLabel disabled>Accountability</TableSortLabel>
+                  </TableCell>
+
                   <TableCell
                     sx={{
                       textAlign: "center",
@@ -716,10 +774,19 @@ const PrintFixedAsset = (props) => {
                                 {data.location.location_code} {" - "}
                                 {data.location.location_name}
                               </Typography>
-                              <Typography noWrap fontSize="10px" color="gray">
+                              {/* <Typography noWrap fontSize="10px" color="gray">
                                 {data.account_title.account_title_code}
                                 {" - "}
                                 {data.account_title.account_title_name}
+                              </Typography> */}
+                            </TableCell>
+
+                            <TableCell>
+                              <Typography noWrap variant="h3" fontSize="12px" color="secondary" fontWeight="bold">
+                                {data.accountable}
+                              </Typography>
+                              <Typography noWrap fontSize="11px" color="gray">
+                                {data.accountability}
                               </Typography>
                             </TableCell>
 
@@ -763,7 +830,7 @@ const PrintFixedAsset = (props) => {
         <Stack flexDirection="row" width="100%" justifyContent="space-between" flexWrap="wrap" alignItems="center">
           <Box sx={{ pl: "5px" }}>
             <Typography fontFamily="Anton, Impact, Roboto" fontSize="18px" color="secondary.main">
-              Selected : {watch("tagNumber").length}
+              Selected: {watch("tagNumber").length}
             </Typography>
           </Box>
 
