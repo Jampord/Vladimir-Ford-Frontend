@@ -201,13 +201,13 @@ const schema = yup.object().shape({
     })
     .required()
     .label("Location"),
-  account_title_id: yup
-    .string()
-    .transform((value) => {
-      return value?.id.toString();
-    })
-    .required()
-    .label("Account Title"),
+  // account_title_id: yup
+  //   .string()
+  //   .transform((value) => {
+  //     return value?.id.toString();
+  //   })
+  //   .required()
+  //   .label("Account Title"),
   asset_description: yup.string().required().label("Asset Description"),
   asset_specification: yup.string().required().label("Asset Specification"),
   acquisition_date: yup.string().required().label("Acquisition Date").typeError("Acquisition Date is a required field"),
@@ -286,7 +286,7 @@ const AddFixedAsset = (props) => {
   const [poNumber, setPoNumber] = useState("");
   const [rrNumber, setRrNumber] = useState("");
 
-  console.log("data", data);
+  // console.log("data", data);
 
   const isFullWidth = useMediaQuery("(max-width: 600px)");
   const dispatch = useDispatch();
@@ -544,7 +544,7 @@ const AddFixedAsset = (props) => {
       unit_id: null,
       subunit_id: null,
       location_id: null,
-      account_title_id: null,
+      // account_title_id: null,
 
       asset_description: "",
       asset_specification: "",
@@ -691,7 +691,7 @@ const AddFixedAsset = (props) => {
       setValue("unit_id", data.unit);
       setValue("subunit_id", data.subunit);
       setValue("location_id", data.location);
-      setValue("account_title_id", data.account_title);
+      // setValue("account_title_id", data.account_title);
 
       setValue("asset_description", data.asset_description);
       setValue("asset_specification", data.asset_specification);
@@ -879,7 +879,7 @@ const AddFixedAsset = (props) => {
     matchFrom: "any",
   });
 
-  console.log("valid?", isValid);
+  // console.log("valid?", isValid);
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmitHandler)} className="addFixedAsset">
@@ -1021,7 +1021,7 @@ const AddFixedAsset = (props) => {
 
               if (!isIncluded) {
                 setValue("minor_category_id", null);
-                setValue("account_title_id", null);
+                // setValue("account_title_id", null);
               }
 
               setValue("est_useful_life", value.est_useful_life);
@@ -1054,7 +1054,7 @@ const AddFixedAsset = (props) => {
               />
             )}
             onChange={(_, value) => {
-              setValue("account_title_id", value ? value.account_title : null);
+              // setValue("account_title_id", value ? value.account_title : null);
               return value;
             }}
           />
@@ -1233,7 +1233,7 @@ const AddFixedAsset = (props) => {
             )}
           />
 
-          <CustomAutoComplete
+          {/* <CustomAutoComplete
             name="account_title_id"
             disabled
             control={control}
@@ -1252,7 +1252,7 @@ const AddFixedAsset = (props) => {
                 helperText={errors?.account_title_id?.message}
               />
             )}
-          />
+          /> */}
         </Box>
 
         <Box
