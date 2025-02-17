@@ -7,6 +7,7 @@ import { useLocation } from "react-router-dom";
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import { PlaylistRemoveRounded, RemoveFromQueue, RuleFolder, TransferWithinAStation } from "@mui/icons-material";
 import Cards from "../../Components/Reusable/Cards";
+import { useSelector } from "react-redux";
 
 const ApprovingList = [
   {
@@ -14,6 +15,7 @@ const ApprovingList = [
     label: "Request",
     description: "Requesting for Asset Evaluation",
     path: "/approving/request",
+    permission: "approving-request",
   },
 
   {
@@ -21,6 +23,7 @@ const ApprovingList = [
     label: "Transfer",
     description: "Requesting for Asset Transfer",
     path: "/approving/transfer",
+    permission: "approving-transfer",
   },
 
   {
@@ -28,6 +31,7 @@ const ApprovingList = [
     label: "Pull-Out",
     description: "Requesting for Asset Pull-Out",
     path: "/approving/pull-out",
+    permission: "approving-pullout",
   },
 
   {
@@ -35,6 +39,7 @@ const ApprovingList = [
     label: "Disposal",
     description: "List of For Disposal Items",
     path: "/approving/disposal",
+    permission: "approving-disposal",
   },
 ];
 
@@ -42,6 +47,8 @@ const Approving = () => {
   const location = useLocation();
   const isSmallScreen = useMediaQuery("(max-width: 590px)");
   // console.log(location.pathname);
+
+  const permissions = useSelector((state) => state.userLogin?.user.role.access_permission);
 
   return (
     <>
@@ -62,7 +69,7 @@ const Approving = () => {
             <Box className="parentSidebar__container">
               <Box className="parentSidebar__wrapper">
                 {ApprovingList?.map((data, index) => {
-                  return <Cards data={data} key={index} />;
+                  return permissions.split(", ").includes(data.permission) && <Cards data={data} key={index} />;
                 })}
               </Box>
             </Box>
