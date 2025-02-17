@@ -295,7 +295,7 @@ const ExportFixedAsset = () => {
             }
             type="submit"
             color="secondary"
-            disabled={disabledItems()}
+            // disabled={disabledItems()}
           >
             Export
           </LoadingButton>
