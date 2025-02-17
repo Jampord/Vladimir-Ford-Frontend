@@ -40,6 +40,7 @@ import {
   closeDatePicker,
   closeDrawer1,
   closePrint,
+  closeDialog1,
 } from "../../Redux/StateManagement/booleanStateSlice";
 
 // MUI
@@ -70,6 +71,7 @@ import CustomTablePagination from "../../Components/Reusable/CustomTablePaginati
 import AssignmentMemoReprint from "./AssignmentMemoReprint";
 import AddFA from "./AddEdit/AddFA";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
+import ImportNewCOA from "./ImportNewCOA";
 
 const FixedAsset = (props) => {
   const navigate = useNavigate();
@@ -134,6 +136,7 @@ const FixedAsset = (props) => {
 
   const drawer = useSelector((state) => state.booleanState.drawer);
   const drawer1 = useSelector((state) => state.booleanState.drawerMultiple.drawer1);
+  const dialog1 = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
   const dialog = useSelector((state) => state.booleanState.dialog);
   const add = useSelector((state) => state.booleanState.add);
   const importFile = useSelector((state) => state.booleanState.importFile);
@@ -637,6 +640,7 @@ const FixedAsset = (props) => {
       >
         <ImportFixedAsset />
       </Dialog>
+
       <Dialog
         open={drawer1}
         TransitionComponent={Grow}
@@ -652,6 +656,23 @@ const FixedAsset = (props) => {
         }}
       >
         <ImportCost />
+      </Dialog>
+
+      <Dialog
+        open={dialog1}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog1())}
+        PaperProps={{
+          sx: {
+            borderRadius: "10px",
+            padding: "5px 20px",
+            minWidth: "30%",
+            width: "80%",
+            overflow: "hidden",
+          },
+        }}
+      >
+        <ImportNewCOA />
       </Dialog>
 
       <Dialog
