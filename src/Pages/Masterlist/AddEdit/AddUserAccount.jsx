@@ -227,6 +227,7 @@ const AddUserAccount = (props) => {
   ] = useLazyGetWarehouseAllApiQuery();
 
   const { data: roleData = [], isLoading: isRoleLoading, isError: isRoleError } = useGetRoleAllApiQuery();
+  // console.log("roleData: ", roleData);
 
   const {
     handleSubmit,
@@ -300,7 +301,7 @@ const AddUserAccount = (props) => {
     }
   }, [isPostSuccess, isUpdateSuccess]);
 
-  console.log("data", data);
+  // console.log("data", data);
 
   useEffect(() => {
     if (data.status) {
@@ -331,7 +332,7 @@ const AddUserAccount = (props) => {
     const newFormData = {
       ...formData,
       role_id: formData.role_id?.id,
-      warehouse_id: formData.warehouse_id?.id,
+      warehouse_id: formData.warehouse_id?.sync_id,
       password: formData.username,
     };
 
