@@ -9,7 +9,11 @@ import { openToast } from "../../Redux/StateManagement/toastSlice";
 import { openConfirm, closeConfirm, onLoading } from "../../Redux/StateManagement/confirmSlice";
 
 import { useLazyGetYmirWarehouseAllApiQuery } from "../../Redux/Query/Masterlist/YmirCoa/YmirApi";
-import { useGetWarehouseApiQuery, usePostWarehouseApiMutation } from "../../Redux/Query/Masterlist/Warehouse";
+import {
+  useGetWarehouseApiQuery,
+  usePostWarehouseApiMutation,
+  usePostWarehouseStatusApiMutation,
+} from "../../Redux/Query/Masterlist/Warehouse";
 
 import { useSelector } from "react-redux";
 
@@ -108,7 +112,7 @@ const Warehouse = () => {
     isSuccess: warehouseSuccess,
     isError: warehouseError,
     error: errorData,
-    refetch: warehouseApiRefetch,
+    refetch: refetch,
   } = useGetWarehouseApiQuery(
     {
       page: page,
@@ -123,6 +127,8 @@ const Warehouse = () => {
     postWarehouse,
     { data: postData, isLoading: isPostLoading, isSuccess: isPostSuccess, isError: isPostError, error: postError },
   ] = usePostWarehouseApiMutation();
+
+  const [postWarehouseStatusApi, { isLoading }] = usePostWarehouseStatusApiMutation();
 
   useEffect(() => {
     if (ymirWarehouseApiSuccess) {
@@ -209,21 +215,23 @@ const Warehouse = () => {
   console.log("wdata", warehouseData);
 
   const onUpdateHandler = (props) => {
-    const { id, warehouse_name, location } = props;
+    const { id, warehouse_name, location, sync_id } = props;
     setUpdateWarehouse({
       status: true,
       id: id,
+      sync_id: sync_id,
       location: location,
       warehouse_name: warehouse_name,
     });
   };
 
   const onViewLocationHandler = (props) => {
-    const { id, warehouse_name, location } = props;
+    const { id, warehouse_name, location, sync_id } = props;
     setUpdateWarehouse({
       status: true,
       action: "view",
       id: id,
+      sync_id: sync_id,
       location: location,
       warehouse_name: warehouse_name,
     });
@@ -233,6 +241,66 @@ const Warehouse = () => {
     onViewLocationHandler(data);
     dispatch(openDrawer());
     dispatch(closeConfirm());
+  };
+
+  const onArchiveRestoreHandler = async (id) => {
+    dispatch(
+      openConfirm({
+        icon: status === "active" ? ReportProblem : Help,
+        iconColor: status === "active" ? "alert" : "info",
+        message: (
+          <Box>
+            <Typography> Are you sure you want to</Typography>
+            <Typography
+              sx={{
+                display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+                fontFamily: "Raleway",
+              }}
+            >
+              {status === "active" ? "ARCHIVE" : "ACTIVATE"}
+            </Typography>{" "}
+            this data?
+          </Box>
+        ),
+        onConfirm: async () => {
+          try {
+            dispatch(onLoading());
+            const result = await postWarehouseStatusApi({
+              id: id,
+              status: status === "active" ? false : true,
+            }).unwrap();
+
+            dispatch(
+              openToast({
+                message: result.message,
+                duration: 5000,
+              })
+            );
+            dispatch(closeConfirm());
+          } catch (err) {
+            if (err?.status === 422) {
+              dispatch(
+                openToast({
+                  message: err.data.errors?.detail,
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            } else if (err?.status !== 422) {
+              dispatch(
+                openToast({
+                  message: "Something went wrong. Please try again.",
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            }
+          }
+        },
+      })
+    );
   };
 
   return (
@@ -367,7 +435,12 @@ const Warehouse = () => {
                             </TableCell>
 
                             <TableCell className="tbl-cell tr-cen-pad45">
-                              <ActionMenu data={data} onUpdateHandler={onUpdateHandler} />
+                              <ActionMenu
+                                data={data}
+                                onUpdateHandler={onUpdateHandler}
+                                status={status}
+                                onArchiveRestoreHandler={onArchiveRestoreHandler}
+                              />
                             </TableCell>
                           </TableRow>
                         ))}
