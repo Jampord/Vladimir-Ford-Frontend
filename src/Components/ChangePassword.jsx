@@ -145,6 +145,7 @@ const ChangePassword = (props) => {
           size="small"
           error={!!errors?.old_password}
           helperText={errors?.old_password?.message}
+          allowNCharacter
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -173,6 +174,7 @@ const ChangePassword = (props) => {
           size="small"
           error={!!errors?.new_password}
           helperText={errors?.new_password?.message}
+          allowNCharacter
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -201,6 +203,7 @@ const ChangePassword = (props) => {
           size="small"
           error={!!errors?.confirm_password}
           helperText={errors?.confirm_password?.message}
+          allowNCharacter
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">

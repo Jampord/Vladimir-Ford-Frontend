@@ -12,6 +12,8 @@ const CustomTextField = (props) => {
     errors,
     validateText,
     allowSpecialCharacters = false,
+    allowNCharacter = false,
+
     hasRequest,
 
     ...textfield
@@ -20,7 +22,9 @@ const CustomTextField = (props) => {
   const validateInput = (value) => {
     const regex = allowSpecialCharacters
       ? /^[\w\s,.&-]*$/g // Allows letters, numbers, spaces, commas, periods, & and -
-      : /^[a-zA-Z0-9-\s+&,.\d]*$/g; // Keeps the original validation
+      : // : allowNCharacter
+        // ? /^[a-zA-Z0-9Ññ\s]*$/u
+        /^[ña-zA-Z0-9-\s+&,.\d]*$/g; // Keeps the original validation
   };
 
   return (
@@ -45,6 +49,10 @@ const CustomTextField = (props) => {
                 // Clean the input value
                 const newValue = allowSpecialCharacters
                   ? inputValue // If special characters are allowed, no need to clean
+                  : allowNCharacter
+                  ? inputValue
+                      .replace(/[^a-zA-Z0-9Ññ\s,.&-]/g, "") // Allow Ññ
+                      .replace(/\s{2,}/g, " ")
                   : inputValue
                       .replace(/[^a-zA-Z0-9\s,.&-]/g, "") // Clean input for disallowed characters
                       .replace(/\s{2,}/g, " "); // Replace multiple spaces with a single space
