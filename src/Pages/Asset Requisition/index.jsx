@@ -6,7 +6,14 @@ import { Outlet } from "react-router";
 import { useLocation } from "react-router-dom";
 
 import { Box, Typography, useMediaQuery } from "@mui/material";
-import { AssignmentTurnedIn, OpenInBrowserOutlined, Output, ShoppingBasket, TableRows } from "@mui/icons-material";
+import {
+  AssignmentTurnedIn,
+  Construction,
+  OpenInBrowserOutlined,
+  Output,
+  ShoppingBasket,
+  TableRows,
+} from "@mui/icons-material";
 import Cards from "../../Components/Reusable/Cards";
 import { useSelector } from "react-redux";
 import { useGetNotificationApiQuery } from "../../Redux/Query/Notification";
@@ -55,6 +62,14 @@ const AssetRequisition = () => {
       path: "/asset-requisition/requisition-releasing",
       permission: "requisition-releasing",
       notification: notifData?.toRelease,
+    },
+    {
+      icon: <Construction />,
+      label: "Releasing of Small Tools Replacement",
+      description: "Release the Small Tools replacement to the Tagged Asset",
+      path: "/asset-requisition/small-tools-releasing",
+      permission: "requisition-releasing",
+      // notification: notifData?.toRelease,
     },
   ];
 
