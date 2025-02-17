@@ -20,6 +20,7 @@ import {
   openExport,
   openScan,
   openPrint,
+  openDialog1,
 } from "../../Redux/StateManagement/booleanStateSlice";
 
 import { LoadingButton } from "@mui/lab";
@@ -220,6 +221,11 @@ const MasterlistToolbar = (props) => {
 
   const handleOpenImportCost = (e) => {
     dispatch(openDrawer1());
+    setAnchorElImportFa(!e.currentTarget);
+  };
+
+  const handleOpenImportNewCOA = (e) => {
+    dispatch(openDialog1());
     setAnchorElImportFa(!e.currentTarget);
   };
 
@@ -434,6 +440,15 @@ const MasterlistToolbar = (props) => {
                   <AddCard />
                 </ListItemIcon>
                 <ListItemText>Import Additional Cost</ListItemText>
+              </MenuItem>
+
+              <Divider sx={{ mx: 2 }} />
+
+              <MenuItem onClick={handleOpenImportNewCOA} dense>
+                <ListItemIcon>
+                  <LibraryAdd />
+                </ListItemIcon>
+                <ListItemText>Import New COA</ListItemText>
               </MenuItem>
             </Menu>
           )}
