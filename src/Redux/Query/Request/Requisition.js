@@ -118,7 +118,20 @@ export const requisitionApi = createApi({
     }),
 
     getRequestExportApi: builder.query({
-      query: (params) => `/export-aging?from=${params?.from}&to=${params?.to}&data_all=${params?.export}`,
+      query: (params) => {
+        const queryParams = [`data_all=${params?.export}`];
+
+        if (params.from) {
+          queryParams.push(`from=${params?.from}`);
+        }
+        if (params.to) {
+          queryParams.push(`to=${params?.to}`);
+        }
+        const queryString = queryParams.join("&");
+        return `/export-aging?${queryString}`;
+      },
+
+      // `/export-aging?from=${params?.from}&to=${params?.to}&data_all=${params?.export}`,
       providesTags: ["Requisition"],
     }),
   }),

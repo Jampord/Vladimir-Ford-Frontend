@@ -15,8 +15,8 @@ import useExcelJs from "../../Hooks/ExcelJs";
 
 const schema = yup.object().shape({
   id: yup.string(),
-  from: yup.string().required().typeError("Please provide a FROM date"),
-  to: yup.string().required().typeError("Please provide a TO date"),
+  from: yup.string().nullable().typeError("Please provide a FROM date"),
+  to: yup.string().nullable().typeError("Please provide a TO date"),
 });
 
 const ExportRequestMonitoring = () => {
@@ -57,13 +57,14 @@ const ExportRequestMonitoring = () => {
   };
 
   const handleExport = async (formData) => {
+    console.log("formData", formData);
     try {
       const res = await trigger({
-        from: moment(formData?.from).format("YYYY-MM-DD"),
-        to: moment(formData?.to).format("YYYY-MM-DD"),
+        from: formData?.from ? moment(formData?.from).format("YYYY-MM-DD") : null,
+        to: formData?.to ? moment(formData?.to).format("YYYY-MM-DD") : null,
         export: 1,
       }).unwrap();
-      console.log("exportData", exportApi);
+      // console.log("exportData", exportApi);
 
       const newObj = res.flatMap((item) => {
         return {
@@ -180,7 +181,7 @@ const ExportRequestMonitoring = () => {
             startIcon={exportApiLoading ? null : <IosShareRounded color={!isValid ? "gray" : "primary"} size="small" />}
             type="submit"
             color="secondary"
-            disabled={!isValid}
+            // disabled={!isValid}
           >
             Export
           </LoadingButton>
