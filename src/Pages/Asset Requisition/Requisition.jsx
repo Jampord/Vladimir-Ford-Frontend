@@ -188,7 +188,7 @@ const Requisition = () => {
               id: id,
               transaction_number: id,
             }).unwrap();
-            console.log(result);
+            // console.log(result);
             dispatch(
               openToast({
                 message: result.message,
@@ -236,7 +236,7 @@ const Requisition = () => {
   const openAdd = Boolean(anchorElAdd);
 
   const handleOpenAdd = (event) => {
-    deleteAllRequest();
+    // deleteAllRequest();
     setAnchorElAdd(event.currentTarget);
   };
 
@@ -252,7 +252,7 @@ const Requisition = () => {
       : navigate(`/asset-requisition/requisition/view-requisition/${data.transaction_number}`, {
           state: { ...data, viewData },
         });
-    console.log("data", data);
+    // console.log("data", data);
   };
 
   const isAdditionalCost = requisitionData?.data.map((item) => item.is_addcost);
