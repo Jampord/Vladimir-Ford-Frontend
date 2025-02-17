@@ -74,7 +74,7 @@ const ViewRequestReleasing = (props) => {
     }
   );
 
-  console.log("releasingdata", [releasingData]);
+  // console.log("releasingdata", [releasingData]);
 
   const handleReleasing = () => {
     dispatch(openDialog());
@@ -794,7 +794,7 @@ const ViewRequestReleasing = (props) => {
                     </Button>
                   </Box>
 
-                  <Box className="tableCard__properties">
+                  {/* <Box className="tableCard__properties">
                     Assignment Memo:
                     <Button
                       className="tableCard__info"
@@ -806,7 +806,7 @@ const ViewRequestReleasing = (props) => {
                     >
                       Show Image
                     </Button>
-                  </Box>
+                  </Box> */}
 
                   <Box className="tableCard__properties">
                     Authorization Letter:
@@ -848,6 +848,7 @@ const ViewRequestReleasing = (props) => {
           warehouseNumber={{ warehouse_number_id: [data?.warehouse_number?.warehouse_number] }}
           commonData={commonData}
           personalData={personalData}
+          selectedItems={releasingData}
           // hideWN
           // refetch={releasingDataRefetch}
         />
