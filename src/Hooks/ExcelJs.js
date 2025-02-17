@@ -8,7 +8,7 @@ const useExcelJs = () => {
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet("Sheet1");
 
-    const headerNames = Object.keys(obj[0]);
+    const headerNames = Object.keys(obj[0] || obj);
 
     // Add headers to the worksheet
     worksheet.addRow(headerNames);
