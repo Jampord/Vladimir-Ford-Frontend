@@ -38,7 +38,7 @@ const TagWarehouseLocation = ({ data }) => {
     refetch: isLocationRefetch,
   } = useGetLocationAllApiQuery(null, { refetchOnMountOrArgChange: true });
 
-  console.log("locationData", locationData);
+  // console.log("locationData", locationData);
 
   const {
     handleSubmit,
@@ -61,10 +61,10 @@ const TagWarehouseLocation = ({ data }) => {
   };
 
   const onSubmitHandler = (formData) => {
-    // console.log("formData", formData);
-    const location_id = formData.location_id.map((item) => item.id);
+    console.log("formData", formData);
+    const location_id = formData.location_id.map((item) => item.sync_id);
     // console.log("location_idddddd", { location_id: location_id });
-    putWarehouseLocation({ id: data?.id, location_id: location_id });
+    putWarehouseLocation({ id: data?.sync_id, location_id: location_id });
   };
 
   useEffect(() => {
