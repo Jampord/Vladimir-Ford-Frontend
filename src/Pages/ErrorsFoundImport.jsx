@@ -124,7 +124,7 @@ const ErrorsFoundImport = (props) => {
                 return (
                   <TableRow key={item.id || index} hover={true}>
                     <TableCell sx={{ textAlign: "left", pl: "35px" }}>{parseInt(item.row) + 2}</TableCell>
-                    <TableCell className="columnErrorName">{item.column.replace(/_/g, " ")}</TableCell>
+                    <TableCell className="columnErrorName">{item?.column?.replace(/_/g, " ")}</TableCell>
                     <TableCell>{item.message}</TableCell>
                   </TableRow>
                 );
