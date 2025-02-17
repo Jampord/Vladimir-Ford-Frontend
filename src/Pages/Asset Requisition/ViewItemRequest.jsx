@@ -247,9 +247,9 @@ const ViewItemRequest = (props) => {
                           <Typography fontSize={10} color="gray" noWrap>
                             {data.location}
                           </Typography>
-                          <Typography fontSize={10} color="gray" noWrap>
+                          {/* <Typography fontSize={10} color="gray" noWrap>
                             {data.account_title}
-                          </Typography>
+                          </Typography> */}
                         </TableCell>
 
                         <TableCell className="tbl-cell">
