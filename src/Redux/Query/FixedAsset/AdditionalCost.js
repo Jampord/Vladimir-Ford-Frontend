@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const additionalCostApi = createApi({
   reducerPath: "additionalCost",
-  tagTypes: ["AdditionalCost"],
+  tagTypes: ["AdditionalCost", "FixedAsset"],
 
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.VLADIMIR_BASE_URL,
@@ -72,6 +72,15 @@ export const additionalCostApi = createApi({
       invalidatesTags: ["FixedAsset"],
     }),
 
+    postImportNewCOAApi: builder.mutation({
+      query: (data) => ({
+        url: `/import-coa-update`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["FixedAsset"],
+    }),
+
     postAddCostTaggingApi: builder.mutation({
       query: (data) => ({
         url: `/addcost-tagging`,
@@ -91,5 +100,6 @@ export const {
   useUpdateAdditionalCostApiMutation,
   usePostCalcDepreAddCostApiMutation,
   usePostImportApiMutation,
+  usePostImportNewCOAApiMutation,
   usePostAddCostTaggingApiMutation,
 } = additionalCostApi;
