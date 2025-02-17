@@ -35,6 +35,7 @@ import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { LoadingButton } from "@mui/lab";
 import { useGetAccountTitleAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/AccountTitle";
 import { useGetMajorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MajorCategory";
+import { useGetCreditAllQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Credit";
 // import { useGetMajorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Masterlist";
 
 const schema = yup.object().shape({
@@ -85,7 +86,7 @@ const AddMinorCategory = (props) => {
   const [filteredMajorCategoryData, setFilteredMajorCategoryData] = useState([]);
   const dispatch = useDispatch();
 
-  console.log("Data", data?.initial_debit?.depreciation_debit);
+  console.log("Data", data);
 
   const {
     data: majorCategoryData = [],
@@ -100,6 +101,14 @@ const AddMinorCategory = (props) => {
     isError: isAccountTitleError,
     refetch: isAccountTitleRefetch,
   } = useGetAccountTitleAllApiQuery();
+
+  const {
+    data: creditData = [],
+    isLoading: isCreditLoading,
+    isSuccess: isCreditSuccess,
+    isError: isCreditError,
+    refetch: creditRefetch,
+  } = useGetCreditAllQuery();
 
   // console.log("AccountTitleData", accountTitleData);
 
@@ -176,18 +185,18 @@ const AddMinorCategory = (props) => {
 
   useEffect(() => {
     if (data.status) {
-      setValue("id", data.id);
+      setValue("id", data?.id);
       // setValue("division_id", {
       //   id: data.division_id,
       //   division_name: data.division_name,
       // });
-      setValue("major_category_id", data.major_category);
-      setValue("minor_category_name", data.minor_category_name);
+      setValue("major_category_id", data?.major_category);
+      setValue("minor_category_name", data?.minor_category_name);
 
-      setValue("depreciation_credit_id", data.depreciation_credit);
+      setValue("depreciation_credit_id", data?.depreciation_credit.length === 0 ? null : data?.depreciation_credit);
       // setValue("depreciation_debit_id", data.depreciation_debit);
       // setValue("initial_credit_id", data.initial_credit);
-      setValue("initial_debit_id", data.initial_debit);
+      setValue("initial_debit_id", data?.initial_debit);
     }
   }, [data]);
 
@@ -196,7 +205,7 @@ const AddMinorCategory = (props) => {
   // console.log("DC", watch("depreciation_credit_id"));
 
   const onSubmitHandler = (formData) => {
-    console.log("formData", formData);
+    // console.log("formData", formData);
     if (data.status) {
       updateMinorCategory(formData);
       return;
@@ -228,7 +237,7 @@ const AddMinorCategory = (props) => {
           loading={isMajorCategoryLoading}
           size="small"
           getOptionLabel={(option) => option.major_category_name}
-          isOptionEqualToValue={(option, value) => option.major_category_name === value.major_category_name}
+          isOptionEqualToValue={(option, value) => option.major_category_name === value?.major_category_name}
           renderInput={(params) => (
             <TextField
               color="secondary"
@@ -267,7 +276,7 @@ const AddMinorCategory = (props) => {
             loading={isAccountTitleLoading}
             size="small"
             getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
-            isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
+            isOptionEqualToValue={(option, value) => option.account_title_code === value?.account_title_code}
             renderInput={(params) => (
               <TextField
                 color="secondary"
@@ -332,11 +341,15 @@ const AddMinorCategory = (props) => {
             autoComplete
             name="depreciation_credit_id"
             control={control}
-            options={accountTitleData}
-            loading={isAccountTitleLoading}
+            options={creditData}
+            loading={isCreditLoading}
             size="small"
-            getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
-            isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
+            getOptionLabel={(option) =>
+              (option.credit_code || option.account_title_code) +
+              " - " +
+              (option.credit_name || option.account_title_name)
+            }
+            isOptionEqualToValue={(option, value) => option.credit_code === value?.credit_code}
             renderInput={(params) => (
               <TextField
                 color="secondary"
@@ -355,12 +368,14 @@ const AddMinorCategory = (props) => {
             options={accountTitleData}
             defaultValue={data?.initial_debit?.depreciation_debit || []}
             getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
+            isOptionEqualToValue={(option, value) => option.account_title_code === value?.account_title_code}
             readOnly
             freeSolo
             fullWidth
             // optional
             optionalSolid
-            disabled={data?.initial_debit?.depreciation_debit.length === 0}
+            setHeight
+            disabled={data?.initial_debit?.depreciation_debit?.length === 0}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -370,7 +385,6 @@ const AddMinorCategory = (props) => {
                 label={"Depreciation Debit"}
               />
             )}
-            sx={{ ".MuiInputBase-root": { borderRadius: "10px" } }}
           />
         </Stack>
 
