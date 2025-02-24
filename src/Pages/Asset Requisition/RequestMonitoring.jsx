@@ -353,6 +353,8 @@ const RequestMonitoring = () => {
                         </TableSortLabel>
                       </TableCell>
 
+                      <TableCell className="tbl-cell">Requestor</TableCell>
+
                       <TableCell className="tbl-cell">
                         <TableSortLabel
                           active={orderBy === `acquisition_details`}
@@ -429,6 +431,17 @@ const RequestMonitoring = () => {
                                   {data.id}
                                 </TableCell> */}
                               <TableCell className="tbl-cell text-weight">{data.transaction_number}</TableCell>
+                              <TableCell className="tbl-cell">
+                                <Typography fontSize={12} fontWeight={700} color="secondary.main">
+                                  {data.requestor.firstname}
+                                </Typography>
+                                <Typography fontSize={11} fontWeight={600} color="secondary.main">
+                                  {data.requestor.lastname}
+                                </Typography>
+                                <Typography fontSize={11} fontWeight={500} color="primary">
+                                  {data.requestor.username}
+                                </Typography>
+                              </TableCell>
                               <TableCell className="tbl-cell">
                                 <Typography fontSize={14} fontWeight={600} color="secondary.main">
                                   {data.acquisition_details}
