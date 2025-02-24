@@ -1174,6 +1174,7 @@ const AddFa = (props) => {
               helperText={errors?.asset_description?.message}
               fullWidth
               multiline
+              allowSpecialCharacters
             />
 
             <CustomTextField
@@ -1187,6 +1188,7 @@ const AddFa = (props) => {
               helperText={errors?.asset_specification?.message}
               fullWidth
               multiline
+              allowSpecialCharacters
             />
 
             <CustomDatePicker
