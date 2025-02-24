@@ -426,7 +426,17 @@ const FixedAsset = (props) => {
                                   color={data.is_additional_cost ? "text.light" : "secondary.main"}
                                   fontWeight={data.is_additional_cost ? null : "bold"}
                                 >
-                                  {data.vladimir_tag_number}
+                                  {data.is_additional_cost === 0 ? (
+                                    data.is_printable === 1 ? (
+                                      data.vladimir_tag_number
+                                    ) : (
+                                      <Typography fontSize="14px" fontWeight={500} color="secondary">
+                                        NON-PRINTABLE
+                                      </Typography>
+                                    )
+                                  ) : (
+                                    data.vladimir_tag_number
+                                  )}
                                   {data.is_additional_cost === 1 ? `-${data.add_cost_sequence}` : null}
                                 </Typography>
                                 <Typography fontSize="12px" color="gray">
@@ -437,6 +447,11 @@ const FixedAsset = (props) => {
                                   fontWeight={data.is_additional_cost ? null : "bold"}
                                   color={data.is_additional_cost === 0 ? "quaternary.main" : "quaternary.light"}
                                 >
+                                  {/* {data.is_printable === 1
+                                    ? data.is_additional_cost === 0
+                                      ? `MAIN ASSET - ${data.additional_cost_count}`
+                                      : `(ADDITIONAL COST)`
+                                    : null} */}
                                   {data.is_additional_cost === 0
                                     ? `MAIN ASSET - ${data.additional_cost_count}`
                                     : `(ADDITIONAL COST)`}
