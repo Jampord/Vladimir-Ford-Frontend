@@ -4,6 +4,7 @@ import CustomAutoComplete from "../../Components/Reusable/CustomAutoComplete";
 import FaStatusChange from "../../Components/Reusable/FaStatusComponent";
 
 import {
+  Badge,
   Box,
   Button,
   Checkbox,
@@ -17,6 +18,7 @@ import {
   Menu,
   MenuItem,
   Stack,
+  Tab,
   Table,
   TableBody,
   TableCell,
@@ -24,13 +26,26 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  Tabs,
   TextField,
+  Tooltip,
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { DataArrayTwoTone, Filter, FilterAlt, FilterList, Help, Print, ResetTv, Search } from "@mui/icons-material";
+import {
+  DataArrayTwoTone,
+  Filter,
+  FilterAlt,
+  FilterList,
+  Help,
+  HomeRepairService,
+  Print,
+  PrintDisabled,
+  ResetTv,
+  Search,
+} from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers";
-import { LoadingButton } from "@mui/lab";
+import { LoadingButton, TabContext, TabPanel } from "@mui/lab";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
 
@@ -38,15 +53,25 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import { closeDatePicker, closePrint } from "../../Redux/StateManagement/booleanStateSlice";
+import {
+  closeDatePicker,
+  closeDialog1,
+  closeDialog2,
+  closeDialog3,
+  closePrint,
+  openDialog1,
+  openDialog2,
+  openDialog3,
+} from "../../Redux/StateManagement/booleanStateSlice";
 import {
   useGetFixedAssetApiQuery,
   useGetPrintViewingApiQuery,
   usePostPrintApiMutation,
   usePostLocalPrintApiMutation,
   usePutMemoPrintApiMutation,
+  usePutSmallToolsPrintableApiMutation,
 } from "../../Redux/Query/FixedAsset/FixedAssets";
 import { usePostPrintOfflineApiMutation } from "../../Redux/Query/FixedAsset/OfflinePrintingFA";
 import { usePostPrintStalwartDateApiMutation } from "../../Redux/Query/FixedAsset/StalwartPrintingFA";
@@ -59,6 +84,8 @@ import { useGetIpApiQuery } from "../../Redux/Query/IpAddressSetup";
 import { closeConfirm, onLoading, openConfirm } from "../../Redux/StateManagement/confirmSlice";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
 import AssignmentMemo from "./AssignmentMemo";
+import { useGetNotificationApiQuery } from "../../Redux/Query/Notification";
+import AddSmallToolsGroup from "./AddEdit/AddSmallToolsGroup";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -97,8 +124,26 @@ const PrintFixedAsset = (props) => {
 
   const dispatch = useDispatch();
 
+  const dialog = useSelector((state) => state.booleanState.dialogMultiple.dialog2);
+  const dialog2 = useSelector((state) => state.booleanState.dialogMultiple.dialog3);
+
   const isSmallerScreen = useMediaQuery("(max-width: 600px)");
   const isSmallScreen = useMediaQuery("(max-width: 850px)");
+
+  // Tabs -----------------
+  const [tabValue, setTabValue] = useState("1");
+  const { data: notifData, refetch } = useGetNotificationApiQuery();
+
+  useEffect(() => {
+    // console.log("refetched data");
+    refetch();
+  }, [notifData]);
+
+  const handleChange = (event, newValue) => {
+    setTabValue(newValue);
+    setPrintMemo(false);
+    reset();
+  };
 
   // Table Sorting --------------------------------
 
@@ -160,6 +205,11 @@ const PrintFixedAsset = (props) => {
     { data: memoData, isLoading: isMemoLoading, isError: isMemoError, isSuccess: isMemoSuccess, error: memoError },
   ] = usePutMemoPrintApiMutation();
 
+  const [
+    putSmallToolsPrintable,
+    { data: putData, isLoading: isPutLoading, isError: isPutError, isSuccess: isPutSuccess, error: putError },
+  ] = usePutSmallToolsPrintableApiMutation();
+
   const {
     data: fixedAssetData,
     isLoading: fixedAssetLoading,
@@ -177,6 +227,7 @@ const PrintFixedAsset = (props) => {
       endDate: endDate,
       isRequest: isRequest ? 1 : 0,
       printMemo: isRequest ? (printMemo ? 1 : 0) : null,
+      smallTool: tabValue === "2" ? 1 : 0,
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -205,21 +256,24 @@ const PrintFixedAsset = (props) => {
   });
 
   useEffect(() => {
-    if (isPostSuccess || isMemoSuccess) {
+    if (isPostSuccess || isMemoSuccess || isPutSuccess) {
       dispatch(
         openToast({
-          message: printData?.message || memoData?.message,
+          message: printData?.message || memoData?.message || putData?.message,
           duration: 5000,
         })
       );
     }
-  }, [isPostSuccess, isMemoSuccess]);
+  }, [isPostSuccess, isMemoSuccess, isPutSuccess]);
 
   useEffect(() => {
-    if ((isPostError || isMemoError) && (memoError?.status || postError?.status === 422)) {
+    if (
+      (isPostError || isMemoError || isPutError) &&
+      (putError?.status === 422 || memoError?.status === 422 || postError?.status === 422)
+    ) {
       setError("search", {
         type: "validate",
-        message: postError?.data?.message || memoError?.data?.message,
+        message: postError?.data?.message || memoError?.data?.message || putError?.data?.message,
       });
       // dispatch(
       //   openToast({
@@ -229,28 +283,37 @@ const PrintFixedAsset = (props) => {
       // );
       dispatch(
         openToast({
-          message: postError?.data?.message || memoError?.data?.message,
+          message: postError?.data?.message || memoError?.data?.message || putError?.data?.message,
           duration: 5000,
           variant: "error",
         })
       );
-    } else if (isPostError && postError?.status === 403) {
+    } else if (
+      (isPostError || isMemoError || isPutError) &&
+      (putError?.status === 403 || memoError?.status === 403 || postError?.status === 403)
+    ) {
       dispatch(
         openToast({
-          message: postError?.data?.message || memoError?.data?.message,
+          message: postError?.data?.message || memoError?.data?.message || putError?.data?.message,
           duration: 5000,
           variant: "error",
         })
       );
-    } else if (isPostError && postError?.status === 404) {
+    } else if (
+      (isPostError || isMemoError || isPutError) &&
+      (putError?.status === 404 || memoError?.status === 404 || postError?.status === 404)
+    ) {
       dispatch(
         openToast({
-          message: postError?.data?.message || memoError?.data?.message,
+          message: postError?.data?.message || memoError?.data?.message || putError?.data?.message,
           duration: 5000,
           variant: "error",
         })
       );
-    } else if ((isPostError || isMemoError) && (memoError?.status || postError?.status !== 422)) {
+    } else if (
+      (isPostError || isMemoError || isPutError) &&
+      (putError?.status !== 422 || memoError?.status !== 422 || postError?.status !== 422)
+    ) {
       dispatch(
         openToast({
           message: "Something went wrong. Please try again.",
@@ -266,7 +329,7 @@ const PrintFixedAsset = (props) => {
       // );
       // console.log(postError);
     }
-  }, [isPostError, isMemoError]);
+  }, [isPostError, isMemoError, isPutError]);
 
   const onPrintHandler = (formData) => {
     // console.log(formData);
@@ -423,6 +486,76 @@ const PrintFixedAsset = (props) => {
     );
   };
 
+  const onTagNonPrintableHandler = (formData) => {
+    console.log("smallTOoldata", smallToolsData);
+    const id = smallToolsData.map((data) => data.id);
+    console.log("id", id);
+    dispatch(
+      openConfirm({
+        icon: Help,
+        iconColor: "info",
+        message: (
+          <Box>
+            <Typography>Are you sure you want to tag</Typography>
+            <Typography
+              sx={{
+                display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+                fontFamily: "Raleway",
+              }}
+            >
+              {watch("tagNumber").length === 0 ? "ALL" : "SELECTED"}
+            </Typography>{" "}
+            Small Tools as{" "}
+            <Typography
+              sx={{
+                // display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+                fontFamily: "Raleway",
+              }}
+            >
+              NON-PRINTABLE?
+            </Typography>
+          </Box>
+        ),
+        onConfirm: async () => {
+          try {
+            dispatch(onLoading());
+            const result = await putSmallToolsPrintable({
+              fixed_asset_id: id,
+              is_printable: 0,
+            }).unwrap();
+            // console.log(formData.tagNumber);
+
+            // console.log(result);
+
+            // dispatch(
+            //   openToast({
+            //     message: result.message,
+            //     duration: 5000,
+            //   })
+            // );
+            // dispatch(
+            //   openToast({
+            //     message: "Printed successfully.",
+            //     duration: 5000,
+            //   })
+            // );
+            dispatch(closeConfirm());
+            reset();
+          } catch (err) {
+            console.log(err.data.message);
+            if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
+            } else if (err?.status !== 422) {
+            }
+          }
+        },
+      })
+    );
+  };
+
   const handleClose = () => {
     dispatch(closePrint());
   };
@@ -465,6 +598,76 @@ const PrintFixedAsset = (props) => {
     }
   };
 
+  const smallToolsData = fixedAssetData?.data.filter((data) => watch("tagNumber").includes(data.vladimir_tag_number));
+  const printable = smallToolsData?.map((data) => data?.is_parent).includes(1);
+
+  // console.log("printable", printable);
+
+  //Validations for Small Tools Grouping
+  const areAllCOASame = (assets) => {
+    if (assets) {
+      if (assets?.length === 0) return true; // No assets to compare
+
+      const firstDepartment = assets[0]?.department?.department_name;
+      const firstBusinessUnit = assets[0]?.business_unit?.business_unit_name;
+      const firstCompany = assets[0]?.company?.company_name;
+      const firstUnit = assets[0]?.unit?.unit_name;
+      const firstSubunit = assets[0]?.subunit?.subunit_name;
+      const firstLocation = assets[0]?.location?.location_name;
+
+      for (let i = 1; i < assets.length; i++) {
+        if (assets[i]?.department?.department_name !== firstDepartment) {
+          return false; // Found a different department
+        }
+        if (assets[i]?.business_unit?.business_unit_name !== firstBusinessUnit) {
+          return false; // Found a different business unit
+        }
+        if (assets[i]?.company?.company_name !== firstCompany) {
+          return false; // Found a different company
+        }
+        if (assets[i]?.unit?.unit_name !== firstUnit) {
+          return false; // Found a different unit
+        }
+        if (assets[i]?.subunit?.subunit_name !== firstSubunit) {
+          return false; // Found a different subunit
+        }
+        if (assets[i]?.location?.location_name !== firstLocation) {
+          return false; // Found a different location
+        }
+      }
+      return true; // All COA are the same
+    }
+  };
+
+  const result = areAllCOASame(smallToolsData);
+  // const result = smallToolsData;
+  // console.log("result = ", result);
+
+  const containerSx = {
+    display: "flex",
+    flexDirection: "column",
+    alignSelf: "center",
+
+    position: "relative",
+    // padding: 0 10px;
+    // color: $secondary;
+    margin: "0 10px",
+    width: "100%",
+    maxWidth: "1800px",
+
+    // height: 250px;
+    // height: 100vh;
+    flex: 1,
+  };
+
+  const tabBackgroundSx = {
+    background: "#ffffff",
+    boxShadow: "0px -3px 19px -10px rgba(166, 166, 166, 0.4)",
+    fontWeight: "bold",
+    borderRadius: "5px",
+    border: "1px solid #dedede",
+  };
+
   return (
     <>
       <Box
@@ -476,6 +679,7 @@ const PrintFixedAsset = (props) => {
           alignItems: "flex-start",
           justifyContent: "center",
           gap: "10px",
+          // width: "100%",
         }}
       >
         <Stack flexDirection="row" justifyContent="space-between" width="100%">
@@ -493,7 +697,7 @@ const PrintFixedAsset = (props) => {
             </Typography>
           </Stack>
 
-          {!!isRequest && (
+          {!!isRequest && tabValue === "1" && (
             <FormControlLabel
               label="Assignment Memo"
               control={
@@ -517,342 +721,1173 @@ const PrintFixedAsset = (props) => {
         </Stack>
         <Divider width="100%" sx={{ boxShadow: "1px solid black" }} />
 
-        <Stack
-          py={0.5}
-          px={1}
-          flexDirection={isSmallScreen ? "column" : "row"}
-          // flexDirection="row"
-          justifyContent="space-between"
-          alignItems="center"
-          width="100%"
-          gap={1}
-        >
-          <Stack flexDirection="row" width="100%">
-            <CustomTextField
-              control={control}
-              name="search"
-              label="Search"
-              type="text"
-              optional
-              color="secondary"
-              onKeyDown={searchHandler}
-              fullWidth={isSmallScreen ? true : false}
-            />
-          </Stack>
-
-          <Stack
-            flexDirection="row"
-            gap={isSmallScreen ? 1 : 2}
-            justifyContent="center"
-            flexWrap={isSmallScreen ? "wrap" : null}
-          >
+        {!isRequest ? (
+          <>
             <Stack
-              flexDirection="row"
+              py={0.5}
+              px={1}
+              flexDirection={isSmallScreen ? "column" : "row"}
+              // flexDirection="row"
+              justifyContent="space-between"
+              alignItems="center"
+              width="100%"
               gap={1}
-              width={isSmallScreen ? "100%" : null}
-              flexWrap={isSmallerScreen ? "wrap" : "noWrap"}
             >
-              <CustomDatePicker
-                control={control}
-                name="startDate"
-                label="Start Date"
-                size="small"
-                fullWidth
-                optional
-                disableFuture
-                reduceAnimations
-                onChange={(newValue) => {
-                  setValue("endDate", null);
-                  return newValue;
-                }}
-              />
+              <Stack flexDirection="row" width="100%">
+                <CustomTextField
+                  control={control}
+                  name="search"
+                  label="Search"
+                  type="text"
+                  optional
+                  color="secondary"
+                  onKeyDown={searchHandler}
+                  fullWidth={isSmallScreen ? true : false}
+                />
+              </Stack>
 
-              <CustomDatePicker
-                control={control}
-                name="endDate"
-                label="End Date"
-                size="small"
-                // views={["year", "month", "day"]}
-                minDate={watch("startDate")}
-                fullWidth
-                optional
-                disableFuture
-                reduceAnimations
-                disabled={watch("startDate") === null || watch("startDate") === ""}
-              />
-            </Stack>
-
-            {isSmallScreen ? (
-              <Button
-                variant="contained"
-                size="small"
-                onClick={handleSearchClick}
-                sx={{
-                  backgroundColor: "primary",
-                  width: isSmallScreen && "100%",
-                  // maxWidth: "100%",
-                }}
+              <Stack
+                flexDirection="row"
+                gap={isSmallScreen ? 1 : 2}
+                justifyContent="center"
+                flexWrap={isSmallScreen ? "wrap" : null}
               >
-                <Search /> {"  "}Search
-              </Button>
-            ) : (
-              <IconButton
-                onClick={handleSearchClick}
-                sx={{ bgcolor: "primary.main", ":hover": { bgcolor: "primary.dark" } }}
-              >
-                <Search />
-              </IconButton>
-            )}
-          </Stack>
-        </Stack>
-        <Box
-          sx={{
-            border: "1px solid lightgray",
-            borderRadius: "10px",
-            width: "100%",
-            // maxWidth: "850px",
-          }}
-        >
-          <TableContainer
-            sx={{
-              height: isSmallScreen ? "35vh" : "45vh",
-              borderRadius: "10px",
-            }}
-          >
-            <Table stickyHeader>
-              <TableHead>
-                <TableRow
-                  sx={{
-                    "& > *": {
-                      whiteSpace: "nowrap",
-                      backgroundColor: "secondary.main",
-                      ".MuiButtonBase-root": { color: "white" },
-                      ".MuiTableSortLabel-icon": { color: "white!important" },
-                    },
-                  }}
+                <Stack
+                  flexDirection="row"
+                  gap={1}
+                  width={isSmallScreen ? "100%" : null}
+                  flexWrap={isSmallerScreen ? "wrap" : "noWrap"}
                 >
-                  <TableCell align="center" sx={{ backgroundColor: "secondary.main", p: 0 }}>
-                    <FormControlLabel
-                      sx={{ margin: "auto", align: "center" }}
-                      control={
-                        <Checkbox
-                          value=""
-                          size="small"
-                          sx={{ color: "primary" }}
-                          checked={
-                            !!fixedAssetData?.data
-                              ?.map((mapItem) => mapItem.vladimir_tag_number)
-                              .every((item) => watch("tagNumber").includes(item))
-                          }
-                          onChange={(e) => {
-                            tagNumberAllHandler(e.target.checked);
-                            // console.log(e.target.checked);
-                          }}
-                        />
-                      }
-                    />
-                  </TableCell>
+                  <CustomDatePicker
+                    control={control}
+                    name="startDate"
+                    label="Start Date"
+                    size="small"
+                    fullWidth
+                    optional
+                    disableFuture
+                    reduceAnimations
+                    onChange={(newValue) => {
+                      setValue("endDate", null);
+                      return newValue;
+                    }}
+                  />
 
-                  <TableCell>
-                    <TableSortLabel
-                      active={orderBy === `vladimir_tag_number`}
-                      direction={orderBy === `vladimir_tag_number` ? order : `asc`}
-                      onClick={() => onSort(`vladimir_tag_number`)}
-                    >
-                      Vladimir Tag #
-                    </TableSortLabel>
-                  </TableCell>
+                  <CustomDatePicker
+                    control={control}
+                    name="endDate"
+                    label="End Date"
+                    size="small"
+                    // views={["year", "month", "day"]}
+                    minDate={watch("startDate")}
+                    fullWidth
+                    optional
+                    disableFuture
+                    reduceAnimations
+                    disabled={watch("startDate") === null || watch("startDate") === ""}
+                  />
+                </Stack>
 
-                  <TableCell>
-                    <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
-                  </TableCell>
-
-                  <TableCell>
-                    <TableSortLabel disabled>Accountability</TableSortLabel>
-                  </TableCell>
-
-                  <TableCell
+                {isSmallScreen ? (
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={handleSearchClick}
                     sx={{
-                      textAlign: "center",
-                      backgroundColor: "secondary.main",
+                      backgroundColor: "primary",
+                      width: isSmallScreen && "100%",
+                      // maxWidth: "100%",
                     }}
                   >
-                    <TableSortLabel
-                      active={orderBy === `asset_status.asset_status_name`}
-                      direction={orderBy === `asset_status.asset_status_name` ? order : `asc`}
-                      onClick={() => onSort(`asset_status.asset_status_name`)}
-                    >
-                      Asset Status
-                    </TableSortLabel>
-                  </TableCell>
-
-                  <TableCell
-                    align="center"
-                    sx={{
-                      backgroundColor: "secondary.main",
-                    }}
-                  >
-                    <TableSortLabel
-                      active={orderBy === `acquisition_date`}
-                      direction={orderBy === `acquisition_date` ? order : `asc`}
-                      onClick={() => onSort(`acquisition_date`)}
-                    >
-                      Date Created
-                    </TableSortLabel>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {fixedAssetSuccess && fixedAssetData.data.length === 0 ? (
-                  <NoRecordsFound heightData="xs" />
+                    <Search /> {"  "}Search
+                  </Button>
                 ) : (
-                  <>
-                    {fixedAssetSuccess &&
-                      [...fixedAssetData.data].sort(comparator(order, orderBy))?.map((data) => {
-                        return (
-                          <TableRow
-                            key={data.id}
+                  <IconButton
+                    onClick={handleSearchClick}
+                    sx={{ bgcolor: "primary.main", ":hover": { bgcolor: "primary.dark" } }}
+                  >
+                    <Search />
+                  </IconButton>
+                )}
+              </Stack>
+            </Stack>
+            <Box
+              sx={{
+                border: "1px solid lightgray",
+                borderRadius: "10px",
+                width: "100%",
+                // maxWidth: "850px",
+              }}
+            >
+              <TableContainer
+                sx={{
+                  height: isSmallScreen ? "35vh" : "45vh",
+                  borderRadius: "10px",
+                }}
+              >
+                <Table stickyHeader>
+                  <TableHead>
+                    <TableRow
+                      sx={{
+                        "& > *": {
+                          whiteSpace: "nowrap",
+                          backgroundColor: "secondary.main",
+                          ".MuiButtonBase-root": { color: "white" },
+                          ".MuiTableSortLabel-icon": { color: "white!important" },
+                        },
+                      }}
+                    >
+                      <TableCell align="center" sx={{ backgroundColor: "secondary.main", p: 0 }}>
+                        <FormControlLabel
+                          sx={{ margin: "auto", align: "center" }}
+                          control={
+                            <Checkbox
+                              value=""
+                              size="small"
+                              sx={{ color: "primary" }}
+                              checked={
+                                !!fixedAssetData?.data
+                                  ?.map((mapItem) => mapItem.vladimir_tag_number)
+                                  .every((item) => watch("tagNumber").includes(item))
+                              }
+                              onChange={(e) => {
+                                tagNumberAllHandler(e.target.checked);
+                                // console.log(e.target.checked);
+                              }}
+                            />
+                          }
+                        />
+                      </TableCell>
+
+                      <TableCell>
+                        <TableSortLabel
+                          active={orderBy === `vladimir_tag_number`}
+                          direction={orderBy === `vladimir_tag_number` ? order : `asc`}
+                          onClick={() => onSort(`vladimir_tag_number`)}
+                        >
+                          Vladimir Tag #
+                        </TableSortLabel>
+                      </TableCell>
+
+                      <TableCell>
+                        <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
+                      </TableCell>
+
+                      <TableCell>
+                        <TableSortLabel disabled>Accountability</TableSortLabel>
+                      </TableCell>
+
+                      <TableCell
+                        sx={{
+                          textAlign: "center",
+                          backgroundColor: "secondary.main",
+                        }}
+                      >
+                        <TableSortLabel
+                          active={orderBy === `asset_status.asset_status_name`}
+                          direction={orderBy === `asset_status.asset_status_name` ? order : `asc`}
+                          onClick={() => onSort(`asset_status.asset_status_name`)}
+                        >
+                          Asset Status
+                        </TableSortLabel>
+                      </TableCell>
+
+                      <TableCell
+                        align="center"
+                        sx={{
+                          backgroundColor: "secondary.main",
+                        }}
+                      >
+                        <TableSortLabel
+                          active={orderBy === `acquisition_date`}
+                          direction={orderBy === `acquisition_date` ? order : `asc`}
+                          onClick={() => onSort(`acquisition_date`)}
+                        >
+                          Date Created
+                        </TableSortLabel>
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+
+                  <TableBody>
+                    {fixedAssetSuccess && fixedAssetData.data.length === 0 ? (
+                      <NoRecordsFound heightData="xs" />
+                    ) : (
+                      <>
+                        {fixedAssetSuccess &&
+                          [...fixedAssetData.data].sort(comparator(order, orderBy))?.map((data) => {
+                            return (
+                              <TableRow
+                                key={data.id}
+                                sx={{
+                                  "&:last-child td, &:last-child th": {
+                                    borderBottom: 0,
+                                  },
+                                  overflow: "auto",
+                                }}
+                              >
+                                <TableCell align="center">
+                                  <FormControlLabel
+                                    value={data.vladimir_tag_number}
+                                    sx={{ margin: "auto" }}
+                                    disabled={data.action === "view"}
+                                    control={
+                                      <Checkbox
+                                        size="small"
+                                        {...register("tagNumber")}
+                                        checked={watch("tagNumber").includes(data.vladimir_tag_number)}
+                                      />
+                                    }
+                                  />
+                                </TableCell>
+
+                                <TableCell>
+                                  <Typography noWrap variant="h6" fontSize="16px" color="secondary" fontWeight="bold">
+                                    {data.vladimir_tag_number}
+                                  </Typography>
+                                  <Typography noWrap fontSize="13px" color="gray">
+                                    {data.asset_description}
+                                  </Typography>
+
+                                  <Typography noWrap fontSize="12px" color="primary" fontWeight="bold">
+                                    {data.type_of_request.type_of_request_name.toUpperCase()}
+                                  </Typography>
+                                </TableCell>
+
+                                <TableCell>
+                                  <Typography noWrap fontSize="10px" color="gray">
+                                    {data.company.company_code}
+                                    {" - "} {data.company.company_name}
+                                  </Typography>
+                                  <Typography noWrap fontSize="10px" color="gray">
+                                    {data.business_unit.business_unit_code}
+                                    {" - "} {data.business_unit.business_unit_name}
+                                  </Typography>
+                                  <Typography noWrap fontSize="10px" color="gray">
+                                    {data.department.department_code}
+                                    {" - "}
+                                    {data.department.department_name}
+                                  </Typography>
+                                  <Typography noWrap fontSize="10px" color="gray">
+                                    {data.unit.unit_code}
+                                    {" - "} {data.unit.unit_name}
+                                  </Typography>
+                                  <Typography noWrap fontSize="10px" color="gray">
+                                    {data.subunit.subunit_code}
+                                    {" - "} {data.subunit.subunit_name}
+                                  </Typography>
+                                  <Typography noWrap fontSize="10px" color="gray">
+                                    {data.location.location_code} {" - "}
+                                    {data.location.location_name}
+                                  </Typography>
+                                  {/* <Typography noWrap fontSize="10px" color="gray">
+                    {data.account_title.account_title_code}
+                    {" - "}
+                    {data.account_title.account_title_name}
+                  </Typography> */}
+                                </TableCell>
+
+                                <TableCell>
+                                  <Typography noWrap variant="h3" fontSize="12px" color="secondary" fontWeight="bold">
+                                    {data.accountable}
+                                  </Typography>
+                                  <Typography noWrap fontSize="11px" color="gray">
+                                    {data.accountability}
+                                  </Typography>
+                                </TableCell>
+
+                                <TableCell
+                                  sx={{
+                                    textAlign: "center",
+                                    pr: "35px",
+                                  }}
+                                >
+                                  <FaStatusChange
+                                    faStatus={data.asset_status.asset_status_name}
+                                    data={data.asset_status.asset_status_name}
+                                  />
+                                </TableCell>
+
+                                <TableCell align="center">
+                                  <Typography noWrap fontSize="13px" paddingRight="15px">
+                                    {moment(data.created_at).format("MMM-DD-YYYY")}
+                                  </Typography>
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                      </>
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              <CustomTablePagination
+                total={fixedAssetData?.total}
+                success={fixedAssetSuccess}
+                current_page={fixedAssetData?.current_page}
+                per_page={fixedAssetData?.per_page}
+                onPageChange={pageHandler}
+                onRowsPerPageChange={perPageHandler}
+                removeShadow
+              />
+            </Box>
+
+            <Stack flexDirection="row" width="100%" justifyContent="space-between" flexWrap="wrap" alignItems="center">
+              <Box sx={{ pl: "5px" }}>
+                <Typography fontFamily="Anton, Impact, Roboto" fontSize="18px" color="secondary.main">
+                  Selected: {watch("tagNumber").length}
+                </Typography>
+              </Box>
+
+              <Stack gap={1.2} flexDirection="row" alignSelf="flex-end" mt={1} mb={1}>
+                <LoadingButton
+                  size="small"
+                  variant="contained"
+                  loading={isLoading}
+                  startIcon={isLoading ? null : <Print color={watch("tagNumber").length === 0 ? "gray" : "primary"} />}
+                  disabled={watch("tagNumber").length === 0}
+                  type="submit"
+                  color={printMemo ? "tertiary" : "secondary"}
+                  sx={{ color: "white" }}
+                >
+                  {printMemo ? "Print Assignment Memo" : "Print"}
+                </LoadingButton>
+
+                <Button variant="outlined" size="small" color="secondary" onClick={handleClose}>
+                  Close
+                </Button>
+              </Stack>
+            </Stack>
+          </>
+        ) : (
+          <Box sx={containerSx}>
+            <TabContext value={tabValue}>
+              <Tabs onChange={handleChange} value={tabValue}>
+                <Tab
+                  label={
+                    <Badge color="error" badgeContent={notifData?.toTagCount}>
+                      Fixed Asset
+                    </Badge>
+                  }
+                  value="1"
+                  sx={tabValue === "1" ? tabBackgroundSx : null}
+                />
+
+                <Tab
+                  label={
+                    <Badge color="error" badgeContent={notifData?.toSmallToolTagging}>
+                      Small Tools
+                    </Badge>
+                  }
+                  value="2"
+                  sx={tabValue === "2" ? tabBackgroundSx : null}
+                />
+              </Tabs>
+
+              <TabPanel sx={{ p: 0 }} value="1" index="1">
+                <Stack>
+                  <Box className="mcontainer__wrapper">
+                    <Stack
+                      py={0.5}
+                      px={1}
+                      flexDirection={isSmallScreen ? "column" : "row"}
+                      // flexDirection="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width="100%"
+                      gap={1}
+                    >
+                      <Stack flexDirection="row" width="100%">
+                        <CustomTextField
+                          control={control}
+                          name="search"
+                          label="Search"
+                          type="text"
+                          optional
+                          color="secondary"
+                          onKeyDown={searchHandler}
+                          fullWidth={isSmallScreen ? true : false}
+                        />
+                      </Stack>
+
+                      <Stack
+                        flexDirection="row"
+                        gap={isSmallScreen ? 1 : 2}
+                        justifyContent="center"
+                        flexWrap={isSmallScreen ? "wrap" : null}
+                      >
+                        <Stack
+                          flexDirection="row"
+                          gap={1}
+                          width={isSmallScreen ? "100%" : null}
+                          flexWrap={isSmallerScreen ? "wrap" : "noWrap"}
+                        >
+                          <CustomDatePicker
+                            control={control}
+                            name="startDate"
+                            label="Start Date"
+                            size="small"
+                            fullWidth
+                            optional
+                            disableFuture
+                            reduceAnimations
+                            onChange={(newValue) => {
+                              setValue("endDate", null);
+                              return newValue;
+                            }}
+                          />
+
+                          <CustomDatePicker
+                            control={control}
+                            name="endDate"
+                            label="End Date"
+                            size="small"
+                            // views={["year", "month", "day"]}
+                            minDate={watch("startDate")}
+                            fullWidth
+                            optional
+                            disableFuture
+                            reduceAnimations
+                            disabled={watch("startDate") === null || watch("startDate") === ""}
+                          />
+                        </Stack>
+
+                        {isSmallScreen ? (
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={handleSearchClick}
                             sx={{
-                              "&:last-child td, &:last-child th": {
-                                borderBottom: 0,
-                              },
-                              overflow: "auto",
+                              backgroundColor: "primary",
+                              width: isSmallScreen && "100%",
+                              // maxWidth: "100%",
                             }}
                           >
-                            <TableCell align="center">
-                              <FormControlLabel
-                                value={data.vladimir_tag_number}
-                                sx={{ margin: "auto" }}
-                                disabled={data.action === "view"}
-                                control={
-                                  <Checkbox
-                                    size="small"
-                                    {...register("tagNumber")}
-                                    checked={watch("tagNumber").includes(data.vladimir_tag_number)}
-                                  />
-                                }
-                              />
-                            </TableCell>
+                            <Search /> {"  "}Search
+                          </Button>
+                        ) : (
+                          <IconButton
+                            onClick={handleSearchClick}
+                            sx={{ bgcolor: "primary.main", ":hover": { bgcolor: "primary.dark" } }}
+                          >
+                            <Search />
+                          </IconButton>
+                        )}
+                      </Stack>
+                    </Stack>
+                    <Box
+                      sx={{
+                        border: "1px solid lightgray",
+                        borderRadius: "10px",
+                        width: "100%",
+                        // maxWidth: "850px",
+                      }}
+                    >
+                      <TableContainer
+                        sx={{
+                          height: isSmallScreen ? "35vh" : "45vh",
+                          borderRadius: "10px",
+                        }}
+                      >
+                        <Table stickyHeader>
+                          <TableHead>
+                            <TableRow
+                              sx={{
+                                "& > *": {
+                                  whiteSpace: "nowrap",
+                                  backgroundColor: "secondary.main",
+                                  ".MuiButtonBase-root": { color: "white" },
+                                  ".MuiTableSortLabel-icon": { color: "white!important" },
+                                },
+                              }}
+                            >
+                              <TableCell align="center" sx={{ backgroundColor: "secondary.main", p: 0 }}>
+                                <FormControlLabel
+                                  sx={{ margin: "auto", align: "center" }}
+                                  control={
+                                    <Checkbox
+                                      value=""
+                                      size="small"
+                                      sx={{ color: "primary" }}
+                                      checked={
+                                        !!fixedAssetData?.data
+                                          ?.map((mapItem) => mapItem.vladimir_tag_number)
+                                          .every((item) => watch("tagNumber").includes(item))
+                                      }
+                                      onChange={(e) => {
+                                        tagNumberAllHandler(e.target.checked);
+                                        // console.log(e.target.checked);
+                                      }}
+                                    />
+                                  }
+                                />
+                              </TableCell>
 
-                            <TableCell>
-                              <Typography noWrap variant="h6" fontSize="16px" color="secondary" fontWeight="bold">
-                                {data.vladimir_tag_number}
-                              </Typography>
-                              <Typography noWrap fontSize="13px" color="gray">
-                                {data.asset_description}
-                              </Typography>
+                              <TableCell>
+                                <TableSortLabel
+                                  active={orderBy === `vladimir_tag_number`}
+                                  direction={orderBy === `vladimir_tag_number` ? order : `asc`}
+                                  onClick={() => onSort(`vladimir_tag_number`)}
+                                >
+                                  Vladimir Tag #
+                                </TableSortLabel>
+                              </TableCell>
 
-                              <Typography noWrap fontSize="12px" color="primary" fontWeight="bold">
-                                {data.type_of_request.type_of_request_name.toUpperCase()}
-                              </Typography>
-                            </TableCell>
+                              <TableCell>
+                                <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
+                              </TableCell>
 
-                            <TableCell>
-                              <Typography noWrap fontSize="10px" color="gray">
-                                {data.company.company_code}
-                                {" - "} {data.company.company_name}
-                              </Typography>
-                              <Typography noWrap fontSize="10px" color="gray">
-                                {data.business_unit.business_unit_code}
-                                {" - "} {data.business_unit.business_unit_name}
-                              </Typography>
-                              <Typography noWrap fontSize="10px" color="gray">
-                                {data.department.department_code}
-                                {" - "}
-                                {data.department.department_name}
-                              </Typography>
-                              <Typography noWrap fontSize="10px" color="gray">
-                                {data.unit.unit_code}
-                                {" - "} {data.unit.unit_name}
-                              </Typography>
-                              <Typography noWrap fontSize="10px" color="gray">
-                                {data.subunit.subunit_code}
-                                {" - "} {data.subunit.subunit_name}
-                              </Typography>
-                              <Typography noWrap fontSize="10px" color="gray">
-                                {data.location.location_code} {" - "}
-                                {data.location.location_name}
-                              </Typography>
-                              {/* <Typography noWrap fontSize="10px" color="gray">
+                              <TableCell>
+                                <TableSortLabel disabled>Accountability</TableSortLabel>
+                              </TableCell>
+
+                              <TableCell
+                                sx={{
+                                  textAlign: "center",
+                                  backgroundColor: "secondary.main",
+                                }}
+                              >
+                                <TableSortLabel
+                                  active={orderBy === `asset_status.asset_status_name`}
+                                  direction={orderBy === `asset_status.asset_status_name` ? order : `asc`}
+                                  onClick={() => onSort(`asset_status.asset_status_name`)}
+                                >
+                                  Asset Status
+                                </TableSortLabel>
+                              </TableCell>
+
+                              <TableCell
+                                align="center"
+                                sx={{
+                                  backgroundColor: "secondary.main",
+                                }}
+                              >
+                                <TableSortLabel
+                                  active={orderBy === `acquisition_date`}
+                                  direction={orderBy === `acquisition_date` ? order : `asc`}
+                                  onClick={() => onSort(`acquisition_date`)}
+                                >
+                                  Date Created
+                                </TableSortLabel>
+                              </TableCell>
+                            </TableRow>
+                          </TableHead>
+
+                          <TableBody>
+                            {fixedAssetSuccess && fixedAssetData.data.length === 0 ? (
+                              <NoRecordsFound heightData="xs" />
+                            ) : (
+                              <>
+                                {fixedAssetSuccess &&
+                                  [...fixedAssetData.data].sort(comparator(order, orderBy))?.map((data) => {
+                                    return (
+                                      <TableRow
+                                        key={data.id}
+                                        sx={{
+                                          "&:last-child td, &:last-child th": {
+                                            borderBottom: 0,
+                                          },
+                                          overflow: "auto",
+                                        }}
+                                      >
+                                        <TableCell align="center">
+                                          <FormControlLabel
+                                            value={data.vladimir_tag_number}
+                                            sx={{ margin: "auto" }}
+                                            disabled={data.action === "view"}
+                                            control={
+                                              <Checkbox
+                                                size="small"
+                                                {...register("tagNumber")}
+                                                checked={watch("tagNumber").includes(data.vladimir_tag_number)}
+                                              />
+                                            }
+                                          />
+                                        </TableCell>
+
+                                        <TableCell>
+                                          <Typography
+                                            noWrap
+                                            variant="h6"
+                                            fontSize="16px"
+                                            color="secondary"
+                                            fontWeight="bold"
+                                          >
+                                            {data.vladimir_tag_number}
+                                          </Typography>
+                                          <Typography noWrap fontSize="13px" color="gray">
+                                            {data.asset_description}
+                                          </Typography>
+
+                                          <Typography noWrap fontSize="12px" color="primary" fontWeight="bold">
+                                            {data.type_of_request.type_of_request_name.toUpperCase()}
+                                          </Typography>
+                                        </TableCell>
+
+                                        <TableCell>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data.company.company_code}
+                                            {" - "} {data.company.company_name}
+                                          </Typography>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data.business_unit.business_unit_code}
+                                            {" - "} {data.business_unit.business_unit_name}
+                                          </Typography>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data.department.department_code}
+                                            {" - "}
+                                            {data.department.department_name}
+                                          </Typography>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data.unit.unit_code}
+                                            {" - "} {data.unit.unit_name}
+                                          </Typography>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data.subunit.subunit_code}
+                                            {" - "} {data.subunit.subunit_name}
+                                          </Typography>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data.location.location_code} {" - "}
+                                            {data.location.location_name}
+                                          </Typography>
+                                          {/* <Typography noWrap fontSize="10px" color="gray">
                                 {data.account_title.account_title_code}
                                 {" - "}
                                 {data.account_title.account_title_name}
                               </Typography> */}
-                            </TableCell>
+                                        </TableCell>
 
-                            <TableCell>
-                              <Typography noWrap variant="h3" fontSize="12px" color="secondary" fontWeight="bold">
-                                {data.accountable}
-                              </Typography>
-                              <Typography noWrap fontSize="11px" color="gray">
-                                {data.accountability}
-                              </Typography>
-                            </TableCell>
+                                        <TableCell>
+                                          <Typography
+                                            noWrap
+                                            variant="h3"
+                                            fontSize="12px"
+                                            color="secondary"
+                                            fontWeight="bold"
+                                          >
+                                            {data.accountable}
+                                          </Typography>
+                                          <Typography noWrap fontSize="11px" color="gray">
+                                            {data.accountability}
+                                          </Typography>
+                                        </TableCell>
 
-                            <TableCell
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "center",
+                                            pr: "35px",
+                                          }}
+                                        >
+                                          <FaStatusChange
+                                            faStatus={data.asset_status.asset_status_name}
+                                            data={data.asset_status.asset_status_name}
+                                          />
+                                        </TableCell>
+
+                                        <TableCell align="center">
+                                          <Typography noWrap fontSize="13px" paddingRight="15px">
+                                            {moment(data.created_at).format("MMM-DD-YYYY")}
+                                          </Typography>
+                                        </TableCell>
+                                      </TableRow>
+                                    );
+                                  })}
+                              </>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+
+                      <CustomTablePagination
+                        total={fixedAssetData?.total}
+                        success={fixedAssetSuccess}
+                        current_page={fixedAssetData?.current_page}
+                        per_page={fixedAssetData?.per_page}
+                        onPageChange={pageHandler}
+                        onRowsPerPageChange={perPageHandler}
+                        removeShadow
+                      />
+                    </Box>
+
+                    <Stack
+                      flexDirection="row"
+                      width="100%"
+                      justifyContent="space-between"
+                      flexWrap="wrap"
+                      alignItems="center"
+                    >
+                      <Box sx={{ pl: "5px" }}>
+                        <Typography fontFamily="Anton, Impact, Roboto" fontSize="18px" color="secondary.main">
+                          Selected: {watch("tagNumber").length}
+                        </Typography>
+                      </Box>
+
+                      <Stack gap={1.2} flexDirection="row" alignSelf="flex-end" mt={1} mb={1}>
+                        <LoadingButton
+                          size="small"
+                          variant="contained"
+                          loading={isLoading}
+                          startIcon={
+                            isLoading ? null : <Print color={watch("tagNumber").length === 0 ? "gray" : "primary"} />
+                          }
+                          disabled={watch("tagNumber").length === 0}
+                          type="submit"
+                          color={printMemo ? "tertiary" : "secondary"}
+                          sx={{ color: "white" }}
+                        >
+                          {printMemo ? "Print Assignment Memo" : "Print"}
+                        </LoadingButton>
+
+                        <Button variant="outlined" size="small" color="secondary" onClick={handleClose}>
+                          Close
+                        </Button>
+                      </Stack>
+                    </Stack>
+                  </Box>
+                </Stack>
+              </TabPanel>
+
+              <TabPanel sx={{ p: 0 }} value="2" index="2">
+                <Stack>
+                  <Box className="mcontainer__wrapper">
+                    <Stack
+                      py={0.5}
+                      px={1}
+                      flexDirection={isSmallScreen ? "column" : "row"}
+                      // flexDirection="row"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      width="100%"
+                      gap={1}
+                    >
+                      <Stack flexDirection="row" width="100%">
+                        <CustomTextField
+                          control={control}
+                          name="search"
+                          label="Search"
+                          type="text"
+                          optional
+                          color="secondary"
+                          onKeyDown={searchHandler}
+                          fullWidth={isSmallScreen ? true : false}
+                        />
+                      </Stack>
+
+                      <Stack
+                        flexDirection="row"
+                        gap={isSmallScreen ? 1 : 2}
+                        justifyContent="center"
+                        flexWrap={isSmallScreen ? "wrap" : null}
+                      >
+                        <Stack
+                          flexDirection="row"
+                          gap={1}
+                          width={isSmallScreen ? "100%" : null}
+                          flexWrap={isSmallerScreen ? "wrap" : "noWrap"}
+                        >
+                          <CustomDatePicker
+                            control={control}
+                            name="startDate"
+                            label="Start Date"
+                            size="small"
+                            fullWidth
+                            optional
+                            disableFuture
+                            reduceAnimations
+                            onChange={(newValue) => {
+                              setValue("endDate", null);
+                              return newValue;
+                            }}
+                          />
+
+                          <CustomDatePicker
+                            control={control}
+                            name="endDate"
+                            label="End Date"
+                            size="small"
+                            // views={["year", "month", "day"]}
+                            minDate={watch("startDate")}
+                            fullWidth
+                            optional
+                            disableFuture
+                            reduceAnimations
+                            disabled={watch("startDate") === null || watch("startDate") === ""}
+                          />
+                        </Stack>
+
+                        {isSmallScreen ? (
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={handleSearchClick}
+                            sx={{
+                              backgroundColor: "primary",
+                              width: isSmallScreen && "100%",
+                              // maxWidth: "100%",
+                            }}
+                          >
+                            <Search /> {"  "}Search
+                          </Button>
+                        ) : (
+                          <IconButton
+                            onClick={handleSearchClick}
+                            sx={{ bgcolor: "primary.main", ":hover": { bgcolor: "primary.dark" } }}
+                          >
+                            <Search />
+                          </IconButton>
+                        )}
+                      </Stack>
+                    </Stack>
+                    <Box
+                      sx={{
+                        border: "1px solid lightgray",
+                        borderRadius: "10px",
+                        width: "100%",
+                        // maxWidth: "850px",
+                      }}
+                    >
+                      <TableContainer
+                        sx={{
+                          height: isSmallScreen ? "35vh" : "45vh",
+                          borderRadius: "10px",
+                        }}
+                      >
+                        <Table stickyHeader>
+                          <TableHead>
+                            <TableRow
                               sx={{
-                                textAlign: "center",
-                                pr: "35px",
+                                "& > *": {
+                                  whiteSpace: "nowrap",
+                                  backgroundColor: "secondary.main",
+                                  ".MuiButtonBase-root": { color: "white" },
+                                  ".MuiTableSortLabel-icon": { color: "white!important" },
+                                },
                               }}
                             >
-                              <FaStatusChange
-                                faStatus={data.asset_status.asset_status_name}
-                                data={data.asset_status.asset_status_name}
+                              <TableCell align="center" sx={{ backgroundColor: "secondary.main", p: 0 }}>
+                                <FormControlLabel
+                                  sx={{ margin: "auto", align: "center" }}
+                                  control={
+                                    <Checkbox
+                                      value=""
+                                      size="small"
+                                      sx={{ color: "primary" }}
+                                      checked={
+                                        !!fixedAssetData?.data
+                                          ?.map((mapItem) => mapItem.vladimir_tag_number)
+                                          .every((item) => watch("tagNumber").includes(item))
+                                      }
+                                      onChange={(e) => {
+                                        tagNumberAllHandler(e.target.checked);
+                                        // console.log(e.target.checked);
+                                      }}
+                                    />
+                                  }
+                                />
+                              </TableCell>
+
+                              <TableCell>
+                                <TableSortLabel
+                                  active={orderBy === `vladimir_tag_number`}
+                                  direction={orderBy === `vladimir_tag_number` ? order : `asc`}
+                                  onClick={() => onSort(`vladimir_tag_number`)}
+                                >
+                                  Small Tools
+                                </TableSortLabel>
+                              </TableCell>
+
+                              <TableCell>
+                                <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
+                              </TableCell>
+
+                              <TableCell>
+                                <TableSortLabel disabled>Accountability</TableSortLabel>
+                              </TableCell>
+
+                              <TableCell
+                                sx={{
+                                  textAlign: "center",
+                                  backgroundColor: "secondary.main",
+                                }}
+                              >
+                                <TableSortLabel
+                                  active={orderBy === `asset_status.asset_status_name`}
+                                  direction={orderBy === `asset_status.asset_status_name` ? order : `asc`}
+                                  onClick={() => onSort(`asset_status.asset_status_name`)}
+                                >
+                                  Asset Status
+                                </TableSortLabel>
+                              </TableCell>
+
+                              <TableCell
+                                align="center"
+                                sx={{
+                                  backgroundColor: "secondary.main",
+                                }}
+                              >
+                                <TableSortLabel
+                                  active={orderBy === `acquisition_date`}
+                                  direction={orderBy === `acquisition_date` ? order : `asc`}
+                                  onClick={() => onSort(`acquisition_date`)}
+                                >
+                                  Date Created
+                                </TableSortLabel>
+                              </TableCell>
+                            </TableRow>
+                          </TableHead>
+
+                          <TableBody>
+                            {fixedAssetSuccess && fixedAssetData.data.length === 0 ? (
+                              <NoRecordsFound heightData="xs" />
+                            ) : (
+                              <>
+                                {fixedAssetSuccess &&
+                                  [...fixedAssetData.data].sort(comparator(order, orderBy))?.map((data) => {
+                                    return (
+                                      <TableRow
+                                        key={data.id}
+                                        sx={{
+                                          "&:last-child td, &:last-child th": {
+                                            borderBottom: 0,
+                                          },
+                                          overflow: "auto",
+                                        }}
+                                      >
+                                        <TableCell align="center">
+                                          <FormControlLabel
+                                            value={data.vladimir_tag_number}
+                                            sx={{ margin: "auto" }}
+                                            disabled={data.action === "view"}
+                                            control={
+                                              <Checkbox
+                                                size="small"
+                                                {...register("tagNumber")}
+                                                checked={watch("tagNumber").includes(data.vladimir_tag_number)}
+                                              />
+                                            }
+                                          />
+                                        </TableCell>
+
+                                        {/* {console.log("selectedItems", watch("tagNumber"))}
+                                        {console.log("filter", smallToolsData)} */}
+
+                                        <TableCell>
+                                          <Typography
+                                            noWrap
+                                            variant="h6"
+                                            fontSize="14px"
+                                            color="secondary.light"
+                                            fontWeight="bold"
+                                          >
+                                            {data?.is_parent === 1 && data.vladimir_tag_number}
+                                          </Typography>
+
+                                          {/* <Typography noWrap fontSize="13px" color="gray">
+                                            {data.asset_description}
+                                          </Typography> */}
+
+                                          <Typography
+                                            noWrap
+                                            variant="h3"
+                                            fontSize="14px"
+                                            color="secondary"
+                                            fontWeight="bold"
+                                          >
+                                            {data.asset_description}
+                                          </Typography>
+                                          <Tooltip title={data.asset_specification} placement="bottom" arrow>
+                                            <Typography
+                                              fontSize="12px"
+                                              color="text.light"
+                                              textOverflow="ellipsis"
+                                              width="100px"
+                                              overflow="hidden"
+                                            >
+                                              {data.asset_specification}
+                                            </Typography>
+                                          </Tooltip>
+
+                                          <Typography noWrap fontSize="10px" color="primary" fontWeight="bold">
+                                            {data.type_of_request.type_of_request_name.toUpperCase()}
+                                          </Typography>
+                                        </TableCell>
+
+                                        <TableCell>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data.company.company_code}
+                                            {" - "} {data.company.company_name}
+                                          </Typography>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data.business_unit.business_unit_code}
+                                            {" - "} {data.business_unit.business_unit_name}
+                                          </Typography>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data.department.department_code}
+                                            {" - "}
+                                            {data.department.department_name}
+                                          </Typography>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data.unit.unit_code}
+                                            {" - "} {data.unit.unit_name}
+                                          </Typography>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data.subunit.subunit_code}
+                                            {" - "} {data.subunit.subunit_name}
+                                          </Typography>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data.location.location_code} {" - "}
+                                            {data.location.location_name}
+                                          </Typography>
+                                          {/* <Typography noWrap fontSize="10px" color="gray">
+                                {data.account_title.account_title_code}
+                                {" - "}
+                                {data.account_title.account_title_name}
+                              </Typography> */}
+                                        </TableCell>
+
+                                        <TableCell>
+                                          <Typography
+                                            noWrap
+                                            variant="h3"
+                                            fontSize="12px"
+                                            color="secondary"
+                                            fontWeight="bold"
+                                          >
+                                            {data.accountable}
+                                          </Typography>
+                                          <Typography noWrap fontSize="11px" color="gray">
+                                            {data.accountability}
+                                          </Typography>
+                                        </TableCell>
+
+                                        <TableCell
+                                          sx={{
+                                            textAlign: "center",
+                                            pr: "35px",
+                                          }}
+                                        >
+                                          <FaStatusChange
+                                            faStatus={data.asset_status.asset_status_name}
+                                            data={data.asset_status.asset_status_name}
+                                          />
+                                        </TableCell>
+
+                                        <TableCell align="center">
+                                          <Typography noWrap fontSize="13px" paddingRight="15px">
+                                            {moment(data.created_at).format("MMM-DD-YYYY")}
+                                          </Typography>
+                                        </TableCell>
+                                      </TableRow>
+                                    );
+                                  })}
+                              </>
+                            )}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+
+                      <CustomTablePagination
+                        total={fixedAssetData?.total}
+                        success={fixedAssetSuccess}
+                        current_page={fixedAssetData?.current_page}
+                        per_page={fixedAssetData?.per_page}
+                        onPageChange={pageHandler}
+                        onRowsPerPageChange={perPageHandler}
+                        removeShadow
+                      />
+                    </Box>
+
+                    <Stack
+                      flexDirection="row"
+                      width="100%"
+                      justifyContent="space-between"
+                      flexWrap="wrap"
+                      alignItems="center"
+                    >
+                      <Box sx={{ pl: "5px" }}>
+                        <Typography fontFamily="Anton, Impact, Roboto" fontSize="18px" color="secondary.main">
+                          Selected: {watch("tagNumber").length}
+                        </Typography>
+                      </Box>
+
+                      {result === false && (
+                        <Typography noWrap fontSize="13px" color="error">
+                          Selected items does not have the same COA.
+                        </Typography>
+                      )}
+
+                      <Stack gap={1.2} flexDirection="row" alignSelf="flex-end" mt={1} mb={1}>
+                        <LoadingButton
+                          size="small"
+                          variant="contained"
+                          loading={isLoading}
+                          startIcon={
+                            isLoading ? null : (
+                              <HomeRepairService
+                                color={
+                                  watch("tagNumber").length === 0 || watch("tagNumber").length === 1 || result === false
+                                    ? "gray"
+                                    : "primary"
+                                }
                               />
-                            </TableCell>
+                            )
+                          }
+                          disabled={
+                            watch("tagNumber").length === 0 || watch("tagNumber").length === 1 || result === false
+                          }
+                          onClick={() => dispatch(openDialog2())}
+                          color={printMemo ? "tertiary" : "secondary"}
+                          sx={{ color: "white" }}
+                        >
+                          Group Small Tools
+                        </LoadingButton>
 
-                            <TableCell align="center">
-                              <Typography noWrap fontSize="13px" paddingRight="15px">
-                                {moment(data.created_at).format("MMM-DD-YYYY")}
-                              </Typography>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                  </>
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                        <LoadingButton
+                          size="small"
+                          variant="contained"
+                          loading={isLoading}
+                          startIcon={
+                            isLoading ? null : (
+                              <PrintDisabled
+                                color={watch("tagNumber").length === 0 || printable === true ? "gray" : "primary"}
+                              />
+                            )
+                          }
+                          disabled={watch("tagNumber").length === 0 || printable === true}
+                          onClick={onTagNonPrintableHandler}
+                          color={printMemo ? "tertiary" : "secondary"}
+                          sx={{ color: "white" }}
+                        >
+                          Tag as Non-Printable
+                        </LoadingButton>
 
-          <CustomTablePagination
-            total={fixedAssetData?.total}
-            success={fixedAssetSuccess}
-            current_page={fixedAssetData?.current_page}
-            per_page={fixedAssetData?.per_page}
-            onPageChange={pageHandler}
-            onRowsPerPageChange={perPageHandler}
-            removeShadow
-          />
-        </Box>
+                        <LoadingButton
+                          size="small"
+                          variant="contained"
+                          loading={isLoading}
+                          startIcon={
+                            isLoading ? null : <Print color={watch("tagNumber").length === 0 ? "gray" : "primary"} />
+                          }
+                          disabled={watch("tagNumber").length === 0}
+                          type="submit"
+                          color={printMemo ? "tertiary" : "secondary"}
+                          sx={{ color: "white" }}
+                        >
+                          {printMemo ? "Print Assignment Memo" : "Print"}
+                        </LoadingButton>
 
-        <Stack flexDirection="row" width="100%" justifyContent="space-between" flexWrap="wrap" alignItems="center">
-          <Box sx={{ pl: "5px" }}>
-            <Typography fontFamily="Anton, Impact, Roboto" fontSize="18px" color="secondary.main">
-              Selected: {watch("tagNumber").length}
-            </Typography>
+                        <Button variant="outlined" size="small" color="secondary" onClick={handleClose}>
+                          Close
+                        </Button>
+                      </Stack>
+                    </Stack>
+                  </Box>
+                </Stack>
+              </TabPanel>
+            </TabContext>
           </Box>
-
-          <Stack gap={1.2} flexDirection="row" alignSelf="flex-end">
-            <LoadingButton
-              size="small"
-              variant="contained"
-              loading={isLoading}
-              startIcon={isLoading ? null : <Print color={watch("tagNumber").length === 0 ? "gray" : "primary"} />}
-              disabled={watch("tagNumber").length === 0}
-              type="submit"
-              color={printMemo ? "tertiary" : "secondary"}
-              sx={{ color: "white" }}
-            >
-              {printMemo ? "Print Assignment Memo" : "Print"}
-            </LoadingButton>
-
-            <Button variant="outlined" size="small" color="secondary" onClick={handleClose}>
-              Close
-            </Button>
-          </Stack>
-        </Stack>
+        )}
 
         <Dialog
           open={printAssignmentMemo}
@@ -878,6 +1913,42 @@ const PrintFixedAsset = (props) => {
             />
           </Box>
         </Dialog>
+
+        <Dialog
+          open={dialog}
+          onClose={() => dispatch(closeDialog2())}
+          TransitionComponent={Grow}
+          PaperProps={{
+            sx: {
+              borderRadius: "10px",
+              margin: "0",
+              maxWidth: "100%",
+              padding: "10px",
+              // overflow: "hidden",
+              bgcolor: "background.light",
+            },
+          }}
+        >
+          <AddSmallToolsGroup data={smallToolsData} />
+        </Dialog>
+
+        {/* <Dialog
+          open={dialog2}
+          onClose={() => dispatch(closeDialog3())}
+          TransitionComponent={Grow}
+          PaperProps={{
+            sx: {
+              borderRadius: "10px",
+              margin: "0",
+              maxWidth: "100%",
+              padding: "10px",
+              // overflow: "hidden",
+              bgcolor: "background.light",
+            },
+          }}
+        >
+
+        </Dialog> */}
       </Box>
     </>
   );
