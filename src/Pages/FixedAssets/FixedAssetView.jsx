@@ -810,7 +810,7 @@ const FixedAssetView = (props) => {
                     >
                       <Stack flexDirection="row" alignItems="center" justifyContent="center" gap={1}>
                         <Typography fontSize="14px" fontWeight="bold" color="secondary.light">
-                          Main Cost :
+                          Main Cost:
                         </Typography>
                         <Typography color="secondary.light">
                           ₱
@@ -822,7 +822,7 @@ const FixedAssetView = (props) => {
                       {`+`}
                       <Stack flexDirection="row" alignItems="center" justifyContent="center" gap={1}>
                         <Typography fontSize="14px" fontWeight="bold" color="secondary.light">
-                          Total Additional Cost :
+                          Total Additional Cost:
                         </Typography>
                         <Typography color="secondary.light">
                           ₱
@@ -847,7 +847,7 @@ const FixedAssetView = (props) => {
                       }}
                     >
                       <Typography fontSize="16px" fontFamily="Anton, Poppins, Sans Serif" color="secondary.main">
-                        TOTAL COST :
+                        TOTAL COST:
                       </Typography>
                       <Typography fontWeight="bold" color="secondary.main">
                         ₱{dataApi?.data?.total_cost === (0 || null) ? 0 : dataApi?.data?.total_cost.toLocaleString()}
@@ -1206,7 +1206,7 @@ const FixedAssetView = (props) => {
 
                   <Divider />
 
-                  {dataApi?.data?.small_tools_item?.length === 0 || !dataApi?.data?.small_tools_item ? (
+                  {dataApi?.data?.small_tools?.length === 0 || !dataApi?.data?.small_tools ? (
                     <AccordionDetails>
                       <Stack flexDirection="row" alignItems="center" justifyContent="center" gap="5px">
                         <img src={NoDataFile} alt="" width="35px" />
@@ -1235,14 +1235,24 @@ const FixedAssetView = (props) => {
                                 },
                               }}
                             >
+                              {/* <TableCell className="tbl-cell">
+                                <Typography fontWeight="bold" fontSize={14}>
+                                  Item ID
+                                </Typography>
+                              </TableCell> */}
                               <TableCell className="tbl-cell">
                                 <Typography fontWeight="bold" fontSize={14}>
-                                  Item Code
+                                  Item Description
                                 </Typography>
                               </TableCell>
                               <TableCell className="tbl-cell">
                                 <Typography fontWeight="bold" fontSize={14}>
-                                  Item Name
+                                  Item Specification
+                                </Typography>
+                              </TableCell>
+                              <TableCell className="tbl-cell" align="center">
+                                <Typography fontWeight="bold" fontSize={14}>
+                                  PR/PO/RR Number
                                 </Typography>
                               </TableCell>
                               <TableCell className="tbl-cell" align="center">
@@ -1250,32 +1260,60 @@ const FixedAssetView = (props) => {
                                   Quantity
                                 </Typography>
                               </TableCell>
+                              {/* <TableCell className="tbl-cell" align="center">
+                                <Typography fontWeight="bold" fontSize={14}>
+                                  Acquisition Cost
+                                </Typography>
+                              </TableCell> */}
                               <TableCell className="tbl-cell" align="center">
                                 <Typography fontWeight="bold" fontSize={14}>
                                   Status
                                 </Typography>
                               </TableCell>
-                              <TableCell className="tbl-cell" align="center">
+                              {/* <TableCell className="tbl-cell" align="center">
                                 <Typography fontWeight="bold" fontSize={14}>
                                   Action
                                 </Typography>
-                              </TableCell>
+                              </TableCell> */}
                             </TableRow>
                           </TableHead>
 
                           <TableBody>
-                            {dataApi?.data?.small_tools_item?.map((item, index) => {
+                            {dataApi?.data?.small_tools?.map((item, index) => {
                               return (
                                 <TableRow key={index}>
+                                  {/* <TableCell className="tbl-cell">
+                                    <Typography fontSize={13}>{item.id}</Typography>
+                                  </TableCell> */}
                                   <TableCell className="tbl-cell">
-                                    <Typography fontSize={13}>{item.item_code}</Typography>
+                                    <Typography fontSize={13} fontWeight="bold" color={"secondary.main"}>
+                                      {item.description}
+                                    </Typography>
                                   </TableCell>
                                   <TableCell className="tbl-cell">
-                                    <Typography fontSize={13}>{item.item_name}</Typography>
+                                    <Typography fontSize={13} fontWeight="bold" color={"secondary.light"}>
+                                      {item.specification}
+                                    </Typography>
                                   </TableCell>
+                                  <TableCell className="tbl-cell" align="center">
+                                    <Typography fontSize={13} fontWeight="bold" color={"secondary.light"}>
+                                      {item.pr_number}
+                                    </Typography>
+                                    <Typography fontSize={13} fontWeight="bold" color={"secondary.light"}>
+                                      {item.po_number}
+                                    </Typography>
+                                    <Typography fontSize={13} fontWeight="bold" color={"secondary.light"}>
+                                      {item.rr_number}
+                                    </Typography>
+                                  </TableCell>{" "}
                                   <TableCell className="tbl-cell" align="center">
                                     <Typography fontSize={13}>{item.quantity}</Typography>
                                   </TableCell>
+                                  {/* <TableCell className="tbl-cell" align="center">
+                                    <Typography fontSize={13} fontWeight="bold" color={"secondary.light"}>
+                                      ₱{item.acquisition_cost}
+                                    </Typography>
+                                  </TableCell> */}
                                   <TableCell className="tbl-cell" align="center">
                                     <Typography fontSize={13}>
                                       {item.status_description === "Good" ? (
@@ -1319,7 +1357,7 @@ const FixedAssetView = (props) => {
                                       )}
                                     </Typography>
                                   </TableCell>
-                                  <TableCell className="tbl-cell" align="center">
+                                  {/* <TableCell className="tbl-cell" align="center">
                                     {item?.status_description !== "For Releasing" && (
                                       <ActionMenu
                                         data={item}
@@ -1328,7 +1366,7 @@ const FixedAssetView = (props) => {
                                         hideEdit
                                       />
                                     )}
-                                  </TableCell>
+                                  </TableCell> */}
                                 </TableRow>
                               );
                             })}
@@ -1446,7 +1484,7 @@ const FixedAssetView = (props) => {
                         >
                           <Stack flexDirection="row" alignItems="center" justifyContent="center" gap={1}>
                             <Typography fontSize="14px" fontWeight="bold" color="secondary.light">
-                              Main Cost :
+                              Main Cost:
                             </Typography>
                             <Typography color="secondary.light">
                               ₱
@@ -1458,7 +1496,7 @@ const FixedAssetView = (props) => {
                           {`+`}
                           <Stack flexDirection="row" alignItems="center" justifyContent="center" gap={1}>
                             <Typography fontSize="14px" fontWeight="bold" color="secondary.light">
-                              Total Additional Cost :
+                              Total Additional Cost:
                             </Typography>
                             <Typography color="secondary.light">
                               ₱
@@ -1483,7 +1521,7 @@ const FixedAssetView = (props) => {
                           }}
                         >
                           <Typography fontSize="16px" fontFamily="Anton, Poppins, Sans Serif" color="secondary.main">
-                            TOTAL COST :
+                            TOTAL COST:
                           </Typography>
                           <Typography fontWeight="bold" color="secondary.main">
                             ₱
