@@ -38,6 +38,15 @@ export const smallToolsApi = createApi({
       invalidatesTags: ["SmallTools"],
     }),
 
+    postGroupSmallToolsApi: builder.mutation({
+      query: (data) => ({
+        url: `/small-tools-main-asset`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["SmallTools"],
+    }),
+
     postItemsApi: builder.mutation({
       query: (data) => ({
         url: `/item`,
@@ -54,5 +63,6 @@ export const {
   useGetSmallToolsAllApiQuery,
   useLazyGetSmallToolsAllApiQuery,
   usePostSmallToolsApiMutation,
+  usePostGroupSmallToolsApiMutation,
   usePostItemsApiMutation,
 } = smallToolsApi;
