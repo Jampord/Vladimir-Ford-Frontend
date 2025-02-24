@@ -78,6 +78,7 @@ export const fixedAssetApi = createApi({
           `page=${params.page}`,
           `isRequest=${params.isRequest}`,
           `printMemo=${params.printMemo}`,
+          `smallTool=${params.smallTool}`,
         ];
 
         if (params.startDate) {
@@ -191,6 +192,17 @@ export const fixedAssetApi = createApi({
       invalidatesTags: ["FixedAsset"],
     }),
 
+    putSmallToolsPrintableApi: builder.mutation({
+      query: (params) => {
+        return {
+          url: `/small-tools-main-asset/not-printable`,
+          method: "PUT",
+          body: params,
+        };
+      },
+      invalidatesTags: ["FixedAsset"],
+    }),
+
     postLocalPrintApi: builder.mutation({
       query: (params) => ({
         url: `/fixed-asset/barcode`,
@@ -233,6 +245,7 @@ export const {
   useLazyGetExportApiQuery,
   usePostPrintApiMutation,
   usePutMemoPrintApiMutation,
+  usePutSmallToolsPrintableApiMutation,
   usePostLocalPrintApiMutation,
 
   usePostDepreciateApiMutation,
