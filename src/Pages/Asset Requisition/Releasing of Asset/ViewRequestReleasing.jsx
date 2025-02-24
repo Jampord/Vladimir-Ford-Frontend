@@ -25,6 +25,7 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  TableHead,
   TableRow,
   Typography,
   useMediaQuery,
@@ -367,6 +368,173 @@ const ViewRequestReleasing = (props) => {
                     </Typography>
                   </Box>
                 </AccordionDetails>
+              </Accordion>
+
+              <Accordion>
+                <AccordionSummary expandIcon={<ExpandMore />}>
+                  <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1rem" }}>
+                    SMALL TOOLS
+                  </Typography>
+                </AccordionSummary>
+
+                <Divider />
+
+                {releasingData?.small_tools?.length === 0 || !releasingData?.small_tools ? (
+                  <AccordionDetails>
+                    <Stack flexDirection="row" alignItems="center" justifyContent="center" gap="5px">
+                      <img src={NoDataFile} alt="" width="35px" />
+                      <Typography
+                        variant="p"
+                        sx={{
+                          fontFamily: "Anton, Roboto, Helvetica",
+                          color: "secondary.main",
+                          fontSize: "1.2rem",
+                        }}
+                      >
+                        No Data Found
+                      </Typography>
+                    </Stack>
+                  </AccordionDetails>
+                ) : (
+                  <AccordionDetails className="tableCard__border">
+                    <TableContainer>
+                      <Table>
+                        <TableHead>
+                          <TableRow
+                            sx={{
+                              "& > *": {
+                                fontWeight: "bold",
+                                whiteSpace: "nowrap",
+                              },
+                            }}
+                          >
+                            <TableCell className="tbl-cell">
+                              <Typography fontWeight="bold" fontSize={14}>
+                                Item Description
+                              </Typography>
+                            </TableCell>
+                            <TableCell className="tbl-cell">
+                              <Typography fontWeight="bold" fontSize={14}>
+                                Item Specification
+                              </Typography>
+                            </TableCell>
+                            <TableCell className="tbl-cell" align="center">
+                              <Typography fontWeight="bold" fontSize={14}>
+                                PR/PO/RR Number
+                              </Typography>
+                            </TableCell>
+                            <TableCell className="tbl-cell" align="center">
+                              <Typography fontWeight="bold" fontSize={14}>
+                                Quantity
+                              </Typography>
+                            </TableCell>
+                            {/* <TableCell className="tbl-cell" align="center">
+                                                           <Typography fontWeight="bold" fontSize={14}>
+                                                             Acquisition Cost
+                                                           </Typography>
+                                                         </TableCell> */}
+                            <TableCell className="tbl-cell" align="center">
+                              <Typography fontWeight="bold" fontSize={14}>
+                                Status
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        </TableHead>
+
+                        <TableBody>
+                          {releasingData?.small_tools?.map((item, index) => {
+                            return (
+                              <TableRow key={index}>
+                                <TableCell className="tbl-cell">
+                                  <Typography fontSize={13} fontWeight="bold" color={"secondary.main"}>
+                                    {item.description}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell className="tbl-cell">
+                                  <Typography fontSize={13} fontWeight="bold" color={"secondary.light"}>
+                                    {item.specification}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell className="tbl-cell" align="center">
+                                  <Typography fontSize={13} fontWeight="bold" color={"secondary.light"}>
+                                    {item.pr_number}
+                                  </Typography>
+                                  <Typography fontSize={13} fontWeight="bold" color={"secondary.light"}>
+                                    {item.po_number}
+                                  </Typography>
+                                  <Typography fontSize={13} fontWeight="bold" color={"secondary.light"}>
+                                    {item.rr_number}
+                                  </Typography>
+                                </TableCell>{" "}
+                                <TableCell className="tbl-cell" align="center">
+                                  <Typography fontSize={13}>{item.quantity}</Typography>
+                                </TableCell>
+                                {/* <TableCell className="tbl-cell" align="center">
+                                                                    <Typography fontSize={13} fontWeight="bold" color={"secondary.light"}>
+                                                                      ₱{item.acquisition_cost}
+                                                                    </Typography>
+                                                                  </TableCell> */}
+                                <TableCell className="tbl-cell" align="center">
+                                  <Typography fontSize={13}>
+                                    {item.status_description === "Good" ? (
+                                      <Chip
+                                        size="small"
+                                        variant="contained"
+                                        sx={{
+                                          background: "#27ff811f",
+                                          color: "active.dark",
+                                          fontSize: "0.7rem",
+                                          px: 1,
+                                        }}
+                                        label={item?.status_description}
+                                      />
+                                    ) : item.status_description === "For Releasing" ||
+                                      item.status_description === "For Replacement" ? (
+                                      <Chip
+                                        size="small"
+                                        variant="contained"
+                                        sx={{
+                                          // border: "1px solid #E9D502",
+                                          background: "#FFFFB3",
+                                          color: "#C29800",
+                                          fontSize: "0.7rem",
+                                          px: 1,
+                                        }}
+                                        label={item?.status_description}
+                                      />
+                                    ) : (
+                                      <Chip
+                                        size="small"
+                                        variant="contained"
+                                        sx={{
+                                          background: "#fc3e3e34",
+                                          color: "error.light",
+                                          fontSize: "0.7rem",
+                                          px: 1,
+                                        }}
+                                        label={item?.status_description}
+                                      />
+                                    )}
+                                  </Typography>
+                                </TableCell>
+                                {/* <TableCell className="tbl-cell" align="center">
+                                    {item?.status_description !== "For Releasing" && (
+                                      <ActionMenu
+                                        data={item}
+                                        onUpdateSmallToolsHandler={onUpdateSmallToolsHandler}
+                                        updateSmallTools
+                                        hideEdit
+                                      />
+                                    )}
+                                  </TableCell> */}
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </AccordionDetails>
+                )}
               </Accordion>
 
               <Accordion>
