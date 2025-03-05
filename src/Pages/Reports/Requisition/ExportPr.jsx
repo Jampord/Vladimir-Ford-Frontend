@@ -95,6 +95,8 @@ const ExportPr = () => {
         export: 1,
       }).unwrap();
 
+      console.log("res", res);
+
       const newObj = res?.flatMap((item) => {
         return {
           "Ymir PR Number": item?.ymir_pr_number,
@@ -118,8 +120,14 @@ const ExportPr = () => {
           Subunit: item?.subunit,
           "Location Code": item?.location_code,
           Location: item?.location,
-          "Account Title Code": item?.account_title_code,
-          "Account Title": item?.account_title,
+          "Initial Credit Code": item?.initial_credit_code,
+          "Initial Credit": item?.initial_credit,
+          "Initial Debit Code": item?.initial_debit_code,
+          "Initial Debit": item?.initial_debit,
+          "Depreciation Credit Code": item?.depreciation_credit_code,
+          "Depreciation Credit": item?.depreciation_credit,
+          "Depreciation Debit Code": item?.depreciation_debit_code,
+          "Depreciation Debit": item?.depreciation_debit,
           "Date Needed": moment(item?.date_needed).format("MMM DD, YYYY"),
           "Created At": moment(item?.created_at).format("MMM DD, YYYY"),
         };
