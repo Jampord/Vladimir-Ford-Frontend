@@ -42,6 +42,7 @@ import NoRecordsFound from "../../Layout/NoRecordsFound";
 import { openDrawer } from "../../Redux/StateManagement/booleanStateSlice";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
 import TagWarehouseLocation from "./AddEdit/TagWarehouseLocation";
+import TagWarehouseDepartment from "./AddEdit/TagWarehouseDepartment";
 
 const Warehouse = () => {
   const [search, setSearch] = useState("");
@@ -191,7 +192,8 @@ const Warehouse = () => {
           try {
             dispatch(onLoading());
             await trigger();
-            warehouseApiRefetch();
+            // warehouseApiRefetch();
+            refetch();
           } catch (err) {
             console.log(err.message);
             dispatch(
@@ -215,30 +217,31 @@ const Warehouse = () => {
   console.log("wdata", warehouseData);
 
   const onUpdateHandler = (props) => {
-    const { id, warehouse_name, location, sync_id } = props;
+    console.log("props", props);
+    const { id, warehouse_name, department, sync_id } = props;
     setUpdateWarehouse({
       status: true,
       id: id,
       sync_id: sync_id,
-      location: location,
+      department: department,
       warehouse_name: warehouse_name,
     });
   };
 
-  const onViewLocationHandler = (props) => {
-    const { id, warehouse_name, location, sync_id } = props;
+  const onViewDepartmentHandler = (props) => {
+    const { id, warehouse_name, department, sync_id } = props;
     setUpdateWarehouse({
       status: true,
       action: "view",
       id: id,
       sync_id: sync_id,
-      location: location,
+      department: department,
       warehouse_name: warehouse_name,
     });
   };
 
-  const handleViewLocation = (data) => {
-    onViewLocationHandler(data);
+  const handleViewDepartment = (data) => {
+    onViewDepartmentHandler(data);
     dispatch(openDrawer());
     dispatch(closeConfirm());
   };
@@ -397,7 +400,7 @@ const Warehouse = () => {
                             <TableCell className="tbl-cell">{data.warehouse_code}</TableCell>
 
                             <TableCell className="tbl-cell" align="center">
-                              <IconButton size="small" onClick={() => handleViewLocation(data)}>
+                              <IconButton size="small" onClick={() => handleViewDepartment(data)}>
                                 <Visibility />
                               </IconButton>
                             </TableCell>
@@ -463,7 +466,7 @@ const Warehouse = () => {
       )}
 
       <Dialog open={drawer} TransitionComponent={Grow} PaperProps={{ sx: { borderRadius: "10px" } }}>
-        <TagWarehouseLocation data={updateWarehouse} />
+        <TagWarehouseDepartment data={updateWarehouse} />
       </Dialog>
     </Box>
   );
