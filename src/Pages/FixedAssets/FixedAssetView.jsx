@@ -603,7 +603,7 @@ const FixedAssetView = (props) => {
                       }}
                       color="secondary.main"
                     >
-                      #{dataApi?.data?.vladimir_tag_number}
+                      {data.is_printable === 1 ? `#${data.vladimir_tag_number}` : "NON PRINTABLE"}
                     </Typography>
                     <FaStatusChange faStatus={dataApi?.data?.asset_status?.asset_status_name} />
                   </Box>
@@ -668,7 +668,8 @@ const FixedAssetView = (props) => {
 
                 {permissions?.split(", ").includes("print-fa") &&
                   dataApi.data?.is_additional_cost === 0 &&
-                  dataApi.data?.type_of_request?.type_of_request_name !== "Capex" && (
+                  dataApi.data?.type_of_request?.type_of_request_name !== "Capex" &&
+                  dataApi.data?.is_printable !== 0 && (
                     <LoadingButton
                       variant="contained"
                       size="small"
