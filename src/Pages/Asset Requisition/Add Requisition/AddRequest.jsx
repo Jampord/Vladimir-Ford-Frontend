@@ -24,6 +24,7 @@ import {
   Button,
   Chip,
   Dialog,
+  DialogActions,
   Divider,
   Grow,
   IconButton,
@@ -45,6 +46,8 @@ import {
   AddToPhotos,
   ArrowBackIosRounded,
   Create,
+  Delete,
+  Download,
   Info,
   Remove,
   Report,
@@ -56,7 +59,7 @@ import { LoadingButton } from "@mui/lab";
 
 // RTK
 import { useDispatch, useSelector } from "react-redux";
-import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
+import { closeDialog, closeDrawer, openDialog, openDrawer } from "../../../Redux/StateManagement/booleanStateSlice";
 import { useLazyGetCompanyAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Company";
 import { useLazyGetBusinessUnitAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/BusinessUnit";
 import { useLazyGetDepartmentAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Department";
@@ -97,12 +100,20 @@ import CustomDatePicker from "../../../Components/Reusable/CustomDatePicker";
 import moment from "moment";
 import ViewItemRequest from "../ViewItemRequest";
 import { useLazyGetWarehouseAllApiQuery } from "../../../Redux/Query/Masterlist/Warehouse";
-import { useLazyGetMinorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MinorCategory";
+import {
+  useLazyGetMinorCategoryAllApiQuery,
+  useLazyGetMinorCategorySmallToolsApiQuery,
+} from "../../../Redux/Query/Masterlist/Category/MinorCategory";
 import { useLazyGetMajorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MajorCategory";
 import {
   useGetSmallToolsAllApiQuery,
   useLazyGetSmallToolsAllApiQuery,
 } from "../../../Redux/Query/Masterlist/YmirCoa/SmallTools";
+import {
+  useGetFixedAssetSmallToolsAllApiQuery,
+  useLazyGetFixedAssetSmallToolsAllApiQuery,
+} from "../../../Redux/Query/FixedAsset/FixedAssets";
+import { useDownloadAttachment } from "../../../Hooks/useDownloadAttachment";
 // import { useLazyGetMajorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MajorCategory";
 
 const schema = yup.object().shape({
@@ -124,15 +135,15 @@ const schema = yup.object().shape({
   subunit_id: yup.object().required().label("Subunit").typeError("Subunit is a required field"),
   location_id: yup.object().required().label("Location").typeError("Location is a required field"),
   // small_tool_id: yup.object().required().label("Small Tools").typeError("Small Tools is a required field"),
-  small_tool_id: yup
-    .object()
-    .nullable()
-    .when("type_of_request", {
-      is: (value) => {
-        value === "Small Tools";
-      },
-      then: (yup) => yup.label("Small Tools").required().typeError("Small Tools is a required field"),
-    }),
+  // small_tool_id: yup
+  //   .object()
+  //   .nullable()
+  //   .when("type_of_request", {
+  //     is: (value) => {
+  //       value === "Small Tools";
+  //     },
+  //     then: (yup) => yup.label("Small Tools").required().typeError("Small Tools is a required field"),
+  //   }),
   // account_title_id: yup.object().required().label("Account Title").typeError("Account Title is a required field"),
   accountability: yup.string().typeError("Accountability is a required field").required().label("Accountability"),
   accountable: yup
@@ -144,8 +155,27 @@ const schema = yup.object().shape({
     }),
   acquisition_details: yup.string().required().label("Acquisition Details"),
   item_status: yup.string().required().label("Item Status"),
+  fixed_asset_id: yup
+    .object()
+    .nullable()
+    .when("type_of_request" && "item_status", {
+      is: (value) => value === "Small Tools" && value === "Replacement",
+      then: (yup) => yup.label("Fixed Asset").required().typeError("Fixed Asset is a required field"),
+    }),
+  //     fixed_asset_id: yup
+  //     .object()
+  //     .nullable().
+  // label("Fixed Asset").typeError("Fixed Asset is a required field"),
+  small_tool_item: yup
+    .object()
+    .nullable()
+    .when("type_of_request" && "item_status", {
+      is: (value) => value === "Small Tools" && value === "Replacement",
+      then: (yup) => yup.label("Small Tool Item").required().typeError("Small Tool Item is a required field"),
+    }),
   asset_description: yup.string().required().label("Asset Description"),
   asset_specification: yup.string().required().label("Asset Specification"),
+  // asset_specification: yup.mixed().required().label("Asset Specification"),
   date_needed: yup.string().required().label("Date Needed").typeError("Date Needed is a required field"),
   brand: yup.string().label("Brand"),
   quantity: yup.number().required().label("Quantity"),
@@ -190,9 +220,11 @@ const AddRequisition = (props) => {
     // account_title_id: null,
 
     item_status: null,
+    fixed_asset_id: null,
     small_tool_id: null,
     asset_description: "",
     asset_specification: "",
+    small_tool_item: null,
     date_needed: null,
     brand: "",
     accountability: null,
@@ -208,6 +240,9 @@ const AddRequisition = (props) => {
     tool_of_trade: null,
     other_attachments: null,
   });
+
+  console.log("updateRequest", updateRequest);
+
   const [isLoading, setIsLoading] = useState(false);
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
@@ -217,12 +252,61 @@ const AddRequisition = (props) => {
   const [editRequest, setEditRequest] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
   const [transactionStatusId, setTransactionStatusId] = useState(null);
+  const [base64, setBase64] = useState("");
+  const [image, setImage] = useState(false);
+  const [fileMimeType, setFileMimeType] = useState("");
+  const [DValue, setDValue] = useState();
+  const [name, setName] = useState("");
 
   const { state: transactionData } = useLocation();
-  console.log("trans data: ", transactionData);
+  // console.log("trans data: ", transactionData);
   const dialog = useSelector((state) => state.booleanState.dialog);
+  const drawer = useSelector((state) => state.booleanState.drawer);
+
+  const handleDownloadAttachment = (value) => {
+    useDownloadAttachment({ attachment: value?.value, id: value?.id });
+  };
+
+  const base64ToBlob = (base64, mimeType) => {
+    const binaryString = atob(base64); // Decode Base64 to binary string
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i); // Convert to byte array
+    }
+    return new Blob([bytes], { type: mimeType });
+  };
+
+  const handleOpenDrawer = (value) => {
+    console.log("valueeeeeee", value);
+    const blob = base64ToBlob(value?.value?.base64, value?.value?.mime_type);
+    const url = URL.createObjectURL(blob);
+
+    console.log("url", url);
+
+    dispatch(openDrawer());
+    setBase64(url);
+    value?.value?.file_name.includes("jpg" || "png" || "jpeg") && setImage(true);
+    setDValue(value.data);
+    setName(value.name);
+  };
+
+  const handleCloseDrawer = () => {
+    dispatch(closeDrawer());
+    setBase64("");
+    setImage(false);
+    setDValue(null);
+    setName("");
+  };
+
+  const attachmentSx = {
+    textDecoration: "underline",
+    cursor: "pointer",
+    color: "primary.main",
+    fontSize: "12px",
+  };
 
   const isFullWidth = useMediaQuery("(max-width: 600px)");
+  const isSmallScreen = useMediaQuery("(min-width: 700px)");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   // const location = useLocation();
@@ -303,6 +387,16 @@ const AddRequisition = (props) => {
       isError: isMinorCategoryError,
     },
   ] = useLazyGetMinorCategoryAllApiQuery();
+
+  const [
+    minorCategorySmallToolsTrigger,
+    {
+      data: minorCategorySmallToolsData = [],
+      isLoading: isMinorCategorySmallToolsLoading,
+      isSuccess: isMinorCategorySmallToolsSuccess,
+      isError: isMinorCategorySmallToolsError,
+    },
+  ] = useLazyGetMinorCategorySmallToolsApiQuery();
 
   const [tag, setTag] = useState(0);
 
@@ -408,6 +502,21 @@ const AddRequisition = (props) => {
   ] = useLazyGetSmallToolsAllApiQuery();
 
   const [
+    fixedAssetSmallToolsTrigger,
+    {
+      data: fixedAssetSmallToolsApiData = [],
+      isLoading: fixedAssetSmallToolsApiLoading,
+      isSuccess: fixedAssetSmallToolsApiSuccess,
+      isFetching: fixedAssetSmallToolsApiFetching,
+      isError: fixedAssetSmallToolsApiError,
+      error: fixedAssetSmallToolsErrorData,
+      refetch: fixedAssetSmallToolsApiRefetch,
+    },
+  ] = useLazyGetFixedAssetSmallToolsAllApiQuery();
+
+  // console.log("fixedAssetSmallToolsApiData", fixedAssetSmallToolsApiData);
+
+  const [
     sedarTrigger,
     { data: sedarData = [], isLoading: isSedarLoading, isSuccess: isSedarSuccess, isError: isSedarError },
   ] = useLazyGetSedarUsersApiQuery();
@@ -434,7 +543,7 @@ const AddRequisition = (props) => {
   // } = useGetRequestContainerAllApiQuery({ page: page, per_page: perPage }, { refetchOnMountOrArgChange: true });
 
   const hasRequest = addRequestAllApi.length > 0;
-  console.log("hasRequest", hasRequest);
+  // console.log("hasRequest", hasRequest);
 
   const {
     data: transactionDataApi = [],
@@ -448,7 +557,7 @@ const AddRequisition = (props) => {
     { refetchOnMountOrArgChange: true }
   );
 
-  console.log("transactiondata", transactionDataApi);
+  // console.log("transactiondata", transactionDataApi);
 
   const [postRequest, { data: postRequestData }] = usePostRequestContainerApiMutation();
   const [updateDataRequest, { data: updateRequestData }] = useUpdateRequestContainerApiMutation();
@@ -468,6 +577,7 @@ const AddRequisition = (props) => {
     getValues,
   } = useForm({
     resolver: yupResolver(schema),
+    // mode: "onSubmit",
     defaultValues: {
       id: "",
       type_of_request_id: null,
@@ -490,6 +600,7 @@ const AddRequisition = (props) => {
       small_tool_id: null,
       asset_description: "",
       asset_specification: "",
+      small_tool_item: null,
       date_needed: null,
       brand: "",
       accountability: null,
@@ -529,7 +640,7 @@ const AddRequisition = (props) => {
 
   useEffect(() => {
     if (updateRequest.id) {
-      console.log("updaterequest", updateRequest);
+      // console.log("updaterequest", updateRequest);
       const accountable = {
         general_info: {
           full_id_number: updateRequest.accountable.split(" ")[0],
@@ -537,7 +648,8 @@ const AddRequisition = (props) => {
         },
       };
       const dateNeededFormat = updateRequest?.date_needed === "-" ? null : new Date(updateRequest?.date_needed);
-      const smallToolFormat = updateRequest?.small_tool_id === undefined ? null : updateRequest?.small_tool_id;
+      const smallToolFormat =
+        updateRequest?.small_tool_id === (undefined || null) ? null : updateRequest?.small_tool_id;
       const cellphoneNumber = updateRequest?.cellphone_number === "-" ? "" : updateRequest?.cellphone_number.slice(2);
       const attachmentFormat = (fields) => (updateRequest?.[fields] === "-" ? "" : updateRequest?.[fields]);
 
@@ -562,10 +674,12 @@ const AddRequisition = (props) => {
       setValue("acquisition_details", updateRequest?.acquisition_details);
 
       // ASSET INFO
+      setValue("fixed_asset_id", updateRequest?.fixed_asset_id);
       setValue("small_tool_id", smallToolFormat);
       setValue("asset_description", updateRequest?.asset_description);
       setValue("item_status", updateRequest?.item_status);
       setValue("asset_specification", updateRequest?.asset_specification);
+      setValue("small_tool_item", updateRequest?.small_tool_item);
       setValue("date_needed", dateNeededFormat);
       setValue("quantity", updateRequest?.quantity);
       setValue("uom_id", updateRequest?.unit_of_measure);
@@ -597,11 +711,27 @@ const AddRequisition = (props) => {
     // console.log("formData", formData);
     const validateAdd = addRequestAllApi.find((item) => item.id === updateRequest.id);
     const validate = transactionDataApi.find((item) => item.id === updateRequest.id);
+    const formDataValidate = formData?.[fieldName]?.name;
+    // console.log("formValidate", formDataValidate);
+    // console.log("updateValidate", updateRequest?.[fieldName]?.file_name);
+    // console.log(
+    //   "updateRequest",
+    //   (formDataValidate === undefined
+    //     ? (validateAdd || validate)?.attachments?.[fieldName]?.file_name
+    //     : formDataValidate) === updateRequest?.[fieldName]?.file_name
+    // );
+    // console.log("validateAdd", validateAdd?.attachments);
+    // console.log("validate", validate?.attachments);
+    // console.log("validate", validate);
 
     if (watch(`${fieldName}`) === null) {
       return "";
     } else if (updateRequest[fieldName] !== null)
-      if ((validateAdd || validate)?.attachments?.[fieldName]?.file_name === updateRequest?.[fieldName]?.file_name) {
+      if (
+        (formDataValidate === undefined
+          ? (validateAdd || validate)?.attachments?.[fieldName]?.file_name
+          : formDataValidate) === updateRequest?.[fieldName]?.file_name
+      ) {
         return "x";
       } else {
         return formData?.[fieldName];
@@ -614,7 +744,7 @@ const AddRequisition = (props) => {
   //  * CONTAINER
   // Adding of Request
   const addRequestHandler = (formData) => {
-    // console.log("formData👀", formData);
+    console.log("formData👀", formData);
     const cipNumberFormat = formData?.cip_number === "" ? "" : formData?.cip_number?.toString();
     const updatingCoa = (fields, name) =>
       updateRequest ? formData?.[fields]?.id : formData?.[fields]?.[name]?.id.toString();
@@ -650,10 +780,18 @@ const AddRequisition = (props) => {
 
       acquisition_details: formData?.acquisition_details?.toString(),
       item_status: formData?.item_status?.toString(),
+      fixed_asset_id: formData?.fixed_asset_id?.id?.toString() || "",
       asset_description: formData?.asset_description?.toString(),
-      asset_specification: formData?.asset_specification?.toString(),
+      asset_specification: formData?.small_tool_item
+        ? formData?.small_tool_item?.description.toString() +
+          " - " +
+          formData?.small_tool_item?.specification.toString()
+        : formData?.asset_specification?.toString(),
+      item_id: formData?.small_tool_item?.id || "",
       date_needed: dateNeededFormat,
       cellphone_number: cpFormat,
+
+      transaction_number: transactionData ? transactionData?.transaction_number : "",
 
       brand: formData?.brand?.toString(),
       quantity: formData?.quantity?.toString(),
@@ -786,6 +924,7 @@ const AddRequisition = (props) => {
                           item_status: null,
                           asset_description: "",
                           asset_specification: "",
+                          small_tool_item: null,
                           date_needed: null,
                           brand: "",
                           accountability: null,
@@ -882,6 +1021,7 @@ const AddRequisition = (props) => {
                     item_status: null,
                     asset_description: "",
                     asset_specification: "",
+                    small_tool_item: null,
                     date_needed: null,
                     brand: "",
                     accountability: null,
@@ -914,7 +1054,8 @@ const AddRequisition = (props) => {
                 openToast({
                   message: err?.response?.data?.errors?.detail
                     ? err?.response?.data?.errors?.detail
-                    : Object.entries(err?.response?.data?.errors).at(0).at(1).at(0),
+                    : //  Object?.entries(err?.response?.data?.errors)?.at(0)?.at(1)?.at(0),
+                      "Something went wrong. Please try again.",
                   // err?.response?.data?.errors?.detail ||
                   // err?.response?.data?.errors[0]?.detail ||
                   // err?.response?.data?.message,
@@ -967,6 +1108,7 @@ const AddRequisition = (props) => {
 
     setSelectedId(null);
   };
+  // console.log("small_tool_id", watch("small_tool_id"));
 
   // CREATE button function
   const onSubmitHandler = () => {
@@ -1198,6 +1340,65 @@ const AddRequisition = (props) => {
     );
   };
 
+  //Delete/Clear all items in request container
+  const onDeleteAllHandler = async () => {
+    dispatch(
+      openConfirm({
+        icon: Report,
+        iconColor: "warning",
+        message: (
+          <Box>
+            <Typography> Are you sure you want to</Typography>
+            <Typography
+              sx={{
+                display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+              }}
+            >
+              CLEAR
+            </Typography>{" "}
+            all requests?
+          </Box>
+        ),
+
+        onConfirm: async () => {
+          try {
+            dispatch(onLoading());
+            let result = await deleteAllRequest().unwrap();
+            // console.log(result);
+            dispatch(
+              openToast({
+                message: result.message,
+                duration: 5000,
+              })
+            );
+            dispatch(closeConfirm());
+          } catch (err) {
+            console.log(err);
+            if (err?.status === 422) {
+              dispatch(
+                openToast({
+                  message: err.data.message,
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            } else if (err?.status !== 422) {
+              dispatch(
+                openToast({
+                  message: "Something went wrong. Please try again.",
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            }
+          }
+        },
+      })
+    );
+  };
+
   // Remove function for the attachments
   const RemoveFile = ({ title, value }) => {
     return (
@@ -1288,7 +1489,10 @@ const AddRequisition = (props) => {
       accountability,
       accountable,
       acquisition_details,
+
+      item,
       item_status,
+      fixed_asset,
       asset_description,
       asset_specification,
       date_needed,
@@ -1299,6 +1503,7 @@ const AddRequisition = (props) => {
       additional_info,
       attachments,
     } = props;
+    console.log("props", props);
 
     setUpdateRequest({
       id,
@@ -1325,8 +1530,10 @@ const AddRequisition = (props) => {
       acquisition_details,
 
       item_status,
+      fixed_asset_id: fixed_asset,
       asset_description,
       asset_specification,
+      small_tool_item: item,
       date_needed,
       brand,
       quantity,
@@ -1360,8 +1567,10 @@ const AddRequisition = (props) => {
       acquisition_details: "",
 
       item_status: null,
+      fixed_asset_id: null,
       asset_description: "",
       asset_specification: "",
+      small_tool_item: null,
       date_needed: null,
       brand: "",
       accountability: null,
@@ -1418,6 +1627,7 @@ const AddRequisition = (props) => {
                   setValue("small_tool_id", null);
                   setValue("asset_description", "");
                   setValue("asset_specification", "");
+                  setValue("quantity", 1);
                   return value;
                 }}
               />
@@ -1475,6 +1685,7 @@ const AddRequisition = (props) => {
                 multiline
                 sx={{ overscrollBehavior: "none" }}
                 maxRows={6}
+                allowSpecialCharacters
               />
 
               <CustomAutoComplete
@@ -1516,6 +1727,30 @@ const AddRequisition = (props) => {
                   />
                 )}
               /> */}
+
+              {/* <CustomAutoComplete
+                control={control}
+                name="receiving_warehouse_id"
+                options={userWarehouse}
+                // onOpen={() => (isWarehouseSuccess ? null : warehouseTrigger(0))}
+                // onBlur={() => handleInputValidation("receiving_warehouse_id", "warehouse?.id", "warehouse")}
+                loading={isWarehouseLoading}
+                // disabled={transactionData ? transactionData?.length !== 0 : addRequestAllApi?.length !== 0}
+                disabled={(updateRequest && disable) || userCoa?.location?.warehouse?.length === 1}
+                defaultValue={userCoa?.location?.warehouse.length === 1 && userCoa?.location?.warehouse[0]}
+                getOptionLabel={(option) => option.warehouse_name}
+                getOptionKey={(option) => option.warehouse_code}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    color="secondary"
+                    label="Warehouse"
+                    error={!!errors?.receiving_warehouse_id}
+                    helperText={errors?.receiving_warehouse_id?.message}
+                  />
+                )}
+              /> */}
             </Box>
 
             <Divider />
@@ -1525,9 +1760,25 @@ const AddRequisition = (props) => {
               <CustomAutoComplete
                 name="minor_category_id"
                 control={control}
-                options={minorCategoryData}
-                onOpen={() => (isMinorCategorySuccess ? null : minorCategoryTrigger())}
-                loading={isMinorCategoryLoading}
+                options={
+                  watch("type_of_request_id")?.type_of_request_name === "Small Tools"
+                    ? minorCategorySmallToolsData
+                    : minorCategoryData
+                }
+                onOpen={() =>
+                  watch("type_of_request_id")?.type_of_request_name === "Small Tools"
+                    ? isMinorCategorySmallToolsSuccess
+                      ? null
+                      : minorCategorySmallToolsTrigger()
+                    : isMinorCategorySuccess
+                    ? null
+                    : minorCategoryTrigger()
+                }
+                loading={
+                  watch("type_of_request_id")?.type_of_request_name === "Small Tools"
+                    ? isMinorCategorySmallToolsLoading
+                    : isMinorCategoryLoading
+                }
                 disabled={updateRequest && disable}
                 size="small"
                 getOptionLabel={(option) => `${option.id} - ${option.minor_category_name}`}
@@ -1586,6 +1837,10 @@ const AddRequisition = (props) => {
                   setValue("unit_id", null);
                   setValue("subunit_id", null);
                   setValue("location_id", null);
+                  setValue("fixed_asset_id", null);
+                  setValue("small_tool_item", null);
+                  setValue("asset_description", "");
+                  setValue("asset_specification", "");
                   return value;
                 }}
               />
@@ -1704,6 +1959,13 @@ const AddRequisition = (props) => {
                     helperText={errors?.location_id?.message}
                   />
                 )}
+                onChange={(_, value) => {
+                  setValue("fixed_asset_id", null);
+                  setValue("small_tool_item", null);
+                  setValue("asset_description", "");
+                  setValue("asset_specification", "");
+                  return value;
+                }}
               />
 
               {/* <CustomAutoComplete
@@ -1783,7 +2045,6 @@ const AddRequisition = (props) => {
             {/* Asset Information */}
             <Box sx={BoxStyle}>
               <Typography sx={sxSubtitle}>Asset Information</Typography>
-
               <CustomAutoComplete
                 name="item_status"
                 hasRequest={hasRequest && true}
@@ -1792,7 +2053,11 @@ const AddRequisition = (props) => {
                 disablePortal
                 disabled={updateRequest && disable}
                 filterOptions={filterOptions}
-                options={["New", "Replacement", "Additional"]}
+                options={[
+                  "New",
+                  "Replacement",
+                  // , "Additional"
+                ]}
                 // getOptionLabel={(option) => option.general_info?.full_id_number_full_name}
                 isOptionEqualToValue={(option, value) => option === value}
                 renderInput={(params) => (
@@ -1804,16 +2069,76 @@ const AddRequisition = (props) => {
                     helperText={errors?.item_status?.message}
                   />
                 )}
+                onChange={(_, value) => {
+                  setValue("fixed_asset_id", null);
+                  setValue("small_tool_id", null);
+                  setValue("small_tool_item", null);
+                  setValue("asset_description", "");
+                  setValue("asset_specification", "");
+                  setValue("quantity", 1);
+
+                  return value;
+                }}
               />
 
-              {watch("type_of_request_id")?.type_of_request_name === "Small Tools" && (
+              {watch("item_status") === "Replacement" &&
+                watch("type_of_request_id")?.type_of_request_name === "Small Tools" && (
+                  <CustomAutoComplete
+                    name="fixed_asset_id"
+                    hasRequest={hasRequest && true}
+                    control={control}
+                    options={fixedAssetSmallToolsApiData}
+                    onOpen={() =>
+                      // fixedAssetSmallToolsApiSuccess
+                      //   ? null
+                      //   :
+                      fixedAssetSmallToolsTrigger({ sub_unit_id: watch("subunit_id")?.id })
+                    }
+                    loading={fixedAssetSmallToolsApiLoading}
+                    disabled={updateRequest && disable}
+                    size="small"
+                    getOptionLabel={(option) => `${option?.vladimir_tag_number} - ${option?.asset_description}`}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    renderInput={(params) => (
+                      <TextField
+                        color="secondary"
+                        {...params}
+                        label="Fixed Asset"
+                        error={!!errors?.fixed_asset_id}
+                        helperText={errors?.fixed_asset_id?.message}
+                      />
+                    )}
+                    onChange={(_, value) => {
+                      console.log("value", value);
+                      if (value) {
+                        setValue("small_tool_id", value?.small_tools);
+                        setValue("asset_description", value?.asset_description);
+                        setValue(
+                          "asset_specification",
+                          value.small_tools.length === 0
+                            ? value?.small_tools[0]?.description || value?.asset_specification
+                            : value.small_tools.map((items) => ` ${items.description}-${items.specification}`).join()
+                        );
+                      } else {
+                        setValue("small_tool_id", null);
+                        setValue("small_tool_item", null);
+
+                        setValue("asset_description", "");
+                        setValue("asset_specification", "");
+                      }
+                      return value;
+                    }}
+                  />
+                )}
+              {/* {watch("type_of_request_id")?.type_of_request_name === "Small Tools" && (
                 <CustomAutoComplete
                   name="small_tool_id"
+                  hasRequest={hasRequest && true}
                   control={control}
                   options={smallToolsApiData}
                   onOpen={() => (smallToolsApiSuccess ? null : smallToolsTrigger())}
                   loading={smallToolsApiLoading}
-                  disabled={updateRequest && disable}
+                  disabled={(updateRequest && disable) || watch("item_status") === "Replacement"}
                   size="small"
                   getOptionLabel={(option) => `${option?.small_tool_code} - ${option?.small_tool_name}`}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -1827,11 +2152,14 @@ const AddRequisition = (props) => {
                     />
                   )}
                   onChange={(_, value) => {
+                    console.log("value", value);
                     if (value) {
                       setValue("asset_description", value.small_tool_name);
                       setValue(
                         "asset_specification",
-                        value.items.map((items) => ` ${items.item_code} - ${items.item_name}`).join()
+                        value.items.length === 0
+                          ? value.small_tool_name
+                          : value.items.map((items) => ` ${items.item_name}`).join()
                       );
                     } else {
                       setValue("asset_description", "");
@@ -1840,8 +2168,7 @@ const AddRequisition = (props) => {
                     return value;
                   }}
                 />
-              )}
-
+              )} */}
               <CustomTextField
                 control={control}
                 hasRequest={hasRequest && true}
@@ -1849,15 +2176,17 @@ const AddRequisition = (props) => {
                 label="Asset Description"
                 type="text"
                 disabled={
-                  (updateRequest && disable) || watch("type_of_request_id")?.type_of_request_name === "Small Tools"
+                  (updateRequest && disable) ||
+                  (watch("type_of_request_id")?.type_of_request_name === "Small Tools" &&
+                    watch("item_status") === "Replacement")
                 }
+                allowSpecialCharacters
                 error={!!errors?.asset_description}
                 helperText={errors?.asset_description?.message}
                 fullWidth
                 multiline
                 maxRows={5}
               />
-
               <CustomTextField
                 control={control}
                 hasRequest={hasRequest && true}
@@ -1865,16 +2194,49 @@ const AddRequisition = (props) => {
                 label="Asset Specification"
                 type="text"
                 disabled={
-                  (updateRequest && disable) || watch("type_of_request_id")?.type_of_request_name === "Small Tools"
+                  (updateRequest && disable) ||
+                  (watch("type_of_request_id")?.type_of_request_name === "Small Tools" &&
+                    watch("item_status") === "Replacement")
                 }
+                allowSpecialCharacters
                 error={!!errors?.asset_specification}
                 helperText={errors?.asset_specification?.message}
                 fullWidth
-                sx={{ overscrollBehavior: "none" }}
+                // sx={{ overscrollBehavior: "none" }}
                 multiline
                 // minRows={3}
                 maxRows={5}
               />
+
+              {console.log("fixedasset", watch("fixed_asset_id")?.small_tools)}
+
+              {watch("item_status") === "Replacement" &&
+              watch("type_of_request_id")?.type_of_request_name === "Small Tools" &&
+              watch("fixed_asset_id")?.small_tools?.length >= 1 ? (
+                <CustomAutoComplete
+                  name="small_tool_item"
+                  hasRequest={hasRequest && true}
+                  control={control}
+                  options={watch("fixed_asset_id")?.small_tools || updateRequest?.small_tool_item || []}
+                  // onOpen={() =>
+                  //   fixedAssetSmallToolsApiSuccess ? null : fixedAssetSmallToolsTrigger({ replacement: 1 })
+                  // }
+                  // loading={fixedAssetSmallToolsApiLoading}
+                  disabled={updateRequest && disable}
+                  size="small"
+                  getOptionLabel={(option) => `${option?.description} - ${option?.specification}`}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  renderInput={(params) => (
+                    <TextField
+                      color="secondary"
+                      {...params}
+                      label="Small Tool Item"
+                      error={!!errors?.small_tool_item}
+                      helperText={errors?.small_tool_item?.message}
+                    />
+                  )}
+                />
+              ) : null}
 
               <CustomTextField
                 control={control}
@@ -1887,7 +2249,6 @@ const AddRequisition = (props) => {
                 helperText={errors?.brand?.message}
                 fullWidth
               />
-
               <CustomDatePicker
                 control={control}
                 name="date_needed"
@@ -1900,15 +2261,19 @@ const AddRequisition = (props) => {
                 minDate={new Date()}
                 reduceAnimations
               />
-
               <CustomNumberField
                 control={control}
                 hasRequest={hasRequest && true}
                 name="quantity"
                 label="Quantity"
                 type="number"
-                disabled={updateRequest && disable}
-                error={!!errors?.quantity}
+                disabled={
+                  updateRequest && disable
+                  // ||
+                  // (watch("item_status") === "Replacement" &&
+                  //   watch("type_of_request_id")?.type_of_request_name === "Small Tools")
+                }
+                error={!!errors?.quantity || watch("small_tool_item")?.quantity < watch("quantity")}
                 helperText={errors?.quantity?.message}
                 fullWidth
                 isAllowed={(values) => {
@@ -1916,7 +2281,11 @@ const AddRequisition = (props) => {
                   return floatValue >= 1;
                 }}
               />
-
+              {watch("small_tool_item")?.quantity < watch("quantity") && (
+                <Typography my={-1} color="error" fontSize={11} ml={1}>
+                  Quantity exceeded Small Tool Item quantity.
+                </Typography>
+              )}
               <CustomAutoComplete
                 control={control}
                 hasRequest={hasRequest && true}
@@ -1939,7 +2308,6 @@ const AddRequisition = (props) => {
                   />
                 )}
               />
-
               <CustomPatternField
                 control={control}
                 name="cellphone_number"
@@ -1966,6 +2334,7 @@ const AddRequisition = (props) => {
                 multiline
                 minRows={3}
                 maxRows={5}
+                allowSpecialCharacters
               />
             </Box>
 
@@ -2099,7 +2468,14 @@ const AddRequisition = (props) => {
           variant="contained"
           type="submit"
           size="small"
-          disabled={!transactionData ? !isValid : updateToggle}
+          disabled={
+            (!transactionData ? !isValid : updateToggle) ||
+            watch("small_tool_item")?.quantity < watch("quantity") ||
+            (watch("item_status") === "Replacement" &&
+              watch("type_of_request_id")?.type_of_request_name === "Small Tools" &&
+              watch("fixed_asset_id")?.small_tools?.length >= 1 &&
+              watch("small_tool_item") === null) === true
+          }
           fullWidth
           sx={{ gap: 1 }}
         >
@@ -2257,7 +2633,7 @@ const AddRequisition = (props) => {
     );
   };
 
-  console.log("minor category", watch("minor_category_id"));
+  // console.log("pewqpwepeewpw", transactionData);
 
   return (
     <>
@@ -2271,8 +2647,11 @@ const AddRequisition = (props) => {
             size="small"
             startIcon={<ArrowBackIosRounded color="secondary" />}
             onClick={() => {
-              navigate(-1);
-              deleteAllRequest();
+              transactionData?.requestMonitoring
+                ? navigate("/request-monitoring")
+                : navigate("/asset-requisition/requisition");
+              // navigate(-1);
+              // deleteAllRequest();
             }}
             disableRipple
             sx={{ width: "90px", ml: "-15px", mt: "-5px", pb: "10px", "&:hover": { backgroundColor: "transparent" } }}
@@ -2280,7 +2659,7 @@ const AddRequisition = (props) => {
             Back
           </Button>
 
-          <Box className="request request__wrapper" p={2}>
+          <Box className={isSmallScreen ? "request request__wrapper" : "request__wrapper"} p={2}>
             {/* FORM */}
             {/* {transactionData ? (transactionData?.process_count === 1 ? formInputs() : null) : formInputs()} */}
             {!transactionData
@@ -2394,6 +2773,10 @@ const AddRequisition = (props) => {
                                 color={data.attachment_type === "Budgeted" ? "success.main" : "primary.dark"}
                               >
                                 {data.attachment_type}
+                              </Typography>
+
+                              <Typography fontSize={12} fontWeight={600} color="primary.main">
+                                {data.is_addcost === 1 && "Additional Cost"}
                               </Typography>
                             </TableCell>
 
@@ -2538,13 +2921,30 @@ const AddRequisition = (props) => {
                               {data.additional_info}
                             </TableCell>
 
-                            <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
+                            <TableCell className="tbl-cell">
                               {data?.attachments?.letter_of_request && (
                                 <Stack flexDirection="row" gap={1}>
                                   <Typography fontSize={12} fontWeight={600}>
                                     Letter of Request:
                                   </Typography>
-                                  {data?.attachments?.letter_of_request?.file_name}
+                                  <Tooltip title={"View or Download Letter of Request"} arrow>
+                                    <Typography
+                                      sx={attachmentSx}
+                                      onClick={() => {
+                                        data.attachments.letter_of_request.file_name.includes("pdf") ||
+                                        data.attachments.letter_of_request.file_name.includes("svg") ||
+                                        data.attachments.letter_of_request.file_name.includes("png")
+                                          ? handleOpenDrawer({
+                                              value: data.attachments.letter_of_request,
+                                              data: data,
+                                              name: "letter_of_request",
+                                            })
+                                          : handleDownloadAttachment({ value: "letter_of_request", id: data?.id });
+                                      }}
+                                    >
+                                      {data?.attachments?.letter_of_request?.file_name}
+                                    </Typography>
+                                  </Tooltip>
                                 </Stack>
                               )}
 
@@ -2553,7 +2953,22 @@ const AddRequisition = (props) => {
                                   <Typography fontSize={12} fontWeight={600}>
                                     Quotation:
                                   </Typography>
-                                  {data?.attachments?.quotation?.file_name}
+                                  <Tooltip title={"View or Download Quotation"} arrow>
+                                    <Typography
+                                      sx={attachmentSx}
+                                      onClick={() => {
+                                        data.attachments.quotation.file_name.includes("pdf")
+                                          ? handleOpenDrawer({
+                                              value: data.attachments.quotation,
+                                              data: data,
+                                              name: "quotation",
+                                            })
+                                          : handleDownloadAttachment({ value: "quotation", id: data?.id });
+                                      }}
+                                    >
+                                      {data?.attachments?.quotation?.file_name}
+                                    </Typography>
+                                  </Tooltip>
                                 </Stack>
                               )}
 
@@ -2562,7 +2977,22 @@ const AddRequisition = (props) => {
                                   <Typography fontSize={12} fontWeight={600}>
                                     Specification:
                                   </Typography>
-                                  {data?.attachments?.specification_form?.file_name}
+                                  <Tooltip title={"View or Download Specification Form"} arrow>
+                                    <Typography
+                                      sx={attachmentSx}
+                                      onClick={() => {
+                                        data.attachments.specification_form.file_name.includes("pdf")
+                                          ? handleOpenDrawer({
+                                              value: data.attachments.specification_form,
+                                              data: data,
+                                              name: "specification_form",
+                                            })
+                                          : handleDownloadAttachment({ value: "specification_form", id: data?.id });
+                                      }}
+                                    >
+                                      {data?.attachments?.specification_form?.file_name}
+                                    </Typography>
+                                  </Tooltip>
                                 </Stack>
                               )}
 
@@ -2571,7 +3001,22 @@ const AddRequisition = (props) => {
                                   <Typography fontSize={12} fontWeight={600}>
                                     Tool of Trade:
                                   </Typography>
-                                  {data?.attachments?.tool_of_trade?.file_name}
+                                  <Tooltip title={"View or Download Tool of Trade"} arrow>
+                                    <Typography
+                                      sx={attachmentSx}
+                                      onClick={() => {
+                                        data.attachments.tool_of_trade.file_name.includes("pdf")
+                                          ? handleOpenDrawer({
+                                              value: data.attachments.tool_of_trade,
+                                              data: data,
+                                              name: "tool_of_trade",
+                                            })
+                                          : handleDownloadAttachment({ value: "tool_of_trade", id: data?.id });
+                                      }}
+                                    >
+                                      {data?.attachments?.tool_of_trade?.file_name}
+                                    </Typography>
+                                  </Tooltip>
                                 </Stack>
                               )}
 
@@ -2580,7 +3025,22 @@ const AddRequisition = (props) => {
                                   <Typography fontSize={12} fontWeight={600}>
                                     Other Attachment:
                                   </Typography>
-                                  {data?.attachments?.other_attachments?.file_name}
+                                  <Tooltip title={"View or Download Other Attachment"} arrow>
+                                    <Typography
+                                      sx={attachmentSx}
+                                      onClick={() => {
+                                        data.attachments.other_attachments.file_name.includes("pdf")
+                                          ? handleOpenDrawer({
+                                              value: data.attachments.other_attachments,
+                                              data: data,
+                                              name: "other_attachments",
+                                            })
+                                          : handleDownloadAttachment({ value: "other_attachments", id: data?.id });
+                                      }}
+                                    >
+                                      {data?.attachments?.other_attachments?.file_name}
+                                    </Typography>
+                                  </Tooltip>
                                 </Stack>
                               )}
                             </TableCell>
@@ -2610,7 +3070,8 @@ const AddRequisition = (props) => {
                                       //DELETE request
                                       onDeleteHandler={
                                         (transactionData && addRequestAllApi?.length === 0) ||
-                                        addRequestAllApi?.length === 1
+                                        editRequest ||
+                                        (transactionData && addRequestAllApi?.length === 1)
                                           ? false
                                           : onDeleteHandler
                                       }
@@ -2654,48 +3115,65 @@ const AddRequisition = (props) => {
                   color="secondary.main"
                   sx={{ pt: "10px" }}
                 >
-                  {transactionData ? "Transactions" : "Added"} :{" "}
-                  {transactionData ? transactionDataApi?.length : addRequestAllApi?.length} request
+                  {transactionData ? "Transactions" : "Added"}:{" "}
+                  {transactionData ? transactionDataApi?.length : addRequestAllApi?.length}{" "}
+                  {transactionDataApi?.length >= 2 || addRequestAllApi?.length >= 2 ? "requests" : "request"}
                 </Typography>
 
-                {!transactionData && (
-                  <Stack flexDirection="row" justifyContent="flex-end" gap={2} sx={{ pt: "10px" }}>
-                    {transactionData?.status === "For Approval of Approver 1" ||
-                    transactionData?.status === "Returned" ? (
-                      <LoadingButton
-                        onClick={onSubmitHandler}
-                        variant="contained"
-                        size="small"
-                        color="secondary"
-                        startIcon={<SaveAlt color={"primary"} />}
-                        disabled={
-                          transactionDataApi[0]?.can_edit === 0
-                            ? isTransactionLoading
-                              ? disable
-                              : null
-                            : transactionDataApi.length === 0
-                            ? true
-                            : false
-                        }
-                        loading={isPostLoading}
-                      >
-                        Resubmit
-                      </LoadingButton>
-                    ) : (
-                      <LoadingButton
-                        onClick={onSubmitHandler}
-                        variant="contained"
-                        size="small"
-                        color="secondary"
-                        startIcon={<Create color={"primary"} />}
-                        disabled={isRequestLoading || addRequestAllApi?.length === 0}
-                        loading={isPostLoading}
-                      >
-                        Create
-                      </LoadingButton>
-                    )}
-                  </Stack>
-                )}
+                <Stack flexDirection="row" gap={2}>
+                  {!transactionData && (
+                    <LoadingButton
+                      onClick={onDeleteAllHandler}
+                      variant="contained"
+                      size="small"
+                      color="error"
+                      startIcon={<Delete color={"primary"} />}
+                      disabled={isRequestLoading || addRequestAllApi?.length === 0 || editRequest}
+                      loading={isPostLoading}
+                      sx={{ mt: "10px" }}
+                    >
+                      Clear
+                    </LoadingButton>
+                  )}
+                  {!transactionData && (
+                    <Stack flexDirection="row" justifyContent="flex-end" gap={2} sx={{ pt: "10px" }}>
+                      {transactionData?.status === "For Approval of Approver 1" ||
+                      transactionData?.status === "Returned" ? (
+                        <LoadingButton
+                          onClick={onSubmitHandler}
+                          variant="contained"
+                          size="small"
+                          color="secondary"
+                          startIcon={<SaveAlt color={"primary"} />}
+                          disabled={
+                            transactionDataApi[0]?.can_edit === 0
+                              ? isTransactionLoading
+                                ? disable
+                                : null
+                              : transactionDataApi.length === 0
+                              ? true
+                              : false
+                          }
+                          loading={isPostLoading}
+                        >
+                          Resubmit
+                        </LoadingButton>
+                      ) : (
+                        <LoadingButton
+                          onClick={onSubmitHandler}
+                          variant="contained"
+                          size="small"
+                          color="secondary"
+                          startIcon={<Create color={"primary"} />}
+                          disabled={isRequestLoading || addRequestAllApi?.length === 0}
+                          loading={isPostLoading}
+                        >
+                          Create
+                        </LoadingButton>
+                      )}
+                    </Stack>
+                  )}
+                </Stack>
               </Stack>
             </Box>
           </Box>
@@ -2711,6 +3189,67 @@ const AddRequisition = (props) => {
         }}
       >
         <ViewItemRequest data={itemData} />
+      </Dialog>
+
+      <Dialog
+        open={drawer}
+        TransitionComponent={Grow}
+        PaperProps={{ sx: { borderRadius: "10px" } }}
+        onClose={handleCloseDrawer}
+        fullScreen
+      >
+        <Stack alignContent="center" justifyContent="center" height="93vh">
+          {image === true ? (
+            <img
+              src={base64}
+              style={{
+                display: "flex",
+                maxWidth: "100vw",
+                maxHeight: "93vh",
+                alignContent: "center",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto",
+                border: "1px solid black",
+              }}
+              title="View Attachment"
+            />
+          ) : (
+            <iframe
+              src={base64}
+              style={{
+                display: "flex",
+                width: "100%",
+                height: "100%",
+                alignContent: "center",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "0 auto",
+                border: "1px solid black",
+              }}
+              title="View Attachment"
+            />
+          )}
+        </Stack>
+        <DialogActions>
+          <Button
+            variant="outlined"
+            // size="small"
+            color="secondary"
+            onClick={handleCloseDrawer}
+          >
+            Close
+          </Button>
+          <Button
+            variant="contained"
+            // size="small"
+            color="secondary"
+            startIcon={<Download color="primary" />}
+            onClick={() => handleDownloadAttachment({ value: name, id: DValue?.id })}
+          >
+            Download
+          </Button>
+        </DialogActions>
       </Dialog>
     </>
   );
