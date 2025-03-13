@@ -53,12 +53,17 @@ const RequestTimeline = (props) => {
             ? ["Cancelled", ...transactionData?.steps]
             : transactionData?.status === "Returned"
             ? ["Returned", ...transactionData?.steps]
+            : transactionData?.status === "Returned From Ymir"
+            ? ["Returned From Ymir", ...transactionData?.steps]
             : transactionData?.steps
           )?.map((label, index) => (
             <Step key={label} last>
               <StepLabel
                 icon={
-                  (transactionData?.status === "Returned" || transactionData?.status === "Cancelled") && index === 0 ? (
+                  (transactionData?.status === "Returned" ||
+                    transactionData?.status === "Cancelled" ||
+                    transactionData?.status === "Returned From Ymir") &&
+                  index === 0 ? (
                     <Error />
                   ) : null
                 }
@@ -67,7 +72,10 @@ const RequestTimeline = (props) => {
                   ".Mui-completed > p": { color: "text.light" },
                   ".Mui-active": {
                     color:
-                      (transactionData?.status === "Returned" || transactionData?.status === "Cancelled") && index === 0
+                      (transactionData?.status === "Returned" ||
+                        transactionData?.status === "Cancelled" ||
+                        transactionData?.status === "Returned From Ymir") &&
+                      index === 0
                         ? "error.main"
                         : "primary.main",
                   },
@@ -183,7 +191,8 @@ const RequestTimeline = (props) => {
                             item?.action === "Returned" ||
                             item?.action === "Cancelled" ||
                             item?.action === "Cancelled Remaining Items" ||
-                            item.action === "Cancelled Item To PO"
+                            item.action === "Cancelled Item To PO" ||
+                            item.action === "Returned From Ymir"
                               ? "#ff000017"
                               : item?.action === "Approved" || item?.action === "Claimed"
                               ? "#00800016"
@@ -221,9 +230,7 @@ const RequestTimeline = (props) => {
                             {item?.action}
                           </Typography>
                           <Typography fontSize={12} color="text.light">
-                            {item?.ymir_causer
-                              ? item?.ymir_causer
-                              : `(${item?.causer?.employee_id}) - ${item?.causer?.firstname}  ${item?.causer?.lastname}`}
+                            {`(${item?.causer?.employee_id}) - ${item?.causer?.firstname}  ${item?.causer?.lastname}`}
                           </Typography>
 
                           {/* --------------------------------- ADDITIONAL INFO -----------------------------------*/}
@@ -268,15 +275,6 @@ const RequestTimeline = (props) => {
                           {item?.remarks && (
                             <Typography fontSize={12} fontWeight={600}>
                               Remarks: {item?.remarks}
-                            </Typography>
-                          )}
-                          {(item?.quantity_delivered || item?.quantity_remaining) && (
-                            <Typography fontSize={12} fontWeight={500} color="secondary.light">
-                              Quantity Delivered: {item?.quantity_delivered} | Quantity Remaining:{" "}
-                              {item?.quantity_remaining}{" "}
-                              {item?.quantity_cancelled &&
-                                item?.quantity_cancelled !== null &&
-                                "| Quantity Cancelled: " + item?.quantity_cancelled}
                             </Typography>
                           )}
                         </Box>
