@@ -126,7 +126,7 @@ const ViewRequestReleasing = (props) => {
                   }}
                   color="primary.main"
                 >
-                  VLADIMIR TAG NUMBER
+                  {releasingData?.is_printable === 0 ? "NON-PRINTABLE" : "VLADIMIR TAG NUMBER"}
                 </Typography>
 
                 <Box
@@ -147,7 +147,9 @@ const ViewRequestReleasing = (props) => {
                     }}
                     color="secondary.main"
                   >
-                    #{releasingData?.vladimir_tag_number}
+                    {releasingData?.is_printable === 0
+                      ? "NO VLADIMIR TAG NUMBER"
+                      : `#${releasingData?.vladimir_tag_number}`}
                   </Typography>
                 </Box>
               </Box>
@@ -909,6 +911,15 @@ const ViewRequestReleasing = (props) => {
 
                           <TableCell>
                             <Typography fontSize="12px" fontWeight="bold">
+                              {releasingData?.vladimir_tag_number}
+                            </Typography>
+                            <Typography fontSize="10px" color="gray" noWrap>
+                              Vladimir Tag Number
+                            </Typography>
+                          </TableCell>
+
+                          <TableCell>
+                            <Typography fontSize="12px" fontWeight="bold">
                               {releasingData?.acquisition_cost}
                             </Typography>
                             <Typography fontSize="10px" color="gray" noWrap>
@@ -938,31 +949,32 @@ const ViewRequestReleasing = (props) => {
                 </Accordion>
               )}
 
-              <Accordion>
-                <AccordionSummary expandIcon={<ExpandMore />}>
-                  <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1rem" }}>
-                    ATTACHMENTS
-                  </Typography>
-                </AccordionSummary>
+              {data?.is_released === 1 && (
+                <Accordion>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1rem" }}>
+                      ATTACHMENTS
+                    </Typography>
+                  </AccordionSummary>
 
-                <Divider />
+                  <Divider />
 
-                <AccordionDetails sx={{ display: "flex", flexDirection: "column" }}>
-                  <Box className="tableCard__properties">
-                    Receiver Image:
-                    <Button
-                      className="tableCard__info"
-                      sx={{ fontSize: "10px" }}
-                      variant="contained"
-                      color="secondary"
-                      startIcon={<ImageIcon sx={{ color: "orange" }} />}
-                      onClick={() => handleViewImage(releasingData?.receiverImg)}
-                    >
-                      Show Image
-                    </Button>
-                  </Box>
+                  <AccordionDetails sx={{ display: "flex", flexDirection: "column" }}>
+                    <Box className="tableCard__properties">
+                      Receiver Image:
+                      <Button
+                        className="tableCard__info"
+                        sx={{ fontSize: "10px" }}
+                        variant="contained"
+                        color="secondary"
+                        startIcon={<ImageIcon sx={{ color: "orange" }} />}
+                        onClick={() => handleViewImage(releasingData?.receiverImg)}
+                      >
+                        Show Image
+                      </Button>
+                    </Box>
 
-                  {/* <Box className="tableCard__properties">
+                    {/* <Box className="tableCard__properties">
                     Assignment Memo:
                     <Button
                       className="tableCard__info"
@@ -976,21 +988,22 @@ const ViewRequestReleasing = (props) => {
                     </Button>
                   </Box> */}
 
-                  <Box className="tableCard__properties">
-                    Authorization Letter:
-                    <Button
-                      className="tableCard__info"
-                      sx={{ fontSize: "10px" }}
-                      variant="contained"
-                      color="secondary"
-                      startIcon={<ImageIcon sx={{ color: "orange" }} />}
-                      onClick={() => handleViewImage(releasingData?.authorizationMemoImg)}
-                    >
-                      Show Image
-                    </Button>
-                  </Box>
-                </AccordionDetails>
-              </Accordion>
+                    <Box className="tableCard__properties">
+                      Authorization Letter:
+                      <Button
+                        className="tableCard__info"
+                        sx={{ fontSize: "10px" }}
+                        variant="contained"
+                        color="secondary"
+                        startIcon={<ImageIcon sx={{ color: "orange" }} />}
+                        onClick={() => handleViewImage(releasingData?.authorizationMemoImg)}
+                      >
+                        Show Image
+                      </Button>
+                    </Box>
+                  </AccordionDetails>
+                </Accordion>
+              )}
             </Box>
           </Box>
         </Box>
