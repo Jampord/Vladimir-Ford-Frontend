@@ -39,10 +39,12 @@ import {
   FilterList,
   Help,
   HomeRepairService,
+  PriceChange,
   Print,
   PrintDisabled,
   ResetTv,
   Search,
+  Warning,
 } from "@mui/icons-material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { LoadingButton, TabContext, TabPanel } from "@mui/lab";
@@ -72,6 +74,7 @@ import {
   usePostLocalPrintApiMutation,
   usePutMemoPrintApiMutation,
   usePutSmallToolsPrintableApiMutation,
+  usePutUngroupSmallToolsApiMutation,
 } from "../../Redux/Query/FixedAsset/FixedAssets";
 import { usePostPrintOfflineApiMutation } from "../../Redux/Query/FixedAsset/OfflinePrintingFA";
 import { usePostPrintStalwartDateApiMutation } from "../../Redux/Query/FixedAsset/StalwartPrintingFA";
@@ -210,6 +213,17 @@ const PrintFixedAsset = (props) => {
     { data: putData, isLoading: isPutLoading, isError: isPutError, isSuccess: isPutSuccess, error: putError },
   ] = usePutSmallToolsPrintableApiMutation();
 
+  const [
+    putUngroupSmallTools,
+    {
+      data: putUngroupData,
+      isLoading: isPutUngroupLoading,
+      isError: isPutUngroupError,
+      isSuccess: isPutUngroupSuccess,
+      error: putUngroupError,
+    },
+  ] = usePutUngroupSmallToolsApiMutation();
+
   const {
     data: fixedAssetData,
     isLoading: fixedAssetLoading,
@@ -255,25 +269,36 @@ const PrintFixedAsset = (props) => {
     },
   });
 
+  const resetHandler = () => {
+    reset();
+  };
+
   useEffect(() => {
-    if (isPostSuccess || isMemoSuccess || isPutSuccess) {
+    if (isPostSuccess || isMemoSuccess || isPutSuccess || isPutUngroupSuccess) {
       dispatch(
         openToast({
-          message: printData?.message || memoData?.message || putData?.message,
+          message: printData?.message || memoData?.message || putData?.message || putUngroupData?.message,
           duration: 5000,
         })
       );
     }
-  }, [isPostSuccess, isMemoSuccess, isPutSuccess]);
+  }, [isPostSuccess, isMemoSuccess, isPutSuccess, isPutUngroupSuccess]);
 
   useEffect(() => {
     if (
-      (isPostError || isMemoError || isPutError) &&
-      (putError?.status === 422 || memoError?.status === 422 || postError?.status === 422)
+      (isPostError || isMemoError || isPutError || isPutUngroupError) &&
+      (putError?.status === 422 ||
+        memoError?.status === 422 ||
+        postError?.status === 422 ||
+        putUngroupError?.status === 422)
     ) {
       setError("search", {
         type: "validate",
-        message: postError?.data?.message || memoError?.data?.message || putError?.data?.message,
+        message:
+          postError?.data?.message ||
+          memoError?.data?.message ||
+          putError?.data?.message ||
+          putUngroupError?.data?.message,
       });
       // dispatch(
       //   openToast({
@@ -289,30 +314,44 @@ const PrintFixedAsset = (props) => {
         })
       );
     } else if (
-      (isPostError || isMemoError || isPutError) &&
-      (putError?.status === 403 || memoError?.status === 403 || postError?.status === 403)
+      (isPostError || isMemoError || isPutError || isPutUngroupError) &&
+      (putError?.status === 403 ||
+        memoError?.status === 403 ||
+        postError?.status === 403 ||
+        putUngroupError?.status === 403)
     ) {
       dispatch(
         openToast({
-          message: postError?.data?.message || memoError?.data?.message || putError?.data?.message,
+          message:
+            postError?.data?.message ||
+            memoError?.data?.message ||
+            putError?.data?.message ||
+            putUngroupError?.data?.message,
           duration: 5000,
           variant: "error",
         })
       );
     } else if (
-      (isPostError || isMemoError || isPutError) &&
-      (putError?.status === 404 || memoError?.status === 404 || postError?.status === 404)
+      (isPostError || isMemoError || isPutError || isPutUngroupError) &&
+      (putError?.status === 404 || memoError?.status === 404 || postError?.status === 404 || putUngroupError === 404)
     ) {
       dispatch(
         openToast({
-          message: postError?.data?.message || memoError?.data?.message || putError?.data?.message,
+          message:
+            postError?.data?.message ||
+            memoError?.data?.message ||
+            putError?.data?.message ||
+            putUngroupError?.data?.message,
           duration: 5000,
           variant: "error",
         })
       );
     } else if (
-      (isPostError || isMemoError || isPutError) &&
-      (putError?.status !== 422 || memoError?.status !== 422 || postError?.status !== 422)
+      (isPostError || isMemoError || isPutError || isPutUngroupError) &&
+      (putError?.status !== 422 ||
+        memoError?.status !== 422 ||
+        postError?.status !== 422 ||
+        putUngroupError?.status !== 422)
     ) {
       dispatch(
         openToast({
@@ -329,7 +368,7 @@ const PrintFixedAsset = (props) => {
       // );
       // console.log(postError);
     }
-  }, [isPostError, isMemoError, isPutError]);
+  }, [isPostError, isMemoError, isPutError, isPutUngroupError]);
 
   const onPrintHandler = (formData) => {
     // console.log(formData);
@@ -486,6 +525,76 @@ const PrintFixedAsset = (props) => {
     );
   };
 
+  const onTagNonPrintableAssetHandler = (formData) => {
+    console.log("smallTOoldata", smallToolsData);
+    const id = smallToolsData.map((data) => data.id);
+    console.log("id", id);
+    dispatch(
+      openConfirm({
+        icon: Help,
+        iconColor: "info",
+        message: (
+          <Box>
+            <Typography>Are you sure you want to tag</Typography>
+            <Typography
+              sx={{
+                display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+                fontFamily: "Raleway",
+              }}
+            >
+              {watch("tagNumber").length === 0 ? "ALL" : "SELECTED"}
+            </Typography>{" "}
+            Asset as{" "}
+            <Typography
+              sx={{
+                // display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+                fontFamily: "Raleway",
+              }}
+            >
+              NON-PRINTABLE?
+            </Typography>
+          </Box>
+        ),
+        onConfirm: async () => {
+          try {
+            dispatch(onLoading());
+            const result = await putSmallToolsPrintable({
+              fixed_asset_id: id,
+              is_printable: 0,
+            }).unwrap();
+            // console.log(formData.tagNumber);
+
+            // console.log(result);
+
+            // dispatch(
+            //   openToast({
+            //     message: result.message,
+            //     duration: 5000,
+            //   })
+            // );
+            // dispatch(
+            //   openToast({
+            //     message: "Printed successfully.",
+            //     duration: 5000,
+            //   })
+            // );
+            dispatch(closeConfirm());
+            reset();
+          } catch (err) {
+            console.log(err.data.message);
+            if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
+            } else if (err?.status !== 422) {
+            }
+          }
+        },
+      })
+    );
+  };
+
   const onTagNonPrintableHandler = (formData) => {
     console.log("smallTOoldata", smallToolsData);
     const id = smallToolsData.map((data) => data.id);
@@ -556,6 +665,66 @@ const PrintFixedAsset = (props) => {
     );
   };
 
+  const onUngroupSmallToolsHandler = (formData) => {
+    console.log("ungroupdata", smallToolsData);
+    const id = smallToolsData.map((data) => data.id);
+    console.log("id", id);
+    dispatch(
+      openConfirm({
+        icon: Warning,
+        iconColor: "warning",
+        message: (
+          <Box>
+            <Typography>Are you sure you want to</Typography>
+            <Typography
+              sx={{
+                // display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+                fontFamily: "Raleway",
+              }}
+            >
+              UNGROUP
+            </Typography>{" "}
+            selected Small Tools?
+          </Box>
+        ),
+        onConfirm: async () => {
+          try {
+            dispatch(onLoading());
+            const result = await putUngroupSmallTools({
+              id: id,
+            }).unwrap();
+            // console.log(formData.tagNumber);
+
+            // console.log(result);
+
+            // dispatch(
+            //   openToast({
+            //     message: result.message,
+            //     duration: 5000,
+            //   })
+            // );
+            // dispatch(
+            //   openToast({
+            //     message: "Printed successfully.",
+            //     duration: 5000,
+            //   })
+            // );
+            dispatch(closeConfirm());
+            reset();
+            resetHandler();
+          } catch (err) {
+            console.log(err);
+            if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
+            } else if (err?.status !== 422) {
+            }
+          }
+        },
+      })
+    );
+  };
+
   const handleClose = () => {
     dispatch(closePrint());
   };
@@ -602,6 +771,7 @@ const PrintFixedAsset = (props) => {
   const printable = smallToolsData?.map((data) => data?.is_parent).includes(1);
 
   // console.log("printable", printable);
+  console.log("smallToolsData", smallToolsData);
 
   //Validations for Small Tools Grouping
   const areAllCOASame = (assets) => {
@@ -684,10 +854,10 @@ const PrintFixedAsset = (props) => {
       >
         <Stack flexDirection="row" justifyContent="space-between" width="100%">
           <Stack flexDirection="row" alignItems="center" pl="10px" gap={1.5}>
-            <Print color="primary" fontSize="large" />
+            <Print color="primary" fontSize={isSmallerScreen ? "small" : "large"} />
             <Typography
               noWrap
-              variant="h5"
+              variant={isSmallerScreen ? "body2" : "h5"}
               color="secondary"
               sx={{
                 fontFamily: "Anton",
@@ -697,9 +867,10 @@ const PrintFixedAsset = (props) => {
             </Typography>
           </Stack>
 
+          {/* {!!isRequest && ( */}
           {!!isRequest && tabValue === "1" && (
             <FormControlLabel
-              label="Assignment Memo"
+              label={"Assignment Memo"}
               control={
                 <Checkbox
                   size="small"
@@ -713,8 +884,13 @@ const PrintFixedAsset = (props) => {
                 pr: 2,
                 pl: 0.5,
                 borderRadius: 3,
-                outline: "2px solid",
+                outline: isSmallerScreen ? "1px solid" : "2px solid",
                 outlineColor: printMemo ? "primary.main" : "secondary.main",
+
+                ".MuiFormControlLabel-label": {
+                  fontSize: isSmallerScreen && "10px",
+                  // fontWeight: isSmallerScreen && 700,
+                },
               }}
             />
           )}
@@ -1424,6 +1600,48 @@ const PrintFixedAsset = (props) => {
                       </Box>
 
                       <Stack gap={1.2} flexDirection="row" alignSelf="flex-end" mt={1} mb={1}>
+                        {!printMemo && (
+                          <LoadingButton
+                            size="small"
+                            variant="contained"
+                            loading={isLoading}
+                            startIcon={
+                              isLoading ? null : (
+                                <PriceChange
+                                  color={watch("tagNumber").length === 0 || printable === true ? "gray" : "primary"}
+                                />
+                              )
+                            }
+                            disabled={watch("tagNumber").length === 0 || printable === true}
+                            // onClick={onTagNonPrintableAssetHandler}
+                            color={printMemo ? "tertiary" : "secondary"}
+                            sx={{ color: "white" }}
+                          >
+                            {isSmallScreen ? null : "Tag as Add Cost"}
+                          </LoadingButton>
+                        )}
+
+                        {!printMemo && (
+                          <LoadingButton
+                            size="small"
+                            variant="contained"
+                            loading={isLoading}
+                            startIcon={
+                              isLoading ? null : (
+                                <PrintDisabled
+                                  color={watch("tagNumber").length === 0 || printable === true ? "gray" : "primary"}
+                                />
+                              )
+                            }
+                            disabled={watch("tagNumber").length === 0 || printable === true}
+                            onClick={onTagNonPrintableAssetHandler}
+                            color={printMemo ? "tertiary" : "secondary"}
+                            sx={{ color: "white" }}
+                          >
+                            {isSmallScreen ? null : "Tag as Non-Printable"}
+                          </LoadingButton>
+                        )}
+
                         <LoadingButton
                           size="small"
                           variant="contained"
@@ -1598,6 +1816,10 @@ const PrintFixedAsset = (props) => {
                               </TableCell>
 
                               <TableCell>
+                                <TableSortLabel disabled>PR/PO/RR Number</TableSortLabel>
+                              </TableCell>
+
+                              <TableCell>
                                 <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
                               </TableCell>
 
@@ -1714,6 +1936,18 @@ const PrintFixedAsset = (props) => {
                                         </TableCell>
 
                                         <TableCell>
+                                          <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
+                                            PR - {data.pr_number}
+                                          </Typography>
+                                          <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
+                                            PO - {data.po_number}
+                                          </Typography>
+                                          <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
+                                            RR - {data.rr_number}
+                                          </Typography>
+                                        </TableCell>
+
+                                        <TableCell>
                                           <Typography noWrap fontSize="10px" color="gray">
                                             {data.company.company_code}
                                             {" - "} {data.company.company_name}
@@ -1812,7 +2046,7 @@ const PrintFixedAsset = (props) => {
                       </Box>
 
                       {result === false && (
-                        <Typography noWrap fontSize="13px" color="error">
+                        <Typography noWrap fontSize="11px" color="error">
                           Selected items does not have the same COA.
                         </Typography>
                       )}
@@ -1840,7 +2074,34 @@ const PrintFixedAsset = (props) => {
                           color={printMemo ? "tertiary" : "secondary"}
                           sx={{ color: "white" }}
                         >
-                          Group Small Tools
+                          {isSmallScreen ? null : "Group Small Tools"}
+                        </LoadingButton>
+
+                        <LoadingButton
+                          size="small"
+                          variant="contained"
+                          loading={isLoading}
+                          startIcon={
+                            isLoading ? null : (
+                              <HomeRepairService
+                                color={
+                                  watch("tagNumber").length === 0 ||
+                                  watch("tagNumber").length > 1 ||
+                                  printable === false
+                                    ? "gray"
+                                    : "primary"
+                                }
+                              />
+                            )
+                          }
+                          disabled={
+                            watch("tagNumber").length === 0 || watch("tagNumber").length > 1 || printable === false
+                          }
+                          onClick={onUngroupSmallToolsHandler}
+                          color={printMemo ? "tertiary" : "warning"}
+                          sx={{ color: "white" }}
+                        >
+                          {isSmallScreen ? null : "Ungroup Small Tools"}
                         </LoadingButton>
 
                         <LoadingButton
@@ -1859,7 +2120,7 @@ const PrintFixedAsset = (props) => {
                           color={printMemo ? "tertiary" : "secondary"}
                           sx={{ color: "white" }}
                         >
-                          Tag as Non-Printable
+                          {isSmallScreen ? null : "Tag as Non-Printable"}
                         </LoadingButton>
 
                         <LoadingButton
@@ -1929,7 +2190,7 @@ const PrintFixedAsset = (props) => {
             },
           }}
         >
-          <AddSmallToolsGroup data={smallToolsData} />
+          <AddSmallToolsGroup data={smallToolsData} resetHandler={reset} />
         </Dialog>
 
         {/* <Dialog
