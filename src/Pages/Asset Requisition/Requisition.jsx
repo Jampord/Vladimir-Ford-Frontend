@@ -83,7 +83,7 @@ const Requisition = () => {
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
-    newValue === "1" ? setClaimed("") : setClaimed("claimed");
+    newValue === "1" ? setClaimed("") : setClaimed("Claimed");
   };
 
   // const enableForm = true;
@@ -245,13 +245,14 @@ const Requisition = () => {
   };
 
   const handleEditRequisition = (data) => {
-    data?.is_addcost === 1
-      ? navigate(`/asset-requisition/requisition/additional-cost/${data.transaction_number}`, {
-          state: { ...data, viewData },
-        })
-      : navigate(`/asset-requisition/requisition/view-requisition/${data.transaction_number}`, {
-          state: { ...data, viewData },
-        });
+    // data?.is_addcost === 1
+    //   ? navigate(`/asset-requisition/requisition/additional-cost/${data.transaction_number}`, {
+    //       state: { ...data, viewData },
+    //     })
+    //   :
+    navigate(`/asset-requisition/requisition/view-requisition/${data.transaction_number}`, {
+      state: { ...data, viewData },
+    });
     // console.log("data", data);
   };
 
@@ -343,10 +344,15 @@ const Requisition = () => {
       <Box>
         <TabContext value={value}>
           <Tabs onChange={handleChange} value={value}>
-            <Tab label="Pending Request" value="1" claimed="" className={value === "1" ? "tab__background" : null} />
+            <Tab
+              label={isSmallScreen ? "Pending" : "Pending Request"}
+              value="1"
+              claimed=""
+              className={value === "1" ? "tab__background" : null}
+            />
 
             <Tab
-              label="Claimed Request"
+              label={isSmallScreen ? "Claimed" : "Claimed Request"}
               value="2"
               claimed="claimed"
               className={value === "2" ? "tab__background" : null}
@@ -511,8 +517,24 @@ const Requisition = () => {
                                 </TableCell> */}
                                       <TableCell className="tbl-cell text-weight">{data.transaction_number}</TableCell>
                                       <TableCell className="tbl-cell">
-                                        <Typography fontSize={14} fontWeight={600} color="secondary.main">
-                                          {data.acquisition_details}
+                                        <Typography
+                                          fontSize={14}
+                                          fontWeight={600}
+                                          maxWidth="440px"
+                                          overflow="hidden"
+                                          textOverflow="ellipsis"
+                                          color="secondary.main"
+                                        >
+                                          <Tooltip
+                                            title={data.acquisition_details}
+                                            placement="top-start"
+                                            arrow
+                                            // slots={{
+                                            //   transition: Zoom,
+                                            // }}
+                                          >
+                                            {data.acquisition_details}
+                                          </Tooltip>
                                         </Typography>
                                         <Typography fontSize={12} color="secondary.light">
                                           ({data.warehouse?.id}) - {data.warehouse?.warehouse_name}
@@ -758,12 +780,34 @@ const Requisition = () => {
                                 </TableCell> */}
                                       <TableCell className="tbl-cell text-weight">{data.transaction_number}</TableCell>
                                       <TableCell className="tbl-cell">
-                                        <Typography fontSize={14} fontWeight={600} color="secondary.main">
-                                          {data.acquisition_details}
+                                        <Typography
+                                          fontSize={14}
+                                          fontWeight={600}
+                                          maxWidth="440px"
+                                          overflow="hidden"
+                                          textOverflow="ellipsis"
+                                          color="secondary.main"
+                                        >
+                                          <Tooltip
+                                            title={data.acquisition_details}
+                                            placement="top-start"
+                                            arrow
+                                            // slots={{
+                                            //   transition: Zoom,
+                                            // }}
+                                          >
+                                            {data.acquisition_details}
+                                          </Tooltip>
                                         </Typography>
                                         <Typography fontSize={12} color="secondary.light">
                                           ({data.warehouse?.id}) - {data.warehouse?.warehouse_name}
                                         </Typography>
+                                        {/* <Typography fontSize={14} fontWeight={600} color="secondary.main">
+                                          {data.acquisition_details}
+                                        </Typography>
+                                        <Typography fontSize={12} color="secondary.light">
+                                          ({data.warehouse?.id}) - {data.warehouse?.warehouse_name}
+                                        </Typography> */}
                                         {/* <Typography fontSize={12} color="primary.main" fontWeight={400}>
                                   {data.is_addcost === 1 && "Additional Cost"}
                                 </Typography> */}
