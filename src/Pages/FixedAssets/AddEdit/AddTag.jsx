@@ -261,13 +261,14 @@ const AddTag = ({ data, tag, handleCancel }) => {
         name="replacement_tag"
         control={control}
         options={fixedAssetData}
-        getOptionLabel={(option) => `(${option.vladimir_tag_number}) - ${option.asset_description}`}
+        loading={isFixedAssetLoading}
+        getOptionLabel={(option) => `(${option?.vladimir_tag_number}) - ${option?.asset_description}`}
         // disabled={edit ? false : transactionData?.view}
-        isOptionEqualToValue={(option, value) => option.vladimir_tag_number === value.vladimir_tag_number}
+        isOptionEqualToValue={(option, value) => option?.vladimir_tag_number === value?.vladimir_tag_number}
         onValueChange={(e, value) => {
           // console.log("eeeeeeeeeeeeeeeeeeeeeeee", value.vladimir_tag_number);
 
-          setValue("replacement_tag", value.vladimir_tag_number);
+          setValue("replacement_tag", value?.vladimir_tag_number);
         }}
         onOpen={() => fixedAssetTrigger()}
         renderInput={(params) => (
