@@ -127,17 +127,17 @@ const ExportFixedAsset = () => {
           "Company Code": item.company_code,
           Company: item.company_name,
 
-          "Business Unit Code": item.company_code,
-          "Business Unit": item.company_name,
+          "Business Unit Code": item.business_unit_code,
+          "Business Unit": item.business_unit_name,
 
           "Department Code": item.department_code,
           Department: item.department_name,
 
-          "Unit Code": item.company_code,
-          Unit: item.company_name,
+          "Unit Code": item.unit_code,
+          Unit: item.unit_name,
 
-          "Sub Unit Code": item.company_code,
-          "Sub Unit": item.company_name,
+          "Sub Unit Code": item.sub_unit_code,
+          "Sub Unit": item.sub_unit_name,
 
           "Location Code": item.location_code,
           Location: item.location_name,
