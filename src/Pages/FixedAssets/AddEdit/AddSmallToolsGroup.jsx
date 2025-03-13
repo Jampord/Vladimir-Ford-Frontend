@@ -17,7 +17,7 @@ const schema = yup.object().shape({
   //   main_asset_id: yup.object().required().typeError("Main Asset is required").label("Main Asset"),
   child_asset_ids: yup.array().required().label("Child Asset"),
 });
-const AddSmallToolsGroup = ({ data }) => {
+const AddSmallToolsGroup = ({ data, resetHandler }) => {
   const [selectedApprovers, setSelectedApprovers] = useState([]);
   const [checked, setChecked] = useState(true);
 
@@ -68,7 +68,7 @@ const AddSmallToolsGroup = ({ data }) => {
 
   useEffect(() => {
     if (isPostSuccess) {
-      reset();
+      // reset();
       dispatch(closeDialog2());
       dispatch(
         openToast({
@@ -85,11 +85,12 @@ const AddSmallToolsGroup = ({ data }) => {
       //   dispatch(closeDialog2());
       dispatch(
         openToast({
-          message: postError?.message,
+          message: postError?.errors?.detail || "Child asset is already selected as main asset",
           duration: 5000,
           variant: "error",
         })
       );
+      // reset();
     }
   }, [isPostError]);
 
@@ -133,9 +134,9 @@ const AddSmallToolsGroup = ({ data }) => {
               {watch("child_asset_ids")[0]?.asset?.asset_description}
             </Typography>{" "}
             as Main Asset?
-            <Typography color="error" fontSize={"14px"}>
+            {/* <Typography color="error" fontSize={"14px"}>
               This action is irreversible.
-            </Typography>
+            </Typography> */}
           </Box>
         ),
         onConfirm: async () => {
@@ -145,13 +146,14 @@ const AddSmallToolsGroup = ({ data }) => {
             dispatch(closeConfirm());
             dispatch(fixedAssetApi.util.invalidateTags(["FixedAsset"]));
             reset();
+            resetHandler();
           } catch (err) {
-            console.log(err.data.message);
-            if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
-              // reset();
-            } else if (err?.status !== 422) {
-              // reset();
-            }
+            console.log(err);
+            // if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
+            //   // reset();
+            // } else if (err?.status !== 422) {
+            //   // reset();
+            // }
           }
         },
       })
