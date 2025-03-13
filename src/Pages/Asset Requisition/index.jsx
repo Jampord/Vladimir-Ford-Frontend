@@ -63,14 +63,14 @@ const AssetRequisition = () => {
       permission: "requisition-releasing",
       notification: notifData?.toRelease,
     },
-    {
-      icon: <Construction />,
-      label: "Releasing of Small Tools Replacement",
-      description: "Release the Small Tools replacement to the Tagged Asset",
-      path: "/asset-requisition/small-tools-releasing",
-      permission: "requisition-releasing",
-      // notification: notifData?.toRelease,
-    },
+    // {
+    //   icon: <Construction />,
+    //   label: "Releasing of Small Tools Replacement",
+    //   description: "Release the Small Tools replacement to the Tagged Asset",
+    //   path: "/asset-requisition/small-tools-releasing",
+    //   permission: "requisition-releasing",
+    //   // notification: notifData?.toRelease,
+    // },
   ];
 
   const permissions = useSelector((state) => state.userLogin?.user.role.access_permission);
