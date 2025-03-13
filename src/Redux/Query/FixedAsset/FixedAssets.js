@@ -37,8 +37,7 @@ export const fixedAssetApi = createApi({
     }),
 
     getFixedAssetSmallToolsAllApi: builder.query({
-      query: (params) =>
-        `/fixed-asset?pagination=none&small_tools=1&replacement=${params.replacement}&sub_unit_id=${params.sub_unit_id}`,
+      query: (params) => `/fixed-asset?pagination=none&small_tools=1&sub_unit_id=${params.sub_unit_id}`,
       transformResponse: (response) => response.data,
       providesTags: ["FixedAsset"],
     }),
@@ -160,6 +159,7 @@ export const fixedAssetApi = createApi({
     //     } else {
     //       return {
     //         url: `http://127.0.0.1:80/VladimirPrinting/public/index.php/api/fixed-asset/barcode`,
+    //         // url: `http://10.10.2.30:8069/VladimirPrinting/public/index.php/api/fixed-asset/barcode`,
     //         method: "POST",
     //         body: params,
     //       };
@@ -196,6 +196,17 @@ export const fixedAssetApi = createApi({
       query: (params) => {
         return {
           url: `/small-tools-main-asset/not-printable`,
+          method: "PUT",
+          body: params,
+        };
+      },
+      invalidatesTags: ["FixedAsset"],
+    }),
+
+    putUngroupSmallToolsApi: builder.mutation({
+      query: (params) => {
+        return {
+          url: `/ungroup-small-tools-main-asset/${params.id}`,
           method: "PUT",
           body: params,
         };
@@ -246,6 +257,7 @@ export const {
   usePostPrintApiMutation,
   usePutMemoPrintApiMutation,
   usePutSmallToolsPrintableApiMutation,
+  usePutUngroupSmallToolsApiMutation,
   usePostLocalPrintApiMutation,
 
   usePostDepreciateApiMutation,
