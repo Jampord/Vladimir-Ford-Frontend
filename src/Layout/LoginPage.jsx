@@ -218,6 +218,7 @@ const LoginPage = () => {
               color="secondary"
               error={!!errors?.username?.message}
               helperText={errors?.username?.message}
+              allowNCharacter
             />
 
             <CustomTextField
@@ -231,6 +232,7 @@ const LoginPage = () => {
               color="secondary"
               error={!!errors?.password?.message}
               helperText={errors?.password?.message}
+              allowNCharacter
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -249,7 +251,6 @@ const LoginPage = () => {
               }}
               sx={{ ".MuiInputBase-root": { borderRadius: "10px" } }}
             />
-
             <LoadingButton
               variant="contained"
               color="primary"
