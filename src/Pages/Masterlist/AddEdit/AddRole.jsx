@@ -163,7 +163,7 @@ const AddRole = (props) => {
     "warehouse",
     "category",
     "status-category",
-    "small-tools",
+    // "small-tools",
 
     // UserManagement
     "user-accounts",
@@ -196,6 +196,7 @@ const AddRole = (props) => {
     "approved-request",
     "approving-request",
     "approving-transfer",
+    "final-approving",
     "approving-pull-out",
     "approving-disposal",
     "approving-evaluation",
@@ -235,6 +236,7 @@ const AddRole = (props) => {
   const approving = [
     "approving-request",
     "approving-transfer",
+    "final-approving",
     "approving-pull-out",
     "approving-disposal",
     "approving-evaluation",
@@ -369,7 +371,7 @@ const AddRole = (props) => {
       { label: "Credit", value: "credit" },
       { label: "Supplier", value: "supplier" },
       { label: "Unit of Measurement", value: "unit-of-measurement" },
-      { label: "Small Tools", value: "small-tools" },
+      // { label: "Small Tools", value: "small-tools" },
     ];
 
     const masterlist2 = [
@@ -534,6 +536,18 @@ const AddRole = (props) => {
               <Checkbox
                 {...register("access_permission")}
                 checked={watch("access_permission")?.includes("approving-transfer")}
+              />
+            }
+          />
+
+          <FormControlLabel
+            disabled={data.action === "view"}
+            label="Final Approving"
+            value="final-approving"
+            control={
+              <Checkbox
+                {...register("access_permission")}
+                checked={watch("access_permission")?.includes("final-approving")}
               />
             }
           />
@@ -776,7 +790,7 @@ const AddRole = (props) => {
                                     "category",
                                     "status-category",
                                     "unit-of-measurement",
-                                    "small-tools",
+                                    // "small-tools",
                                   ]),
                                 ]);
                               } else {
@@ -1060,6 +1074,7 @@ const AddRole = (props) => {
                                     ...watch("access_permission"),
                                     "approving-request",
                                     "approving-transfer",
+                                    "final-approving",
                                     "approving-pull-out",
                                     "approving-disposal",
                                     "approving-evaluation",
