@@ -373,7 +373,7 @@ const ReleasingTable = (props) => {
 
                               <TableCell onClick={() => handleViewData(data)} className="tbl-cell">
                                 <Typography fontSize={14} fontWeight={600} color="secondary.main">
-                                  {data.vladimir_tag_number}
+                                  {data.is_printable === 1 ? data.vladimir_tag_number : "NON PRINTABLE"}
                                 </Typography>
                                 <Typography fontSize={12} color="secondary.light">
                                   ({data.warehouse?.id}) - {data.warehouse?.warehouse_name}
