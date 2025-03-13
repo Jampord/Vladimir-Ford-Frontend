@@ -50,6 +50,7 @@ import {
 } from "../../Redux/Query/Request/AssetReceiving";
 import { closeDialog, openDialog } from "../../Redux/StateManagement/booleanStateSlice";
 import { useCancelRrVladimirApiMutation, useCancelRrYmirApiMutation } from "../../Redux/Query/Request/ReceivedReceipt";
+import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 
 const RrSummary = (props) => {
   const { received } = props;
@@ -112,6 +113,7 @@ const RrSummary = (props) => {
     isLoading: receivedReceiptLoading,
     isSuccess: receivedReceiptSuccess,
     isError: receivedReceiptError,
+    isFetching: receivedReceiptFetching,
     error: errorData,
     refetch,
   } = useGetRrSummaryApiQuery(
@@ -275,12 +277,14 @@ const RrSummary = (props) => {
                         </TableSortLabel>
                       </TableCell>
 
-                      <TableCell className="tbl-cell">Action</TableCell>
+                      {status === "active" && <TableCell className="tbl-cell">Action</TableCell>}
                     </TableRow>
                   </TableHead>
 
                   <TableBody>
-                    {receivedReceiptData?.data?.length === 0 ? (
+                    {receivedReceiptFetching ? (
+                      <LoadingData />
+                    ) : receivedReceiptData?.data?.length === 0 ? (
                       <NoRecordsFound heightData="small" />
                     ) : (
                       <>
@@ -352,16 +356,18 @@ const RrSummary = (props) => {
                                 {Moment(data.created_at).format("MMM DD, YYYY")}
                               </TableCell>
 
-                              <TableCell className="tbl-cell">
-                                {data?.can_cancel === 1 && (
-                                  <ActionMenu
-                                    hideEdit
-                                    data={data?.rr_id}
-                                    showCancelRr={true}
-                                    handleCancelRR={handleCancelRR}
-                                  />
-                                )}
-                              </TableCell>
+                              {status === "active" && (
+                                <TableCell className="tbl-cell">
+                                  {data?.can_cancel === 1 && (
+                                    <ActionMenu
+                                      hideEdit
+                                      data={data?.rr_id}
+                                      showCancelRr={true}
+                                      handleCancelRR={handleCancelRR}
+                                    />
+                                  )}
+                                </TableCell>
+                              )}
                             </TableRow>
                           ))}
                       </>
