@@ -92,13 +92,6 @@ const MasterlistList = [
   },
 
   {
-    icon: <HomeRepairService />,
-    label: "Small Tools",
-    description: "Synching of Small Tools from Ymir to Vladimir",
-    path: "/masterlist/small-tools",
-  },
-
-  {
     icon: <Groups2Rounded />,
     label: "Division",
     description: "Adding, editing and archiving of Division masterlist",
