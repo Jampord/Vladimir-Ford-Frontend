@@ -281,12 +281,12 @@ const Sidebar = () => {
           path: "masterlist/unit-of-measurement",
           permission: "unit-of-measurement",
         },
-        {
-          label: "Small Tools",
-          icon: HomeRepairService,
-          path: "/masterlist/small-tools",
-          permission: "small-tools",
-        },
+        // {
+        //   label: "Small Tools",
+        //   icon: HomeRepairService,
+        //   path: "/masterlist/small-tools",
+        //   permission: "small-tools",
+        // },
 
         // * CRUD Operations
         {
@@ -407,6 +407,9 @@ const Sidebar = () => {
           path: "/settings/form-settings",
           permission: "form-settings",
         },
+
+        // <Divider sx={{ mb: "10px", mx: "15px" }} />,
+
         {
           label: "Coordinator Settings",
           icon: ManageAccounts,
@@ -480,6 +483,14 @@ const Sidebar = () => {
           notification: notifData?.toRelease,
           setter: closeCollapse,
         },
+        // {
+        //   label: "Small Tools Releasing",
+        //   icon: Construction,
+        //   path: "/asset-requisition/small-tools-releasing",
+        //   permission: "requisition-releasing",
+        //   notification: notifData?.toSmallToolRelease,
+        //   setter: closeCollapse,
+        // },
       ],
       open: assetRequisitionCollapse,
       setter: () => {
@@ -565,14 +576,18 @@ const Sidebar = () => {
       icon: DomainVerification,
       path: "/approving",
       permission: "approving",
-      notification: notifData?.toApproveCount,
+      notification: permissions.includes("final-approving")
+        ? notifData?.toApproveCount + notifData?.toAcquisitionFaApproval
+        : notifData?.toApproveCount,
       children: [
         {
           label: "Request",
           icon: ApprovalRounded,
           path: "/approving/request",
           permission: "approving-request",
-          notification: notifData?.toApproveCount,
+          notification: permissions.includes("final-approving")
+            ? notifData?.toApproveCount + notifData?.toAcquisitionFaApproval
+            : notifData?.toApproveCount,
           setter: closeCollapse,
         },
         {
@@ -790,26 +805,46 @@ const Sidebar = () => {
                         {item.children.map((childItem) => {
                           return (
                             permissions.split(", ").includes(childItem.permission) && (
-                              <ListItemButton
-                                className="sidebar__menu-btn-list"
-                                key={childItem.path}
-                                component={NavLink}
-                                to={childItem.path}
-                                sx={{
-                                  width: "208px",
-                                  ml: 2,
-                                  borderRadius: "12px",
-                                  px: 0,
-                                }}
-                                dense
-                              >
-                                <ListItemIcon sx={{ pl: 2, py: 0.5 }}>
-                                  <Badge badgeContent={childItem.notification} color="error">
-                                    <SvgIcon component={childItem.icon} />
-                                  </Badge>
-                                </ListItemIcon>
-                                <ListItemText primary={childItem.label} />
-                              </ListItemButton>
+                              <>
+                                {childItem.label === "Coordinator Settings" ? (
+                                  <>
+                                    <Divider sx={{ mt: 1, mx: "15px", fontSize: "11px", color: "text.secondary" }}>
+                                      For Asset Transfer
+                                    </Divider>
+                                    {/* <Divider sx={{ mx: "15px" }} />
+                                    <Typography
+                                      sx={{
+                                        color: "text.secondary",
+                                        fontSize: "12px",
+                                        ml: 3,
+                                        mt: 1,
+                                      }}
+                                    >
+                                      For Asset Transfer
+                                    </Typography> */}
+                                  </>
+                                ) : null}
+                                <ListItemButton
+                                  className="sidebar__menu-btn-list"
+                                  key={childItem.path}
+                                  component={NavLink}
+                                  to={childItem.path}
+                                  sx={{
+                                    width: "208px",
+                                    ml: 2,
+                                    borderRadius: "12px",
+                                    px: 0,
+                                  }}
+                                  dense
+                                >
+                                  <ListItemIcon sx={{ pl: 2, py: 0.5 }}>
+                                    <Badge badgeContent={childItem.notification} color="error">
+                                      <SvgIcon component={childItem.icon} />
+                                    </Badge>
+                                  </ListItemIcon>
+                                  <ListItemText primary={childItem.label} />
+                                </ListItemButton>
+                              </>
                             )
                           );
                         })}
