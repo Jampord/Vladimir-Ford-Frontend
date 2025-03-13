@@ -717,10 +717,6 @@ function App() {
     dispatch(closeToast());
   };
 
-  const handleCloseConfirm = () => {
-    dispatch(closeConfirm());
-  };
-
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
       <ThemeProvider theme={theme}>
@@ -748,7 +744,11 @@ function App() {
         <Dialog
           TransitionComponent={Zoom}
           open={confirmOpen}
-          onClose={handleCloseConfirm}
+          onClose={(event, reason) => {
+            // Prevent closing on backdrop click
+            if (reason === "backdropClick") return;
+            dispatch(closeConfirm());
+          }}
           sx={{
             ".MuiPaper-root": {
               alignItems: "center",
