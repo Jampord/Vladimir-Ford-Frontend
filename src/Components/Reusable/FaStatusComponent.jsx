@@ -7,8 +7,10 @@ import {
   EditOff,
   FileCopy,
   FolderDelete,
+  Pending,
   RadioButtonUncheckedRounded,
   Sell,
+  SwapHorizontalCircle,
 } from "@mui/icons-material";
 
 const faStatusComponent = ({ faStatus, data }) => {
@@ -34,6 +36,21 @@ const faStatusComponent = ({ faStatus, data }) => {
         variant="contained"
         icon={<BuildCircle size="small" color="#0288d1" />}
         label="For Repair"
+        sx={{
+          backgroundColor: "#61c3f831",
+          color: "#0288d1",
+
+          p: "0 5px",
+        }}
+      />
+    );
+  } else if (faStatus === "For Releasing") {
+    return (
+      <Chip
+        size="small"
+        variant="contained"
+        icon={<Pending size="small" color="#0288d1" />}
+        label="For Releasing"
         sx={{
           backgroundColor: "#61c3f831",
           color: "#0288d1",
@@ -108,6 +125,21 @@ const faStatusComponent = ({ faStatus, data }) => {
         variant="contained"
         icon={<DeleteForever size="small" color="#a32424" />}
         label="Disposed"
+        sx={{
+          backgroundColor: "#ff979749",
+          color: "#a32424",
+
+          p: "0 5px",
+        }}
+      />
+    );
+  } else if (faStatus === "Replaced") {
+    return (
+      <Chip
+        size="small"
+        variant="contained"
+        icon={<SwapHorizontalCircle size="small" color="#a32424" />}
+        label="Replaced"
         sx={{
           backgroundColor: "#ff979749",
           color: "#a32424",
