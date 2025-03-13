@@ -22,6 +22,11 @@ export const approvalApi = createApi({
         `asset-approval?=${params.search}&per_page=${params.per_page}&status=${params.status}&page=${params.page}`,
       providesTags: ["Approval"],
     }),
+    getFinalApprovalApi: builder.query({
+      query: (params) =>
+        `asset-approval?=${params.search}&per_page=${params.per_page}&status=${params.status}&page=${params.page}&final_approval=${params.final_approval}`,
+      providesTags: ["Approval"],
+    }),
 
     getApprovalAllApi: builder.query({
       query: () => `asset-approval?pagination=none`,
@@ -31,6 +36,7 @@ export const approvalApi = createApi({
 
     getApprovalIdApi: builder.query({
       query: (params) => `asset-approval/${params.transaction_number}?page=${params.page}&per_page=${params.per_page}`,
+      providesTags: ["Approval"],
     }),
 
     patchApprovalStatusApi: builder.mutation({
@@ -42,8 +48,17 @@ export const approvalApi = createApi({
       invalidatesTags: ["Approval"],
     }),
 
+    putFinalApprovalEditApi: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/final-approval-update/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Approval"],
+    }),
+
     getNextRequest: builder.query({
-      query: () => `/next-request`,
+      query: (params) => `/next-request?final_approval=${params.final_approval}`,
     }),
 
     dlAttachment: builder.query({
@@ -57,9 +72,11 @@ export const approvalApi = createApi({
 
 export const {
   useGetApprovalApiQuery,
+  useGetFinalApprovalApiQuery,
   useGetApprovalAllApiQuery,
   useGetApprovalIdApiQuery,
   usePatchApprovalStatusApiMutation,
+  usePutFinalApprovalEditApiMutation,
   useGetNextRequestQuery,
   useLazyGetNextRequestQuery,
   useLazyDlAttachmentQuery,
