@@ -33,7 +33,7 @@ export const receivedReceiptApi = createApi({
 
     cancelRrYmirApi: builder.mutation({
       query: (params) => ({
-        url: `${process.env.YMIR_BASE_URL}cancel_rr/${params.rr_number}`,
+        url: `${process.env.YMIR_BASE_URL}/cancel_rr/${params.rr_number}`,
         method: "PATCH",
         body: params,
       }),
