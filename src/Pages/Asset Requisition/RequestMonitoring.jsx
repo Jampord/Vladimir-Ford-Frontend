@@ -28,6 +28,8 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Stack,
+  Tab,
   Table,
   TableBody,
   TableCell,
@@ -35,9 +37,11 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  Tabs,
   Tooltip,
   Typography,
   useMediaQuery,
+  Zoom,
 } from "@mui/material";
 import { AddBox, AddCircleSharp, IosShareRounded, LibraryAdd, Visibility } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
@@ -47,6 +51,7 @@ import useExcel from "../../Hooks/Xlsx";
 import moment from "moment";
 import ExportRequestMonitoring from "./ExportRequestMonitoring";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
+import { TabContext } from "@mui/lab";
 
 const RequestMonitoring = () => {
   const [search, setSearch] = useState("");
@@ -55,6 +60,7 @@ const RequestMonitoring = () => {
   const [page, setPage] = useState(1);
   const [requestFilter, setRequestFilter] = useState([]);
   const [transactionIdData, setTransactionIdData] = useState();
+  const [filterValue, setFilterValue] = useState("2");
   const viewData = true;
   const requestMonitoring = true;
 
@@ -66,6 +72,10 @@ const RequestMonitoring = () => {
   const showExport = useSelector((state) => state.booleanState.exportFile);
 
   const { excelExport } = useExcel();
+
+  const handleChange = (event, newValue) => {
+    setFilterValue(newValue);
+  };
 
   // Table Sorting --------------------------------
 
@@ -122,7 +132,23 @@ const RequestMonitoring = () => {
       per_page: perPage,
       status: status,
       search: search,
-      filter: requestFilter,
+      // filter: requestFilter,
+      filter:
+        filterValue === "2"
+          ? "For Approval"
+          : filterValue === "3"
+          ? "For FA Approval"
+          : filterValue === "4"
+          ? "Sent To Ymir"
+          : filterValue === "5"
+          ? "For Tagging"
+          : filterValue === "6"
+          ? "For Pickup"
+          : filterValue === "7"
+          ? "Returned"
+          : filterValue === "8"
+          ? "Claimed"
+          : null,
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -308,32 +334,47 @@ const RequestMonitoring = () => {
       <Typography className="mcontainer__title" sx={{ fontFamily: "Anton", fontSize: "2rem" }}>
         Request Monitoring
       </Typography>
-      {requisitionLoading && <MasterlistSkeleton />}
-      {requisitionError && <ErrorFetching refetch={refetch} error={errorData} />}
-      {requisitionData && !requisitionError && (
-        <>
-          <Box className="request__wrapper">
-            <MasterlistToolbar
-              onStatusChange={setStatus}
-              onSearchChange={setSearch}
-              onSetPage={setPage}
-              setRequestFilter={setRequestFilter}
-              requestFilter={requestFilter}
-            />
 
-            <Box>
-              <TableContainer className="mcontainer__th-body">
-                <Table className="mcontainer__table" stickyHeader>
-                  <TableHead>
-                    <TableRow
-                      sx={{
-                        "& > *": {
-                          fontWeight: "bold!important",
-                          whiteSpace: "nowrap",
-                        },
-                      }}
-                    >
-                      {/* <TableCell className="tbl-cell text-center">
+      <Box>
+        <TabContext value={filterValue}>
+          <Tabs onChange={handleChange} value={filterValue}>
+            {/* <Tab label="ALL" value="1" className={filterValue === "1" ? "tab__background" : null} /> */}
+            <Tab label="For Approval" value="2" className={filterValue === "2" ? "tab__background" : null} />
+            <Tab label="For FA Approval" value="3" className={filterValue === "3" ? "tab__background" : null} />
+            <Tab label="Sent to Ymir" value="4" className={filterValue === "4" ? "tab__background" : null} />
+            <Tab label="For Asset Tagging" value="5" className={filterValue === "5" ? "tab__background" : null} />
+            <Tab label="For Pickup" value="6" className={filterValue === "6" ? "tab__background" : null} />
+            <Tab label="Returned" value="7" className={filterValue === "7" ? "tab__background" : null} />
+            <Tab label="Claimed" value="8" className={filterValue === "8" ? "tab__background" : null} />
+          </Tabs>
+        </TabContext>
+
+        <Stack className="category_height">
+          {requisitionLoading && <MasterlistSkeleton category={true} />}
+          {requisitionError && <ErrorFetching refetch={refetch} error={errorData} />}
+          {requisitionData && !requisitionError && (
+            <Box className="mcontainer__wrapper">
+              <MasterlistToolbar
+                onStatusChange={setStatus}
+                onSearchChange={setSearch}
+                onSetPage={setPage}
+                setRequestFilter={setRequestFilter}
+                // requestFilter={requestFilter}
+              />
+
+              <Box>
+                <TableContainer className="mcontainer__th-body-category">
+                  <Table className="mcontainer__table" stickyHeader>
+                    <TableHead>
+                      <TableRow
+                        sx={{
+                          "& > *": {
+                            fontWeight: "bold!important",
+                            whiteSpace: "nowrap",
+                          },
+                        }}
+                      >
+                        {/* <TableCell className="tbl-cell text-center">
                         <TableSortLabel
                           active={orderBy === `id`}
                           direction={orderBy === `id` ? order : `asc`}
@@ -343,177 +384,194 @@ const RequestMonitoring = () => {
                         </TableSortLabel>
                       </TableCell> */}
 
-                      <TableCell className="tbl-cell">
-                        <TableSortLabel
-                          active={orderBy === `transaction_number`}
-                          direction={orderBy === `transaction_number` ? order : `asc`}
-                          onClick={() => onSort(`transaction_number`)}
-                        >
-                          Transaction No.
-                        </TableSortLabel>
-                      </TableCell>
+                        <TableCell className="tbl-cell">
+                          <TableSortLabel
+                            active={orderBy === `transaction_number`}
+                            direction={orderBy === `transaction_number` ? order : `asc`}
+                            onClick={() => onSort(`transaction_number`)}
+                          >
+                            Transaction No.
+                          </TableSortLabel>
+                        </TableCell>
 
-                      <TableCell className="tbl-cell">Requestor</TableCell>
+                        <TableCell className="tbl-cell">Requestor</TableCell>
 
-                      <TableCell className="tbl-cell">
-                        <TableSortLabel
-                          active={orderBy === `acquisition_details`}
-                          direction={orderBy === `acquisition_details` ? order : `asc`}
-                          onClick={() => onSort(`acquisition_details`)}
-                        >
-                          Acquisition Details
-                        </TableSortLabel>
-                      </TableCell>
+                        <TableCell className="tbl-cell">
+                          <TableSortLabel
+                            active={orderBy === `acquisition_details`}
+                            direction={orderBy === `acquisition_details` ? order : `asc`}
+                            onClick={() => onSort(`acquisition_details`)}
+                          >
+                            Acquisition Details
+                          </TableSortLabel>
+                        </TableCell>
 
-                      <TableCell className="tbl-cell text-center">
-                        <TableSortLabel
-                          active={orderBy === `pr_number`}
-                          direction={orderBy === `pr_number` ? order : `asc`}
-                          onClick={() => onSort(`pr_number`)}
-                        >
-                          PR Number
-                        </TableSortLabel>
-                      </TableCell>
+                        <TableCell className="tbl-cell text-center">
+                          <TableSortLabel
+                            active={orderBy === `pr_number`}
+                            direction={orderBy === `pr_number` ? order : `asc`}
+                            onClick={() => onSort(`pr_number`)}
+                          >
+                            PR Number
+                          </TableSortLabel>
+                        </TableCell>
 
-                      <TableCell className="tbl-cell text-center">
-                        <TableSortLabel
-                          active={orderBy === `item_count`}
-                          direction={orderBy === `item_count` ? order : `asc`}
-                          onClick={() => onSort(`item_count`)}
-                        >
-                          Quantity
-                        </TableSortLabel>
-                      </TableCell>
+                        <TableCell className="tbl-cell text-center">
+                          <TableSortLabel
+                            active={orderBy === `item_count`}
+                            direction={orderBy === `item_count` ? order : `asc`}
+                            onClick={() => onSort(`item_count`)}
+                          >
+                            Quantity
+                          </TableSortLabel>
+                        </TableCell>
 
-                      <TableCell className="tbl-cell text-center">View Information</TableCell>
+                        <TableCell className="tbl-cell text-center">View Information</TableCell>
 
-                      <TableCell className="tbl-cell text-center">
-                        <TableSortLabel
-                          active={orderBy === `status`}
-                          direction={orderBy === `status` ? order : `asc`}
-                          onClick={() => onSort(`status`)}
-                        >
-                          View Status
-                        </TableSortLabel>
-                      </TableCell>
+                        <TableCell className="tbl-cell text-center">
+                          <TableSortLabel
+                            active={orderBy === `status`}
+                            direction={orderBy === `status` ? order : `asc`}
+                            onClick={() => onSort(`status`)}
+                          >
+                            View Status
+                          </TableSortLabel>
+                        </TableCell>
 
-                      <TableCell className="tbl-cell text-center">
-                        <TableSortLabel
-                          active={orderBy === `created_at`}
-                          direction={orderBy === `created_at` ? order : `asc`}
-                          onClick={() => onSort(`created_at`)}
-                        >
-                          Date Created
-                        </TableSortLabel>
-                      </TableCell>
-                    </TableRow>
-                  </TableHead>
+                        <TableCell className="tbl-cell text-center">
+                          <TableSortLabel
+                            active={orderBy === `created_at`}
+                            direction={orderBy === `created_at` ? order : `asc`}
+                            onClick={() => onSort(`created_at`)}
+                          >
+                            Date Created
+                          </TableSortLabel>
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
 
-                  <TableBody>
-                    {requisitionData?.data?.length === 0 ? (
-                      <NoRecordsFound heightData="medium" />
-                    ) : (
-                      <>
-                        {requisitionFetching ? (
-                          <LoadingData />
-                        ) : (
-                          requisitionSuccess &&
-                          [...requisitionData?.data]?.sort(comparator(order, orderBy))?.map((data) => (
-                            <TableRow
-                              key={data.id}
-                              sx={{
-                                "&:last-child td, &:last-child th": {
-                                  borderBottom: 0,
-                                },
-                              }}
-                            >
-                              {/* <TableCell className="tbl-cell tr-cen-pad45">
+                    <TableBody>
+                      {requisitionData?.data?.length === 0 ? (
+                        <NoRecordsFound heightData="medium" />
+                      ) : (
+                        <>
+                          {requisitionFetching || requisitionLoading ? (
+                            <LoadingData />
+                          ) : (
+                            requisitionSuccess &&
+                            [...requisitionData?.data]?.sort(comparator(order, orderBy))?.map((data) => (
+                              <TableRow
+                                key={data.id}
+                                sx={{
+                                  "&:last-child td, &:last-child th": {
+                                    borderBottom: 0,
+                                  },
+                                }}
+                              >
+                                {/* <TableCell className="tbl-cell tr-cen-pad45">
                                   {data.id}
                                 </TableCell> */}
-                              <TableCell className="tbl-cell text-weight">{data.transaction_number}</TableCell>
-                              <TableCell className="tbl-cell">
-                                <Typography fontSize={12} fontWeight={700} color="secondary.main">
-                                  {data.requestor.firstname}
-                                </Typography>
-                                <Typography fontSize={11} fontWeight={600} color="secondary.main">
-                                  {data.requestor.lastname}
-                                </Typography>
-                                <Typography fontSize={11} fontWeight={500} color="primary">
-                                  {data.requestor.username}
-                                </Typography>
-                              </TableCell>
-                              <TableCell className="tbl-cell">
-                                <Typography fontSize={14} fontWeight={600} color="secondary.main">
-                                  {data.acquisition_details}
-                                </Typography>
-                                <Typography fontSize={12} color="secondary.light">
-                                  ({data.warehouse?.id}) - {data.warehouse?.warehouse_name}
-                                </Typography>
-                                {/* <Typography fontSize={12} color="primary.main" fontWeight={400}>
+                                <TableCell className="tbl-cell text-weight">{data.transaction_number}</TableCell>
+                                <TableCell className="tbl-cell">
+                                  <Typography fontSize={12} fontWeight={700} color="secondary.main">
+                                    {data.requestor.firstname}
+                                  </Typography>
+                                  <Typography fontSize={11} fontWeight={600} color="secondary.main">
+                                    {data.requestor.lastname}
+                                  </Typography>
+                                  <Typography fontSize={11} fontWeight={500} color="primary">
+                                    {data.requestor.username}
+                                  </Typography>
+                                </TableCell>
+                                <TableCell className="tbl-cell">
+                                  <Typography
+                                    fontSize={14}
+                                    fontWeight={600}
+                                    maxWidth="440px"
+                                    overflow="hidden"
+                                    textOverflow="ellipsis"
+                                    color="secondary.main"
+                                  >
+                                    <Tooltip
+                                      title={data.acquisition_details}
+                                      placement="top-start"
+                                      arrow
+                                      // slots={{
+                                      //   transition: Zoom,
+                                      // }}
+                                    >
+                                      {data.acquisition_details}
+                                    </Tooltip>
+                                  </Typography>
+                                  <Typography fontSize={12} color="secondary.light">
+                                    ({data.warehouse?.id}) - {data.warehouse?.warehouse_name}
+                                  </Typography>
+                                  {/* <Typography fontSize={12} color="primary.main" fontWeight={400}>
                                   {data.is_addcost === 1 && "Additional Cost"}
                                 </Typography> */}
-                              </TableCell>
+                                </TableCell>
 
-                              <TableCell className="tbl-cell">
-                                <Typography fontSize={14} fontWeight={600} color="secondary.main">
-                                  {data.ymir_pr_number}
-                                </Typography>
-                              </TableCell>
+                                <TableCell className="tbl-cell">
+                                  <Typography fontSize={14} fontWeight={600} color="secondary.main">
+                                    {data.ymir_pr_number}
+                                  </Typography>
+                                </TableCell>
 
-                              <TableCell className="tbl-cell tr-cen-pad45">{data.item_count}</TableCell>
-                              <TableCell className="tbl-cell text-center">
-                                <Tooltip placement="top" title="View Request Information" arrow>
-                                  <IconButton onClick={() => handleEditRequisition(data)}>
-                                    <Visibility />
-                                  </IconButton>
-                                </Tooltip>
-                              </TableCell>
-                              <TableCell className="tbl-cell tr-cen-pad45">{transactionStatus(data)}</TableCell>
-                              <TableCell className="tbl-cell tr-cen-pad45">
-                                {data.status === "Cancelled"
-                                  ? Moment(data.deleted_at).format("MMM DD, YYYY")
-                                  : Moment(data.created_at).format("MMM DD, YYYY")}
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </>
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+                                <TableCell className="tbl-cell tr-cen-pad45">{data.item_count}</TableCell>
+                                <TableCell className="tbl-cell text-center">
+                                  <Tooltip placement="top" title="View Request Information" arrow>
+                                    <IconButton onClick={() => handleEditRequisition(data)}>
+                                      <Visibility />
+                                    </IconButton>
+                                  </Tooltip>
+                                </TableCell>
+                                <TableCell className="tbl-cell tr-cen-pad45">{transactionStatus(data)}</TableCell>
+                                <TableCell className="tbl-cell tr-cen-pad45">
+                                  {data.status === "Cancelled"
+                                    ? Moment(data.deleted_at).format("MMM DD, YYYY")
+                                    : Moment(data.created_at).format("MMM DD, YYYY")}
+                                </TableCell>
+                              </TableRow>
+                            ))
+                          )}
+                        </>
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+
+              <Box className="mcontainer__pagination-export">
+                <Button
+                  className="mcontainer__export"
+                  variant="outlined"
+                  size="small"
+                  color="text"
+                  startIcon={<IosShareRounded color="primary" />}
+                  onClick={openExportDialog}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "10px 20px",
+                  }}
+                >
+                  EXPORT
+                </Button>
+
+                <CustomTablePagination
+                  total={requisitionData?.total}
+                  success={requisitionSuccess}
+                  current_page={requisitionData?.current_page}
+                  per_page={requisitionData?.per_page}
+                  onPageChange={pageHandler}
+                  onRowsPerPageChange={perPageHandler}
+                />
+              </Box>
             </Box>
-
-            <Box className="mcontainer__pagination-export">
-              <Button
-                className="mcontainer__export"
-                variant="outlined"
-                size="small"
-                color="text"
-                startIcon={<IosShareRounded color="primary" />}
-                onClick={openExportDialog}
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "10px 20px",
-                }}
-              >
-                EXPORT
-              </Button>
-
-              <CustomTablePagination
-                total={requisitionData?.total}
-                success={requisitionSuccess}
-                current_page={requisitionData?.current_page}
-                per_page={requisitionData?.per_page}
-                onPageChange={pageHandler}
-                onRowsPerPageChange={perPageHandler}
-              />
-            </Box>
-          </Box>
-        </>
-      )}
+          )}
+        </Stack>
+      </Box>
 
       <Dialog
         open={dialog}
