@@ -29,6 +29,11 @@ export const minorCategoryApi = createApi({
       providesTags: ["minorCategory"],
     }),
 
+    getMinorCategorySmallToolsApi: builder.query({
+      query: (params) => `/minor-category?pagination=none&is_small_tools=1`,
+      providesTags: ["minorCategory"],
+    }),
+
     getMinorCategoryIdApi: builder.query({
       query: (id) => `/minor-category/${id}/`,
       providesTags: ["minorCategory"],
@@ -69,6 +74,7 @@ export const {
   useGetMinorCategoryApiQuery,
   useGetMinorCategoryAllApiQuery,
   useLazyGetMinorCategoryAllApiQuery,
+  useLazyGetMinorCategorySmallToolsApiQuery,
   useGetMinorCategoryIdApiQuery,
   usePutMinorCategoryStatusApiMutation,
   usePostMinorCategoryApiMutation,
