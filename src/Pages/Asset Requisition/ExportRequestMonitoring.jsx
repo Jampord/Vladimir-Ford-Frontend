@@ -95,7 +95,7 @@ const ExportRequestMonitoring = () => {
         };
       });
 
-      await excelExport(newObj, "Vladimir-Request-Monitoring.xlsx");
+      await excelExport(newObj, "Vladimir-Request-Monitoring");
       dispatch(
         openToast({
           message: "Successfully Exported",
