@@ -905,7 +905,8 @@ const AddUserAccount = (props) => {
               fullWidth
             />
 
-            {watch("role_id")?.role_name === "Warehouse" && (
+            {(watch("role_id")?.role_name.includes("Warehouse") ||
+              watch("role_id")?.role_name.includes("warehouse")) && (
               <CustomAutoComplete
                 name="warehouse_id"
                 control={control}
