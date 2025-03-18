@@ -497,7 +497,9 @@ const UserAccounts = () => {
                               {users.subunit?.subunit_code} - {users.subunit?.subunit_name}
                             </TableCell> */}
                             <TableCell className="tbl-cell capitalized" sx={{ whiteSpace: "nowrap" }}>
-                              {users.role.role_name === "Warehouse" || users.is_coordinator === 1 ? (
+                              {users.role.role_name.includes("Warehouse") ||
+                              users.role.role_name.includes("warehouse") ||
+                              users.is_coordinator === 1 ? (
                                 <Stack flexDirection="column">
                                   {users.role.role_name}
                                   <Typography fontSize={10} fontWeight={500} color="secondary.main">
