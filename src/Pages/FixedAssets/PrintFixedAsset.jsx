@@ -39,6 +39,7 @@ import {
   FilterList,
   Help,
   HomeRepairService,
+  IosShareRounded,
   PriceChange,
   Print,
   PrintDisabled,
@@ -62,10 +63,13 @@ import {
   closeDialog1,
   closeDialog2,
   closeDialog3,
+  closeExport,
   closePrint,
   openDialog1,
   openDialog2,
   openDialog3,
+  openDialog4,
+  openExport,
 } from "../../Redux/StateManagement/booleanStateSlice";
 import {
   useGetFixedAssetApiQuery,
@@ -89,6 +93,8 @@ import CustomTablePagination from "../../Components/Reusable/CustomTablePaginati
 import AssignmentMemo from "./AssignmentMemo";
 import { useGetNotificationApiQuery } from "../../Redux/Query/Notification";
 import AddSmallToolsGroup from "./AddEdit/AddSmallToolsGroup";
+import AddTagAddCost from "./AddEdit/AddTagAddCost";
+import ExportPrintFixedAsset from "./ExportPrintFixedAsset";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -129,6 +135,7 @@ const PrintFixedAsset = (props) => {
 
   const dialog = useSelector((state) => state.booleanState.dialogMultiple.dialog2);
   const dialog2 = useSelector((state) => state.booleanState.dialogMultiple.dialog3);
+  const dialog3 = useSelector((state) => state.booleanState.dialogMultiple.dialog4);
 
   const isSmallerScreen = useMediaQuery("(max-width: 600px)");
   const isSmallScreen = useMediaQuery("(max-width: 850px)");
@@ -229,6 +236,7 @@ const PrintFixedAsset = (props) => {
     isLoading: fixedAssetLoading,
     isSuccess: fixedAssetSuccess,
     isError: fixedAssetError,
+    isFetching: fixedAssetFetching,
     error: errorData,
     refetch: fixedAssetRefetch,
   } = useGetPrintViewingApiQuery(
@@ -876,7 +884,10 @@ const PrintFixedAsset = (props) => {
                   size="small"
                   color="primary"
                   checked={printMemo}
-                  onChange={() => setPrintMemo(!printMemo)}
+                  onChange={() => {
+                    setPrintMemo(!printMemo);
+                    reset();
+                  }}
                   sx={{ p: 0, px: 1 }}
                 />
               }
@@ -1575,15 +1586,35 @@ const PrintFixedAsset = (props) => {
                         </Table>
                       </TableContainer>
 
-                      <CustomTablePagination
-                        total={fixedAssetData?.total}
-                        success={fixedAssetSuccess}
-                        current_page={fixedAssetData?.current_page}
-                        per_page={fixedAssetData?.per_page}
-                        onPageChange={pageHandler}
-                        onRowsPerPageChange={perPageHandler}
-                        removeShadow
-                      />
+                      <Box className="mcontainer__pagination-export">
+                        <Button
+                          className="mcontainer__export"
+                          variant="outlined"
+                          size="small"
+                          color="text"
+                          startIcon={<IosShareRounded color="primary" />}
+                          // onClick={handleExport}
+                          onClick={() => dispatch(openDialog4())}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            margin: "10px 20px",
+                          }}
+                        >
+                          EXPORT
+                        </Button>
+
+                        <CustomTablePagination
+                          total={fixedAssetData?.total}
+                          success={fixedAssetSuccess}
+                          current_page={fixedAssetData?.current_page}
+                          per_page={fixedAssetData?.per_page}
+                          onPageChange={pageHandler}
+                          onRowsPerPageChange={perPageHandler}
+                          removeShadow
+                        />
+                      </Box>
                     </Box>
 
                     <Stack
@@ -1599,6 +1630,12 @@ const PrintFixedAsset = (props) => {
                         </Typography>
                       </Box>
 
+                      {result === false && (
+                        <Typography noWrap fontSize="11px" color="error">
+                          Selected items does not have the same COA.
+                        </Typography>
+                      )}
+
                       <Stack gap={1.2} flexDirection="row" alignSelf="flex-end" mt={1} mb={1}>
                         {!printMemo && (
                           <LoadingButton
@@ -1608,12 +1645,16 @@ const PrintFixedAsset = (props) => {
                             startIcon={
                               isLoading ? null : (
                                 <PriceChange
-                                  color={watch("tagNumber").length === 0 || printable === true ? "gray" : "primary"}
+                                  color={
+                                    watch("tagNumber").length === 0 || printable === true || result === false
+                                      ? "gray"
+                                      : "primary"
+                                  }
                                 />
                               )
                             }
-                            disabled={watch("tagNumber").length === 0 || printable === true}
-                            // onClick={onTagNonPrintableAssetHandler}
+                            disabled={watch("tagNumber").length === 0 || printable === true || result === false}
+                            onClick={() => dispatch(openDialog3())}
                             color={printMemo ? "tertiary" : "secondary"}
                             sx={{ color: "white" }}
                           >
@@ -2021,15 +2062,35 @@ const PrintFixedAsset = (props) => {
                         </Table>
                       </TableContainer>
 
-                      <CustomTablePagination
-                        total={fixedAssetData?.total}
-                        success={fixedAssetSuccess}
-                        current_page={fixedAssetData?.current_page}
-                        per_page={fixedAssetData?.per_page}
-                        onPageChange={pageHandler}
-                        onRowsPerPageChange={perPageHandler}
-                        removeShadow
-                      />
+                      <Box className="mcontainer__pagination-export">
+                        <Button
+                          className="mcontainer__export"
+                          variant="outlined"
+                          size="small"
+                          color="text"
+                          startIcon={<IosShareRounded color="primary" />}
+                          // onClick={handleExport}
+                          onClick={() => dispatch(openDialog4())}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            margin: "10px 20px",
+                          }}
+                        >
+                          EXPORT
+                        </Button>
+
+                        <CustomTablePagination
+                          total={fixedAssetData?.total}
+                          success={fixedAssetSuccess}
+                          current_page={fixedAssetData?.current_page}
+                          per_page={fixedAssetData?.per_page}
+                          onPageChange={pageHandler}
+                          onRowsPerPageChange={perPageHandler}
+                          removeShadow
+                        />
+                      </Box>
                     </Box>
 
                     <Stack
@@ -2193,7 +2254,7 @@ const PrintFixedAsset = (props) => {
           <AddSmallToolsGroup data={smallToolsData} resetHandler={reset} />
         </Dialog>
 
-        {/* <Dialog
+        <Dialog
           open={dialog2}
           onClose={() => dispatch(closeDialog3())}
           TransitionComponent={Grow}
@@ -2202,14 +2263,23 @@ const PrintFixedAsset = (props) => {
               borderRadius: "10px",
               margin: "0",
               maxWidth: "100%",
-              padding: "10px",
+              // padding: "10px",
               // overflow: "hidden",
               bgcolor: "background.light",
             },
           }}
         >
+          <AddTagAddCost data={smallToolsData} resetHandler={reset} />
+        </Dialog>
 
-        </Dialog> */}
+        <Dialog
+          open={dialog3}
+          TransitionComponent={Grow}
+          onClose={() => dispatch(closeDialog3())}
+          PaperProps={{ sx: { maxWidth: "1320px", borderRadius: "10px", p: 3 } }}
+        >
+          <ExportPrintFixedAsset tabValue={tabValue} />
+        </Dialog>
       </Box>
     </>
   );
