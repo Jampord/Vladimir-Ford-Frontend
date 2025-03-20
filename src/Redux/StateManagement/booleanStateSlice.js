@@ -4,7 +4,7 @@ const initialState = {
   drawer: false,
   drawerMultiple: { drawer1: false, drawer2: false },
   dialog: false,
-  dialogMultiple: { dialog1: false, dialog2: false, dialog3: false },
+  dialogMultiple: { dialog1: false, dialog2: false, dialog3: false, dialog4: false },
   add: false,
   datePicker: false,
   importFile: false,
@@ -61,6 +61,12 @@ export const booleanStateSlice = createSlice({
     },
     closeDialog3: (state, action) => {
       state.dialogMultiple.dialog3 = false;
+    },
+    openDialog4: (state, action) => {
+      state.dialogMultiple.dialog4 = true;
+    },
+    closeDialog4: (state, action) => {
+      state.dialogMultiple.dialog4 = false;
     },
 
     // Add
@@ -132,9 +138,11 @@ export const {
   openDialog1,
   openDialog2,
   openDialog3,
+  openDialog4,
   closeDialog1,
   closeDialog2,
   closeDialog3,
+  closeDialog4,
   openAdd,
   closeAdd,
   openDatePicker,
