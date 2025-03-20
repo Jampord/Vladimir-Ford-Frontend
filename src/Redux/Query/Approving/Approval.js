@@ -19,12 +19,12 @@ export const approvalApi = createApi({
   endpoints: (builder) => ({
     getApprovalApi: builder.query({
       query: (params) =>
-        `asset-approval?=${params.search}&per_page=${params.per_page}&status=${params.status}&page=${params.page}`,
+        `asset-approval?search=${params.search}&per_page=${params.per_page}&status=${params.status}&page=${params.page}`,
       providesTags: ["Approval"],
     }),
     getFinalApprovalApi: builder.query({
       query: (params) =>
-        `asset-approval?=${params.search}&per_page=${params.per_page}&status=${params.status}&page=${params.page}&final_approval=${params.final_approval}`,
+        `asset-approval?search=${params.search}&per_page=${params.per_page}&status=${params.status}&page=${params.page}&final_approval=${params.final_approval}`,
       providesTags: ["Approval"],
     }),
 
@@ -45,7 +45,7 @@ export const approvalApi = createApi({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: ["Approval"],
+      // invalidatesTags: ["Approval"],
     }),
 
     putFinalApprovalEditApi: builder.mutation({
