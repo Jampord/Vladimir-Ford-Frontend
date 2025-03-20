@@ -260,7 +260,7 @@ const AddTag = ({ data, tag, handleCancel }) => {
         autoComplete
         name="replacement_tag"
         control={control}
-        options={fixedAssetData}
+        options={fixedAssetData || []}
         loading={isFixedAssetLoading}
         getOptionLabel={(option) => `(${option?.vladimir_tag_number}) - ${option?.asset_description}`}
         // disabled={edit ? false : transactionData?.view}
