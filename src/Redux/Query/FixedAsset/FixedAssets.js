@@ -36,6 +36,12 @@ export const fixedAssetApi = createApi({
       providesTags: ["FixedAsset"],
     }),
 
+    getFixedAssetSubunitAllApi: builder.query({
+      query: (params) => `fixed-asset?pagination=none&add_cost=1&sub_unit_id=${params.sub_unit_id}`,
+      transformResponse: (response) => response.data,
+      providesTags: ["FixedAsset"],
+    }),
+
     getFixedAssetSmallToolsAllApi: builder.query({
       query: (params) => `/fixed-asset?pagination=none&small_tools=1&sub_unit_id=${params.sub_unit_id}`,
       transformResponse: (response) => response.data,
@@ -214,6 +220,15 @@ export const fixedAssetApi = createApi({
       invalidatesTags: ["FixedAsset"],
     }),
 
+    postTagFixedAssetAddCostApi: builder.mutation({
+      query: (params) => ({
+        url: `/asset-to-addcost`,
+        method: "POST",
+        body: params,
+      }),
+      invalidatesTags: ["FixedAsset"],
+    }),
+
     postLocalPrintApi: builder.mutation({
       query: (params) => ({
         url: `/fixed-asset/barcode`,
@@ -231,6 +246,30 @@ export const fixedAssetApi = createApi({
       }),
       invalidatesTags: ["FixedAsset"],
     }),
+
+    getSeriesDataApi: builder.query({
+      query: (params) => ({
+        url: `/series-data/${params.id}`,
+      }),
+      providesTags: ["FixedAsset"],
+    }),
+
+    getExportPrintRequestApi: builder.query({
+      query: (params) => {
+        const queryParams = [`smallTool=${params.smallTool}`];
+
+        if (params.startDate) {
+          queryParams.push(`startDate=${params.startDate}`);
+        }
+
+        if (params.endDate) {
+          queryParams.push(`endDate=${params.endDate}`);
+        }
+
+        const queryString = queryParams.join("&");
+        return `/print-barcode-show?isRequest=1&pagination=none&${queryString}`;
+      },
+    }),
   }),
 });
 
@@ -239,6 +278,8 @@ export const {
   useLazyGetFixedAssetAllApiQuery,
   useLazyGetFixedAssetAddCostAllApiQuery,
   useGetFixedAssetAddCostAllApiQuery,
+  useGetFixedAssetSubunitAllApiQuery,
+  useLazyGetFixedAssetSubunitAllApiQuery,
   useGetFixedAssetSmallToolsAllApiQuery,
   useLazyGetFixedAssetSmallToolsAllApiQuery,
   useGetFixedAssetAllApiQuery,
@@ -247,6 +288,7 @@ export const {
   useGetReprintMemoApiQuery,
   useGetDepreciationHistoryApiQuery,
   useGetPrintViewingApiQuery,
+  useLazyGetPrintViewingApiQuery,
   useLazyGetDepreciationHistoryApiQuery,
   useLazyGetCalcDepreApiQuery,
   useArchiveFixedAssetStatusApiMutation,
@@ -258,7 +300,11 @@ export const {
   usePutMemoPrintApiMutation,
   usePutSmallToolsPrintableApiMutation,
   usePutUngroupSmallToolsApiMutation,
+  usePostTagFixedAssetAddCostApiMutation,
   usePostLocalPrintApiMutation,
+  useGetSeriesDataApiQuery,
+  useLazyGetSeriesDataApiQuery,
+  useLazyGetExportPrintRequestApiQuery,
 
   usePostDepreciateApiMutation,
 } = fixedAssetApi;
