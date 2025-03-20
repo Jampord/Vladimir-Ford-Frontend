@@ -60,6 +60,7 @@ import {
   usePutMemoPrintApiMutation,
   useGetReprintMemoApiQuery,
   useGetFixedAssetAllApiQuery,
+  useLazyGetSeriesDataApiQuery,
 } from "../../Redux/Query/FixedAsset/FixedAssets";
 
 import CustomDatePicker from "../../Components/Reusable/CustomDatePicker";
@@ -101,6 +102,8 @@ const AssignmentMemoReprint = (props) => {
   const [printAssignmentMemo, setPrintAssignmentMemo] = useState(false);
   const [selectedMemo, setSelectedMemo] = useState(null);
   const [faData, setFaData] = useState(null);
+  const [id, setId] = useState();
+  const [series, setSeries] = useState();
 
   const dispatch = useDispatch();
 
@@ -160,20 +163,26 @@ const AssignmentMemoReprint = (props) => {
   const [printAsset, { data: printData, isLoading, isError: isPostError, isSuccess: isPostSuccess, error: postError }] =
     usePostPrintApiMutation();
 
-  const {
-    data: fixedAssetData,
-    isLoading: fixedAssetLoading,
-    isSuccess: fixedAssetSuccess,
-    isError: fixedAssetError,
-    error: errorData,
-    refetch: fixedAssetRefetch,
-  } = useGetFixedAssetAllApiQuery({}, { refetchOnMountOrArgChange: true });
+  const [
+    memoTrigger,
+    {
+      data: seriesData,
+      isLoading: seriesLoading,
+      isSuccess: seriesSuccess,
+      isError: seriesError,
+      error: errorData,
+      refetch: seriesRefetch,
+    },
+  ] = useLazyGetSeriesDataApiQuery();
+
+  console.log("seriesData", seriesData);
 
   const {
     data: assignedData,
     isLoading: assignedLoading,
     isSuccess: assignedSuccess,
     isError: assignedError,
+    isFetching,
     refetch: assignedRefetch,
   } = useGetReprintMemoApiQuery(
     {
@@ -183,6 +192,8 @@ const AssignmentMemoReprint = (props) => {
     },
     { refetchOnMountOrArgChange: true }
   );
+
+  console.log("assigned data", assignedData);
 
   const {
     handleSubmit,
@@ -251,9 +262,13 @@ const AssignmentMemoReprint = (props) => {
   }, [isPostError]);
 
   const onPrintMemoHandler = async (data) => {
-    setFaData(fixedAssetData);
+    await memoTrigger({ id: data?.id });
     setSelectedMemo(data?.vladimir_tag_number);
-    setPrintAssignmentMemo(true);
+    setId(data?.id);
+    setSeries(data?.memo_series);
+    // setFaData(seriesData);
+    console.log("faData", faData);
+    !isFetching && !seriesLoading && setPrintAssignmentMemo(true);
   };
 
   // console.log("fixedAssetData - Memo", fixedAssetData);
@@ -543,10 +558,11 @@ const AssignmentMemoReprint = (props) => {
         >
           <Box>
             <AssignmentMemo
-              data={faData}
+              data={seriesData}
               setPrintAssignmentMemo={setPrintAssignmentMemo}
               selectedMemo={selectedMemo}
-              series={assignedData?.data[0]?.memo_series}
+              series={series}
+              reprintDataRefetch={seriesRefetch}
             />
           </Box>
         </Dialog>
