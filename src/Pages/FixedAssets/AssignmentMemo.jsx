@@ -29,12 +29,14 @@ const AssignmentMemo = (props) => {
   const contentToPrint = useRef(null);
 
   const arrayData = newData?.map((data) => data);
+  console.log("data", data);
+  console.log("selectedMemo", selectedMemo);
 
   useEffect(() => {
     const filteredData = data?.filter((item) => selectedMemo.includes(item.vladimir_tag_number));
     setNewData(filteredData);
-    // console.log("filteredData", filteredData);
-  }, [data]);
+    console.log("filteredData", filteredData);
+  }, [data, selectedMemo, series]);
 
   const handlePrintAssignmentMemo = useReactToPrint({
     documentTitle: "Assignment Memo" + " " + memoData?.data?.memo_series,
@@ -230,7 +232,14 @@ const AssignmentMemo = (props) => {
         >
           Print
         </Button>
-        <Button variant="outlined" color="secondary" size="small" onClick={() => setPrintAssignmentMemo(false)}>
+        <Button
+          variant="outlined"
+          color="secondary"
+          size="small"
+          onClick={() => {
+            setPrintAssignmentMemo(false);
+          }}
+        >
           Close
         </Button>
       </Stack>
