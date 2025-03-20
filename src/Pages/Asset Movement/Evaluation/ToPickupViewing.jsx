@@ -165,12 +165,13 @@ const ToPickupViewing = () => {
             <Button
               onClick={() => onPickupHandler(evaluationData?.id)}
               variant="contained"
-              startIcon={isSmallScreen ? null : <ShoppingCartCheckout />}
+              startIcon={isSmallScreen ? null : <ShoppingCartCheckout color="primary" />}
               size="small"
+              color="secondary"
               sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
             >
               {isSmallScreen ? (
-                <ShoppingCartCheckout color="black" sx={{ color: "secondary.main", fontSize: "20px" }} />
+                <ShoppingCartCheckout color="primary" sx={{ color: "primary.main", fontSize: "20px" }} />
               ) : (
                 "Pickup"
               )}
