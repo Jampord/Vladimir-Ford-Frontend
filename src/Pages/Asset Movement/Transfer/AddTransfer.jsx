@@ -131,6 +131,13 @@ const schema = yup.object().shape({
   location_id: yup.object().required().label("Location").typeError("Location is a required field"),
   // account_title_id: yup.object().required().label("Account Title").typeError("Account Title is a required field"),
 
+  // Accounting Entries
+  depreciation_debit_id: yup
+    .object()
+    .required()
+    .label("Depreciation Debit")
+    .typeError("Depreciation Debit is a required field"),
+
   remarks: yup.string().label("Remarks"),
   attachments: yup.mixed().required().label("Attachments"),
   assets: yup.array().of(
@@ -145,6 +152,7 @@ const schema = yup.object().shape({
       unit_id: yup.string().nullable(),
       sub_unit_id: yup.string().nullable(),
       location_id: yup.string().nullable(),
+      remaining_book_value: yup.string().nullable(),
       accountability: yup.string().typeError("Accountability is a required field").required().label("Accountability"),
       accountable: yup
         .object()
@@ -184,6 +192,7 @@ const AddTransfer = (props) => {
 
     remarks: "",
     attachments: null,
+    depreciation_debit_id: null,
 
     assets: [{ id: null, fixed_asset_id: null, asset_accountable: "", created_at: null }],
 
@@ -415,6 +424,7 @@ const AddTransfer = (props) => {
       location_id: null,
       // account_title_id: null,
 
+      depreciation_debit_id: null,
       remarks: "",
       attachments: null,
 
@@ -433,12 +443,13 @@ const AddTransfer = (props) => {
           accountability: null,
           accountable: null,
           receiver_id: null,
+          remaining_book_value: null,
         },
       ],
     },
   });
 
-  // console.log("errors", errors);
+  console.log("errors", errors);
   // console.log("isdirty: ", isDirty);
   // console.log("💣: ", isValid);
 
@@ -465,6 +476,7 @@ const AddTransfer = (props) => {
       accountability: null,
       accountable: null,
       receiver_id: null,
+      remaining_book_value: null,
     });
 
   // console.log("watch assets: ", watch("assets[0].fixed_asset_id"));
@@ -516,6 +528,8 @@ const AddTransfer = (props) => {
         location_id: data?.location,
         // account_title_id: null,
 
+        depreciation_debit_id: data?.depreciation_debit,
+
         remarks: data?.remarks || "",
         attachments: data?.attachments,
 
@@ -533,6 +547,7 @@ const AddTransfer = (props) => {
           accountability: asset?.new_accountability,
           accountable: asset?.new_accountable,
           receiver_id: asset?.receiver,
+          remaining_book_value: asset?.remaining_book_value,
         })),
       });
 
@@ -583,7 +598,7 @@ const AddTransfer = (props) => {
 
   //* Form functions ----------------------------------------------------------------
   const addTransferHandler = (formData) => {
-    // console.log("formData", formData);
+    console.log("formData", formData);
     setIsLoading(true);
     const token = localStorage.getItem("token");
 
@@ -604,6 +619,8 @@ const AddTransfer = (props) => {
       // accountability: formData?.accountability?.toString(),
       // accountable: accountableFormat,
       attachments: formData?.attachments,
+
+      depreciation_debit_id: formData?.depreciation_debit_id.sync_id?.toString(),
 
       assets: formData?.assets?.map((item) => ({
         fixed_asset_id: item.fixed_asset_id.id,
@@ -927,7 +944,7 @@ const AddTransfer = (props) => {
   const user_id = user.id;
   const subunit_id = watch("subunit_id_coordinator")?.id || null;
   // console.log("user", user);
-  // console.log("isCoordinator", isCoordinator);
+  console.log("isCoordinator", isCoordinator);
   // console.log("subunit_id", subunit_id);
 
   return (
@@ -1073,6 +1090,7 @@ const AddTransfer = (props) => {
                       fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
                       fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
                       fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
 
                       setValue("unit_id_coordinator", null);
                       setValue("subunit_id_coordinator", null);
@@ -1162,6 +1180,7 @@ const AddTransfer = (props) => {
                       fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
                       fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
                       fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
 
                       setValue("subunit_id_coordinator", null);
                       setValue("location_id_coordinator", null);
@@ -1537,6 +1556,34 @@ const AddTransfer = (props) => {
 
               {/* {console.log(watch("receiver_id"))} */}
 
+              <Stack gap={2}>
+                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
+                  ACCOUNTING ENTRIES
+                </Typography>
+
+                <CustomAutoComplete
+                  autoComplete
+                  name="depreciation_debit_id"
+                  disabled={edit ? false : transactionData?.view}
+                  control={control}
+                  options={accountTitleData}
+                  loading={isAccountTitleLoading}
+                  onOpen={() => (isAccountTitleSuccess ? null : accountTitleTrigger())}
+                  size="small"
+                  getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
+                  isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
+                  renderInput={(params) => (
+                    <TextField
+                      color="secondary"
+                      {...params}
+                      label="Depreciation Debit"
+                      error={!!errors?.depreciation_debit_id}
+                      helperText={errors?.depreciation_debit_id?.message}
+                    />
+                  )}
+                />
+              </Stack>
+
               <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px" }}>
                 ATTACHMENTS
               </Typography>
@@ -1593,6 +1640,7 @@ const AddTransfer = (props) => {
                     <TableCell className="tbl-cell">Transfer To Details</TableCell>
                     <TableCell className="tbl-cell">Accountability</TableCell>
                     <TableCell className="tbl-cell">Chart Of Accounts</TableCell>
+                    <TableCell className="tbl-cell">Remaining Book Value</TableCell>
                     <TableCell className="tbl-cell">Acquisition Date</TableCell>
                     <TableCell className="tbl-cell" align="center">
                       Action
@@ -1666,7 +1714,7 @@ const AddTransfer = (props) => {
                                   onChange={(_, newValue) => {
                                     if (newValue) {
                                       // onChange(newValue);
-                                      // console.log("newValue: ", newValue);
+                                      console.log("newValue: ", newValue);
                                       onChange(newValue);
                                       setValue(
                                         `assets.${index}.asset_accountable`,
@@ -1683,6 +1731,7 @@ const AddTransfer = (props) => {
                                       setValue(`assets.${index}.unit_id`, newValue.unit?.unit_name);
                                       setValue(`assets.${index}.sub_unit_id`, newValue.subunit?.subunit_name);
                                       setValue(`assets.${index}.location_id`, newValue.location?.location_name);
+                                      setValue(`assets.${index}.remaining_book_value`, newValue.remaining_book_value);
                                     } else {
                                       onChange(null);
                                       setValue(`assets.${index}.asset_accountable`, "");
@@ -1778,9 +1827,11 @@ const AddTransfer = (props) => {
                                       setValue(`assets.${index}.unit_id`, newValue.unit?.unit_name);
                                       setValue(`assets.${index}.sub_unit_id`, newValue.subunit?.subunit_name);
                                       setValue(`assets.${index}.location_id`, newValue.location?.location_name);
+                                      setValue(`assets.${index}.remaining_book_value`, newValue.remaining_book_value);
                                     } else {
                                       onChange(null);
                                       setValue(`assets.${index}.asset_accountable`, "");
+                                      setValue(`assets.${index}.remaining_book_value`, "");
                                       setValue(`assets.${index}.created_at`, null);
                                     }
 
@@ -2443,14 +2494,46 @@ const AddTransfer = (props) => {
 
                         <TableCell className="tbl-cell">
                           <TextField
-                            {...register(`assets.${index}.created_at`)}
+                            {...register(`assets.${index}.remaining_book_value`)}
                             variant="outlined"
                             disabled
-                            type="date"
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <Typography sx={{ color: "gray", mt: "2px" }}>₱</Typography>
+                                </InputAdornment>
+                              ),
+                            }}
                             sx={{
                               backgroundColor: "transparent",
                               border: "none",
                               ml: "-10px",
+                              "& .MuiOutlinedInput-root": {
+                                "& fieldset": {
+                                  border: "none",
+                                },
+                              },
+                              "& .MuiInputBase-input": {
+                                backgroundColor: "transparent",
+                              },
+
+                              "& .Mui-disabled": {
+                                color: "red",
+                              },
+                            }}
+                          />
+                        </TableCell>
+
+                        <TableCell className="tbl-cell">
+                          <TextField
+                            {...register(`assets.${index}.created_at`)}
+                            variant="outlined"
+                            disabled
+                            // type="date"
+                            sx={{
+                              backgroundColor: "transparent",
+                              border: "none",
+                              ml: "-11px",
                               "& .MuiOutlinedInput-root": {
                                 "& fieldset": {
                                   border: "none",
