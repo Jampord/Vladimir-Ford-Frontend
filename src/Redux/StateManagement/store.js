@@ -11,6 +11,7 @@ import userLoginReducer from "../StateManagement/userLogin";
 import collapseCapexReducer from "./collapseCapexSlice";
 import booleanStateReducer from "./booleanStateSlice";
 import actionMenuReducer from "../StateManagement/actionMenuSlice";
+import tabReducer from "./tabSlice";
 
 // import drawerReducer from './drawerSlice'
 // import dialogReducer from './dialogSlice'
@@ -118,6 +119,7 @@ export const store = configureStore({
     collapseCapex: collapseCapexReducer,
     booleanState: booleanStateReducer,
     actionMenu: actionMenuReducer,
+    tab: tabReducer,
 
     // drawer: drawerReducer,
     // dialog: dialogReducer,
