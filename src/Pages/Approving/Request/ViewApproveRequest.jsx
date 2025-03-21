@@ -8,6 +8,7 @@ import {
   Chip,
   Dialog,
   DialogActions,
+  Divider,
   Grow,
   Stack,
   Table,
@@ -16,6 +17,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Tooltip,
   Typography,
   useMediaQuery,
@@ -24,13 +26,19 @@ import {
   ArrowBackIosRounded,
   Cancel,
   Check,
+  Description,
+  Done,
   Download,
+  Edit,
   Help,
   InsertDriveFile,
   RemoveShoppingCart,
   Report,
   Undo,
 } from "@mui/icons-material";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 
 // RTK
 import { useDispatch, useSelector } from "react-redux";
@@ -41,31 +49,53 @@ import NoRecordsFound from "../../../Layout/NoRecordsFound";
 import { useGetRequestContainerAllApiQuery } from "../../../Redux/Query/Request/RequestContainer";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import {
+  approvalApi,
   useGetApprovalIdApiQuery,
   useGetNextRequestQuery,
   useLazyDlAttachmentQuery,
   useLazyGetNextRequestQuery,
   usePatchApprovalStatusApiMutation,
+  usePutFinalApprovalEditApiMutation,
 } from "../../../Redux/Query/Approving/Approval";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import MasterlistToolbar from "../../../Components/Reusable/MasterlistToolbar";
-import { closeDialog, openDialog, closeDialog1, openDialog1 } from "../../../Redux/StateManagement/booleanStateSlice";
+import {
+  closeDialog,
+  openDialog,
+  closeDialog1,
+  openDialog1,
+  closeDrawer,
+} from "../../../Redux/StateManagement/booleanStateSlice";
 import { useRemovePurchaseRequestApiMutation } from "../../../Redux/Query/Request/PurchaseRequest";
 import ErrorFetching from "../../ErrorFetching";
 import { useDownloadAttachment } from "../../../Hooks/useDownloadAttachment";
 import { usePatchPrYmirApiMutation, usePostPrYmirApiMutation } from "../../../Redux/Query/Masterlist/YmirCoa/YmirApi";
 import { useGetYmirPrApiQuery, useLazyGetYmirPrApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/YmirPr";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
+import ActionMenu from "../../../Components/Reusable/ActionMenu";
+import CustomAutoComplete from "../../../Components/Reusable/CustomAutoComplete";
+import { useLazyGetMinorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MinorCategory";
+import CustomTextField from "../../../Components/Reusable/CustomTextField";
+
+const schema = yup.object().shape({
+  minor_category_id: yup.object().required().label("Minor Category").typeError("Minor Category is a required field"),
+  description: yup.string().required().label("Asset Description"),
+});
 
 const ViewApproveRequest = (props) => {
   const { approving } = props;
   const { state: transactionData } = useLocation();
+  // console.log("transactionData", transactionData);
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
   const [attachment, setAttachment] = useState("");
   const [base64, setBase64] = useState("");
+  const [image, setImage] = useState(false);
+
+  console.log("image", image);
   const [value, setValue] = useState();
   const [name, setName] = useState("");
+  const [referenceNumber, setReferenceNumber] = useState("");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -78,6 +108,7 @@ const ViewApproveRequest = (props) => {
   const [patchPr, { data: patchYmirData, isLoading: isPatchYmirLoading }] = usePatchPrYmirApiMutation();
   const [getNextRequest, { data: nextData, isLoading: isNextRequestLoading, isFetching: isNextRequestFetching }] =
     useLazyGetNextRequestQuery();
+  console.log("nextData", nextData);
   const [removePrNumber] = useRemovePurchaseRequestApiMutation();
 
   // CONTAINER
@@ -92,6 +123,18 @@ const ViewApproveRequest = (props) => {
     { page: page, per_page: perPage, transaction_number: transactionData?.transaction_number },
     { refetchOnMountOrArgChange: true }
   );
+
+  console.log("approve request", approveRequestData?.data);
+
+  const [
+    minorCategoryTrigger,
+    {
+      data: minorCategoryData = [],
+      isLoading: isMinorCategoryLoading,
+      isSuccess: isMinorCategorySuccess,
+      isError: isMinorCategoryError,
+    },
+  ] = useLazyGetMinorCategoryAllApiQuery();
 
   // console.log("approveRequest", approveRequestData);
 
@@ -109,6 +152,26 @@ const ViewApproveRequest = (props) => {
   const [getYmirData, { isSuccess: isYmirDataSuccess }] = useLazyGetYmirPrApiQuery();
 
   const [downloadAttachment] = useLazyDlAttachmentQuery({ attachment: attachment, id: approveRequestData?.id });
+
+  const [putFinalApproval, { data: postData }] = usePutFinalApprovalEditApiMutation();
+
+  const {
+    handleSubmit,
+    control,
+    register,
+    formState: { errors, isDirty, isValid },
+    setError,
+    reset,
+    watch,
+    setValue: setFormValue,
+    getValues,
+  } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      minor_category_id: null,
+      description: "",
+    },
+  });
 
   // Table Sorting --------------------------------
   const [order, setOrder] = useState("desc");
@@ -191,18 +254,11 @@ const ViewApproveRequest = (props) => {
               transaction_number: transaction_number,
             }).unwrap();
 
-            // dispatch(
-            //   openToast({
-            //     message: result.message,
-            //     duration: 5000,
-            //   })
-            // );
-
             // console.log("Responsesssssss", approveRequestData?.data);
-            const refetchResult = await isApproveRefetch();
+            // const refetchResult = await isApproveRefetch({ force: true });
             // console.log("refetchResult", refetchResult);
-            const updatedData = refetchResult?.data;
-            // console.log("updatedData", updatedData);
+            // const updatedData = refetchResult?.data;
+            // console.log("updatedData", updatedData?.data);
             // console.log(
             //   "Response",
             //   updatedData?.data.map((item) => item.fa_approval)
@@ -215,9 +271,14 @@ const ViewApproveRequest = (props) => {
               })
             );
 
-            if (updatedData?.data.map((data) => data.fa_approval).includes(1)) {
+            if (
+              // updatedData?.data.map((data) => data?.fa_approval).includes(1) ||
+              // updatedData?.data.map((data) => data?.final_approval).includes(1)
+              // || approveRequestData?.data.map((data) => data?.fa_approval).includes(1) ||
+              approveRequestData?.data.map((data) => data?.final_approval).includes(1)
+            ) {
               const requestData = approveRequestData?.data[0];
-              // console.log("requestData", requestData);
+              console.log("requestData", requestData);
               try {
                 const getYmirDataApi = await getYmirData({ transaction_number }).unwrap();
                 // console.log("getYmirDataApi", getYmirDataApi);
@@ -233,22 +294,28 @@ const ViewApproveRequest = (props) => {
                   // console.log("postYmirData", postYmirData);
                 }
 
-                const next = await getNextRequest().unwrap();
+                const next = await getNextRequest({
+                  final_approval: transactionData?.final || requestData?.final_approval === 1 ? 1 : 0,
+                }).unwrap();
                 return navigate(`/approving/request/${next?.[0].transaction_number}`, {
                   state: next?.[0],
                   replace: true,
                 });
               } catch (err) {
                 noNextData(err);
+                console.log("error in pr return", err);
               }
             } else {
-              const next = await getNextRequest().unwrap();
-              navigate(`/approving/request/${next?.[0].transaction_number}`, { state: next?.[0], replace: true });
               const requestData = approveRequestData?.data[0];
+              const next = await getNextRequest({
+                final_approval: transactionData?.final || requestData?.final_approval === 1 ? 1 : 0,
+              }).unwrap();
+              navigate(`/approving/request/${next?.[0].transaction_number}`, { state: next?.[0], replace: true });
               // console.log("ERROR:", requestData);
             }
           } catch (err) {
             noNextData(err);
+            console.log("error in approving", err);
           }
         },
       })
@@ -296,10 +363,16 @@ const ViewApproveRequest = (props) => {
                 duration: 5000,
               })
             );
-            const next = await getNextRequest().unwrap();
+
+            const requestData = approveRequestData?.data[0];
+
+            const next = await getNextRequest({
+              final_approval: transactionData?.final || requestData?.final_approval === 1 ? 1 : 0,
+            }).unwrap();
             navigate(`/approving/request/${next?.[0].transaction_number}`, { state: next?.[0], replace: true });
-            dispatch(requisitionApi.util.invalidateTags(["Requisition"]));
+            // dispatch(requisitionApi.util.invalidateTags(["Requisition"]));
           } catch (err) {
+            console.log("error", err);
             if (err?.status === 404) {
               navigate(`/approving/request`);
             } else if (err?.status === 422) {
@@ -319,6 +392,14 @@ const ViewApproveRequest = (props) => {
                   variant: "error",
                 })
               );
+            } else {
+              dispatch(
+                openToast({
+                  message: "Something went wrong. Please try again.",
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
             }
           }
         },
@@ -330,10 +411,27 @@ const ViewApproveRequest = (props) => {
     useDownloadAttachment({ attachment: value?.value, id: value?.id });
   };
 
+  const base64ToBlob = (base64, mimeType) => {
+    const binaryString = atob(base64); // Decode Base64 to binary string
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i); // Convert to byte array
+    }
+    return new Blob([bytes], { type: mimeType });
+  };
+
   const handleOpenDialog = (value) => {
-    console.log("valueeeeeee", value);
+    // console.log("valueeeeeee", value);
+
+    const blob = base64ToBlob(value?.value?.base64, value?.value?.mime_type);
+    const url = URL.createObjectURL(blob);
+
     dispatch(openDialog());
-    setBase64(value.value);
+    setBase64(url);
+    (value?.value?.file_name.includes("jpg") ||
+      value?.value?.file_name.includes("png") ||
+      value?.value?.file_name.includes("jpeg")) &&
+      setImage(true);
     setValue(value.data);
     setName(value.name);
   };
@@ -341,6 +439,7 @@ const ViewApproveRequest = (props) => {
   const handleCloseDialog = () => {
     dispatch(closeDialog()) || dispatch(closeDialog1());
     setBase64("");
+    setImage(false);
     setValue(null);
     setName("");
   };
@@ -382,6 +481,80 @@ const ViewApproveRequest = (props) => {
   const pageHandler = (_, page) => {
     // console.log(page + 1);
     setPage(page + 1);
+  };
+
+  const onUpdateHandler = (props) => {
+    console.log("props", props);
+    setReferenceNumber(props.reference_number);
+    setFormValue("minor_category_id", props.minor_category);
+    setFormValue("description", props.asset_description);
+    dispatch(openDialog1());
+  };
+
+  const onSubmitHandler = async (formData) => {
+    console.log("formData: ", formData);
+    const newFormData = {
+      major_category_id: formData.minor_category_id?.major_category?.id,
+      minor_category_id: formData.minor_category_id?.id,
+      description: formData.description,
+      id: referenceNumber,
+    };
+    console.log("newFormData: ", newFormData);
+
+    dispatch(
+      openConfirm({
+        icon: Help,
+        iconColor: "info",
+        message: (
+          <Box>
+            <Typography> Are you sure you want to</Typography>
+            <Typography
+              sx={{
+                display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+                fontFamily: "Raleway",
+              }}
+            >
+              UPDATE
+            </Typography>{" "}
+            this data?
+          </Box>
+        ),
+
+        onConfirm: async () => {
+          try {
+            // const res = await postToken(formData).unwrap();
+            await putFinalApproval(newFormData).unwrap();
+            reset();
+            dispatch(
+              openToast({
+                message: postData?.message || "Final approval update successful!",
+                duration: 5000,
+              })
+            );
+            dispatch(closeDialog1());
+          } catch (error) {
+            console.log(error);
+            dispatch(
+              openToast({
+                message: error?.data?.message,
+                duration: 5000,
+                variant: "error",
+              })
+            );
+          }
+        },
+      })
+    );
+  };
+
+  const onCloseHandler = () => {
+    dispatch(closeDialog1());
+    dispatch(closeDrawer());
+    setReferenceNumber("");
+    setFormValue("minor_category_id", null);
+    setFormValue("description", "");
   };
 
   return (
@@ -438,46 +611,52 @@ const ViewApproveRequest = (props) => {
                       <TableCell className="tbl-cell">Cellphone #</TableCell>
                       <TableCell className="tbl-cell">Remarks</TableCell>
                       <TableCell className="tbl-cell">Attachments</TableCell>
+                      {transactionData?.final && <TableCell className="tbl-cell">Action</TableCell>}
                     </TableRow>
                   </TableHead>
 
                   <TableBody>
-                    {(isNextRequestLoading || isNextRequestFetching) && <LoadingData />}
+                    {(isNextRequestLoading || isNextRequestFetching || isApproveLoading) && <LoadingData />}
                     {approveRequestData?.data?.length === 0 ? (
                       <NoRecordsFound />
                     ) : (
                       <>
-                        {approveRequestData?.data?.map((data, index) => (
-                          <TableRow
-                            key={index}
-                            sx={{
-                              "&:last-child td, &:last-child th": {
-                                borderBottom: 0,
-                              },
-                            }}
-                          >
-                            <TableCell className="tbl-cell tr-cen-pad45 text-weight">{data.reference_number}</TableCell>
-                            <TableCell className="tbl-cell">
-                              <Typography fontWeight={600}>{data.type_of_request?.type_of_request_name}</Typography>
-                              <Typography
-                                fontWeight={400}
-                                fontSize={12}
-                                color={data.attachment_type === "Budgeted" ? "success.main" : "primary.dark"}
-                              >
-                                {data.attachment_type}
-                              </Typography>
-                            </TableCell>
+                        {!isNextRequestLoading &&
+                          !isNextRequestFetching &&
+                          !isApproveLoading &&
+                          approveRequestData?.data?.map((data, index) => (
+                            <TableRow
+                              key={index}
+                              sx={{
+                                "&:last-child td, &:last-child th": {
+                                  borderBottom: 0,
+                                },
+                              }}
+                            >
+                              <TableCell className="tbl-cell tr-cen-pad45 text-weight">
+                                {data.reference_number}
+                              </TableCell>
+                              <TableCell className="tbl-cell">
+                                <Typography fontWeight={600}>{data.type_of_request?.type_of_request_name}</Typography>
+                                <Typography
+                                  fontWeight={400}
+                                  fontSize={12}
+                                  color={data.attachment_type === "Budgeted" ? "success.main" : "primary.dark"}
+                                >
+                                  {data.attachment_type}
+                                </Typography>
+                              </TableCell>
 
-                            <TableCell className="tbl-cell text-weight">{data.warehouse.warehouse_name}</TableCell>
+                              <TableCell className="tbl-cell text-weight">{data.warehouse.warehouse_name}</TableCell>
 
-                            <TableCell className="tbl-cell">{data.acquisition_details}</TableCell>
+                              <TableCell className="tbl-cell">{data.acquisition_details}</TableCell>
 
-                            <TableCell className="tbl-cell-category capitalized">
-                              <Typography fontSize={11} color="secondary.light" noWrap>
-                                Inital Debit : ({data.initial_debit?.account_title_code})-
-                                {data.initial_debit?.account_title_name}
-                              </Typography>
-                              {/* <Typography fontSize={11} color="secondary.light" noWrap>
+                              <TableCell className="tbl-cell-category capitalized">
+                                <Typography fontSize={11} color="secondary.light" noWrap>
+                                  Inital Debit : ({data.initial_debit?.account_title_code})-
+                                  {data.initial_debit?.account_title_name}
+                                </Typography>
+                                {/* <Typography fontSize={11} color="secondary.light" noWrap>
                                 Inital Credit : ({data.initial_credit?.account_title_code})-{" "}
                                 {data.initial_credit?.account_title_name}
                               </Typography>
@@ -485,201 +664,227 @@ const ViewApproveRequest = (props) => {
                                 Depreciation Debit : ({data.depreciation_debit?.account_title_code})-
                                 {data.depreciation_debit?.account_title_name}
                               </Typography> */}
-                              <Typography fontSize={11} color="secondary.light" noWrap>
-                                Depreciation Credit : ({data.depreciation_credit?.account_title_code})-{" "}
-                                {data.depreciation_credit?.account_title_name}
-                              </Typography>
-                            </TableCell>
+                                <Typography fontSize={11} color="secondary.light" noWrap>
+                                  Depreciation Credit : ({data.depreciation_credit?.account_title_code})-{" "}
+                                  {data.depreciation_credit?.account_title_name}
+                                </Typography>
+                              </TableCell>
 
-                            <TableCell className="tbl-cell">
-                              <Typography fontSize={10} color="gray">
-                                {`(${data.company?.company_code}) - ${data.company?.company_name}`}
-                              </Typography>
-                              <Typography fontSize={10} color="gray">
-                                {`(${data.business_unit?.business_unit_code}) - ${data.business_unit?.business_unit_name}`}
-                              </Typography>
-                              <Typography fontSize={10} color="gray">
-                                {`(${data.department?.department_code}) - ${data.department?.department_name}`}
-                              </Typography>
-                              <Typography fontSize={10} color="gray">
-                                {`(${data.unit?.unit_code}) - ${data.unit?.unit_name}`}
-                              </Typography>
-                              <Typography fontSize={10} color="gray">
-                                {`(${data.subunit?.subunit_code}) - ${data.subunit?.subunit_name}`}
-                              </Typography>
-                              <Typography fontSize={10} color="gray">
-                                {`(${data.location?.location_code}) - ${data.location?.location_name}`}
-                              </Typography>
-                              {/* <Typography fontSize={10} color="gray">
+                              <TableCell className="tbl-cell">
+                                <Typography fontSize={10} color="gray">
+                                  {`(${data.company?.company_code}) - ${data.company?.company_name}`}
+                                </Typography>
+                                <Typography fontSize={10} color="gray">
+                                  {`(${data.business_unit?.business_unit_code}) - ${data.business_unit?.business_unit_name}`}
+                                </Typography>
+                                <Typography fontSize={10} color="gray">
+                                  {`(${data.department?.department_code}) - ${data.department?.department_name}`}
+                                </Typography>
+                                <Typography fontSize={10} color="gray">
+                                  {`(${data.unit?.unit_code}) - ${data.unit?.unit_name}`}
+                                </Typography>
+                                <Typography fontSize={10} color="gray">
+                                  {`(${data.subunit?.subunit_code}) - ${data.subunit?.subunit_name}`}
+                                </Typography>
+                                <Typography fontSize={10} color="gray">
+                                  {`(${data.location?.location_code}) - ${data.location?.location_name}`}
+                                </Typography>
+                                {/* <Typography fontSize={10} color="gray">
                                 {`(${data.account_title?.account_title_code}) - ${data.account_title?.account_title_name}`}
                               </Typography> */}
-                            </TableCell>
+                              </TableCell>
 
-                            <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
-                              {data.accountability === "Personal Issued"
-                                ? formatAccountable(data?.accountable)
-                                : "Common"}
-                            </TableCell>
+                              <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
+                                {data.accountability === "Personal Issued"
+                                  ? formatAccountable(data?.accountable)
+                                  : "Common"}
+                              </TableCell>
 
-                            <TableCell className="tbl-cell">
-                              <Typography fontWeight={600} fontSize="14px" color="secondary.main">
-                                {data.asset_description}
-                              </Typography>
-                              <Typography fontSize="12px" color="text.light">
-                                {data.asset_specification}
-                              </Typography>
-                              <Typography fontSize="12px" fontWeight={600} color="primary">
-                                STATUS - {data.item_status}
-                              </Typography>
-                            </TableCell>
+                              <TableCell className="tbl-cell">
+                                <Typography fontWeight={600} fontSize="14px" color="secondary.main">
+                                  {data.asset_description}
+                                </Typography>
+                                <Typography fontSize="12px" color="text.light">
+                                  {data.asset_specification}
+                                </Typography>
+                                <Typography fontSize="12px" fontWeight={600} color="primary">
+                                  STATUS - {data.item_status}
+                                </Typography>
+                              </TableCell>
 
-                            <TableCell className="tbl-cell text-center">{data.quantity}</TableCell>
+                              <TableCell className="tbl-cell text-center">{data.quantity}</TableCell>
 
-                            <TableCell className="tbl-cell text-center">{data.unit_of_measure.uom_name}</TableCell>
+                              <TableCell className="tbl-cell text-center">{data.unit_of_measure.uom_name}</TableCell>
 
-                            <TableCell className="tbl-cell">{data.cellphone_number}</TableCell>
+                              <TableCell className="tbl-cell">{data.cellphone_number}</TableCell>
 
-                            <TableCell className="tbl-cell">{data.remarks}</TableCell>
+                              <TableCell className="tbl-cell">{data.remarks}</TableCell>
 
-                            <TableCell className="tbl-cell">
-                              {data?.attachments?.letter_of_request && (
-                                <Stack flexDirection="row" gap={1}>
-                                  <Typography fontSize={12} fontWeight={600}>
-                                    Letter of Request:
-                                  </Typography>
-                                  <Tooltip title="View Letter of Request" arrow>
-                                    <Typography
-                                      sx={attachmentSx}
-                                      // onClick={() =>
-                                      //   handleDownloadAttachment({ value: "letter_of_request", id: data?.id })
-                                      // }
-                                      onClick={() => {
-                                        data.attachments.letter_of_request.base64.includes("data:")
-                                          ? handleOpenDialog({
-                                              value: data.attachments.letter_of_request.base64,
-                                              data: data,
-                                              name: "letter_of_request",
-                                            })
-                                          : handleDownloadAttachment({ value: "letter_of_request", id: data?.id });
-                                      }}
-                                    >
-                                      {data?.attachments?.letter_of_request?.file_name}
+                              <TableCell className="tbl-cell">
+                                {/* {data?.attachments?.letter_of_request && (
+                                  <Stack flexDirection="row" gap={1}>
+                                    <Typography fontSize={12} fontWeight={600}>
+                                      Letter of Request:
                                     </Typography>
-                                  </Tooltip>
-                                </Stack>
-                              )}
-                              {data?.attachments?.quotation && (
-                                <Stack flexDirection="row" gap={1}>
-                                  <Typography fontSize={12} fontWeight={600}>
-                                    Quotation:
-                                  </Typography>
-                                  <Tooltip title="View Quotation" arrow>
-                                    <Typography
-                                      sx={attachmentSx}
-                                      // onClick={() => handleDownloadAttachment({ value: "quotation", id: data?.id })}
-                                      onClick={() => {
-                                        data.attachments.quotation.base64.includes("data:")
-                                          ? handleOpenDialog({
-                                              value: data.attachments.quotation.base64,
-                                              data: data,
-                                              name: "quotation",
-                                            })
-                                          : handleDownloadAttachment({ value: "quotation", id: data?.id });
-                                      }}
-                                    >
-                                      {data?.attachments?.quotation?.file_name}
+                                    <Tooltip title="View Letter of Request" arrow>
+                                      <Typography
+                                        sx={attachmentSx}
+                                        // onClick={() =>
+                                        //   handleDownloadAttachment({ value: "letter_of_request", id: data?.id })
+                                        // }
+                                        onClick={() => {
+                                          data.attachments.letter_of_request.base64.includes("data:")
+                                            ? handleOpenDialog({
+                                                value: data.attachments.letter_of_request.base64,
+                                                data: data,
+                                                name: "letter_of_request",
+                                              })
+                                            : handleDownloadAttachment({ value: "letter_of_request", id: data?.id });
+                                        }}
+                                      >
+                                        {data?.attachments?.letter_of_request?.file_name}
+                                      </Typography>
+                                    </Tooltip>
+                                  </Stack>
+                                )} */}
+
+                                {data?.attachments?.letter_of_request && (
+                                  <Stack flexDirection="row" gap={1}>
+                                    <Typography fontSize={12} fontWeight={600}>
+                                      Letter of Request:
                                     </Typography>
-                                  </Tooltip>
-                                </Stack>
-                              )}
-                              {data?.attachments?.specification_form && (
-                                <Stack flexDirection="row" gap={1}>
-                                  <Typography fontSize={12} fontWeight={600}>
-                                    Specification:
-                                  </Typography>
-                                  <Tooltip title="View Specification" arrow>
-                                    <Typography
-                                      sx={attachmentSx}
-                                      // onClick={() =>
-                                      //   handleDownloadAttachment({ value: "specification_form", id: data?.id })
-                                      // }
-                                      onClick={() => {
-                                        data.attachments.specification_form.base64.includes("data:")
-                                          ? handleOpenDialog({
-                                              value: data.attachments.specification_form.base64,
-                                              data: data,
-                                              name: "specification_form",
-                                            })
-                                          : handleDownloadAttachment({ value: "specification_form", id: data?.id });
-                                      }}
-                                    >
-                                      {data?.attachments?.specification_form?.file_name}
+                                    <Tooltip title={"View or Download Letter of Request"} arrow>
+                                      <Typography
+                                        sx={attachmentSx}
+                                        onClick={() => {
+                                          data.attachments.letter_of_request.file_name.includes("pdf") ||
+                                          data.attachments.letter_of_request.file_name.includes("svg") ||
+                                          data.attachments.letter_of_request.file_name.includes("png")
+                                            ? handleOpenDialog({
+                                                value: data.attachments.letter_of_request,
+                                                data: data,
+                                                name: "letter_of_request",
+                                              })
+                                            : handleDownloadAttachment({ value: "letter_of_request", id: data?.id });
+                                        }}
+                                      >
+                                        {data?.attachments?.letter_of_request?.file_name}
+                                      </Typography>
+                                    </Tooltip>
+                                  </Stack>
+                                )}
+
+                                {data?.attachments?.quotation && (
+                                  <Stack flexDirection="row" gap={1}>
+                                    <Typography fontSize={12} fontWeight={600}>
+                                      Quotation:
                                     </Typography>
-                                  </Tooltip>
-                                </Stack>
-                              )}
-                              {data?.attachments?.tool_of_trade && (
-                                <Stack flexDirection="row" gap={1}>
-                                  <Typography fontSize={12} fontWeight={600}>
-                                    Tool of Trade:
-                                  </Typography>
-                                  <Tooltip title="View Tool of Trade" arrow>
-                                    <Typography
-                                      sx={attachmentSx}
-                                      // onClick={() => handleDownloadAttachment({ value: "tool_of_trade", id: data?.id })}
-                                      onClick={() => {
-                                        data.attachments.tool_of_trade.base64.includes("data:")
-                                          ? handleOpenDialog({
-                                              value: data.attachments.tool_of_trade.base64,
-                                              data: data,
-                                              name: "tool_of_trade",
-                                            })
-                                          : handleDownloadAttachment({ value: "tool_of_trade", id: data?.id });
-                                      }}
-                                    >
-                                      {data?.attachments?.tool_of_trade?.file_name}
+                                    <Tooltip title={"View or Download Quotation"} arrow>
+                                      <Typography
+                                        sx={attachmentSx}
+                                        onClick={() => {
+                                          data.attachments.quotation.file_name.includes("pdf") ||
+                                          data.attachments.quotation.file_name.includes("svg") ||
+                                          data.attachments.quotation.file_name.includes("png")
+                                            ? handleOpenDialog({
+                                                value: data.attachments.quotation,
+                                                data: data,
+                                                name: "quotation",
+                                              })
+                                            : handleDownloadAttachment({ value: "quotation", id: data?.id });
+                                        }}
+                                      >
+                                        {data?.attachments?.quotation?.file_name}
+                                      </Typography>
+                                    </Tooltip>
+                                  </Stack>
+                                )}
+
+                                {data?.attachments?.specification_form && (
+                                  <Stack flexDirection="row" gap={1}>
+                                    <Typography fontSize={12} fontWeight={600}>
+                                      Specification:
                                     </Typography>
-                                    {/* <iframe src={data.attachments.tool_of_trade.base64}></iframe> */}
-                                  </Tooltip>
-                                </Stack>
-                              )}
-                              {data?.attachments?.other_attachments && (
-                                <Stack flexDirection="row" gap={1}>
-                                  <Typography fontSize={12} fontWeight={600}>
-                                    Other Attachment:
-                                  </Typography>
-                                  <Tooltip title="View Other Attachments" arrow>
-                                    <Typography
-                                      sx={attachmentSx}
-                                      // onClick={() =>
-                                      //   handleDownloadAttachment({ value: "other_attachments", id: data?.id })
-                                      // }
-                                      // onClick={() =>
-                                      //   handleOpenDialog({
-                                      //     value: data.attachments.other_attachments.base64,
-                                      //     data: data,
-                                      //     name: "other_attachments",
-                                      //   })
-                                      // }
-                                      onClick={() => {
-                                        data.attachments.other_attachments.base64.includes("data:")
-                                          ? handleOpenDialog({
-                                              value: data.attachments.other_attachments.base64,
-                                              data: data,
-                                              name: "other_attachments",
-                                            })
-                                          : handleDownloadAttachment({ value: "other_attachments", id: data?.id });
-                                      }}
-                                    >
-                                      {data?.attachments?.other_attachments?.file_name}
-                                      {/* <iframe src={data.attachments.other_attachments.base64}></iframe> */}
+                                    <Tooltip title={"View or Download Specification Form"} arrow>
+                                      <Typography
+                                        sx={attachmentSx}
+                                        onClick={() => {
+                                          data.attachments.specification_form.file_name.includes("pdf") ||
+                                          data.attachments.specification_form.file_name.includes("svg") ||
+                                          data.attachments.specification_form.file_name.includes("png")
+                                            ? handleOpenDialog({
+                                                value: data.attachments.specification_form,
+                                                data: data,
+                                                name: "specification_form",
+                                              })
+                                            : handleDownloadAttachment({ value: "specification_form", id: data?.id });
+                                        }}
+                                      >
+                                        {data?.attachments?.specification_form?.file_name}
+                                      </Typography>
+                                    </Tooltip>
+                                  </Stack>
+                                )}
+
+                                {data?.attachments?.tool_of_trade && (
+                                  <Stack flexDirection="row" gap={1}>
+                                    <Typography fontSize={12} fontWeight={600}>
+                                      Tool of Trade:
                                     </Typography>
-                                  </Tooltip>
-                                </Stack>
+                                    <Tooltip title={"View or Download Tool of Trade"} arrow>
+                                      <Typography
+                                        sx={attachmentSx}
+                                        onClick={() => {
+                                          data.attachments.tool_of_trade.file_name.includes("pdf") ||
+                                          data.attachments.tool_of_trade.file_name.includes("svg") ||
+                                          data.attachments.tool_of_trade.file_name.includes("png")
+                                            ? handleOpenDialog({
+                                                value: data.attachments.tool_of_trade,
+                                                data: data,
+                                                name: "tool_of_trade",
+                                              })
+                                            : handleDownloadAttachment({ value: "tool_of_trade", id: data?.id });
+                                        }}
+                                      >
+                                        {data?.attachments?.tool_of_trade?.file_name}
+                                      </Typography>
+                                    </Tooltip>
+                                  </Stack>
+                                )}
+
+                                {data?.attachments?.other_attachments && (
+                                  <Stack flexDirection="row" gap={1}>
+                                    <Typography fontSize={12} fontWeight={600}>
+                                      Other Attachment:
+                                    </Typography>
+                                    <Tooltip title={"View or Download Other Attachment"} arrow>
+                                      <Typography
+                                        sx={attachmentSx}
+                                        onClick={() => {
+                                          data.attachments.other_attachments.file_name.includes("pdf") ||
+                                          data.attachments.other_attachments.file_name.includes("svg") ||
+                                          data.attachments.other_attachments.file_name.includes("png")
+                                            ? handleOpenDialog({
+                                                value: data.attachments.other_attachments,
+                                                data: data,
+                                                name: "other_attachments",
+                                              })
+                                            : handleDownloadAttachment({ value: "other_attachments", id: data?.id });
+                                        }}
+                                      >
+                                        {data?.attachments?.other_attachments?.file_name}
+                                      </Typography>
+                                    </Tooltip>
+                                  </Stack>
+                                )}
+                              </TableCell>
+                              {transactionData?.final && (
+                                <TableCell className="tbl-cell">
+                                  <ActionMenu onUpdateHandler={onUpdateHandler} data={data} />
+                                </TableCell>
                               )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
+                            </TableRow>
+                          ))}
                       </>
                     )}
                   </TableBody>
@@ -739,6 +944,73 @@ const ViewApproveRequest = (props) => {
             </Box>
           </Box>
 
+          <Dialog open={dialog1} TransitionComponent={Grow} onClose={onCloseHandler}>
+            <Stack
+              flexDirection="Column"
+              gap="10px"
+              padding="20px "
+              component="form"
+              onSubmit={handleSubmit(onSubmitHandler)}
+            >
+              <Stack flexDirection="row" alignItems="center">
+                <Edit color="secondary" sx={{ fontSize: "25px" }} />
+                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
+                  Edit Minor Category and Asset Description
+                </Typography>
+              </Stack>
+
+              <Divider />
+
+              <CustomAutoComplete
+                name="minor_category_id"
+                control={control}
+                options={minorCategoryData}
+                onOpen={() => (isMinorCategorySuccess ? null : minorCategoryTrigger())}
+                loading={isMinorCategoryLoading}
+                size="small"
+                getOptionLabel={(option) => `${option.id} - ${option.minor_category_name}`}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                  <TextField
+                    color={"secondary"}
+                    {...params}
+                    label="Minor Category"
+                    error={!!errors?.minor_category_id}
+                    helperText={errors?.minor_category_id?.message}
+                  />
+                )}
+              />
+
+              <CustomTextField
+                control={control}
+                name="description"
+                label="Asset Description"
+                type="text"
+                allowSpecialCharacters
+                error={!!errors?.description}
+                helperText={errors?.description?.message}
+                fullWidth
+                multiline
+                maxRows={5}
+              />
+
+              <DialogActions>
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="secondary"
+                  startIcon={<Done color="primary" />}
+                  type="submit"
+                >
+                  Update
+                </Button>
+                <Button variant="outlined" onClick={onCloseHandler} size="small" color="secondary">
+                  Cancel
+                </Button>
+              </DialogActions>
+            </Stack>
+          </Dialog>
+
           <Dialog
             open={dialog}
             TransitionComponent={Grow}
@@ -747,7 +1019,7 @@ const ViewApproveRequest = (props) => {
             fullScreen
           >
             <Stack alignContent="center" justifyContent="center" height="93vh">
-              {base64.includes("image") ? (
+              {image === true ? (
                 <img
                   src={base64}
                   style={{
