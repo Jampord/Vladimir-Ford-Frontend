@@ -9,6 +9,7 @@ const CustomAutoComplete = ({
   onChange: onValueChange,
   onOpen,
   optionalSolid,
+  setHeight,
   ...autocomplete
 }) => {
   return (
@@ -34,6 +35,16 @@ const CustomAutoComplete = ({
               ".MuiInputBase-root": {
                 borderRadius: "10px",
                 // backgroundColor: "white",
+                height: setHeight && "125px",
+                overflow: setHeight && "auto",
+              },
+
+              "& .MuiOutlinedInput-root": {
+                // overflow: "hidden",
+                // whiteSpace: "nowrap",
+                "&:hover fieldset": {
+                  borderColor: setHeight && "#FFF", // Set to original border color
+                },
               },
 
               ".MuiOutlinedInput-notchedOutline": {
