@@ -35,6 +35,8 @@ import {
   RemoveShoppingCart,
   Report,
   Undo,
+  ZoomIn,
+  ZoomOut,
 } from "@mui/icons-material";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -91,14 +93,14 @@ const ViewApproveRequest = (props) => {
   const [attachment, setAttachment] = useState("");
   const [base64, setBase64] = useState("");
   const [image, setImage] = useState(false);
-
-  console.log("image", image);
   const [value, setValue] = useState();
   const [name, setName] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
+  const [scale, setScale] = useState(1);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const isSmallScreen = useMediaQuery("(min-width: 700px)");
 
   const dialog = useSelector((state) => state.booleanState.dialog);
   const dialog1 = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
@@ -278,7 +280,7 @@ const ViewApproveRequest = (props) => {
               approveRequestData?.data.map((data) => data?.final_approval).includes(1)
             ) {
               const requestData = approveRequestData?.data[0];
-              console.log("requestData", requestData);
+              // console.log("requestData", requestData);
               try {
                 const getYmirDataApi = await getYmirData({ transaction_number }).unwrap();
                 // console.log("getYmirDataApi", getYmirDataApi);
@@ -442,6 +444,16 @@ const ViewApproveRequest = (props) => {
     setImage(false);
     setValue(null);
     setName("");
+    setScale(1);
+  };
+
+  // Zoom handlers
+  const handleZoomIn = () => {
+    setScale((prev) => Math.min(prev + 0.2, 4)); // Limit max zoom to 3x
+  };
+
+  const handleZoomOut = () => {
+    setScale((prev) => Math.max(prev - 0.2, 0.5)); // Limit min zoom to 0.5x
   };
 
   // const perPageHandler = (e) => {
@@ -1026,11 +1038,14 @@ const ViewApproveRequest = (props) => {
                     display: "flex",
                     maxWidth: "100vw",
                     maxHeight: "93vh",
+                    transform: `scale(${scale})`,
+                    transformOrigin: "center center",
+                    transition: "transform 0.3s ease",
                     alignContent: "center",
                     alignItems: "center",
                     justifyContent: "center",
                     margin: "0 auto",
-                    border: "1px solid black",
+                    border: "0px solid black",
                   }}
                   title="View Attachment"
                 />
@@ -1051,25 +1066,70 @@ const ViewApproveRequest = (props) => {
                 />
               )}
             </Stack>
-            <DialogActions>
-              <Button
-                variant="outlined"
-                // size="small"
-                color="secondary"
-                onClick={handleCloseDialog}
-              >
-                Close
-              </Button>
-              <Button
-                variant="contained"
-                // size="small"
-                color="secondary"
-                startIcon={<Download color="primary" />}
-                onClick={() => handleDownloadAttachment({ value: name, id: value?.id })}
-              >
-                Download
-              </Button>
-            </DialogActions>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1,
+                justifyContent: "space-between",
+                backgroundColor: "white",
+                zIndex: 1,
+                position: "fixed",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                padding: "5px 30px 5px 0",
+                borderTop: "1px solid #000",
+              }}
+            >
+              <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-start" }} />
+              {image && (
+                <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    size="medium"
+                    onClick={handleZoomOut}
+                    startIcon={<ZoomOut color="primary" />}
+                  >
+                    {!isSmallScreen ? "-" : "Zoom -"}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    size="medium"
+                    onClick={handleZoomIn}
+                    startIcon={<ZoomIn color="primary" />}
+                  >
+                    {!isSmallScreen ? "+" : "Zoom +"}
+                  </Button>
+                </Box>
+              )}
+
+              <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
+                <DialogActions>
+                  <Button
+                    variant="outlined"
+                    // size="small"
+                    color="secondary"
+                    onClick={handleCloseDialog}
+                    sx={{ backgroundColor: "white" }}
+                  >
+                    Close
+                  </Button>
+
+                  <Button
+                    variant="contained"
+                    // size="small"
+                    color="secondary"
+                    startIcon={<Download color="primary" />}
+                    onClick={() => handleDownloadAttachment({ value: name, id: DValue?.id })}
+                  >
+                    Download
+                  </Button>
+                </DialogActions>
+              </Box>
+            </Box>
           </Dialog>
         </Box>
       )}
