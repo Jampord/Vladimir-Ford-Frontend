@@ -54,6 +54,8 @@ import {
   SaveAlt,
   Update,
   Warning,
+  ZoomIn,
+  ZoomOut,
 } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 
@@ -241,8 +243,6 @@ const AddRequisition = (props) => {
     other_attachments: null,
   });
 
-  console.log("updateRequest", updateRequest);
-
   const [isLoading, setIsLoading] = useState(false);
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
@@ -254,9 +254,11 @@ const AddRequisition = (props) => {
   const [transactionStatusId, setTransactionStatusId] = useState(null);
   const [base64, setBase64] = useState("");
   const [image, setImage] = useState(false);
+  console.log("image: ", image);
   const [fileMimeType, setFileMimeType] = useState("");
   const [DValue, setDValue] = useState();
   const [name, setName] = useState("");
+  const [scale, setScale] = useState(1);
 
   const { state: transactionData } = useLocation();
   // console.log("trans data: ", transactionData);
@@ -285,7 +287,10 @@ const AddRequisition = (props) => {
 
     dispatch(openDrawer());
     setBase64(url);
-    value?.value?.file_name.includes("jpg" || "png" || "jpeg") && setImage(true);
+    (value?.value?.file_name.includes("jpg") ||
+      value?.value?.file_name.includes("png") ||
+      value?.value?.file_name.includes("jpeg")) &&
+      setImage(true);
     setDValue(value.data);
     setName(value.name);
   };
@@ -296,6 +301,16 @@ const AddRequisition = (props) => {
     setImage(false);
     setDValue(null);
     setName("");
+    setScale(1);
+  };
+
+  // Zoom handlers
+  const handleZoomIn = () => {
+    setScale((prev) => Math.min(prev + 0.2, 4)); // Limit max zoom to 3x
+  };
+
+  const handleZoomOut = () => {
+    setScale((prev) => Math.max(prev - 0.2, 0.5)); // Limit min zoom to 0.5x
   };
 
   const attachmentSx = {
@@ -535,6 +550,7 @@ const AddRequisition = (props) => {
   const {
     data: addRequestAllApi = [],
     isLoading: isRequestLoading,
+    isFetching: isRequestFetching,
     isSuccess: isRequestSuccess,
     isError: isRequestError,
     error: errorRequest,
@@ -2208,8 +2224,6 @@ const AddRequisition = (props) => {
                 maxRows={5}
               />
 
-              {console.log("fixedasset", watch("fixed_asset_id")?.small_tools)}
-
               {watch("item_status") === "Replacement" &&
               watch("type_of_request_id")?.type_of_request_name === "Small Tools" &&
               watch("fixed_asset_id")?.small_tools?.length >= 1 ? (
@@ -2736,7 +2750,7 @@ const AddRequisition = (props) => {
                   </TableHead>
 
                   <TableBody>
-                    {(updateRequest && isTransactionLoading) || isRequestLoading ? (
+                    {(updateRequest && isTransactionLoading) || isRequestLoading || isRequestFetching ? (
                       <LoadingData />
                     ) : (transactionData ? transactionDataApi?.length === 0 : addRequestAllApi?.length === 0) ? (
                       <NoRecordsFound heightData="medium" />
@@ -2957,7 +2971,9 @@ const AddRequisition = (props) => {
                                     <Typography
                                       sx={attachmentSx}
                                       onClick={() => {
-                                        data.attachments.quotation.file_name.includes("pdf")
+                                        data.attachments.quotation.file_name.includes("pdf") ||
+                                        data.attachments.quotation.file_name.includes("svg") ||
+                                        data.attachments.quotation.file_name.includes("png")
                                           ? handleOpenDrawer({
                                               value: data.attachments.quotation,
                                               data: data,
@@ -2981,7 +2997,9 @@ const AddRequisition = (props) => {
                                     <Typography
                                       sx={attachmentSx}
                                       onClick={() => {
-                                        data.attachments.specification_form.file_name.includes("pdf")
+                                        data.attachments.specification_form.file_name.includes("pdf") ||
+                                        data.attachments.specification_form.file_name.includes("svg") ||
+                                        data.attachments.specification_form.file_name.includes("png")
                                           ? handleOpenDrawer({
                                               value: data.attachments.specification_form,
                                               data: data,
@@ -3005,7 +3023,9 @@ const AddRequisition = (props) => {
                                     <Typography
                                       sx={attachmentSx}
                                       onClick={() => {
-                                        data.attachments.tool_of_trade.file_name.includes("pdf")
+                                        data.attachments.tool_of_trade.file_name.includes("pdf") ||
+                                        data.attachments.tool_of_trade.file_name.includes("svg") ||
+                                        data.attachments.tool_of_trade.file_name.includes("png")
                                           ? handleOpenDrawer({
                                               value: data.attachments.tool_of_trade,
                                               data: data,
@@ -3029,7 +3049,9 @@ const AddRequisition = (props) => {
                                     <Typography
                                       sx={attachmentSx}
                                       onClick={() => {
-                                        data.attachments.other_attachments.file_name.includes("pdf")
+                                        data.attachments.other_attachments.file_name.includes("pdf") ||
+                                        data.attachments.other_attachments.file_name.includes("svg") ||
+                                        data.attachments.other_attachments.file_name.includes("png")
                                           ? handleOpenDrawer({
                                               value: data.attachments.other_attachments,
                                               data: data,
@@ -3128,7 +3150,7 @@ const AddRequisition = (props) => {
                       size="small"
                       color="error"
                       startIcon={<Delete color={"primary"} />}
-                      disabled={isRequestLoading || addRequestAllApi?.length === 0 || editRequest}
+                      disabled={isRequestLoading || isRequestFetching || addRequestAllApi?.length === 0 || editRequest}
                       loading={isPostLoading}
                       sx={{ mt: "10px" }}
                     >
@@ -3165,7 +3187,7 @@ const AddRequisition = (props) => {
                           size="small"
                           color="secondary"
                           startIcon={<Create color={"primary"} />}
-                          disabled={isRequestLoading || addRequestAllApi?.length === 0}
+                          disabled={isRequestLoading || isRequestFetching || addRequestAllApi?.length === 0}
                           loading={isPostLoading}
                         >
                           Create
@@ -3206,11 +3228,14 @@ const AddRequisition = (props) => {
                 display: "flex",
                 maxWidth: "100vw",
                 maxHeight: "93vh",
+                transform: `scale(${scale})`,
+                transformOrigin: "center center",
+                transition: "transform 0.3s ease",
                 alignContent: "center",
                 alignItems: "center",
                 justifyContent: "center",
                 margin: "0 auto",
-                border: "1px solid black",
+                border: "0px solid black",
               }}
               title="View Attachment"
             />
@@ -3225,31 +3250,77 @@ const AddRequisition = (props) => {
                 alignItems: "center",
                 justifyContent: "center",
                 margin: "0 auto",
-                border: "1px solid black",
+                // border: "1px solid black",
               }}
               title="View Attachment"
             />
           )}
         </Stack>
-        <DialogActions>
-          <Button
-            variant="outlined"
-            // size="small"
-            color="secondary"
-            onClick={handleCloseDrawer}
-          >
-            Close
-          </Button>
-          <Button
-            variant="contained"
-            // size="small"
-            color="secondary"
-            startIcon={<Download color="primary" />}
-            onClick={() => handleDownloadAttachment({ value: name, id: DValue?.id })}
-          >
-            Download
-          </Button>
-        </DialogActions>
+
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            justifyContent: "space-between",
+            backgroundColor: "white",
+            zIndex: 1,
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            padding: "5px 30px 5px 0",
+            borderTop: "1px solid #000",
+          }}
+        >
+          <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-start" }} />
+          {image && (
+            <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+              <Button
+                variant="contained"
+                color="secondary"
+                size="medium"
+                onClick={handleZoomOut}
+                startIcon={<ZoomOut color="primary" />}
+              >
+                {!isSmallScreen ? "-" : "Zoom Out"}
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                size="medium"
+                onClick={handleZoomIn}
+                startIcon={<ZoomIn color="primary" />}
+              >
+                {!isSmallScreen ? "+" : "Zoom In"}
+              </Button>
+            </Box>
+          )}
+
+          <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
+            <DialogActions>
+              <Button
+                variant="outlined"
+                // size="small"
+                color="secondary"
+                onClick={handleCloseDrawer}
+                sx={{ backgroundColor: "white" }}
+              >
+                Close
+              </Button>
+
+              <Button
+                variant="contained"
+                // size="small"
+                color="secondary"
+                startIcon={<Download color="primary" />}
+                onClick={() => handleDownloadAttachment({ value: name, id: DValue?.id })}
+              >
+                Download
+              </Button>
+            </DialogActions>
+          </Box>
+        </Box>
       </Dialog>
     </>
   );
