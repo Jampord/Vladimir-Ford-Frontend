@@ -17,7 +17,7 @@ const schema = yup.object().shape({
   //   main_asset_id: yup.object().required().typeError("Main Asset is required").label("Main Asset"),
   child_asset_ids: yup.array().required().label("Child Asset"),
 });
-const AddSmallToolsGroup = ({ data, resetHandler }) => {
+const AddSmallToolsGroup = ({ data, resetHandler, refetch }) => {
   const [selectedApprovers, setSelectedApprovers] = useState([]);
   const [checked, setChecked] = useState(true);
 
@@ -147,6 +147,7 @@ const AddSmallToolsGroup = ({ data, resetHandler }) => {
             dispatch(fixedAssetApi.util.invalidateTags(["FixedAsset"]));
             reset();
             resetHandler();
+            refetch();
           } catch (err) {
             console.log(err);
             // if (err?.status === 403 || err?.status === 404 || err?.status === 422) {

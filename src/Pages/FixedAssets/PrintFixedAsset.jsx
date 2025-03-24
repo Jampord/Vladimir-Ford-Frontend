@@ -592,6 +592,7 @@ const PrintFixedAsset = (props) => {
             // );
             dispatch(closeConfirm());
             reset();
+            refetch();
           } catch (err) {
             console.log(err.data.message);
             if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
@@ -662,8 +663,9 @@ const PrintFixedAsset = (props) => {
             // );
             dispatch(closeConfirm());
             reset();
+            refetch();
           } catch (err) {
-            console.log(err.data.message);
+            console.log(err);
             if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
             } else if (err?.status !== 422) {
             }
@@ -720,6 +722,7 @@ const PrintFixedAsset = (props) => {
             //   })
             // );
             dispatch(closeConfirm());
+            refetch();
             reset();
             resetHandler();
           } catch (err) {
@@ -2251,7 +2254,7 @@ const PrintFixedAsset = (props) => {
             },
           }}
         >
-          <AddSmallToolsGroup data={smallToolsData} resetHandler={reset} />
+          <AddSmallToolsGroup data={smallToolsData} resetHandler={reset} refetch={refetch} />
         </Dialog>
 
         <Dialog
