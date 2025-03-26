@@ -75,6 +75,7 @@ const RequestMonitoring = () => {
 
   const handleChange = (event, newValue) => {
     setFilterValue(newValue);
+    setPage(1);
   };
 
   // Table Sorting --------------------------------
@@ -337,7 +338,7 @@ const RequestMonitoring = () => {
 
       <Box>
         <TabContext value={filterValue}>
-          <Tabs onChange={handleChange} value={filterValue}>
+          <Tabs onChange={handleChange} value={filterValue} variant="scrollable" scrollButtons="auto">
             {/* <Tab label="ALL" value="1" className={filterValue === "1" ? "tab__background" : null} /> */}
             <Tab label="For Approval" value="2" className={filterValue === "2" ? "tab__background" : null} />
             <Tab label="For FA Approval" value="3" className={filterValue === "3" ? "tab__background" : null} />
