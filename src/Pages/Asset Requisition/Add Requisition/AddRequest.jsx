@@ -254,7 +254,6 @@ const AddRequisition = (props) => {
   const [transactionStatusId, setTransactionStatusId] = useState(null);
   const [base64, setBase64] = useState("");
   const [image, setImage] = useState(false);
-  console.log("image: ", image);
   const [fileMimeType, setFileMimeType] = useState("");
   const [DValue, setDValue] = useState();
   const [name, setName] = useState("");
@@ -564,6 +563,7 @@ const AddRequisition = (props) => {
   const {
     data: transactionDataApi = [],
     isLoading: isTransactionLoading,
+    isFetching: isTransactionFetching,
     isLoading: isTransactionSuccess,
     isError: isTransactionError,
     error: errorTransaction,
@@ -760,7 +760,7 @@ const AddRequisition = (props) => {
   //  * CONTAINER
   // Adding of Request
   const addRequestHandler = (formData) => {
-    console.log("formData👀", formData);
+    // console.log("formData👀", formData);
     const cipNumberFormat = formData?.cip_number === "" ? "" : formData?.cip_number?.toString();
     const updatingCoa = (fields, name) =>
       updateRequest ? formData?.[fields]?.id : formData?.[fields]?.[name]?.id.toString();
@@ -888,6 +888,7 @@ const AddRequisition = (props) => {
               ),
 
               onConfirm: async () => {
+                dispatch(onLoading());
                 setIsLoading(true);
                 await axios
                   .post(
@@ -1071,7 +1072,9 @@ const AddRequisition = (props) => {
                   message: err?.response?.data?.errors?.detail
                     ? err?.response?.data?.errors?.detail
                     : //  Object?.entries(err?.response?.data?.errors)?.at(0)?.at(1)?.at(0),
-                      "Something went wrong. Please try again.",
+                    err?.response?.data?.errors?.fixed_asset_id
+                    ? err?.response?.data?.errors?.fixed_asset_id
+                    : "Something went wrong. Please try again.",
                   // err?.response?.data?.errors?.detail ||
                   // err?.response?.data?.errors[0]?.detail ||
                   // err?.response?.data?.message,
@@ -1212,7 +1215,7 @@ const AddRequisition = (props) => {
 
             postRequestSms(smsData);
           } catch (err) {
-            console.log(err);
+            console.log("err", err);
             if (err?.status === 422) {
               dispatch(
                 openToast({
@@ -1226,7 +1229,7 @@ const AddRequisition = (props) => {
 
               dispatch(
                 openToast({
-                  message: "Something went wrong. Please try again.",
+                  message: err?.data?.errors?.detail || err.data.message || "Something went wrong. Please try again.",
                   duration: 5000,
                   variant: "error",
                 })
@@ -2750,7 +2753,9 @@ const AddRequisition = (props) => {
                   </TableHead>
 
                   <TableBody>
-                    {(updateRequest && isTransactionLoading) || isRequestLoading || isRequestFetching ? (
+                    {(updateRequest && (isTransactionLoading || isTransactionFetching)) ||
+                    isRequestLoading ||
+                    isRequestFetching ? (
                       <LoadingData />
                     ) : (transactionData ? transactionDataApi?.length === 0 : addRequestAllApi?.length === 0) ? (
                       <NoRecordsFound heightData="medium" />
@@ -3270,7 +3275,7 @@ const AddRequisition = (props) => {
             left: 0,
             right: 0,
             padding: "5px 30px 5px 0",
-            borderTop: "1px solid #000",
+            borderTop: image === true ? "1px solid #000" : null,
           }}
         >
           <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-start" }} />
