@@ -76,7 +76,10 @@ import { useGetYmirPrApiQuery, useLazyGetYmirPrApiQuery } from "../../../Redux/Q
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
 import ActionMenu from "../../../Components/Reusable/ActionMenu";
 import CustomAutoComplete from "../../../Components/Reusable/CustomAutoComplete";
-import { useLazyGetMinorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MinorCategory";
+import {
+  useLazyGetMinorCategoryAllApiQuery,
+  useLazyGetMinorCategorySmallToolsApiQuery,
+} from "../../../Redux/Query/Masterlist/Category/MinorCategory";
 import CustomTextField from "../../../Components/Reusable/CustomTextField";
 
 const schema = yup.object().shape({
@@ -97,6 +100,8 @@ const ViewApproveRequest = (props) => {
   const [name, setName] = useState("");
   const [referenceNumber, setReferenceNumber] = useState("");
   const [scale, setScale] = useState(1);
+  const [isSmallTools, setIsSmallTools] = useState(false);
+  console.log("isSmallTools", isSmallTools);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -108,8 +113,10 @@ const ViewApproveRequest = (props) => {
   const [patchApprovalStatus, { isLoading }] = usePatchApprovalStatusApiMutation();
   const [postPr, { data: postedYmirData, isLoading: isPostYmirLoading }] = usePostPrYmirApiMutation();
   const [patchPr, { data: patchYmirData, isLoading: isPatchYmirLoading }] = usePatchPrYmirApiMutation();
-  const [getNextRequest, { data: nextData, isLoading: isNextRequestLoading, isFetching: isNextRequestFetching }] =
-    useLazyGetNextRequestQuery();
+  const [
+    getNextRequest,
+    { data: nextData, isLoading: isNextRequestLoading, isFetching: isNextRequestFetching, error: nextRequestError },
+  ] = useLazyGetNextRequestQuery();
   console.log("nextData", nextData);
   const [removePrNumber] = useRemovePurchaseRequestApiMutation();
 
@@ -137,6 +144,16 @@ const ViewApproveRequest = (props) => {
       isError: isMinorCategoryError,
     },
   ] = useLazyGetMinorCategoryAllApiQuery();
+
+  const [
+    minorCategorySmallToolsTrigger,
+    {
+      data: minorCategorySmallToolsData = [],
+      isLoading: isMinorCategorySmallToolsLoading,
+      isSuccess: isMinorCategorySmallToolsSuccess,
+      isError: isMinorCategorySmallToolsError,
+    },
+  ] = useLazyGetMinorCategorySmallToolsApiQuery();
 
   // console.log("approveRequest", approveRequestData);
 
@@ -266,18 +283,12 @@ const ViewApproveRequest = (props) => {
             //   updatedData?.data.map((item) => item.fa_approval)
             // );
 
-            dispatch(
-              openToast({
-                message: result.message,
-                duration: 5000,
-              })
-            );
-
             if (
               // updatedData?.data.map((data) => data?.fa_approval).includes(1) ||
               // updatedData?.data.map((data) => data?.final_approval).includes(1)
               // || approveRequestData?.data.map((data) => data?.fa_approval).includes(1) ||
-              approveRequestData?.data.map((data) => data?.final_approval).includes(1)
+              approveRequestData?.data.map((data) => data?.final_approval).includes(1) ||
+              transactionData?.final === true
             ) {
               const requestData = approveRequestData?.data[0];
               // console.log("requestData", requestData);
@@ -299,6 +310,7 @@ const ViewApproveRequest = (props) => {
                 const next = await getNextRequest({
                   final_approval: transactionData?.final || requestData?.final_approval === 1 ? 1 : 0,
                 }).unwrap();
+
                 return navigate(`/approving/request/${next?.[0].transaction_number}`, {
                   state: next?.[0],
                   replace: true,
@@ -306,6 +318,12 @@ const ViewApproveRequest = (props) => {
               } catch (err) {
                 noNextData(err);
                 console.log("error in pr return", err);
+                dispatch(
+                  openToast({
+                    message: result.message,
+                    duration: 5000,
+                  })
+                );
               }
             } else {
               const requestData = approveRequestData?.data[0];
@@ -315,9 +333,24 @@ const ViewApproveRequest = (props) => {
               navigate(`/approving/request/${next?.[0].transaction_number}`, { state: next?.[0], replace: true });
               // console.log("ERROR:", requestData);
             }
+
+            dispatch(
+              openToast({
+                message: result.message,
+                duration: 5000,
+              })
+            );
           } catch (err) {
             noNextData(err);
             console.log("error in approving", err);
+            if (err?.status === 404) {
+              dispatch(
+                openToast({
+                  message: "Request approved successfully!",
+                  duration: 5000,
+                })
+              );
+            }
           }
         },
       })
@@ -359,13 +392,6 @@ const ViewApproveRequest = (props) => {
               remarks: data,
             }).unwrap();
 
-            dispatch(
-              openToast({
-                message: result.message,
-                duration: 5000,
-              })
-            );
-
             const requestData = approveRequestData?.data[0];
 
             const next = await getNextRequest({
@@ -373,10 +399,25 @@ const ViewApproveRequest = (props) => {
             }).unwrap();
             navigate(`/approving/request/${next?.[0].transaction_number}`, { state: next?.[0], replace: true });
             // dispatch(requisitionApi.util.invalidateTags(["Requisition"]));
+
+            console.log("nextRequestError", nextRequestError);
+
+            dispatch(
+              openToast({
+                message: result.message,
+                duration: 5000,
+              })
+            );
           } catch (err) {
             console.log("error", err);
             if (err?.status === 404) {
               navigate(`/approving/request`);
+              dispatch(
+                openToast({
+                  message: "Request returned successfully!",
+                  duration: 5000,
+                })
+              );
             } else if (err?.status === 422) {
               dispatch(
                 openToast({
@@ -500,6 +541,7 @@ const ViewApproveRequest = (props) => {
     setReferenceNumber(props.reference_number);
     setFormValue("minor_category_id", props.minor_category);
     setFormValue("description", props.asset_description);
+    setIsSmallTools(Boolean(props.type_of_request.type_of_request_name === "Small Tools"));
     dispatch(openDialog1());
   };
 
@@ -567,6 +609,7 @@ const ViewApproveRequest = (props) => {
     setReferenceNumber("");
     setFormValue("minor_category_id", null);
     setFormValue("description", "");
+    setIsSmallTools(false);
   };
 
   return (
@@ -976,9 +1019,17 @@ const ViewApproveRequest = (props) => {
               <CustomAutoComplete
                 name="minor_category_id"
                 control={control}
-                options={minorCategoryData}
-                onOpen={() => (isMinorCategorySuccess ? null : minorCategoryTrigger())}
-                loading={isMinorCategoryLoading}
+                options={isSmallTools === true ? minorCategorySmallToolsData : minorCategoryData}
+                onOpen={() =>
+                  isSmallTools === true
+                    ? isMinorCategorySmallToolsSuccess
+                      ? null
+                      : minorCategorySmallToolsTrigger()
+                    : isMinorCategorySuccess
+                    ? null
+                    : minorCategoryTrigger()
+                }
+                loading={isSmallTools === true ? isMinorCategorySmallToolsLoading : isMinorCategoryLoading}
                 size="small"
                 getOptionLabel={(option) => `${option.id} - ${option.minor_category_name}`}
                 isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -1079,7 +1130,7 @@ const ViewApproveRequest = (props) => {
                 left: 0,
                 right: 0,
                 padding: "5px 30px 5px 0",
-                borderTop: "1px solid #000",
+                borderTop: image === true ? "1px solid #000" : null,
               }}
             >
               <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-start" }} />
@@ -1123,7 +1174,7 @@ const ViewApproveRequest = (props) => {
                     // size="small"
                     color="secondary"
                     startIcon={<Download color="primary" />}
-                    onClick={() => handleDownloadAttachment({ value: name, id: DValue?.id })}
+                    onClick={() => handleDownloadAttachment({ value: name, id: value?.id })}
                   >
                     Download
                   </Button>
