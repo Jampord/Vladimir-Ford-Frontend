@@ -34,9 +34,9 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { Help, LibraryAdd, Output, Report, ReportProblem, Visibility } from "@mui/icons-material";
+import { Help, IosShareRounded, LibraryAdd, Output, Report, ReportProblem, Visibility } from "@mui/icons-material";
 import { Link, useNavigate } from "react-router-dom";
-import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
+import { closeDialog, closeExport, openDialog, openExport } from "../../../Redux/StateManagement/booleanStateSlice";
 
 import { useGetAssetReleasingQuery } from "../../../Redux/Query/Request/AssetReleasing";
 
@@ -44,6 +44,7 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import AddReleasingInfo from "./AddReleasingInfo";
+import ExportReleasingOfAsset from "./ExportReleasingOfAsset";
 
 const schema = yup.object().shape({
   warehouse_number_id: yup.array(),
@@ -194,6 +195,13 @@ const ReleasingTable = (props) => {
 
   // console.log("releasingData", releasingData?.data);
   // console.log("wnumber", wNumber);
+
+  const showExport = useSelector((state) => state.booleanState.exportFile);
+
+  const openExportDialog = () => {
+    dispatch(openExport());
+    // setPrItems(data);
+  };
 
   return (
     <Stack sx={{ height: "calc(100vh - 250px)" }}>
@@ -463,14 +471,34 @@ const ReleasingTable = (props) => {
                 </Table>
               </TableContainer>
             </Box>
-            <CustomTablePagination
-              total={releasingData?.total}
-              success={releasingSuccess}
-              current_page={releasingData?.current_page}
-              per_page={releasingData?.per_page}
-              onPageChange={pageHandler}
-              onRowsPerPageChange={perPageHandler}
-            />
+
+            <Box className="mcontainer__pagination-export">
+              <Button
+                className="mcontainer__export"
+                variant="outlined"
+                size="small"
+                color="text"
+                startIcon={<IosShareRounded color="primary" />}
+                onClick={openExportDialog}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "10px 20px",
+                }}
+              >
+                EXPORT
+              </Button>
+
+              <CustomTablePagination
+                total={releasingData?.total}
+                success={releasingSuccess}
+                current_page={releasingData?.current_page}
+                per_page={releasingData?.per_page}
+                onPageChange={pageHandler}
+                onRowsPerPageChange={perPageHandler}
+              />
+            </Box>
           </Box>
         </>
       )}
@@ -498,6 +526,15 @@ const ReleasingTable = (props) => {
           // personalData={personalData}
           selectedItems={selectedItem}
         />
+      </Dialog>
+
+      <Dialog
+        open={showExport}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeExport())}
+        PaperProps={{ sx: { maxWidth: "1320px", borderRadius: "10px", p: 3 } }}
+      >
+        <ExportReleasingOfAsset released={!!released} />
       </Dialog>
     </Stack>
   );
