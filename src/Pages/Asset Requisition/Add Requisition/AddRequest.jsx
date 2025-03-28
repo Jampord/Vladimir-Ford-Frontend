@@ -1074,6 +1074,8 @@ const AddRequisition = (props) => {
                     : //  Object?.entries(err?.response?.data?.errors)?.at(0)?.at(1)?.at(0),
                     err?.response?.data?.errors?.fixed_asset_id
                     ? err?.response?.data?.errors?.fixed_asset_id
+                    : err?.response?.data?.errors?.item_id
+                    ? err?.response?.data?.errors?.item_id
                     : "Something went wrong. Please try again.",
                   // err?.response?.data?.errors?.detail ||
                   // err?.response?.data?.errors[0]?.detail ||
@@ -2116,7 +2118,11 @@ const AddRequisition = (props) => {
                     loading={fixedAssetSmallToolsApiLoading}
                     disabled={updateRequest && disable}
                     size="small"
-                    getOptionLabel={(option) => `${option?.vladimir_tag_number} - ${option?.asset_description}`}
+                    getOptionLabel={(option) =>
+                      `${option?.is_printable === 0 ? "No Vladimir Tag" : option?.vladimir_tag_number} - ${
+                        option?.asset_description
+                      }`
+                    }
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                     renderInput={(params) => (
                       <TextField
@@ -2125,6 +2131,8 @@ const AddRequisition = (props) => {
                         label="Fixed Asset"
                         error={!!errors?.fixed_asset_id}
                         helperText={errors?.fixed_asset_id?.message}
+                        multiline
+                        maxRows={3}
                       />
                     )}
                     onChange={(_, value) => {
@@ -2234,7 +2242,11 @@ const AddRequisition = (props) => {
                   name="small_tool_item"
                   hasRequest={hasRequest && true}
                   control={control}
-                  options={watch("fixed_asset_id")?.small_tools || updateRequest?.small_tool_item || []}
+                  options={
+                    watch("fixed_asset_id")?.small_tools?.filter((item) => item.status_description === "Good") ||
+                    updateRequest?.small_tool_item?.filter((item) => item.status_description === "Good") ||
+                    []
+                  }
                   // onOpen={() =>
                   //   fixedAssetSmallToolsApiSuccess ? null : fixedAssetSmallToolsTrigger({ replacement: 1 })
                   // }
