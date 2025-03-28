@@ -324,6 +324,13 @@ const ViewApproveRequest = (props) => {
                     duration: 5000,
                   })
                 );
+              } finally {
+                dispatch(
+                  openToast({
+                    message: result.message,
+                    duration: 5000,
+                  })
+                );
               }
             } else {
               const requestData = approveRequestData?.data[0];
@@ -666,7 +673,9 @@ const ViewApproveRequest = (props) => {
                       <TableCell className="tbl-cell">Cellphone #</TableCell>
                       <TableCell className="tbl-cell">Remarks</TableCell>
                       <TableCell className="tbl-cell">Attachments</TableCell>
-                      {transactionData?.final && <TableCell className="tbl-cell">Action</TableCell>}
+                      {(transactionData?.final || (nextData && nextData[0]?.final_approval === 1)) && (
+                        <TableCell className="tbl-cell">Action</TableCell>
+                      )}
                     </TableRow>
                   </TableHead>
 
@@ -933,7 +942,7 @@ const ViewApproveRequest = (props) => {
                                   </Stack>
                                 )}
                               </TableCell>
-                              {transactionData?.final && (
+                              {(transactionData?.final || data?.final_approval === 1) && (
                                 <TableCell className="tbl-cell">
                                   <ActionMenu onUpdateHandler={onUpdateHandler} data={data} />
                                 </TableCell>
