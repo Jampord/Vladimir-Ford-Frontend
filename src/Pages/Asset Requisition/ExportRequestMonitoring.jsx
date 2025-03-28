@@ -177,8 +177,12 @@ const ExportRequestMonitoring = () => {
         <Box sx={{ display: "flex", gap: "10px" }}>
           <LoadingButton
             variant="contained"
-            loading={exportApiLoading}
-            startIcon={exportApiLoading ? null : <IosShareRounded color={!isValid ? "gray" : "primary"} size="small" />}
+            loading={exportApiLoading || exportApiFetching}
+            startIcon={
+              exportApiLoading || exportApiFetching ? null : (
+                <IosShareRounded color={!isValid ? "gray" : "primary"} size="small" />
+              )
+            }
             type="submit"
             color="secondary"
             // disabled={!isValid}
