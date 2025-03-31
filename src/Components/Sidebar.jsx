@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import "../Style/sidebar.scss";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -805,7 +805,7 @@ const Sidebar = () => {
                         {item.children.map((childItem) => {
                           return (
                             permissions.split(", ").includes(childItem.permission) && (
-                              <>
+                              <Fragment key={childItem.label}>
                                 {childItem.label === "Coordinator Settings" ? (
                                   <>
                                     <Divider sx={{ mt: 1, mx: "15px", fontSize: "11px", color: "text.secondary" }}>
@@ -844,7 +844,7 @@ const Sidebar = () => {
                                   </ListItemIcon>
                                   <ListItemText primary={childItem.label} />
                                 </ListItemButton>
-                              </>
+                              </Fragment>
                             )
                           );
                         })}
