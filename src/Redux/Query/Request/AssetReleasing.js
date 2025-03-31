@@ -74,6 +74,23 @@ export const assetReleasingApi = createApi({
       }),
       invalidatesTags: ["SmallToolsReleasing"],
     }),
+
+    getExportAssetReleasing: builder.query({
+      query: (params) => {
+        const queryParams = [`isReleased=${params.isReleased}`];
+
+        if (params.from) {
+          queryParams.push(`from=${params.from}`);
+        }
+
+        if (params.to) {
+          queryParams.push(`to=${params.to}`);
+        }
+
+        const queryString = queryParams.join("&");
+        return `/asset-release?pagination=none&${queryString}`;
+      },
+    }),
   }),
 });
 
@@ -88,4 +105,5 @@ export const {
   useGetSmallToolsReleasingQuery,
   usePutSmallToolsStatusMutation,
   usePutSmallToolsReleasingMutation,
+  useLazyGetExportAssetReleasingQuery,
 } = assetReleasingApi;
