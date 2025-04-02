@@ -65,6 +65,12 @@ export const transferApi = createApi({
       providesTags: ["Transfer"],
     }),
 
+    getTransferFinalApprovalApi: builder.query({
+      query: (params) =>
+        `transfer-approver?page=${params.page}&per_page=${params.per_page}&search=${params.search}&status=${params.status}&final_approval=${params.final_approval}`,
+      providesTags: ["Transfer"],
+    }),
+
     postTransferApi: builder.mutation({
       query: (data) => ({
         url: `asset-transfer`,
@@ -126,6 +132,7 @@ export const {
   useLazyGetFixedAssetTransferCoordinatorApiQuery,
   useGetTransferAllApiQuery,
   useGetTransferApprovalApiQuery,
+  useGetTransferFinalApprovalApiQuery,
   usePostTransferApiMutation,
   useArchiveTransferApiMutation,
   useLazyGetNextTransferQuery,
