@@ -152,7 +152,7 @@ const schema = yup.object().shape({
       unit_id: yup.string().nullable(),
       sub_unit_id: yup.string().nullable(),
       location_id: yup.string().nullable(),
-      remaining_book_value: yup.string().nullable(),
+      // remaining_book_value: yup.number().nullable(),
       accountability: yup.string().typeError("Accountability is a required field").required().label("Accountability"),
       accountable: yup
         .object()
@@ -450,8 +450,8 @@ const AddTransfer = (props) => {
   });
 
   console.log("errors", errors);
-  // console.log("isdirty: ", isDirty);
-  // console.log("💣: ", isValid);
+  console.log("isdirty: ", isDirty);
+  console.log("💣: ", isValid);
 
   // console.log("👀", watch("assets"));
 
@@ -940,7 +940,8 @@ const AddTransfer = (props) => {
   });
 
   const user = JSON.parse(localStorage.getItem("user"));
-  const isCoordinator = user.has_handle === 1;
+  // console.log("user", user);
+  const isCoordinator = user?.has_handle === 1;
   const user_id = user.id;
   const subunit_id = watch("subunit_id_coordinator")?.id || null;
   // console.log("user", user);
@@ -1833,6 +1834,12 @@ const AddTransfer = (props) => {
                                       setValue(`assets.${index}.asset_accountable`, "");
                                       setValue(`assets.${index}.remaining_book_value`, "");
                                       setValue(`assets.${index}.created_at`, null);
+                                      setValue(`assets.${index}.company_id`, "");
+                                      setValue(`assets.${index}.business_unit_id`, "");
+                                      setValue(`assets.${index}.department_id`, "");
+                                      setValue(`assets.${index}.unit_id`, "");
+                                      setValue(`assets.${index}.sub_unit_id`, "");
+                                      setValue(`assets.${index}.location_id`, "");
                                     }
 
                                     return newValue;
