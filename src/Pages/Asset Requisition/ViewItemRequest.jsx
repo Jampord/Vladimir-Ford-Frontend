@@ -160,7 +160,22 @@ const ViewItemRequest = (props) => {
                         }}
                       >
                         <TableCell className="tbl-cell" align="center">
-                          {index}
+                          <Chip
+                            size="small"
+                            variant="filled"
+                            sx={{
+                              borderColor: "primary.main",
+                              color: "white",
+                              fontSize: "0.7rem",
+                              px: 1,
+                              cursor: "pointer",
+                              backgroundColor: "primary.main",
+                              ":hover": {
+                                backgroundColor: "primary.main",
+                              },
+                            }}
+                            label={`${index + 1}`}
+                          />
                         </TableCell>
                         <TableCell className="tbl-cell">{data.type_of_request}</TableCell>
                         <TableCell className="tbl-cell" sx={{ fontWeight: 600, color: "secondary.main" }}>
