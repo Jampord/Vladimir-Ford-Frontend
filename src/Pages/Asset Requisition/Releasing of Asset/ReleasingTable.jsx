@@ -175,6 +175,7 @@ const ReleasingTable = (props) => {
 
   // console.log("handleSelectedItems", allEqual(handleSelectedItems));
   // console.log("handleSelectedItems", handleSelectedItems);
+  // console.log("selectedItem", selectedItem);
 
   //**Validation for Department of Selected Items
   const commonData = [...new Set(handleSelectedItems?.map((item) => item.location.id))].length === 1;
@@ -203,6 +204,44 @@ const ReleasingTable = (props) => {
     // setPrItems(data);
   };
 
+  const areAllCOASame = (assets) => {
+    if (assets) {
+      if (assets?.length === 0) return true; // No assets to compare
+
+      const firstDepartment = assets[0]?.department?.department_name;
+      const firstBusinessUnit = assets[0]?.business_unit?.business_unit_name;
+      const firstCompany = assets[0]?.company?.company_name;
+      const firstUnit = assets[0]?.unit?.unit_name;
+      const firstSubunit = assets[0]?.subunit?.subunit_name;
+      const firstLocation = assets[0]?.location?.location_name;
+
+      for (let i = 1; i < assets.length; i++) {
+        if (assets[i]?.department?.department_name !== firstDepartment) {
+          return false; // Found a different department
+        }
+        if (assets[i]?.business_unit?.business_unit_name !== firstBusinessUnit) {
+          return false; // Found a different business unit
+        }
+        if (assets[i]?.company?.company_name !== firstCompany) {
+          return false; // Found a different company
+        }
+        if (assets[i]?.unit?.unit_name !== firstUnit) {
+          return false; // Found a different unit
+        }
+        if (assets[i]?.subunit?.subunit_name !== firstSubunit) {
+          return false; // Found a different subunit
+        }
+        if (assets[i]?.location?.location_name !== firstLocation) {
+          return false; // Found a different location
+        }
+      }
+      return true; // All COA are the same
+    }
+  };
+
+  const result = areAllCOASame(handleSelectedItems);
+  // console.log("result: ", result);
+
   return (
     <Stack sx={{ height: "calc(100vh - 250px)" }}>
       {releasingLoading && <MasterlistSkeleton onAdd={true} category />}
@@ -221,7 +260,8 @@ const ReleasingTable = (props) => {
                 disabled={
                   !watch("warehouse_number_id") ||
                   // || validateSelectedItems()
-                  (commonData === false && personalData === false)
+                  (commonData === false && personalData === false) ||
+                  result === false
                 }
               >
                 Release
@@ -489,6 +529,12 @@ const ReleasingTable = (props) => {
               >
                 EXPORT
               </Button>
+
+              {result === false && (
+                <Typography noWrap fontSize="13px" color="error">
+                  Selected items does not have the same COA.
+                </Typography>
+              )}
 
               <CustomTablePagination
                 total={releasingData?.total}
