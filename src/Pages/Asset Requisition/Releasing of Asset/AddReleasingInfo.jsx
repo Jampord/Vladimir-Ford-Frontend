@@ -271,6 +271,21 @@ const AddReleasingInfo = (props) => {
     }
   }, [isPostSuccess]);
 
+  useEffect(() => {
+    if (!departmentData || departmentData.length === 0) {
+      departmentTrigger();
+    }
+    if (!unitData || unitData.length === 0) {
+      unitTrigger();
+    }
+    if (!subUnitData || subUnitData.length === 0) {
+      subunitTrigger();
+    }
+    if (!locationData || locationData.length === 0) {
+      locationTrigger();
+    }
+  }, [departmentData, unitData, subUnitData, locationData]);
+
   // useEffect(() => {
   //   console.log("useeffectitems", selectedItems.department);
   //   setValue("department_id", selectedItems.department);
@@ -788,7 +803,7 @@ const AddReleasingInfo = (props) => {
             onOpen={() => (isDepartmentSuccess ? null : (departmentTrigger(), companyTrigger(), businessUnitTrigger()))}
             loading={isDepartmentLoading}
             // disabled={handleSaveValidation()}
-            disabled
+            // disabled
             disableClearable
             size="small"
             getOptionLabel={(option) => option.department_code + " - " + option.department_name}
@@ -873,7 +888,7 @@ const AddReleasingInfo = (props) => {
             onOpen={() => (isUnitSuccess ? null : (unitTrigger(), subunitTrigger(), locationTrigger()))}
             loading={isUnitLoading}
             // disabled={handleSaveValidation()}
-            disabled
+            // disabled
             disableClearable
             size="small"
             getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
@@ -901,7 +916,7 @@ const AddReleasingInfo = (props) => {
             options={unitData?.filter((obj) => obj?.id === watch("unit_id")?.id)[0]?.subunit || []}
             loading={isSubUnitLoading}
             // disabled={handleSaveValidation()}
-            disabled
+            // disabled
             disableClearable
             size="small"
             getOptionLabel={(option) => option.subunit_code + " - " + option.subunit_name}
@@ -928,7 +943,7 @@ const AddReleasingInfo = (props) => {
             })}
             loading={isLocationLoading}
             // disabled={handleSaveValidation()}
-            disabled
+            // disabled
             disableClearable
             size="small"
             getOptionLabel={(option) => option.location_code + " - " + option.location_name}
