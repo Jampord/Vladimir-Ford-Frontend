@@ -183,7 +183,7 @@ const schema = yup.object().shape({
   quantity: yup.number().required().label("Quantity"),
   uom_id: yup.object().required().label("UOM").typeError("UOM is a required field"),
   cellphone_number: yup.string().nullable().label("Cellphone Number"),
-  additional_info: yup.string().nullable().label("Additional Info"),
+  additional_info: yup.string().required().label("Capex Num / Unit Charging"),
   letter_of_request: yup
     .mixed()
     .label("Letter of Request")
@@ -2354,8 +2354,9 @@ const AddRequisition = (props) => {
               <CustomTextField
                 control={control}
                 name="additional_info"
-                label="Additional Info. (Optional)"
-                optional
+                label="Capex Num / Unit Charging"
+                // optional
+                hasRequest={hasRequest && true}
                 type="text"
                 disabled={updateRequest && disable}
                 fullWidth
@@ -2754,7 +2755,7 @@ const AddRequisition = (props) => {
                           </>
                         )}
                       <TableCell className="tbl-cell">Cellphone #</TableCell>
-                      <TableCell className="tbl-cell">Additional Info.</TableCell>
+                      <TableCell className="tbl-cell">Capex Num / Unit Charging</TableCell>
                       <TableCell className="tbl-cell">Attachments</TableCell>
                       {transactionData?.requestMonitoring
                         ? null
@@ -2949,7 +2950,25 @@ const AddRequisition = (props) => {
                             </TableCell>
 
                             <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
-                              {data.additional_info}
+                              <Typography
+                                fontSize={14}
+                                fontWeight={400}
+                                maxWidth="440px"
+                                overflow="hidden"
+                                textOverflow="ellipsis"
+                                color="secondary.main"
+                              >
+                                <Tooltip
+                                  title={data.additional_info}
+                                  placement="top-start"
+                                  arrow
+                                  // slots={{
+                                  //   transition: Zoom,
+                                  // }}
+                                >
+                                  {data.additional_info}
+                                </Tooltip>
+                              </Typography>
                             </TableCell>
 
                             <TableCell className="tbl-cell">
