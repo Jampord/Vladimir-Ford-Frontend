@@ -585,6 +585,7 @@ const ViewApproveRequest = (props) => {
 
         onConfirm: async () => {
           try {
+            dispatch(onLoading());
             // const res = await postToken(formData).unwrap();
             await putFinalApproval(newFormData).unwrap();
             reset();
@@ -671,7 +672,7 @@ const ViewApproveRequest = (props) => {
                       <TableCell className="tbl-cell text-center">Quantity</TableCell>
                       <TableCell className="tbl-cell text-center">UOM</TableCell>
                       <TableCell className="tbl-cell">Cellphone #</TableCell>
-                      <TableCell className="tbl-cell">Remarks</TableCell>
+                      <TableCell className="tbl-cell">Capex Num / Unit Charging</TableCell>
                       <TableCell className="tbl-cell">Attachments</TableCell>
                       {(transactionData?.final || (nextData && nextData[0]?.final_approval === 1)) && (
                         <TableCell className="tbl-cell">Action</TableCell>
@@ -782,7 +783,28 @@ const ViewApproveRequest = (props) => {
 
                               <TableCell className="tbl-cell">{data.cellphone_number}</TableCell>
 
-                              <TableCell className="tbl-cell">{data.remarks}</TableCell>
+                              <TableCell className="tbl-cell">
+                                {" "}
+                                <Typography
+                                  fontSize={14}
+                                  fontWeight={400}
+                                  maxWidth="440px"
+                                  overflow="hidden"
+                                  textOverflow="ellipsis"
+                                  color="secondary.main"
+                                >
+                                  <Tooltip
+                                    title={data.additional_info}
+                                    placement="top-start"
+                                    arrow
+                                    // slots={{
+                                    //   transition: Zoom,
+                                    // }}
+                                  >
+                                    {data.additional_info}
+                                  </Tooltip>
+                                </Typography>
+                              </TableCell>
 
                               <TableCell className="tbl-cell">
                                 {/* {data?.attachments?.letter_of_request && (
