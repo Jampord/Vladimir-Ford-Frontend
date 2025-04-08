@@ -7,12 +7,14 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import {
   Addchart,
+  Analytics,
   PlaylistRemoveRounded,
   RemoveFromQueue,
   RuleFolder,
   TransferWithinAStation,
 } from "@mui/icons-material";
 import Cards from "../../Components/Reusable/Cards";
+import { useSelector } from "react-redux";
 
 const ReportList = [
   {
@@ -20,6 +22,7 @@ const ReportList = [
     label: "PR Reports",
     description: "List of  PR Reports",
     path: "/reports/pr-report",
+    permission: "pr-report",
   },
 
   {
@@ -27,6 +30,14 @@ const ReportList = [
     label: "Transfer History Reports",
     description: "List of Asset Transfers",
     path: "/reports/transfer-report",
+    permission: "transfer-report",
+  },
+  {
+    icon: <Analytics />,
+    label: "General Ledger Reports",
+    description: "List of GL Reports",
+    path: "/reports/general-ledger-report",
+    permission: "general-ledger-report",
   },
 
   // {
@@ -49,6 +60,8 @@ const Reports = () => {
   const isSmallScreen = useMediaQuery("(max-width: 590px)");
   // console.log(location.pathname);
 
+  const permissions = useSelector((state) => state.userLogin?.user.role.access_permission);
+
   return (
     <>
       {location.pathname === "/reports" ? (
@@ -68,7 +81,7 @@ const Reports = () => {
             <Box className="parentSidebar__container">
               <Box className="parentSidebar__wrapper">
                 {ReportList?.map((data, index) => {
-                  return <Cards data={data} key={index} />;
+                  return permissions.split(", ").includes(data.permission) && <Cards data={data} key={index} />;
                 })}
               </Box>
             </Box>
