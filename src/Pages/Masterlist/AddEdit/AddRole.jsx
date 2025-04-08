@@ -208,6 +208,7 @@ const AddRole = (props) => {
     "reports",
     "pr-report",
     "transfer-report",
+    "general-ledger-report",
 
     // Setup settings
     "ip-setup",
@@ -241,7 +242,7 @@ const AddRole = (props) => {
     "approving-disposal",
     "approving-evaluation",
   ];
-  const reports = ["pr-report", "transfer-report"];
+  const reports = ["pr-report", "transfer-report", "general-ledger-report"];
   const setupSettings = ["ip-setup", "token-setup"];
 
   const onSubmitHandler = (formData) => {
@@ -630,6 +631,18 @@ const AddRole = (props) => {
               <Checkbox
                 {...register("access_permission")}
                 checked={watch("access_permission")?.includes("transfer-report")}
+              />
+            }
+          />
+
+          <FormControlLabel
+            disabled={data.action === "view"}
+            label="General Ledger Report"
+            value="general-ledger-report"
+            control={
+              <Checkbox
+                {...register("access_permission")}
+                checked={watch("access_permission")?.includes("general-ledger-report")}
               />
             }
           />
@@ -1130,7 +1143,12 @@ const AddRole = (props) => {
                             onChange={(e) => {
                               if (e.target.checked) {
                                 setValue("access_permission", [
-                                  ...new Set([...watch("access_permission"), "pr-report", "transfer-report"]),
+                                  ...new Set([
+                                    ...watch("access_permission"),
+                                    "pr-report",
+                                    "transfer-report",
+                                    "general-ledger-report",
+                                  ]),
                                 ]);
                               } else {
                                 const reportsEmptyValue = watch("access_permission").filter(
@@ -1176,8 +1194,8 @@ const AddRole = (props) => {
                             //   watch("access_permission").includes(perm)
                             // )}
                             indeterminate={
-                              reports.some((perm) => watch("access_permission").includes(perm)) &&
-                              !reports.every((perm) => watch("access_permission").includes(perm))
+                              setupSettings.some((perm) => watch("access_permission").includes(perm)) &&
+                              !setupSettings.every((perm) => watch("access_permission").includes(perm))
                             }
                             onChange={(e) => {
                               if (e.target.checked) {
@@ -1186,7 +1204,7 @@ const AddRole = (props) => {
                                 ]);
                               } else {
                                 const reportsEmptyValue = watch("access_permission").filter(
-                                  (perm) => ![...reports, "reports"].includes(perm)
+                                  (perm) => ![...setupSettings, "setup-settings"].includes(perm)
                                 );
 
                                 setValue("access_permission", reportsEmptyValue);
