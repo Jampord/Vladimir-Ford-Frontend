@@ -52,6 +52,7 @@ import {
 } from "../../../Redux/Query/Request/PurchaseRequest";
 import moment from "moment";
 import ExportPr from "./ExportPr";
+import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 
 const PurchaseRequestReport = (props) => {
   const { received } = props;
@@ -110,6 +111,7 @@ const PurchaseRequestReport = (props) => {
   const {
     data: prData,
     isLoading: prLoading,
+    isFetching: prFetching,
     isSuccess: prSuccess,
     isError: prError,
     error: errorData,
@@ -329,7 +331,10 @@ const PurchaseRequestReport = (props) => {
                       <NoRecordsFound heightData="small" />
                     ) : (
                       <>
-                        {prSuccess &&
+                        {prFetching ? (
+                          <LoadingData />
+                        ) : (
+                          prSuccess &&
                           [...prData?.data]?.sort(comparator(order, orderBy))?.map((data, index) => (
                             <TableRow
                               key={index}
@@ -376,7 +381,7 @@ const PurchaseRequestReport = (props) => {
                               </TableCell>
 
                               <TableCell className="tbl-cell" align="center">
-                                {data?.items.length}
+                                {data?.items?.length}
                               </TableCell>
 
                               <TableCell className="tbl-cell" align="center">
@@ -391,7 +396,8 @@ const PurchaseRequestReport = (props) => {
                                 {Moment(data.created_at).format("MMM DD, YYYY")}
                               </TableCell>
                             </TableRow>
-                          ))}
+                          ))
+                        )}
                       </>
                     )}
                   </TableBody>
