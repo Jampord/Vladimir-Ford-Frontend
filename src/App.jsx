@@ -100,6 +100,7 @@ import AddCoordinatorSettings from "./Pages/Settings/AddEdit/AddCoordinatorSetti
 import ReceiverSettings from "./Pages/Settings/ReceiverSettings";
 import Credit from "./Pages/Masterlist/Credit";
 import ReleasingOfSmallToolsReplacement from "./Pages/Asset Requisition/Releasing of Small Tools Replacement/ReleasingOfSmallToolsReplacement";
+import GeneralLedgerReports from "./Pages/Reports/GeneralLedgerReports";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -585,6 +586,11 @@ const router = createBrowserRouter([
                 path: "transfer-report",
                 element: <TransferHistoryReport />,
                 handle: { permission: "transfer-report" },
+              },
+              {
+                path: "general-ledger-report",
+                element: <GeneralLedgerReports />,
+                handle: { permission: "general-ledger-report" },
               },
               // {
               //   path: "report3",
