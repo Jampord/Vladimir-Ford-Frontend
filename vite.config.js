@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import dotenv from "dotenv";
 import { VitePWA } from "vite-plugin-pwa";
 import basicSsl from "@vitejs/plugin-basic-ssl";
+import viteCompression from "vite-plugin-compression";
+import { visualizer } from "rollup-plugin-visualizer";
 
 dotenv.config();
 
@@ -19,6 +21,7 @@ export default defineConfig({
       workbox: {
         cleanupOutdatedCaches: false,
         globPatterns: ["**/*.{js,css,html,ico,png,svg,json,vue,txt,woff2}"],
+        maximumFileSizeToCacheInBytes: 8 * 1024 * 1024, // 8MB
       },
 
       manifest: {
@@ -47,7 +50,28 @@ export default defineConfig({
         ],
       },
     }),
+    viteCompression({
+      algorithm: "brotliCompress", // or 'gzip'
+      ext: ".br",
+    }),
+    visualizer({
+      open: true,
+      filename: "stats.html",
+      gzipSize: true,
+      brotliSize: true,
+    }),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes("node_modules")) {
+            return "vendor";
+          }
+        },
+      },
+    },
+  },
   server: {
     // port: 3030,
     host: true,
@@ -60,5 +84,6 @@ export default defineConfig({
     "process.env.FISTO_KEY": `"${process.env.FISTO_KEY}"`,
     "process.env.FISTO_KEY_ADMIN": `"${process.env.FISTO_KEY_ADMIN}"`,
     "process.env.VLADIMIR_BASE_URL": `"${process.env.VLADIMIR_BASE_URL}"`,
+    "process.env.GL_KEY": `"${process.env.GL_KEY}"`,
   },
 });
