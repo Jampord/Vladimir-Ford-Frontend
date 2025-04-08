@@ -89,7 +89,7 @@ export const transferApi = createApi({
     }),
 
     getNextTransfer: builder.query({
-      query: () => `/get-next-transfer`,
+      query: (params) => `/get-next-transfer?final_approval=${params.final_approval}`,
       providesTags: ["Transfer"],
     }),
 
