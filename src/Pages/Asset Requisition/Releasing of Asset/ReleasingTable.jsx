@@ -355,6 +355,8 @@ const ReleasingTable = (props) => {
                       )}
 
                       <TableCell className="tbl-cell">Accountability</TableCell>
+
+                      {released && <TableCell className="tbl-cell">Date Released</TableCell>}
                       <TableCell className="tbl-cell">
                         <TableSortLabel
                           active={orderBy === `created_at`}
@@ -499,6 +501,9 @@ const ReleasingTable = (props) => {
                                 {data.accountability !== "Common" && (
                                   <Typography fontSize={12}>{data.accountable}</Typography>
                                 )}
+                              </TableCell>
+                              <TableCell onClick={() => handleViewData(data)} className="tbl-cell tr-cen-pad45">
+                                {Moment(data.release_date).format("MMM DD, YYYY")}
                               </TableCell>
                               <TableCell onClick={() => handleViewData(data)} className="tbl-cell tr-cen-pad45">
                                 {Moment(data.created_at).format("MMM DD, YYYY")}
