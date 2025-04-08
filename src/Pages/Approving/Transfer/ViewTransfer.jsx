@@ -115,6 +115,11 @@ const schema = yup.object().shape({
   unit_id: yup.object().required().label("Unit").typeError("Unit is a required field"),
   subunit_id: yup.object().required().label("Subunit").typeError("Subunit is a required field"),
   location_id: yup.object().required().label("Location").typeError("Location is a required field"),
+  depreciation_debit_id: yup
+    .object()
+    .required()
+    .label("Depreciation Debit")
+    .typeError("Depreciation Debit is a required field"),
   // account_title_id: yup.object().required().label("Account Title").typeError("Account Title is a required field"),
 
   remarks: yup.string().label("Remarks"),
@@ -141,7 +146,7 @@ const ViewTransfer = (props) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { state: transactionData } = useLocation();
-  // console.log("transactionData: ", transactionData);
+  console.log("transactionData: ", transactionData);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -336,6 +341,7 @@ const ViewTransfer = (props) => {
       unit_id: null,
       subunit_id: null,
       location_id: null,
+      depreciation_debit_id: null,
       // account_title_id: null,
 
       remarks: "",
@@ -378,7 +384,7 @@ const ViewTransfer = (props) => {
   const transferNumberData = transferData?.at(0);
 
   useEffect(() => {
-    // console.log("transferNumberData", transferNumberData);
+    console.log("transferNumberData", transferNumberData);
 
     if (transferNumberData) {
       fixedAssetTrigger();
@@ -402,6 +408,7 @@ const ViewTransfer = (props) => {
       setValue("location_id", transferNumberData?.location);
       // setValue("account_title_id", transferNumberData?.account_title);
       setValue("remarks", transferNumberData?.remarks);
+      setValue("depreciation_debit_id", transferNumberData?.depreciation_debit);
       setValue("attachments", attachmentFormat);
       setValue(
         "assets",
@@ -415,6 +422,7 @@ const ViewTransfer = (props) => {
           fixed_asset_id: asset,
           asset_accountable: asset.accountable === "-" ? "Common" : asset.accountable,
           created_at: asset.created_at || asset.acquisition_date,
+          remaining_book_value: asset.remaining_book_value,
           company_id: asset.company?.company_name,
           business_unit_id: asset.business_unit?.business_unit_name,
           department_id: asset.department?.department_name,
@@ -501,6 +509,12 @@ const ViewTransfer = (props) => {
         onConfirm: async () => {
           const noNextData = (err) => {
             if (err?.status === 404) {
+              dispatch(
+                openToast({
+                  message: "Request approved successfully!",
+                  duration: 5000,
+                })
+              );
               navigate(`/approving/transfer`);
             } else if (err?.status === 422) {
               // dispatch(
@@ -541,7 +555,9 @@ const ViewTransfer = (props) => {
             );
 
             dispatch(closeConfirm());
-            const next = await getNextTransfer().unwrap();
+            const next = await getNextTransfer({
+              final_approval: transactionData?.final || transferData[0]?.final_approval === 1 ? 1 : 0,
+            }).unwrap();
             console.log("next: ", next);
             navigate(`/approving/transfer/${next?.transfer_number}`, { state: next, replace: true });
           } catch (err) {
@@ -582,6 +598,12 @@ const ViewTransfer = (props) => {
         onConfirm: async (data) => {
           const noNextData = (err) => {
             if (err?.status === 404) {
+              dispatch(
+                openToast({
+                  message: "Request returned successfully!",
+                  duration: 5000,
+                })
+              );
               navigate(`/approving/transfer`);
             } else if (err?.status === 422) {
               // dispatch(
@@ -621,7 +643,9 @@ const ViewTransfer = (props) => {
             );
 
             dispatch(closeConfirm());
-            const next = await getNextTransfer().unwrap();
+            const next = await getNextTransfer({
+              final_approval: transactionData?.final || transferData[0]?.final_approval === 1 ? 1 : 0,
+            }).unwrap();
             navigate(`/approving/transfer/${next?.transfer_number}`, { state: next, view, replace: true });
           } catch (err) {
             noNextData(err);
@@ -958,6 +982,36 @@ const ViewTransfer = (props) => {
                     )}
                   />
 
+                  <Stack gap={2}>
+                    <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
+                      ACCOUNTING ENTRIES
+                    </Typography>
+
+                    <CustomAutoComplete
+                      autoComplete
+                      freeSolo
+                      name="depreciation_debit_id"
+                      disabled
+                      control={control}
+                      options={accountTitleData}
+                      loading={isAccountTitleLoading}
+                      onOpen={() => (isAccountTitleSuccess ? null : accountTitleTrigger())}
+                      size="small"
+                      getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
+                      isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
+                      renderInput={(params) => (
+                        <TextField
+                          color="secondary"
+                          {...params}
+                          label="Depreciation Debit"
+                          error={!!errors?.depreciation_debit_id}
+                          helperText={errors?.depreciation_debit_id?.message}
+                          multiline
+                        />
+                      )}
+                    />
+                  </Stack>
+
                   {/* <CustomAutoComplete
                     name="receiver_id"
                     disabled={edit ? false : view}
@@ -1027,11 +1081,9 @@ const ViewTransfer = (props) => {
                     <TableCell className="tbl-cell">Asset</TableCell>
                     <TableCell className="tbl-cell">Transfer To</TableCell>
                     <TableCell className="tbl-cell">Accountability</TableCell>
+                    <TableCell className="tbl-cell">Remaining Book Value</TableCell>
                     <TableCell className="tbl-cell">Chart Of Accounts</TableCell>
                     <TableCell className="tbl-cell">Acquisition Date</TableCell>
-                    <TableCell className="tbl-cell" align="center">
-                      Action
-                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -1180,8 +1232,6 @@ const ViewTransfer = (props) => {
                                 />
                               )}
                             />
-
-                            {console.log(watch(`assets`))}
 
                             {watch(`assets.${index}.accountability`) === "Personal Issued" && (
                               <Controller
@@ -1388,6 +1438,38 @@ const ViewTransfer = (props) => {
                         </TableCell>
 
                         <TableCell className="tbl-cell">
+                          <TextField
+                            {...register(`assets.${index}.remaining_book_value`)}
+                            variant="outlined"
+                            disabled
+                            InputProps={{
+                              startAdornment: (
+                                <InputAdornment position="start">
+                                  <Typography sx={{ color: "gray", mt: "2px" }}>₱</Typography>
+                                </InputAdornment>
+                              ),
+                            }}
+                            sx={{
+                              backgroundColor: "transparent",
+                              border: "none",
+                              ml: "-10px",
+                              "& .MuiOutlinedInput-root": {
+                                "& fieldset": {
+                                  border: "none",
+                                },
+                              },
+                              "& .MuiInputBase-input": {
+                                backgroundColor: "transparent",
+                              },
+
+                              "& .Mui-disabled": {
+                                color: "red",
+                              },
+                            }}
+                          />
+                        </TableCell>
+
+                        <TableCell className="tbl-cell">
                           <Stack width="250px" rowGap={0}>
                             <TextField
                               {...register(`assets.${index}.company_id`)}
@@ -1583,19 +1665,6 @@ const ViewTransfer = (props) => {
                               ml: "-10px",
                             }}
                           />
-                        </TableCell>
-
-                        <TableCell align="center" className="tbl-cell">
-                          <IconButton
-                            onClick={() => remove(index)}
-                            disabled={edit ? false : fields.length === 1 || view}
-                          >
-                            <Tooltip title="Delete Row" placement="top" arrow>
-                              <RemoveCircle
-                                color={fields.length === 1 || view ? (edit ? "warning" : "gray") : "warning"}
-                              />
-                            </Tooltip>
-                          </IconButton>
                         </TableCell>
                       </TableRow>
                     ))
