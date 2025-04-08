@@ -96,6 +96,7 @@ import {
   BadgeOutlined,
   BadgeSharp,
   CreditCard,
+  Analytics,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -595,7 +596,7 @@ const Sidebar = () => {
           icon: MoveDown,
           path: "/approving/transfer",
           permission: "approving-transfer",
-          notification: notifData?.toTransferApproveCount,
+          notification: notifData?.toTransferApproveCount + notifData?.toTransferFaApproval,
           setter: closeCollapse,
         },
         {
@@ -684,6 +685,13 @@ const Sidebar = () => {
           icon: Addchart,
           path: "/reports/transfer-report",
           permission: "transfer-report",
+          setter: closeCollapse,
+        },
+        {
+          label: "General Ledger Reports",
+          icon: Analytics,
+          path: "/reports/general-ledger-report",
+          permission: "general-ledger-report",
           setter: closeCollapse,
         },
         // {
