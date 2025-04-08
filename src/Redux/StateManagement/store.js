@@ -107,6 +107,7 @@ import { coordinatorSettingsApi } from "../Query/Settings/CoordinatorSettings";
 import { actionMenuSlice } from "./actionMenuSlice";
 import { receiverSettingsApi } from "../Query/Settings/ReceiverSettings";
 import { creditApi } from "../Query/Masterlist/YmirCoa/Credit";
+import { generalLedgerReportApi } from "../Query/Reports/GeneralLedgerReport";
 
 export const store = configureStore({
   reducer: {
@@ -219,6 +220,7 @@ export const store = configureStore({
 
     //Asset Movement Reports
     [assetMovementReportApi.reducerPath]: assetMovementReportApi.reducer,
+    [generalLedgerReportApi.reducerPath]: generalLedgerReportApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -314,6 +316,7 @@ export const store = configureStore({
 
       //Asset Movement Reports
       assetMovementReportApi.middleware,
+      generalLedgerReportApi.middleware,
     ]),
 });
 
