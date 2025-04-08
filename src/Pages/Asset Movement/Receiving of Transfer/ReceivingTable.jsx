@@ -302,9 +302,12 @@ const ReceivingTable = ({ received }) => {
                                   label={data.id}
                                 />
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="tbl-cell">
                                 <Typography fontSize={14} fontWeight={600} color="secondary.main">
                                   {data?.vladimir_tag_number}
+                                </Typography>
+                                <Typography fontSize={12} fontWeight={600} color="secondary.light">
+                                  {data?.description}
                                 </Typography>
                               </TableCell>
                               <TableCell className="tbl-cell">
