@@ -378,11 +378,11 @@ const ApprovedRequest = (props) => {
                             </TableCell>
 
                             <TableCell className="tbl-cell-category tr-cen-pad45">
-                              {Moment(data.created_at).format("MMM DD, YYYY")}
+                              {Moment(data?.asset_request?.date_requested).format("MMM DD, YYYY")}
                             </TableCell>
 
                             <TableCell className="tbl-cell-category tr-cen-pad45">
-                              {Moment(data.created_at).format("MMM DD, YYYY")}
+                              {Moment(data?.asset_request?.date_approved).format("MMM DD, YYYY")}
                             </TableCell>
                           </TableRow>
                         ))}
