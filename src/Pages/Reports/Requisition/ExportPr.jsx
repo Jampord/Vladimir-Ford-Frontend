@@ -26,8 +26,8 @@ import useExcelJs from "../../../Hooks/ExcelJs";
 
 const schema = yup.object().shape({
   id: yup.string(),
-  from: yup.string().required().typeError("Please provide a FROM date"),
-  to: yup.string().required().typeError("Please provide a TO date"),
+  from: yup.string().nullable().typeError("Please provide a FROM date"),
+  to: yup.string().nullable().typeError("Please provide a TO date"),
 });
 
 const ExportPr = () => {
@@ -58,8 +58,8 @@ const ExportPr = () => {
     resolver: yupResolver(schema),
     defaultValues: {
       id: "",
-      from: null,
-      to: null,
+      from: "",
+      to: "",
       export: null,
     },
   });
@@ -89,9 +89,9 @@ const ExportPr = () => {
       const res = await trigger({
         search: "",
         page: "",
-        perPage: "",
-        from: moment(formData?.from).format("MMM DD, YYYY"),
-        to: moment(formData?.to).format("MMM DD, YYYY"),
+        per_page: "",
+        from: formData?.from.length !== 0 ? moment(formData?.from).format("YYYY-MM-DD") : "",
+        to: formData?.to.length !== 0 ? moment(formData?.to).format("YYYY-MM-DD") : "",
         export: 1,
       }).unwrap();
 
@@ -133,7 +133,7 @@ const ExportPr = () => {
         };
       });
 
-      await excelExport(newObj, "Vladimir-PR-Reports.xlsx");
+      await excelExport(newObj, "Vladimir-PR-Reports");
       dispatch(
         openToast({
           message: "Successfully Exported",
@@ -198,6 +198,7 @@ const ExportPr = () => {
             name="from"
             label="From"
             size="small"
+            maxDate={new Date()}
             error={!!errors?.from}
             helperText={errors?.from?.message}
           />
@@ -223,14 +224,14 @@ const ExportPr = () => {
               exportApiLoading ? null : (
                 <IosShareRounded
                   // color={disabledItems() ? "gray" : "primary"}
-                  color={!isValid ? "gray" : "primary"}
+                  color={"primary"}
                   size="small"
                 />
               )
             }
             type="submit"
             color="secondary"
-            disabled={!isValid}
+            // disabled={!isValid}
           >
             Export
           </LoadingButton>
