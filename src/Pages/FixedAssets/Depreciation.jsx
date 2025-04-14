@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import moment from "moment";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   fixedAssetApi,
   useGetDepreciationHistoryApiQuery,
   useLazyGetDepreciationHistoryApiQuery,
+  useLazyGetNextDepreciationRequestApiQuery,
   usePostDepreciateApiMutation,
 } from "../../Redux/Query/FixedAsset/FixedAssets";
 
@@ -108,9 +109,10 @@ const formatCost = (value) => {
 };
 
 const Depreciation = (props) => {
-  const { setViewDepre, calcDepreApi, vladimirTag, refetch } = props;
+  const { setViewDepre, calcDepreApi, vladimirTag, refetch, nextRequest } = props;
 
   console.log("calcDepreApi", calcDepreApi);
+  console.log("nextRequest", !!nextRequest);
 
   const isSmallScreen = useMediaQuery("(max-width: 1000px)");
 
@@ -225,12 +227,18 @@ const Depreciation = (props) => {
     { data: depreciationData, isLoading: isDepreciationLoading, isSuccess: isDepreciationSuccess },
   ] = usePostDepreciateApiMutation();
 
+  const [
+    getNextDepreciationRequest,
+    { data: nextData, isLoading: isNextRequestLoading, isFetching: isNextRequestFetching, error: nextRequestError },
+  ] = useLazyGetNextDepreciationRequestApiQuery();
+
   const data = calcDepreApi?.data;
   const depreciationDebit = calcDepreApi?.data?.initial_debit?.depreciation_debit;
   // console.log("dataaaaaaaaaaa", data);
   // console.log("👀👀👀", depreciationDebit);
   const dispatch = useDispatch();
   const dialog = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
+  const navigate = useNavigate();
 
   const handleViewHistory = () => {
     setOpenHistory(!openHistory);
@@ -465,19 +473,35 @@ const Depreciation = (props) => {
               vladimir_tag_number: vladimirTag,
             }).unwrap();
 
+            if (nextRequest) {
+              const next = await getNextDepreciationRequest().unwrap();
+              console.log("next", next);
+              setViewDepre(false);
+              navigate(`/fixed-asset/depreciation/${next?.vladimir_tag_number}`, { state: next, replace: true });
+            }
+
+            if (!nextRequest) {
+              dispatch(
+                openToast({
+                  message: result.message,
+                  duration: 5000,
+                })
+              );
+              refetch();
+              dispatch(fixedAssetApi.util.invalidateTags(["FixedAsset"]));
+              setViewDepre(false);
+            }
+
             dispatch(
               openToast({
                 message: result.message,
                 duration: 5000,
               })
             );
-            refetch();
-            dispatch(fixedAssetApi.util.invalidateTags(["FixedAsset"]));
-            setViewDepre(false);
           } catch (err) {
             console.log(err);
             if (err?.status === 404) {
-              navigate(`/approving/request`);
+              nextRequest ? navigate(`/fixed-asset/depreciation`) : navigate(`/fixed-asset/fixed-asset`);
             } else if (err?.status === 422) {
               dispatch(
                 openToast({
