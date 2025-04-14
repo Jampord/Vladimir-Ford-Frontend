@@ -270,6 +270,13 @@ export const fixedAssetApi = createApi({
         return `/print-barcode-show?isRequest=1&pagination=none&${queryString}`;
       },
     }),
+
+    getNextDepreciationRequestApi: builder.query({
+      query: (params) => ({
+        url: `/next-to-depreciate`,
+      }),
+      // providesTags: ["FixedAsset"],
+    }),
   }),
 });
 
@@ -307,4 +314,5 @@ export const {
   useLazyGetExportPrintRequestApiQuery,
 
   usePostDepreciateApiMutation,
+  useLazyGetNextDepreciationRequestApiQuery,
 } = fixedAssetApi;
