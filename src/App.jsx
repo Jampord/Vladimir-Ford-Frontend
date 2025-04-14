@@ -101,6 +101,9 @@ import ReceiverSettings from "./Pages/Settings/ReceiverSettings";
 import Credit from "./Pages/Masterlist/Credit";
 import ReleasingOfSmallToolsReplacement from "./Pages/Asset Requisition/Releasing of Small Tools Replacement/ReleasingOfSmallToolsReplacement";
 import GeneralLedgerReports from "./Pages/Reports/GeneralLedgerReports";
+import FixedAssetIndex from "./Pages/FixedAssets";
+import DepreciationPage from "./Pages/FixedAssets/Depreciation/DepreciationPage";
+import FixedAssetDepreciationView from "./Pages/FixedAssets/Depreciation/FixedAssetDepreciationView";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -267,22 +270,38 @@ const router = createBrowserRouter([
 
           {
             path: "fixed-asset",
-            index: false,
-            element: <FixedAsset />,
+            element: <FixedAssetIndex />,
             handle: { permission: "fixed-asset" },
-            children: [],
-          },
+            children: [
+              { index: true, element: <></> },
+              {
+                path: "fixed-asset",
+                // index: false,
+                element: <FixedAsset />,
+                handle: { permission: "fixed-asset" },
+              },
+              {
+                path: "fixed-asset/:tag_number",
+                element: <FixedAssetView />,
+                handle: { permission: "fixed-asset" },
+              },
+              {
+                path: "fixed-asset/additional-cost",
+                element: <AdditionalCost />,
+                handle: { permission: "fixed-asset" },
+              },
 
-          {
-            path: "fixed-asset/:tag_number",
-            element: <FixedAssetView />,
-            handle: { permission: "fixed-asset" },
-          },
-
-          {
-            path: "fixed-asset/additional-cost",
-            element: <AdditionalCost />,
-            handle: { permission: "fixed-asset" },
+              {
+                path: "depreciation",
+                element: <DepreciationPage />,
+                handle: { permission: "fixed-asset" },
+              },
+              {
+                path: "depreciation/:tag_number",
+                element: <FixedAssetDepreciationView />,
+                handle: { permission: "fixed-asset" },
+              },
+            ],
           },
 
           {
