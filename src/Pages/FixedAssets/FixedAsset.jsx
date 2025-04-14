@@ -135,8 +135,14 @@ const FixedAsset = (props) => {
   });
 
   const drawer = useSelector((state) => state.booleanState.drawer);
+
+  // console.log("drawer", drawer);
+
   const drawer1 = useSelector((state) => state.booleanState.drawerMultiple.drawer1);
   const dialog1 = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
+
+  // console.log("dialog1", dialog1);
+
   const dialog = useSelector((state) => state.booleanState.dialog);
   const add = useSelector((state) => state.booleanState.add);
   const importFile = useSelector((state) => state.booleanState.importFile);
@@ -199,8 +205,8 @@ const FixedAsset = (props) => {
       status: status,
       search: search,
       filter: faFilter,
-    },
-    { refetchOnMountOrArgChange: true }
+    }
+    // { refetchOnMountOrArgChange: true }
   );
 
   const onUpdateResetHandler = () => {
@@ -255,7 +261,7 @@ const FixedAsset = (props) => {
   };
 
   const handleTableData = (data) => {
-    navigate(`/fixed-asset/${data.vladimir_tag_number}`, {
+    navigate(`/fixed-asset/fixed-asset/${data.vladimir_tag_number}`, {
       state: { ...data, status },
     });
   };
