@@ -51,7 +51,8 @@ const GeneralLedgerReports = () => {
     {
       page: page,
       per_page: perPage,
-      adjustment_date: selectedDate !== null ? moment(selectedDate).format("YYYY-MM") : "",
+      adjustment_date:
+        selectedDate !== null ? moment(selectedDate).format("YYYY-MM") : moment(new Date()).format("YYYY-MM"),
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -100,7 +101,7 @@ const GeneralLedgerReports = () => {
               label={"Month and Year"}
               views={["month", "year"]}
               maxDate={new Date()}
-              value={selectedDate} // Bind the state to the DatePicker
+              value={selectedDate || new Date()} // Bind the state to the DatePicker
               onChange={(newValue) => setSelectedDate(newValue)} // Update state on change
               // slotProps={{
               //   textField: {
@@ -127,14 +128,19 @@ const GeneralLedgerReports = () => {
                   >
                     <TableCell className="tbl-cell">Transaction Date</TableCell>
                     <TableCell className="tbl-cell">DR / CR</TableCell>
-                    <TableCell className="tbl-cell">Vladimir Tag Number (Asset CIP)</TableCell>
+                    <TableCell className="tbl-cell">Asset / CIP #</TableCell>
+                    <TableCell className="tbl-cell">Asset Code</TableCell>
+                    <TableCell className="tbl-cell">Asset (Vladimir Tag #)</TableCell>
                     <TableCell className="tbl-cell">Item Description</TableCell>
                     <TableCell className="tbl-cell">Quantity</TableCell>
                     <TableCell className="tbl-cell">Unit Price</TableCell>
+                    <TableCell className="tbl-cell">Line Amount</TableCell>
                     <TableCell className="tbl-cell">Chart of Account</TableCell>
                     <TableCell className="tbl-cell">PO/RR Number</TableCell>
+                    <TableCell className="tbl-cell">Reference No.</TableCell>
                     <TableCell className="tbl-cell">Account Title</TableCell>
-                    <TableCell className="tbl-cell">Client Supplier</TableCell>
+                    {/* <TableCell className="tbl-cell">Client Supplier</TableCell> */}
+                    <TableCell className="tbl-cell">Service Provider</TableCell>
                     <TableCell className="tbl-cell">BOA</TableCell>
                     <TableCell className="tbl-cell">Books</TableCell>
                   </TableRow>
@@ -159,12 +165,31 @@ const GeneralLedgerReports = () => {
                           >
                             <TableCell className="tbl-cell">{data?.transactionDate}</TableCell>
                             <TableCell className="tbl-cell">{data?.drcr}</TableCell>
-                            <TableCell className="tbl-cell">{data?.assetCIP}</TableCell>
+                            <TableCell className="tbl-cell">
+                              <Typography fontSize="12px" fontWeight={600}>
+                                {data.assetCip || "-"}
+                              </Typography>
+                            </TableCell>
+                            <TableCell className="tbl-cell">
+                              <Typography fontSize="12px" fontWeight={600}>
+                                {data.assetCode || "-"}
+                              </Typography>
+                            </TableCell>
+                            <TableCell className="tbl-cell">
+                              <Typography fontSize="12px" fontWeight={600}>
+                                {data.asset || "-"}
+                              </Typography>
+                            </TableCell>
                             <TableCell className="tbl-cell">{data?.itemDescription}</TableCell>
                             <TableCell className="tbl-cell">{`${data?.quantity} - ${data?.uom}`}</TableCell>
                             <TableCell className="tbl-cell">
                               <Typography fontSize="13px" color={data?.unitPrice < 0 ? "red" : "black"}>
                                 ₱{data?.unitPrice}
+                              </Typography>
+                            </TableCell>
+                            <TableCell className="tbl-cell">
+                              <Typography fontSize="13px" color={data?.unitPrice < 0 ? "red" : "black"}>
+                                ₱{data?.lineAmount}
                               </Typography>
                             </TableCell>
                             <TableCell className="tbl-cell">
@@ -191,8 +216,17 @@ const GeneralLedgerReports = () => {
                               <Typography fontSize="12px">PO - {data.poNumber}</Typography>
                               <Typography fontSize="12px">RR - {data.rrNumber}</Typography>
                             </TableCell>
+                            <TableCell className="tbl-cell">
+                              <Typography fontSize="13px">{data.referenceNo}</Typography>
+                            </TableCell>
                             <TableCell className="tbl-cell">{`${data?.accountTitleCode} - ${data?.accountTitle}`}</TableCell>
-                            <TableCell className="tbl-cell">{data?.clientSupplier}</TableCell>
+                            {/* <TableCell className="tbl-cell">{data?.clientSupplier || "-"}</TableCell> */}
+                            <TableCell className="tbl-cell">
+                              <Typography fontSize="12px" fontWeight={700}>
+                                {data.serviceProviderCode}
+                              </Typography>
+                              <Typography fontSize="12px">{data.serviceProvider}</Typography>
+                            </TableCell>
                             <TableCell className="tbl-cell">{data?.boa}</TableCell>
                             <TableCell className="tbl-cell">{data?.books}</TableCell>
                           </TableRow>
