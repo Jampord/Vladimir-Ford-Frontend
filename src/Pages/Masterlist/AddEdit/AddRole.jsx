@@ -209,6 +209,7 @@ const AddRole = (props) => {
     "pr-report",
     "transfer-report",
     "general-ledger-report",
+    "purchase-request-recon",
 
     // Setup settings
     "ip-setup",
@@ -242,7 +243,7 @@ const AddRole = (props) => {
     "approving-disposal",
     "approving-evaluation",
   ];
-  const reports = ["pr-report", "transfer-report", "general-ledger-report"];
+  const reports = ["pr-report", "transfer-report", "general-ledger-report", "purchase-request-recon"];
   const setupSettings = ["ip-setup", "token-setup"];
 
   const onSubmitHandler = (formData) => {
@@ -643,6 +644,18 @@ const AddRole = (props) => {
               <Checkbox
                 {...register("access_permission")}
                 checked={watch("access_permission")?.includes("general-ledger-report")}
+              />
+            }
+          />
+
+          <FormControlLabel
+            disabled={data.action === "view"}
+            label="Purchase Request Recon"
+            value="purchase-request-recon"
+            control={
+              <Checkbox
+                {...register("access_permission")}
+                checked={watch("access_permission")?.includes("purchase-request-recon")}
               />
             }
           />
@@ -1148,6 +1161,7 @@ const AddRole = (props) => {
                                     "pr-report",
                                     "transfer-report",
                                     "general-ledger-report",
+                                    "purchase-request-recon",
                                   ]),
                                 ]);
                               } else {
