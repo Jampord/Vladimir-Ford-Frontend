@@ -108,6 +108,7 @@ import { actionMenuSlice } from "./actionMenuSlice";
 import { receiverSettingsApi } from "../Query/Settings/ReceiverSettings";
 import { creditApi } from "../Query/Masterlist/YmirCoa/Credit";
 import { generalLedgerReportApi } from "../Query/Reports/GeneralLedgerReport";
+import { purchaseRequestReconApi } from "../Query/Reports/PurchaseRequestRecon";
 
 export const store = configureStore({
   reducer: {
@@ -221,6 +222,7 @@ export const store = configureStore({
     //Asset Movement Reports
     [assetMovementReportApi.reducerPath]: assetMovementReportApi.reducer,
     [generalLedgerReportApi.reducerPath]: generalLedgerReportApi.reducer,
+    [purchaseRequestReconApi.reducerPath]: purchaseRequestReconApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -317,6 +319,7 @@ export const store = configureStore({
       //Asset Movement Reports
       assetMovementReportApi.middleware,
       generalLedgerReportApi.middleware,
+      purchaseRequestReconApi.middleware,
     ]),
 });
 
