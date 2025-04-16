@@ -144,6 +144,10 @@ const MasterlistToolbar = (props) => {
   const permissions = useSelector((state) => state.userLogin?.user.role.access_permission);
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
 
+  useEffect(() => {
+    refetch();
+  }, [notifData]);
+
   const searchHandler = (e) => {
     if (e.key === "Enter") {
       onSearchChange(e.target.value);
@@ -345,7 +349,7 @@ const MasterlistToolbar = (props) => {
         {/* Printing */}
         <Box className="masterlist-toolbar__addBtn">
           {onPrint && permissions?.split(", ").includes("print-fa") && (
-            <Badge color="error" badgeContent={notifData?.toTagCount} variant="dot">
+            <Badge color="error" badgeContent={notifData?.toTagCount || notifData?.toSmallToolTagging} variant="dot">
               <Button
                 component={Link}
                 variant="outlined"
@@ -382,7 +386,7 @@ const MasterlistToolbar = (props) => {
 
               <MenuItem onClick={handleOpenPrintRequest} dense>
                 <ListItemIcon>
-                  <Badge color="error" badgeContent={notifData?.toTagCount}>
+                  <Badge color="error" badgeContent={notifData?.toTagCount + notifData?.toSmallToolTagging}>
                     <PrintRounded />
                   </Badge>
                 </ListItemIcon>
@@ -644,7 +648,7 @@ const MasterlistToolbar = (props) => {
                       />
                     </MenuItem>
 
-                    <MenuItem dense>
+                    {/* <MenuItem dense>
                       <FormControlLabel
                         control={
                           <Checkbox
@@ -656,7 +660,7 @@ const MasterlistToolbar = (props) => {
                         }
                         label="To Depreciate"
                       />
-                    </MenuItem>
+                    </MenuItem> */}
 
                     <MenuItem dense>
                       <FormControlLabel
@@ -686,7 +690,7 @@ const MasterlistToolbar = (props) => {
                       />
                     </MenuItem>
 
-                    <Divider />
+                    {/* <Divider />
 
                     <MenuItem dense>
                       <FormControlLabel
@@ -699,7 +703,7 @@ const MasterlistToolbar = (props) => {
                         }
                         label="With Voucher"
                       />
-                    </MenuItem>
+                    </MenuItem> */}
                   </FormGroup>
                 </Menu>
               )}
