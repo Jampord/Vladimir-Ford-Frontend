@@ -9,6 +9,7 @@ import {
   Addchart,
   Analytics,
   PlaylistRemoveRounded,
+  Radar,
   RemoveFromQueue,
   RuleFolder,
   TransferWithinAStation,
@@ -38,6 +39,13 @@ const ReportList = [
     description: "List of GL Reports",
     path: "/reports/general-ledger-report",
     permission: "general-ledger-report",
+  },
+  {
+    icon: <Radar />,
+    label: "Purchase Request Recon",
+    description: "List of PR Recon",
+    path: "/reports/purchase-request-recon",
+    permission: "purchase-request-recon",
   },
 
   // {
