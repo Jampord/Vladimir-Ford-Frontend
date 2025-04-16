@@ -104,6 +104,7 @@ import GeneralLedgerReports from "./Pages/Reports/GeneralLedgerReports";
 import FixedAssetIndex from "./Pages/FixedAssets";
 import DepreciationPage from "./Pages/FixedAssets/Depreciation/DepreciationPage";
 import FixedAssetDepreciationView from "./Pages/FixedAssets/Depreciation/FixedAssetDepreciationView";
+import PurchaseRequestRecon from "./Pages/Reports/PurchaseRequestRecon";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -610,6 +611,11 @@ const router = createBrowserRouter([
                 path: "general-ledger-report",
                 element: <GeneralLedgerReports />,
                 handle: { permission: "general-ledger-report" },
+              },
+              {
+                path: "purchase-request-recon",
+                element: <PurchaseRequestRecon />,
+                handle: { permission: "purchase-request-recon" },
               },
               // {
               //   path: "report3",
