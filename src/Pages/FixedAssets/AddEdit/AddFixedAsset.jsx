@@ -519,6 +519,7 @@ const AddFixedAsset = (props) => {
     reset,
     watch,
     setValue,
+    trigger,
     getValues,
   } = useForm({
     resolver: yupResolver(schema),
@@ -548,14 +549,14 @@ const AddFixedAsset = (props) => {
 
       asset_description: "",
       asset_specification: "",
-      acquisition_date: null,
+      acquisition_date: "",
       accountability: null,
       accountable: null,
       cellphone_number: null,
       brand: "",
       care_of: "",
       voucher: "",
-      voucher_date: null,
+      voucher_date: "",
       receipt: "",
       po_number: "",
       quantity: 1,
@@ -567,10 +568,10 @@ const AddFixedAsset = (props) => {
 
       depreciation_method: null,
       est_useful_life: "",
-      release_date: null,
-      acquisition_cost: "",
-      months_depreciated: "",
-      scrap_value: "",
+      release_date: "",
+      acquisition_cost: null,
+      months_depreciated: null,
+      scrap_value: null,
       depreciable_basis: "",
       // accumulated_cost: "",
       // start_depreciation: null,
@@ -580,6 +581,9 @@ const AddFixedAsset = (props) => {
       // remaining_book_value: "",
     },
   });
+
+  console.log({ errors });
+  console.log({ isValid });
 
   // setError fetching ----------------------------------------------------------
   // useEffect(() => {
@@ -732,6 +736,7 @@ const AddFixedAsset = (props) => {
       // setValue("depreciation_per_year", data.depreciation_per_year);
       // setValue("depreciation_per_month", data.depreciation_per_month);
       // setValue("remaining_book_value", data.remaining_book_value);
+      trigger();
     }
   }, [data]);
 
@@ -1000,6 +1005,7 @@ const AddFixedAsset = (props) => {
             onOpen={() => (isMajorCategorySuccess ? null : majorCategoryTrigger())}
             loading={isMajorCategoryLoading}
             size="small"
+            disabled={data?.can_update !== 1}
             getOptionLabel={(option) => option.major_category_name}
             isOptionEqualToValue={(option, value) => option.major_category_name === value.major_category_name}
             renderInput={(params) => (
@@ -1039,9 +1045,10 @@ const AddFixedAsset = (props) => {
                 return obj?.id === watch("major_category_id")?.id;
               })[0]?.minor_category || []
             }
-            onOpen={() => (isMinorCategorySuccess ? null : minorCategoryTrigger())}
+            onOpen={() => (isMajorCategorySuccess ? null : majorCategoryTrigger())}
             loading={isMinorCategoryLoading}
             size="small"
+            disabled={data?.can_update !== 1}
             getOptionLabel={(option) => option.minor_category_name}
             isOptionEqualToValue={(option, value) => option.minor_category_name === value.minor_category_name}
             renderInput={(params) => (
@@ -1649,6 +1656,7 @@ const AddFixedAsset = (props) => {
               control={control}
               options={["STL", "One Time", "Supplier Rebase"]}
               size="small"
+              disabled={data?.can_update !== 1}
               renderInput={(params) => (
                 <TextField
                   color="secondary"
@@ -1677,7 +1685,7 @@ const AddFixedAsset = (props) => {
 
             <CustomAutoComplete
               autoComplete
-              disabled={watch("depreciation_method") === "Supplier Rebase"}
+              disabled={watch("depreciation_method") === "Supplier Rebase" || data?.can_update !== 1}
               size="small"
               name="depreciation_status_id"
               control={control}
@@ -1788,6 +1796,7 @@ const AddFixedAsset = (props) => {
                   label="Months Depreciated"
                   color="secondary"
                   size="small"
+                  disabled={data?.can_update !== 1}
                   error={!!errors?.months_depreciated}
                   helperText={errors?.months_depreciated?.message}
                   // isAllowed={(values) => {
@@ -1833,6 +1842,7 @@ const AddFixedAsset = (props) => {
                   name="scrap_value"
                   label="Scrap Value"
                   size="small"
+                  disabled={data?.can_update !== 1}
                   error={!!errors?.scrap_value}
                   helperText={errors?.scrap_value?.message}
                   prefix="₱"
