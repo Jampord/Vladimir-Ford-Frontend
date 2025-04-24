@@ -687,6 +687,13 @@ const FixedAssetDepreciationView = (props) => {
                         {dataApi?.data?.cycle_count_status?.cycle_count_status_name}
                       </Typography>
                     </Box>
+
+                    <Box className="tableCard__properties">
+                      Remarks:
+                      <Typography className="tableCard__info" fontSize="14px">
+                        {dataApi?.data?.remarks ? dataApi?.data?.remarks : "-"}
+                      </Typography>
+                    </Box>
                   </AccordionDetails>
                 </Accordion>
                 <Accordion>
