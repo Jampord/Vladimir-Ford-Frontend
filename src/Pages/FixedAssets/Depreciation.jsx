@@ -19,6 +19,7 @@ import {
   Card,
   Chip,
   Dialog,
+  Divider,
   Grow,
   IconButton,
   Slide,
@@ -64,6 +65,16 @@ import { useLazyGetDepartmentAllApiQuery } from "../../Redux/Query/Masterlist/Ym
 import { useLazyGetUnitAllApiQuery } from "../../Redux/Query/Masterlist/YmirCoa/Unit";
 import { useLazyGetSubUnitAllApiQuery } from "../../Redux/Query/Masterlist/YmirCoa/SubUnit";
 import { useLazyGetLocationAllApiQuery } from "../../Redux/Query/Masterlist/YmirCoa/Location";
+import {
+  useGetMajorCategoryAllApiQuery,
+  useLazyGetMajorCategoryAllApiQuery,
+} from "../../Redux/Query/Masterlist/Category/MajorCategory";
+import {
+  useGetMinorCategoryAllApiQuery,
+  useGetMinorCategorySmallToolsApiQuery,
+  useLazyGetMinorCategoryAllApiQuery,
+  useLazyGetMinorCategorySmallToolsApiQuery,
+} from "../../Redux/Query/Masterlist/Category/MinorCategory";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -81,6 +92,20 @@ const schema = yup.object().shape({
     })
     .required()
     .label("Depreciation Debit"),
+  second_depreciation_credit_id: yup
+    .string()
+    .transform((value) => {
+      return value?.sync_id.toString();
+    })
+    .nullable()
+    .label("Second Depreciation Credit"),
+  second_depreciation_debit_id: yup
+    .string()
+    .transform((value) => {
+      return value?.sync_id.toString();
+    })
+    .nullable()
+    .label("Second Depreciation Credit"),
   initial_credit_id: yup
     .string()
     .transform((value) => {
@@ -95,6 +120,20 @@ const schema = yup.object().shape({
     })
     .required()
     .label("Initial Debit"),
+  major_category_id: yup
+    .string()
+    .transform((value) => {
+      return value?.id.toString();
+    })
+    .required()
+    .label("Major Category"),
+  minor_category_id: yup
+    .string()
+    .transform((value) => {
+      return value?.id.toString();
+    })
+    .required()
+    .label("Minor Category"),
   department_id: yup.object().required().label("Department").typeError("Department is a required field"),
   company_id: yup.object().required().label("Company").typeError("Company is a required field"),
   business_unit_id: yup.object().required().label("Business Unit").typeError("Business Unit is a required field"),
@@ -140,6 +179,10 @@ const Depreciation = (props) => {
       unit_id: null,
       subunit_id: null,
       location_id: null,
+      major_category_id: null,
+      minor_category_id: null,
+      second_depreciation_debit_id: null,
+      second_depreciation_credit_id: null,
     },
   });
 
@@ -222,6 +265,34 @@ const Depreciation = (props) => {
     },
   ] = useLazyGetLocationAllApiQuery();
 
+  const {
+    data: majorCategoryData = [],
+    isLoading: isMajorCategoryLoading,
+    isError: isMajorCategoryError,
+  } = useLazyGetMajorCategoryAllApiQuery();
+
+  const [
+    minorCategoryTrigger,
+    {
+      data: minorCategoryData = [],
+      isLoading: isMinorCategoryLoading,
+      isError: isMinorCategoryError,
+      isSuccess: isMinorCategorySuccess,
+    },
+  ] = useLazyGetMinorCategoryAllApiQuery();
+
+  const [
+    minorCategorySmallToolsTrigger,
+    {
+      data: minorCategorySmallToolsData = [],
+      isLoading: isMinorCategorySmallToolsLoading,
+      isError: isMinorCategorySmallToolsError,
+      isSuccess: isMinorCategorySmallToolsSuccess,
+    },
+  ] = useLazyGetMinorCategorySmallToolsApiQuery();
+
+  console.log("minorCategoryData", minorCategoryData);
+
   const [
     postDepreciation,
     { data: depreciationData, isLoading: isDepreciationLoading, isSuccess: isDepreciationSuccess },
@@ -272,6 +343,9 @@ const Depreciation = (props) => {
       setValue("unit_id", data?.unit);
       setValue("subunit_id", data?.sub_unit);
       setValue("location_id", data?.location);
+      setValue("major_category_id", data?.major_category);
+      setValue("minor_category_id", data?.minor_category);
+      setValue("second_depreciation_credit_id", data?.initial_debit);
     }
   }, [data]);
 
@@ -288,7 +362,21 @@ const Depreciation = (props) => {
     if ((!locationData || locationData.length === 0) && data?.depreciation_method === "-") {
       locationTrigger();
     }
-  }, [departmentData, unitData, subUnitData, locationData, data]);
+    if (
+      (!minorCategoryData || minorCategoryData.length === 0) &&
+      data?.is_small_tools !== 1 &&
+      data?.depreciation_method === "-"
+    ) {
+      minorCategoryTrigger();
+    }
+    if (
+      (!minorCategorySmallToolsData || minorCategorySmallToolsData.length === 0) &&
+      data?.is_small_tools === 1 &&
+      data?.depreciation_method === "-"
+    ) {
+      minorCategorySmallToolsTrigger();
+    }
+  }, [departmentData, unitData, subUnitData, locationData, minorCategoryData, minorCategorySmallToolsData, data]);
 
   // console.log("1", watch("initial_debit_id"));
   // console.log("2", watch("initial_credit_id"));
@@ -442,9 +530,17 @@ const Depreciation = (props) => {
       unit_id: formData.unit_id.id,
       subunit_id: formData.subunit_id.id,
       location_id: formData.location_id.id,
+      second_depreciation_credit_id:
+        watch("minor_category_id")?.minor_category_name !== data?.minor_category?.minor_category_name
+          ? formData.second_depreciation_credit_id
+          : "",
+      second_depreciation_debit_id:
+        watch("minor_category_id")?.minor_category_name !== data?.minor_category?.minor_category_name
+          ? formData.second_depreciation_debit_id
+          : "",
     };
 
-    // console.log("newFormData", newFormData);
+    console.log("newFormData", newFormData);
     dispatch(
       openConfirm({
         icon: Help,
@@ -850,6 +946,20 @@ const Depreciation = (props) => {
                           {data?.depreciation_credit?.account_title_name}
                         </Typography>
                       </Box>
+                      <Box className="tableCard__properties">
+                        Second Debit:
+                        <Typography className="tableCard__info" fontSize="14px">
+                          {data?.second_depreciation_debit?.account_title_code} -{" "}
+                          {data?.second_depreciation_debit?.account_title_name}
+                        </Typography>
+                      </Box>
+                      <Box className="tableCard__properties">
+                        Second Credit:
+                        <Typography className="tableCard__info" fontSize="14px">
+                          {data?.second_depreciation_credit?.account_title_code} -{" "}
+                          {data?.second_depreciation_credit?.account_title_name}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Card>
 
@@ -923,6 +1033,75 @@ const Depreciation = (props) => {
                   }}
                 >
                   <Stack gap={2} component="form" onSubmit={handleSubmit(onSubmitHandler)}>
+                    <Typography fontFamily="Anton" color="secondary">
+                      Category
+                    </Typography>
+
+                    <CustomAutoComplete
+                      autoComplete
+                      name="major_category_id"
+                      disabled
+                      control={control}
+                      options={majorCategoryData}
+                      loading={isMajorCategoryLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.major_category_name}
+                      isOptionEqualToValue={(option, value) =>
+                        option.major_category_name === value?.major_category_name
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          color="secondary"
+                          {...params}
+                          label="Major Category"
+                          error={!!errors?.major_category_id?.message}
+                          helperText={errors?.major_category_id?.message}
+                        />
+                      )}
+                    />
+
+                    <CustomAutoComplete
+                      autoComplete
+                      name="minor_category_id"
+                      control={control}
+                      options={data?.is_small_tools === 1 ? minorCategorySmallToolsData : minorCategoryData}
+                      loading={data?.is_small_tools === 1 ? isMinorCategorySmallToolsLoading : isMinorCategoryLoading}
+                      onOpen={() =>
+                        data?.is_small_tools === 1
+                          ? isMinorCategorySmallToolsSuccess
+                            ? null
+                            : minorCategorySmallToolsTrigger()
+                          : isMinorCategorySuccess
+                          ? null
+                          : minorCategoryTrigger()
+                      }
+                      size="small"
+                      getOptionLabel={(option) => option.minor_category_name}
+                      isOptionEqualToValue={(option, value) =>
+                        option.minor_category_name === value?.minor_category_name
+                      }
+                      renderInput={(params) => (
+                        <TextField
+                          color="secondary"
+                          {...params}
+                          label="Minor Category"
+                          error={!!errors?.minor_category_id?.message}
+                          helperText={errors?.minor_category_id?.message}
+                        />
+                      )}
+                      onChange={(_, value) => {
+                        console.log("value", value);
+                        if (value) {
+                          setValue("major_category_id", value.major_category);
+                        } else {
+                          setValue("major_category_id", null);
+                        }
+                        return value;
+                      }}
+                    />
+
+                    {console.log("watch", watch("minor_category_id"))}
+
                     <Typography fontFamily="Anton" color="secondary">
                       Depreciate Asset
                     </Typography>
@@ -1011,6 +1190,57 @@ const Depreciation = (props) => {
                         />
                       )}
                     />
+
+                    {watch("minor_category_id")?.minor_category_name !== data?.minor_category?.minor_category_name && (
+                      <>
+                        <Divider />
+                        <CustomAutoComplete
+                          autoComplete
+                          name="second_depreciation_debit_id"
+                          // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
+                          control={control}
+                          options={watch("minor_category_id")?.initial_debit?.depreciation_debit || []}
+                          // loading={isAccountTitleLoading}
+                          size="small"
+                          getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
+                          isOptionEqualToValue={(option, value) =>
+                            option.account_title_code === value.account_title_code
+                          }
+                          renderInput={(params) => (
+                            <TextField
+                              color="secondary"
+                              {...params}
+                              label="Second Depreciation Debit"
+                              error={!!errors?.second_depreciation_debit_id}
+                              helperText={errors?.second_depreciation_debit_id?.message}
+                            />
+                          )}
+                        />
+                        <CustomAutoComplete
+                          autoComplete
+                          name="second_depreciation_credit_id"
+                          // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
+                          control={control}
+                          disabled
+                          options={accountTitleData}
+                          loading={isAccountTitleLoading}
+                          size="small"
+                          getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
+                          isOptionEqualToValue={(option, value) =>
+                            option.account_title_code === value.account_title_code
+                          }
+                          renderInput={(params) => (
+                            <TextField
+                              color="secondary"
+                              {...params}
+                              label="Second Depreciation Credit"
+                              error={!!errors?.second_depreciation_credit_id}
+                              helperText={errors?.second_depreciation_credit_id?.message}
+                            />
+                          )}
+                        />
+                      </>
+                    )}
 
                     <Typography fontFamily="Anton" color="secondary">
                       Charging Information
@@ -1188,7 +1418,12 @@ const Depreciation = (props) => {
                         variant="contained"
                         size="small"
                         startIcon={<TrendingDownTwoTone />}
-                        disabled={!isValid}
+                        disabled={
+                          !isValid ||
+                          (watch("minor_category_id")?.minor_category_name !==
+                            data?.minor_category?.minor_category_name &&
+                            (!watch("second_depreciation_credit_id") || !watch("second_depreciation_debit_id")))
+                        }
                         sx={{ alignSelf: "end" }}
                       >
                         Depreciate
