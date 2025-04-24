@@ -97,6 +97,8 @@ import {
   BadgeSharp,
   CreditCard,
   Analytics,
+  PriceChange,
+  Radar,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -105,6 +107,7 @@ const Sidebar = () => {
   const [isOverflowing, setIsOverflowing] = useState(false);
   const [masterListCollapse, setMasterListCollapse] = useState(false);
   const [userManagementCollapse, setUserManagementCollapse] = useState(false);
+  const [fixedAssetCollapse, setFixedAssetCollapse] = useState(false);
   const [settingsCollapse, setSettingsCollapse] = useState(false);
   const [assetRequisitionCollapse, setAssetRequisitionCollapse] = useState(false);
   const [assetMovementCollapse, setAssetMovementCollapse] = useState(false);
@@ -142,6 +145,7 @@ const Sidebar = () => {
     setAssetMovementCollapse(false);
     setApprovingCollapse(false);
     setReportCollapse(false);
+    setFixedAssetCollapse(false);
   };
 
   // NOTIFICATION
@@ -165,6 +169,7 @@ const Sidebar = () => {
     const routeStateMap = {
       masterlist: setMasterListCollapse,
       "user-management": setUserManagementCollapse,
+      "fixed-asset": setFixedAssetCollapse,
       settings: setSettingsCollapse,
       "asset-requisition": setAssetRequisitionCollapse,
       "asset-movement": setAssetMovementCollapse,
@@ -338,6 +343,7 @@ const Sidebar = () => {
         // e.preventDefault();
         setMasterListCollapse(!masterListCollapse);
         setUserManagementCollapse(false);
+        setFixedAssetCollapse(false);
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
@@ -376,6 +382,7 @@ const Sidebar = () => {
         setAssetMovementCollapse(false);
         setApprovingCollapse(false);
         setReportCollapse(false);
+        setFixedAssetCollapse(false);
         closeCollapse;
         dispatch(openSidebar());
       },
@@ -387,7 +394,35 @@ const Sidebar = () => {
       path: "/fixed-asset",
       permission: "fixed-asset",
       notification: notifData?.toTagCount,
-      setter: closeCollapse,
+      children: [
+        {
+          label: "Fixed Asset",
+          icon: InventoryRounded,
+          path: "/fixed-asset/fixed-asset",
+          permission: "fixed-asset",
+        },
+        {
+          label: "Depreciation",
+          icon: PriceChange,
+          path: "/fixed-asset/depreciation",
+          permission: "fixed-asset",
+        },
+      ],
+      open: fixedAssetCollapse,
+      // setter: closeCollapse,
+      setter: (e) => {
+        // e.preventDefault();
+        setFixedAssetCollapse(!fixedAssetCollapse);
+        setUserManagementCollapse(false);
+        setMasterListCollapse(false);
+        setSettingsCollapse(false);
+        setAssetRequisitionCollapse(false);
+        setAssetMovementCollapse(false);
+        setApprovingCollapse(false);
+        setReportCollapse(false);
+        closeCollapse;
+        dispatch(openSidebar());
+      },
     },
 
     {
@@ -429,6 +464,7 @@ const Sidebar = () => {
         // e.preventDefault();
         setSettingsCollapse(!settingsCollapse);
         setUserManagementCollapse(false);
+        setFixedAssetCollapse(false);
         setMasterListCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
@@ -498,6 +534,7 @@ const Sidebar = () => {
         setAssetRequisitionCollapse(!assetRequisitionCollapse);
         setMasterListCollapse(false);
         setUserManagementCollapse(false);
+        setFixedAssetCollapse(false);
         setSettingsCollapse(false);
         setAssetMovementCollapse(false);
         setApprovingCollapse(false);
@@ -563,6 +600,7 @@ const Sidebar = () => {
         setAssetMovementCollapse(!assetMovementCollapse);
         setMasterListCollapse(false);
         setUserManagementCollapse(false);
+        setFixedAssetCollapse(false);
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setApprovingCollapse(false);
@@ -626,6 +664,7 @@ const Sidebar = () => {
         setApprovingCollapse(!approvingCollapse);
         setMasterListCollapse(false);
         setUserManagementCollapse(false);
+        setFixedAssetCollapse(false);
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
@@ -681,17 +720,24 @@ const Sidebar = () => {
           setter: closeCollapse,
         },
         {
-          label: "Transfer Reports",
+          label: "Transfer Report",
           icon: Addchart,
           path: "/reports/transfer-report",
           permission: "transfer-report",
           setter: closeCollapse,
         },
         {
-          label: "General Ledger Reports",
+          label: "GL Report",
           icon: Analytics,
           path: "/reports/general-ledger-report",
           permission: "general-ledger-report",
+          setter: closeCollapse,
+        },
+        {
+          label: "PR Recon",
+          icon: Radar,
+          path: "/reports/purchase-request-recon",
+          permission: "purchase-request-recon",
           setter: closeCollapse,
         },
         // {
@@ -707,6 +753,7 @@ const Sidebar = () => {
         setApprovingCollapse(false);
         setMasterListCollapse(false);
         setUserManagementCollapse(false);
+        setFixedAssetCollapse(false);
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
