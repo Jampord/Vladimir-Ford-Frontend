@@ -177,6 +177,7 @@ const FixedAssetView = (props) => {
   });
 
   // console.log("FAData", dataApi);
+  // console.log("Data", data);
 
   const [getCalcDepreApi, { data: calcDepreApi, refetch: calcDepreApiRefetch }] = useLazyGetCalcDepreApiQuery();
   const [postCalcDepreAddCostApi, { data: calcDepreAddCostApi }] = usePostCalcDepreAddCostApiMutation();
@@ -368,7 +369,11 @@ const FixedAssetView = (props) => {
       remaining_book_value,
 
       print_count,
+
+      can_update,
     } = props;
+
+    console.log({ props });
 
     setUpdateFixedAsset({
       status: true,
@@ -431,6 +436,8 @@ const FixedAssetView = (props) => {
       remaining_book_value,
 
       print_count,
+
+      can_update,
     });
   };
 
@@ -513,7 +520,7 @@ const FixedAssetView = (props) => {
   };
 
   const handleTableData = (data) => {
-    navigate(`/fixed-asset/${data.vladimir_tag_number || tag_number}`, {
+    navigate(`/fixed-asset/fixed-asset/${data.vladimir_tag_number || tag_number}`, {
       // state: { ...data, status },
       state: { ...data, tag_number },
     });
@@ -533,7 +540,7 @@ const FixedAssetView = (props) => {
   });
 
   const onBackHandler = () => {
-    dataApi.data?.is_additional_cost === 0 ? navigate("/fixed-asset") : navigate(-1);
+    dataApi.data?.is_additional_cost === 0 ? navigate("/fixed-asset/fixed-asset") : navigate(-1);
   };
 
   const handleOpenInclusion = () => {
@@ -681,7 +688,13 @@ const FixedAssetView = (props) => {
                     </LoadingButton>
                   )}
 
-                <ActionMenu data={dataApi?.data} setStatusChange={setStatusChange} onUpdateHandler={onUpdateHandler} />
+                {dataApi?.data?.can_update === 1 && (
+                  <ActionMenu
+                    data={dataApi?.data}
+                    setStatusChange={setStatusChange}
+                    onUpdateHandler={onUpdateHandler}
+                  />
+                )}
               </Box>
             </Box>
 
@@ -1058,6 +1071,13 @@ const FixedAssetView = (props) => {
                       Cycle Count Status:
                       <Typography className="tableCard__info" fontSize="14px">
                         {dataApi?.data?.cycle_count_status?.cycle_count_status_name}
+                      </Typography>
+                    </Box>
+
+                    <Box className="tableCard__properties">
+                      Remarks:
+                      <Typography className="tableCard__info" fontSize="14px">
+                        {dataApi?.data?.remarks ? dataApi?.data?.remarks : "-"}
                       </Typography>
                     </Box>
                   </AccordionDetails>
