@@ -682,6 +682,14 @@ const Sidebar = () => {
       setter: closeCollapse,
     },
 
+    {
+      label: "Warehouse Monitoring",
+      icon: Warehouse,
+      path: "/warehouse-monitoring",
+      permission: "warehouse-monitoring",
+      setter: closeCollapse,
+    },
+
     // {
     //   label: "Asset for Tagging",
     //   icon: LocalOffer,
