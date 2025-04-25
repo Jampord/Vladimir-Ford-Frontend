@@ -18,10 +18,32 @@ export const purchaseRequestReconApi = createApi({
 
   endpoints: (builder) => ({
     getPurchaseRequestRecon: builder.query({
-      query: () => `/recon/pr-recon`,
+      query: (params) =>
+        `/recon/pr-recon?year_month=${params.year_month}&per_page=${params.per_page}&page=${params.page}&pagination=${params.pagination}`,
+      providesTags: ["PurchaseRequestRecon"],
+    }),
+
+    getPurchaseRequestReconExport: builder.query({
+      query: (params) =>
+        // `/recon/pr-recon?year_month=${params.year_month}&per_page=${params.per_page}&page=${params.page}&pagination=${params.pagination}`,
+        {
+          const queryParams = [`per_page=${params.per_page}`, `page=${params.page}`, `pagination=${params.pagination}`];
+
+          if (params.year_month) {
+            queryParams.push(`year_month=${params.year_month}`);
+          }
+
+          const queryString = queryParams.join("&");
+          return `/recon/pr-recon?${queryString}`;
+        },
+
       providesTags: ["PurchaseRequestRecon"],
     }),
   }),
 });
 
-export const { useGetPurchaseRequestReconQuery } = purchaseRequestReconApi;
+export const {
+  useGetPurchaseRequestReconQuery,
+  useLazyGetPurchaseRequestReconQuery,
+  useLazyGetPurchaseRequestReconExportQuery,
+} = purchaseRequestReconApi;
