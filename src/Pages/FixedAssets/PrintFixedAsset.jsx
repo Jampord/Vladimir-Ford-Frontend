@@ -153,6 +153,7 @@ const PrintFixedAsset = (props) => {
     setTabValue(newValue);
     setPrintMemo(false);
     reset();
+    refetch();
   };
 
   // Table Sorting --------------------------------
