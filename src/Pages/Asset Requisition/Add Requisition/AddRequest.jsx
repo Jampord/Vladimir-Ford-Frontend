@@ -2679,6 +2679,8 @@ const AddRequisition = (props) => {
             onClick={() => {
               transactionData?.requestMonitoring
                 ? navigate("/request-monitoring")
+                : transactionData?.warehouseMonitoring
+                ? navigate("/warehouse-monitoring")
                 : navigate("/asset-requisition/requisition");
               // navigate(-1);
               // deleteAllRequest();
@@ -2694,7 +2696,7 @@ const AddRequisition = (props) => {
             {/* {transactionData ? (transactionData?.process_count === 1 ? formInputs() : null) : formInputs()} */}
             {!transactionData
               ? formInputs()
-              : transactionData?.requestMonitoring
+              : transactionData?.requestMonitoring || transactionData?.warehouseMonitoring
               ? null
               : transactionData?.can_edit === 1 && formInputs()}
 
@@ -2757,7 +2759,7 @@ const AddRequisition = (props) => {
                       <TableCell className="tbl-cell">Cellphone #</TableCell>
                       <TableCell className="tbl-cell">Capex Num / Unit Charging</TableCell>
                       <TableCell className="tbl-cell">Attachments</TableCell>
-                      {transactionData?.requestMonitoring
+                      {transactionData?.requestMonitoring || transactionData?.warehouseMonitoring
                         ? null
                         : (transactionData?.can_edit === 1 || !transactionData) && (
                             <TableCell className="tbl-cell">Action</TableCell>
@@ -3103,7 +3105,7 @@ const AddRequisition = (props) => {
                               )}
                             </TableCell>
 
-                            {transactionData?.requestMonitoring
+                            {transactionData?.requestMonitoring || transactionData?.warehouseMonitoring
                               ? null
                               : data?.can_edit === 1 &&
                                 data?.is_removed === 0 && (
