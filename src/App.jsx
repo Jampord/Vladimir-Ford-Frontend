@@ -105,6 +105,7 @@ import FixedAssetIndex from "./Pages/FixedAssets";
 import DepreciationPage from "./Pages/FixedAssets/Depreciation/DepreciationPage";
 import FixedAssetDepreciationView from "./Pages/FixedAssets/Depreciation/FixedAssetDepreciationView";
 import PurchaseRequestRecon from "./Pages/Reports/PurchaseRequestRecon";
+import WarehouseMonitoring from "./Pages/Asset Requisition/WarehouseMonitoring";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -572,6 +573,18 @@ const router = createBrowserRouter([
             path: "request-monitoring/:transaction_number",
             element: <AddRequisition />,
             handle: { permission: "request-monitoring" },
+          },
+
+          {
+            path: "warehouse-monitoring",
+            element: <WarehouseMonitoring />,
+            handle: { permission: "warehouse-monitoring" },
+          },
+
+          {
+            path: "warehouse-monitoring/:transaction_number",
+            element: <AddRequisition />,
+            handle: { permission: "warehouse-monitoring" },
           },
 
           {
