@@ -149,7 +149,10 @@ const PurchaseRequestRecon = () => {
               views={["month", "year"]}
               maxDate={new Date()}
               value={selectedDate || new Date()} // Bind the state to the DatePicker
-              onChange={(newValue) => setSelectedDate(newValue)} // Update state on change
+              onChange={(newValue) => {
+                setSelectedDate(newValue);
+                setPage(1);
+              }} // Update state on change
               // slotProps={{
               //   textField: {
               //     helperText: selectedDate === null && "Select a Month and Year to fetch data.",
