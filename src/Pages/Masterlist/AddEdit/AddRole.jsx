@@ -203,6 +203,7 @@ const AddRole = (props) => {
 
     // Monitoring
     "request-monitoring",
+    "warehouse-monitoring",
 
     // Reports
     "reports",
@@ -334,6 +335,7 @@ const AddRole = (props) => {
       { label: "Printing of Tag", value: "print-fa" },
       { label: "Settings", value: "settings" },
       { label: "Request Monitoring", value: "request-monitoring" },
+      { label: "Warehouse Monitoring", value: "warehouse-monitoring" },
       // { label: "sample", value: "sample" },
     ];
 
