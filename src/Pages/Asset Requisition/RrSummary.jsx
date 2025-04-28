@@ -61,6 +61,7 @@ const RrSummary = (props) => {
 
   const [vladimirTag, setVladimirTag] = useState([]);
   const [reference, setReference] = useState([]);
+  const [requestDetails, setRequestDetails] = useState();
   const [isVladimirTag, setIsVladimirTag] = useState(true);
 
   const userData = JSON.parse(localStorage.getItem("user"));
@@ -345,6 +346,7 @@ const RrSummary = (props) => {
                                       handleViewData();
                                       setVladimirTag(data.vladimir_tag_number);
                                       setReference(data.reference_number);
+                                      setRequestDetails(data.request_details);
                                     }}
                                   >
                                     <Visibility />
@@ -392,70 +394,114 @@ const RrSummary = (props) => {
         open={dialog}
         TransitionComponent={Grow}
         onClose={() => dispatch(closeDialog())}
-        PaperProps={{ sx: { borderRadius: "10px", width: "min(450px, 800px)", p: 3 } }}
+        PaperProps={{ sx: { borderRadius: "10px", width: "min(800px, 900px)", p: 3 } }}
       >
-        <Stack maxWidth="450px" gap={2}>
+        <Stack maxWidth="800px" gap={2}>
           <Typography fontSize={24} fontFamily="Anton" color="secondary" align="center">
             Tagged Items
           </Typography>
 
           <Stack gap={3}>
-            <Stack gap={1}>
-              <Typography fontFamily="Anton" color="secondary.light">
-                Vladimir Tag
-              </Typography>
-              <Autocomplete
-                readOnly
-                multiple
-                name="vladimir_tag_number"
-                options={vladimirTag}
-                value={vladimirTag}
-                size="small"
-                // PaperComponent={{ maxHeight: "350px" }}
-                renderInput={(params) => (
-                  <TextField
-                    // label="Vladimir Tag"
-                    color="secondary"
+            <TableContainer className="mcontainer__th-body">
+              <Table className="mcontainer__table" stickyHeader>
+                <TableHead>
+                  <TableRow
                     sx={{
-                      ".MuiInputBase-root ": { borderRadius: "10px" },
-                      maxHeight: "150px",
-                      overflow: "auto",
+                      "& > *": {
+                        fontWeight: "bold!important",
+                        whiteSpace: "nowrap",
+                      },
                     }}
-                    {...params}
-                  />
-                )}
-              />
-            </Stack>
+                  >
+                    <TableCell className="tbl-cell">ID</TableCell>
 
-            <Stack gap={1}>
-              <Typography fontFamily="Anton" color="secondary.light">
-                Reference No.
-              </Typography>
-              <Autocomplete
-                readOnly
-                multiple
-                name="reference_number"
-                options={reference}
-                value={reference}
-                size="small"
-                renderInput={(params) => (
-                  <TextField
-                    // label="Reference No."
-                    color="secondary"
-                    sx={{
-                      ".MuiInputBase-root ": { borderRadius: "10px" },
-                      pointer: "default",
-                      maxHeight: "150px",
-                      overflow: "auto",
-                    }}
-                    {...params}
-                  />
-                )}
-              />
-            </Stack>
+                    <TableCell className="tbl-cell">Vladimir Tag Number</TableCell>
+
+                    <TableCell className="tbl-cell">Asset Description</TableCell>
+
+                    <TableCell className="tbl-cell">Asset Specification</TableCell>
+
+                    <TableCell className="tbl-cell" align="center">
+                      Quantity
+                    </TableCell>
+
+                    <TableCell className="tbl-cell" align="center">
+                      Acquisition Cost
+                    </TableCell>
+
+                    <TableCell className="tbl-cell text-center">Type of Request</TableCell>
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {requestDetails === 0 ? (
+                    <NoRecordsFound heightData="small" />
+                  ) : (
+                    <>
+                      {requestDetails?.map((data, index) => (
+                        <TableRow
+                          key={index}
+                          sx={{
+                            "&:last-child td, &:last-child th": {
+                              borderBottom: 0,
+                            },
+                          }}
+                        >
+                          <TableCell className="tbl-cell">
+                            <Chip
+                              size="small"
+                              color={"primary"}
+                              label={
+                                <Typography fontWeight={600} fontSize="12px">
+                                  {data.id}
+                                </Typography>
+                              }
+                            />
+                          </TableCell>
+
+                          <TableCell className="tbl-cell">{data?.vladimir_tag_number}</TableCell>
+
+                          <TableCell className="tbl-cell ">
+                            <Typography fontSize="12px" color="secondary.main">
+                              {data.asset_description}
+                            </Typography>
+                          </TableCell>
+
+                          <TableCell className="tbl-cell ">
+                            <Typography fontSize="12px" color="secondary.main">
+                              {data.asset_specification}
+                            </Typography>
+                          </TableCell>
+
+                          <TableCell className="tbl-cell tr-cen-pad45" align="center">
+                            {data?.quantity}
+                          </TableCell>
+
+                          <TableCell className="tbl-cell" align="center">
+                            ₱{data?.acquisition_cost}
+                          </TableCell>
+
+                          <TableCell className="tbl-cell tr-cen-pad45" align="center">
+                            {data?.type_of_request}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </Stack>
 
-          <Button variant="contained" size="small" color="secondary" onClick={() => dispatch(closeDialog())}>
+          <Button
+            variant="contained"
+            size="small"
+            color="secondary"
+            onClick={() => {
+              dispatch(closeDialog());
+              setRequestDetails(null);
+            }}
+          >
             Close
           </Button>
         </Stack>
