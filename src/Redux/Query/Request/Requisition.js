@@ -33,6 +33,11 @@ export const requisitionApi = createApi({
         `asset-request?&search=${params.search}&per_page=${params.per_page}&status=${params.status}&page=${params.page}&for_monitoring=1&filter=${params.filter}`,
       providesTags: ["Requisition"],
     }),
+    getWarehouseRequisitionMonitoringApi: builder.query({
+      query: (params) =>
+        `asset-request?&search=${params.search}&per_page=${params.per_page}&status=${params.status}&page=${params.page}&for_monitoring=1&filter=${params.filter}&warehouse_monitoring=1`,
+      providesTags: ["Requisition"],
+    }),
 
     getRequisitionAllApi: builder.query({
       query: () => `asset-request?pagination=none`,
@@ -134,6 +139,24 @@ export const requisitionApi = createApi({
       // `/export-aging?from=${params?.from}&to=${params?.to}&data_all=${params?.export}`,
       providesTags: ["Requisition"],
     }),
+
+    getWarehouseExportApi: builder.query({
+      query: (params) => {
+        const queryParams = [`data_all=${params?.export}`];
+
+        if (params.from) {
+          queryParams.push(`from=${params?.from}`);
+        }
+        if (params.to) {
+          queryParams.push(`to=${params?.to}`);
+        }
+        const queryString = queryParams.join("&");
+        return `/export-aging?export_monitoring=1&${queryString}`;
+      },
+
+      // `/export-aging?from=${params?.from}&to=${params?.to}&data_all=${params?.export}`,
+      providesTags: ["Requisition"],
+    }),
   }),
 });
 
@@ -142,6 +165,7 @@ export const {
   useGetRequisitionPerItemApiQuery,
   useGetRequisitionMonitoringApiQuery,
   useLazyGetRequisitionMonitoringApiQuery,
+  useGetWarehouseRequisitionMonitoringApiQuery,
   useGetRequisitionAllApiQuery,
   useLazyGetRequisitionAllApiQuery,
   useGetRequisitionIdApiQuery,
@@ -155,4 +179,5 @@ export const {
   useVoidRequisitionApiMutation,
   useDeleteRequisitionReferenceApiMutation,
   useLazyGetRequestExportApiQuery,
+  useLazyGetWarehouseExportApiQuery,
 } = requisitionApi;
