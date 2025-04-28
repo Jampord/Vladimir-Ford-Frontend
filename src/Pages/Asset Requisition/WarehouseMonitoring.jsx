@@ -43,6 +43,7 @@ import moment from "moment";
 import ExportRequestMonitoring from "./ExportRequestMonitoring";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 import { TabContext } from "@mui/lab";
+import ExportWarehouseMonitoring from "./ExportWarehouseMonitoring";
 
 const WarehouseMonitoring = () => {
   const [search, setSearch] = useState("");
@@ -446,8 +447,8 @@ const WarehouseMonitoring = () => {
                 </TableContainer>
               </Box>
 
-              {/* <Box className="mcontainer__pagination-export"> */}
-              {/* <Button
+              <Box className="mcontainer__pagination-export">
+                <Button
                   className="mcontainer__export"
                   variant="outlined"
                   size="small"
@@ -462,17 +463,17 @@ const WarehouseMonitoring = () => {
                   }}
                 >
                   EXPORT
-                </Button> */}
+                </Button>
 
-              <CustomTablePagination
-                total={requisitionData?.total}
-                success={requisitionSuccess}
-                current_page={requisitionData?.current_page}
-                per_page={requisitionData?.per_page}
-                onPageChange={pageHandler}
-                onRowsPerPageChange={perPageHandler}
-              />
-              {/* </Box> */}
+                <CustomTablePagination
+                  total={requisitionData?.total}
+                  success={requisitionSuccess}
+                  current_page={requisitionData?.current_page}
+                  per_page={requisitionData?.per_page}
+                  onPageChange={pageHandler}
+                  onRowsPerPageChange={perPageHandler}
+                />
+              </Box>
             </Box>
           )}
         </Stack>
@@ -493,7 +494,7 @@ const WarehouseMonitoring = () => {
         // onClose={() => dispatch(closeExport())}
         PaperProps={{ sx: { maxWidth: "1320px", borderRadius: "10px", p: 3 } }}
       >
-        <ExportRequestMonitoring />
+        <ExportWarehouseMonitoring />
       </Dialog>
     </Box>
   );
