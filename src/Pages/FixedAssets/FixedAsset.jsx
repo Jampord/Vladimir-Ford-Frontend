@@ -136,6 +136,10 @@ const FixedAsset = (props) => {
 
   const drawer = useSelector((state) => state.booleanState.drawer);
 
+  useEffect(() => {
+    dispatch(closeDrawer());
+  }, []);
+
   // console.log("drawer", drawer);
 
   const drawer1 = useSelector((state) => state.booleanState.drawerMultiple.drawer1);
