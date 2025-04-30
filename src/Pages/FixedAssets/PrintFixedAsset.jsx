@@ -426,6 +426,7 @@ const PrintFixedAsset = (props) => {
             // );
             dispatch(closeConfirm());
             reset();
+            refetch();
           } catch (err) {
             console.log(err.data.message);
             if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
@@ -496,6 +497,7 @@ const PrintFixedAsset = (props) => {
             }).unwrap();
             setPrintAssignmentMemo(true);
             reset();
+            refetch();
           } catch (err) {
             console.log(err.data.message);
             if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
