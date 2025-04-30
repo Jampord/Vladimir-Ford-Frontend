@@ -211,6 +211,7 @@ const AddRole = (props) => {
     "transfer-report",
     "general-ledger-report",
     "purchase-request-recon",
+    "depreciation-monthly-report",
 
     // Setup settings
     "ip-setup",
@@ -244,7 +245,13 @@ const AddRole = (props) => {
     "approving-disposal",
     "approving-evaluation",
   ];
-  const reports = ["pr-report", "transfer-report", "general-ledger-report", "purchase-request-recon"];
+  const reports = [
+    "pr-report",
+    "transfer-report",
+    "general-ledger-report",
+    "purchase-request-recon",
+    "depreciation-monthly-report",
+  ];
   const setupSettings = ["ip-setup", "token-setup"];
 
   const onSubmitHandler = (formData) => {
@@ -658,6 +665,18 @@ const AddRole = (props) => {
               <Checkbox
                 {...register("access_permission")}
                 checked={watch("access_permission")?.includes("purchase-request-recon")}
+              />
+            }
+          />
+
+          <FormControlLabel
+            disabled={data.action === "view"}
+            label="Depreciation Monthly Report"
+            value="depreciation-monthly-report"
+            control={
+              <Checkbox
+                {...register("access_permission")}
+                checked={watch("access_permission")?.includes("depreciation-monthly-report")}
               />
             }
           />
@@ -1164,6 +1183,7 @@ const AddRole = (props) => {
                                     "transfer-report",
                                     "general-ledger-report",
                                     "purchase-request-recon",
+                                    "depreciation-monthly-report",
                                   ]),
                                 ]);
                               } else {
