@@ -3,7 +3,14 @@ import {
   Autocomplete,
   Box,
   Button,
+  Card,
+  CardActionArea,
+  CardContent,
+  CardMedia,
   Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Divider,
   IconButton,
   InputAdornment,
@@ -21,7 +28,15 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useGetSedarUsersApiQuery } from "../../../Redux/Query/SedarUserApi";
 import { LoadingButton } from "@mui/lab";
-import { closeDialog, closeDialog1, openDialog1 } from "../../../Redux/StateManagement/booleanStateSlice";
+import {
+  closeDialog,
+  closeDialog1,
+  closeDialog2,
+  closeDialog3,
+  openDialog1,
+  openDialog2,
+  openDialog3,
+} from "../../../Redux/StateManagement/booleanStateSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { usePutAssetReleasingMutation, usePutSaveReleasingMutation } from "../../../Redux/Query/Request/AssetReleasing";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
@@ -37,6 +52,12 @@ import { useLazyGetLocationAllApiQuery } from "../../../Redux/Query/Masterlist/Y
 import { useLazyGetAccountTitleAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/AccountTitle";
 import CustomImgAttachment from "../../../Components/Reusable/CustomImgAttachment";
 import AttachmentActive from "../../../Img/SVG/AttachmentActive.svg";
+import CustomWebcam from "../../../Components/Reusable/CustomWebcam";
+import AttachmentIcon from "../../../Img/SVG/Attachment.svg";
+import AttachmentError from "../../../Img/SVG/AttachmentError.svg";
+import Webcam from "react-webcam";
+import WebCamSVG from "../../../Img/SVG/WebCam.svg";
+import uploadSVG from "../../../Img/SVG/upload.svg";
 
 const schema = yup.object().shape({
   department_id: yup.object().required().label("Department").typeError("Department is a required field"),
@@ -96,6 +117,11 @@ const AddReleasingInfo = (props) => {
   const [viewImage, setViewImage] = useState(null);
   const [base64Image, setBase64Image] = useState(null);
   const [currentSchema, setCurrentSchema] = useState(schema);
+  const [capturedImage, setCapturedImage] = useState(null);
+  const [file, setFile] = useState(null);
+
+  // console.log("file", file);
+  // console.log("capturedImage", capturedImage);
 
   const signatureRef = useRef();
   const receiverMemoRef = useRef(null);
@@ -103,7 +129,8 @@ const AddReleasingInfo = (props) => {
   const authorizationLetterRef = useRef(null);
 
   const dialog = useSelector((state) => state.booleanState?.dialogMultiple?.dialog1);
-  const dialog1 = useSelector((state) => state.booleanState?.dialogMultiple?.dialog2);
+  const dialog2 = useSelector((state) => state.booleanState?.dialogMultiple?.dialog2);
+  const dialog3 = useSelector((state) => state.booleanState?.dialogMultiple?.dialog3);
 
   const {
     handleSubmit,
@@ -328,7 +355,7 @@ const AddReleasingInfo = (props) => {
   // console.log(warehouseNumberData);
 
   const onSubmitHandler = async (formData) => {
-    // console.log(formData);
+    // console.log({ formData });
     // fileToBase64
     const fileToBase64 = (file) => {
       return new Promise((resolve, reject) => {
@@ -342,7 +369,7 @@ const AddReleasingInfo = (props) => {
     };
 
     // Formats
-    const receiverImgBase64 = formData?.receiver_img && (await fileToBase64(formData.receiver_img));
+    const receiverImgBase64 = formData?.receiver_img?.includes("base64") ? capturedImage : await fileToBase64(file);
     const assignmentMemoImgBase64 = formData?.assignment_memo_img && (await fileToBase64(formData.assignment_memo_img));
     const authorizationLetterImgBase64 =
       formData?.authorization_memo_img && (await fileToBase64(formData.authorization_memo_img));
@@ -483,7 +510,7 @@ const AddReleasingInfo = (props) => {
     dispatch(closeDialog1());
   };
 
-  const UpdateField = ({ value, label, watch }) => {
+  const UpdateField = ({ value, label, watch, requiredField }) => {
     const handleViewImage = () => {
       const url = URL.createObjectURL(watch);
       // console.log("Object URL created:", url);
@@ -516,6 +543,7 @@ const AddReleasingInfo = (props) => {
               ".MuiInputBase-root": {
                 borderRadius: "10px",
                 // color: "#636363",
+                bgcolor: requiredField && "#f5c9861c",
               },
 
               ".MuiInputLabel-root.Mui-disabled": {
@@ -542,6 +570,8 @@ const AddReleasingInfo = (props) => {
         <IconButton
           onClick={() => {
             setValue(value, null);
+            setCapturedImage(null);
+            setFile(null);
             // ref.current.files = [];
           }}
           size="small"
@@ -580,6 +610,40 @@ const AddReleasingInfo = (props) => {
   useEffect(() => {
     reset({}, { keepDefaultValues: true, resolver: yupResolver(currentSchema) });
   }, [currentSchema, reset]);
+
+  useEffect(() => {
+    if (!!capturedImage) {
+      setValue("receiver_img", capturedImage);
+      trigger("receiver_img");
+    }
+  }, [capturedImage, watch("receiver_img")]);
+
+  useEffect(() => {
+    if (!!file) {
+      setValue("receiver_img", file?.name);
+      trigger("receiver_img");
+    }
+  }, [file, watch("receiver_img")]);
+
+  // console.log("receiver_img", watch("receiver_img"));
+
+  const handleOpenFileSelection = () => {
+    dispatch(openDialog2());
+  };
+
+  const handleCamClose = () => {
+    dispatch(closeDialog2());
+    dispatch(closeDialog3());
+    setCapturedImage(null);
+  };
+
+  const handleFileChange = (event) => {
+    const files = event.target.files;
+    // Handle the uploaded files here
+    // console.log("Selected files:", files[0]);
+    setFile(files[0]);
+    dispatch(closeDialog2());
+  };
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmitHandler)} gap={1} px={3} overflow="auto">
@@ -726,24 +790,68 @@ const AddReleasingInfo = (props) => {
           <Box sx={BoxStyle} pt={0.5}>
             <Typography sx={sxSubtitle}>Attachments</Typography>
             <Stack flexDirection="row" gap={1} alignItems="center">
-              {watch("receiver_img") !== null ? (
-                <UpdateField
-                  label={"Receiver Image"}
-                  value={watch("receiver_img")?.name}
-                  watch={watch("receiver_img")}
-                />
-              ) : (
-                <CustomImgAttachment
-                  control={control}
-                  name="receiver_img"
-                  label="Receiver Image"
-                  // disabled={handleSaveValidation()}
-                  inputRef={receiverMemoRef}
-                  error={!!errors?.receiver_img?.message}
-                  helperText={errors?.receiver_img?.message}
-                />
-              )}
-              {watch("receiver_img") !== null && <RemoveFile title="Receiver Image" value="receiver_img" />}
+              {
+                // watch("receiver_img") !== null ||
+                capturedImage !== null || file !== null ? (
+                  <UpdateField
+                    label={"Receiver Image"}
+                    value={watch("receiver_img")?.name || (!!capturedImage && "Webcam") || (!!file && file?.name)}
+                    watch={watch("receiver_img")}
+                    requiredField
+                  />
+                ) : (
+                  // <CustomImgAttachment
+                  //   control={control}
+                  //   name="receiver_img"
+                  //   label="Receiver Image"
+                  //   // disabled={handleSaveValidation()}
+                  //   inputRef={receiverMemoRef}
+                  //   error={!!errors?.receiver_img?.message}
+                  //   helperText={errors?.receiver_img?.message}
+                  //   requiredField
+                  // />
+                  // <CustomWebcam />
+
+                  <TextField
+                    label="Receiver Image"
+                    variant="outlined"
+                    value={capturedImage ? "WebcamCapture.jpeg" : "No file chosen"}
+                    onClick={handleOpenFileSelection}
+                    color="secondary"
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <img src={AttachmentIcon} width="20px" />
+                        </InputAdornment>
+                      ),
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    sx={{
+                      input: { cursor: "pointer" },
+                      ".MuiInputBase-root": {
+                        borderRadius: "10px",
+                        color: "#636363",
+                        bgcolor: "#f5c9861c",
+                        height: "40px",
+                      },
+                      ".MuiInputLabel-root.Mui-disabled": {
+                        backgroundColor: "transparent",
+                      },
+
+                      ".Mui-disabled": {
+                        backgroundColor: "background.light",
+                        borderRadius: "10px",
+                      },
+                    }}
+                  />
+                )
+              }
+              {
+                // watch("receiver_img") !== null
+                (capturedImage !== null || file !== null) && <RemoveFile title="Receiver Image" value="receiver_img" />
+              }
             </Stack>
 
             {/* <Stack flexDirection="row" gap={1} alignItems="center">
@@ -994,7 +1102,7 @@ const AddReleasingInfo = (props) => {
           size="small"
           type="submit"
           // sx={{ color: handleSaveValidation() && "white" }}
-          disabled={!isValid}
+          disabled={!isValid || !watch("receiver_img")}
         >
           {
             // handleSaveValidation() ? "Save" :
@@ -1046,6 +1154,89 @@ const AddReleasingInfo = (props) => {
               Close
             </Button>
           </Stack>
+        </Box>
+      </Dialog>
+
+      <Dialog open={dialog2} onClose={() => dispatch(closeDialog2())}>
+        <Box p={2} borderRadius="10px">
+          <DialogTitle>
+            <Typography fontFamily="Anton, Impact, Roboto" fontSize={20} color="secondary.main" px={1}>
+              Add Receiver Image
+            </Typography>
+          </DialogTitle>
+          <DialogContent>
+            <Stack gap={2} justifyContent="center" alignItems="center" flexDirection="row">
+              {/* <Webcam setValue={setValue} name="receiver_img" />
+              <Stack flexDirection="row" gap={2}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  onClick={() => {
+                    setValue("receiver_img", null);
+                    dispatch(closeDialog2());
+                  }}
+                >
+                  Capture
+                </Button>
+              </Stack> */}
+              <Card sx={{ maxWidth: 345 }} onClick={() => dispatch(openDialog3())}>
+                <CardActionArea>
+                  <CardMedia component="img" height="200" image={WebCamSVG} alt="web cam" />
+                  <CardContent>
+                    <Typography gutterBottom variant="h6" component="div">
+                      Take a photo.
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+
+              <Box>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={receiverMemoRef}
+                  onChange={handleFileChange}
+                  style={{ display: "none" }}
+                />
+                <Card sx={{ maxWidth: 345 }} onClick={() => receiverMemoRef.current.click()}>
+                  <CardActionArea>
+                    <CardMedia component="img" height="200" image={uploadSVG} alt="web cam" />
+                    <CardContent>
+                      <Typography gutterBottom variant="h6" component="div">
+                        Upload a photo.
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Box>
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button variant="outlined" size="small" color="secondary" onClick={() => dispatch(closeDialog2())}>
+              Close
+            </Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
+
+      <Dialog
+        open={dialog3}
+        onClose={() => dispatch(closeDialog3())}
+        PaperProps={{ sx: { width: "1100px ", borderRadius: "10px", overflow: "hidden" } }}
+        fullScreen
+      >
+        <Box p={2} borderRadius="10px">
+          <CustomWebcam
+            capturedImage={capturedImage}
+            setCapturedImage={setCapturedImage}
+            close={handleCamClose}
+            cancel={() => dispatch(closeDialog3())}
+            submit={() => {
+              dispatch(closeDialog3());
+              dispatch(closeDialog2());
+            }}
+          />
         </Box>
       </Dialog>
     </Box>
