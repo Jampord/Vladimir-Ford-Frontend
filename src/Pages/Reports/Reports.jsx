@@ -11,6 +11,7 @@ import {
   PlaylistRemoveRounded,
   Radar,
   RemoveFromQueue,
+  RequestQuote,
   RuleFolder,
   TransferWithinAStation,
 } from "@mui/icons-material";
@@ -46,6 +47,13 @@ const ReportList = [
     description: "List of PR Recon",
     path: "/reports/purchase-request-recon",
     permission: "purchase-request-recon",
+  },
+  {
+    icon: <RequestQuote />,
+    label: "Depreciation Monthly Report",
+    description: "List of Depreciation Monthly Report",
+    path: "/reports/depreciation-monthly-report",
+    permission: "depreciation-monthly-report",
   },
 
   // {
