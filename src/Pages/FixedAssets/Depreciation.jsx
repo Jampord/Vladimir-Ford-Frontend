@@ -598,6 +598,13 @@ const Depreciation = (props) => {
             console.log(err);
             if (err?.status === 404) {
               nextRequest ? navigate(`/fixed-asset/depreciation`) : navigate(`/fixed-asset/fixed-asset`);
+
+              dispatch(
+                openToast({
+                  message: "Fixed Asset will now be depreciating.",
+                  duration: 5000,
+                })
+              );
             } else if (err?.status === 422) {
               dispatch(
                 openToast({
