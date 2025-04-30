@@ -494,7 +494,7 @@ const RequestMonitoring = () => {
                                     color="secondary.main"
                                   >
                                     <Tooltip
-                                      title={data.acquisition_details}
+                                      title={<>{data.acquisition_details}</>}
                                       placement="top-start"
                                       arrow
                                       // slots={{
@@ -586,7 +586,7 @@ const RequestMonitoring = () => {
       <Dialog
         open={showExport}
         TransitionComponent={Grow}
-        onClose={() => dispatch(closeExport())}
+        // onClose={() => dispatch(closeExport())}
         PaperProps={{ sx: { maxWidth: "1320px", borderRadius: "10px", p: 3 } }}
       >
         <ExportRequestMonitoring />
