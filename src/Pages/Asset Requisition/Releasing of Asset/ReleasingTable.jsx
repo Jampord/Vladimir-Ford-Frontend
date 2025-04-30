@@ -502,9 +502,11 @@ const ReleasingTable = (props) => {
                                   <Typography fontSize={12}>{data.accountable}</Typography>
                                 )}
                               </TableCell>
-                              <TableCell onClick={() => handleViewData(data)} className="tbl-cell tr-cen-pad45">
-                                {Moment(data.release_date).format("MMM DD, YYYY")}
-                              </TableCell>
+                              {released && (
+                                <TableCell onClick={() => handleViewData(data)} className="tbl-cell tr-cen-pad45">
+                                  {Moment(data.release_date).format("MMM DD, YYYY")}
+                                </TableCell>
+                              )}
                               <TableCell onClick={() => handleViewData(data)} className="tbl-cell tr-cen-pad45">
                                 {Moment(data.created_at).format("MMM DD, YYYY")}
                               </TableCell>
