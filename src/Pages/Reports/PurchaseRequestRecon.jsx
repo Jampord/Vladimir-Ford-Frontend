@@ -66,8 +66,6 @@ const PurchaseRequestRecon = () => {
     { refetchOnMountOrArgChange: true }
   );
 
-  console.log("purchaseRequestReconData", purchaseRequestReconData);
-
   const transactionStatus = (data) => {
     let statusColor, hoverColor, textColor, variant;
 
@@ -153,6 +151,7 @@ const PurchaseRequestRecon = () => {
                 setSelectedDate(newValue);
                 setPage(1);
               }} // Update state on change
+              closeOnSelect={false}
               // slotProps={{
               //   textField: {
               //     helperText: selectedDate === null && "Select a Month and Year to fetch data.",
