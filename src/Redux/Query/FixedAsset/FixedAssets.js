@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const fixedAssetApi = createApi({
   reducerPath: "fixedAssetApi",
-  tagTypes: ["FixedAsset"],
+  tagTypes: ["FixedAsset", "Depreciation"],
 
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.VLADIMIR_BASE_URL,
@@ -277,6 +277,32 @@ export const fixedAssetApi = createApi({
       }),
       // providesTags: ["FixedAsset"],
     }),
+
+    getDepreciationMonthlyReportApi: builder.query({
+      query: (params) => {
+        const queryParams = [`year_month=${params.year_month}`];
+
+        if (params.page) {
+          queryParams.push(`page=${params.page}`);
+        }
+
+        if (params.per_page) {
+          queryParams.push(`per_page=${params.per_page}`);
+        }
+
+        if (params.pagination) {
+          queryParams.push(`pagination=${params.pagination}`);
+        }
+
+        if (params.search) {
+          queryParams.push(`search=${params.search}`);
+        }
+
+        const queryString = queryParams.join("&");
+        return `/depreciation-report?${queryString}`;
+      },
+      providesTags: ["Depreciation"],
+    }),
   }),
 });
 
@@ -315,4 +341,7 @@ export const {
 
   usePostDepreciateApiMutation,
   useLazyGetNextDepreciationRequestApiQuery,
+
+  useGetDepreciationMonthlyReportApiQuery,
+  useLazyGetDepreciationMonthlyReportApiQuery,
 } = fixedAssetApi;
