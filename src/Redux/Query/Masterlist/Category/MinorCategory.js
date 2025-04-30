@@ -74,6 +74,7 @@ export const {
   useGetMinorCategoryApiQuery,
   useGetMinorCategoryAllApiQuery,
   useLazyGetMinorCategoryAllApiQuery,
+  useGetMinorCategorySmallToolsApiQuery,
   useLazyGetMinorCategorySmallToolsApiQuery,
   useGetMinorCategoryIdApiQuery,
   usePutMinorCategoryStatusApiMutation,
