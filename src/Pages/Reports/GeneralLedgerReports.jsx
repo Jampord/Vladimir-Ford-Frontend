@@ -53,8 +53,8 @@ const GeneralLedgerReports = () => {
       per_page: perPage,
       adjustment_date:
         selectedDate !== null ? moment(selectedDate).format("YYYY-MM") : moment(new Date()).format("YYYY-MM"),
-    },
-    { refetchOnMountOrArgChange: true }
+    }
+    // { refetchOnMountOrArgChange: true }
   );
 
   const perPageHandler = (e) => {
@@ -103,6 +103,7 @@ const GeneralLedgerReports = () => {
               maxDate={new Date()}
               value={selectedDate || new Date()} // Bind the state to the DatePicker
               onChange={(newValue) => setSelectedDate(newValue)} // Update state on change
+              closeOnSelect={false}
               // slotProps={{
               //   textField: {
               //     helperText: selectedDate === null && "Select a Month and Year to fetch data.",
