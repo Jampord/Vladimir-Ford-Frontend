@@ -1,8 +1,9 @@
 import { Box, Button } from "@mui/material";
 import { useCallback, useRef, useState } from "react";
 import Webcam from "react-webcam";
+import WebCamError from "../../Img/SVG/No Webcam.svg";
 
-const CustomWebcam = ({ capturedImage, setCapturedImage, close, cancel, submit }) => {
+const CustomWebcam = ({ capturedImage, setCapturedImage, close, cancel, submit, error, setError, back }) => {
   const webcamRef = useRef(null);
 
   const capture = useCallback(() => {
@@ -16,30 +17,51 @@ const CustomWebcam = ({ capturedImage, setCapturedImage, close, cancel, submit }
       >
         {!capturedImage && (
           <>
-            <Webcam
-              audio={false}
-              height={800}
-              ref={webcamRef}
-              screenshotFormat="image/jpeg"
-              screenshotQuality={1}
-              width={1300}
-              mirrored={false}
-              imageSmoothing={true}
-              disablePictureInPicture={true}
-              onUserMediaError={(err) => {
-                console.log("webcam error: ", err);
-              }}
-            />
+            {!error && (
+              <Webcam
+                audio={false}
+                height={800}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+                screenshotQuality={1}
+                width={1300}
+                mirrored={false}
+                imageSmoothing={true}
+                disablePictureInPicture={true}
+                onUserMediaError={(err) => {
+                  console.log("webcam error: ", err);
+                  setError(true);
+                }}
+              />
+            )}
 
-            <Box sx={{ display: "flex", gap: "10px", flexDirection: "row", mt: "20px" }}>
-              <Button onClick={capture} variant="contained" color="secondary">
-                Capture photo
-              </Button>
+            {error && (
+              <img
+                src={WebCamError}
+                alt="webcam error"
+                style={{ width: "500px", height: "auto", marginTop: "100px" }}
+              />
+            )}
 
-              <Button onClick={cancel} variant="outlined">
-                Cancel
-              </Button>
-            </Box>
+            {!error && (
+              <Box sx={{ display: "flex", gap: "10px", flexDirection: "row", mt: "20px" }}>
+                <Button onClick={capture} variant="contained" color="secondary">
+                  Capture photo
+                </Button>
+
+                <Button onClick={cancel} variant="outlined">
+                  Cancel
+                </Button>
+              </Box>
+            )}
+
+            {error && (
+              <Box sx={{ display: "flex", gap: "10px", flexDirection: "row", mt: "60px" }}>
+                <Button onClick={back} color="secondary" variant="contained">
+                  Go Back
+                </Button>
+              </Box>
+            )}
           </>
         )}
 
