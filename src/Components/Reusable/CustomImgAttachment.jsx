@@ -5,7 +5,7 @@ import AttachmentActive from "../../Img/SVG/AttachmentActive.svg";
 import AttachmentError from "../../Img/SVG/AttachmentError.svg";
 
 const CustomImgAttachment = (props) => {
-  const { name, control, errors, inputRef, ...textfield } = props;
+  const { name, control, errors, inputRef, requiredField, ...textfield } = props;
 
   return (
     <Controller
@@ -55,6 +55,7 @@ const CustomImgAttachment = (props) => {
                 ".MuiInputBase-root": {
                   borderRadius: "10px",
                   color: textfield.error ? "red" : "#636363",
+                  bgcolor: requiredField && "#f5c9861c",
                 },
                 ".MuiInputLabel-root.Mui-disabled": {
                   backgroundColor: "transparent",
