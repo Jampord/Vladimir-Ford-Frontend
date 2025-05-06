@@ -99,6 +99,7 @@ import {
   Analytics,
   PriceChange,
   Radar,
+  RequestQuote,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -389,7 +390,7 @@ const Sidebar = () => {
     },
 
     {
-      label: "Fixed asset",
+      label: "Asset Management",
       icon: InventoryRounded,
       path: "/fixed-asset",
       permission: "fixed-asset",
@@ -746,6 +747,13 @@ const Sidebar = () => {
           icon: Radar,
           path: "/reports/purchase-request-recon",
           permission: "purchase-request-recon",
+          setter: closeCollapse,
+        },
+        {
+          label: "Depreciation Report",
+          icon: RequestQuote,
+          path: "/reports/depreciation-monthly-report",
+          permission: "depreciation-monthly-report",
           setter: closeCollapse,
         },
         // {
