@@ -106,6 +106,7 @@ import DepreciationPage from "./Pages/FixedAssets/Depreciation/DepreciationPage"
 import FixedAssetDepreciationView from "./Pages/FixedAssets/Depreciation/FixedAssetDepreciationView";
 import PurchaseRequestRecon from "./Pages/Reports/PurchaseRequestRecon";
 import WarehouseMonitoring from "./Pages/Asset Requisition/WarehouseMonitoring";
+import DepreciationMonthlyReport from "./Pages/Reports/DepreciationMonthlyReport";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -629,6 +630,11 @@ const router = createBrowserRouter([
                 path: "purchase-request-recon",
                 element: <PurchaseRequestRecon />,
                 handle: { permission: "purchase-request-recon" },
+              },
+              {
+                path: "depreciation-monthly-report",
+                element: <DepreciationMonthlyReport />,
+                handle: { permission: "depreciation-monthly-report" },
               },
               // {
               //   path: "report3",
