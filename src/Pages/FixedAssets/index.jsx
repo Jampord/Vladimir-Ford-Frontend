@@ -42,7 +42,7 @@ const FixedAssetIndex = () => {
               marginLeft: isSmallScreen ? null : "30px",
             }}
           >
-            Fixed Asset
+            Asset Management
           </Typography>
           <Box className="parentSidebar">
             <Box className="parentSidebar__container">
