@@ -353,6 +353,12 @@ const Depreciation = (props) => {
     if ((!departmentData || departmentData.length === 0) && data?.depreciation_method === "-") {
       departmentTrigger();
     }
+    if ((!companyData || companyData.length === 0) && data?.depreciation_method === "-") {
+      companyTrigger();
+    }
+    if ((!businessUnitData || businessUnitData.length === 0) && data?.depreciation_method === "-") {
+      businessUnitTrigger();
+    }
     if ((!unitData || unitData.length === 0) && data?.depreciation_method === "-") {
       unitTrigger();
     }
@@ -376,7 +382,17 @@ const Depreciation = (props) => {
     ) {
       minorCategorySmallToolsTrigger();
     }
-  }, [departmentData, unitData, subUnitData, locationData, minorCategoryData, minorCategorySmallToolsData, data]);
+  }, [
+    departmentData,
+    companyData,
+    businessUnitData,
+    unitData,
+    subUnitData,
+    locationData,
+    minorCategoryData,
+    minorCategorySmallToolsData,
+    data,
+  ]);
 
   // console.log("1", watch("initial_debit_id"));
   // console.log("2", watch("initial_credit_id"));
