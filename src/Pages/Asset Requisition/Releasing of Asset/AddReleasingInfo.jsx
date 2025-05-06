@@ -119,6 +119,7 @@ const AddReleasingInfo = (props) => {
   const [currentSchema, setCurrentSchema] = useState(schema);
   const [capturedImage, setCapturedImage] = useState(null);
   const [file, setFile] = useState(null);
+  const [webcamError, setWebcamError] = useState(false);
 
   // console.log("file", file);
   // console.log("capturedImage", capturedImage);
@@ -302,6 +303,12 @@ const AddReleasingInfo = (props) => {
     if (!departmentData || departmentData.length === 0) {
       departmentTrigger();
     }
+    if (!companyData || companyData.length === 0) {
+      companyTrigger();
+    }
+    if (!businessUnitData || businessUnitData.length === 0) {
+      businessUnitTrigger();
+    }
     if (!unitData || unitData.length === 0) {
       unitTrigger();
     }
@@ -311,7 +318,7 @@ const AddReleasingInfo = (props) => {
     if (!locationData || locationData.length === 0) {
       locationTrigger();
     }
-  }, [departmentData, unitData, subUnitData, locationData]);
+  }, [departmentData, companyData, businessUnitData, unitData, subUnitData, locationData]);
 
   // useEffect(() => {
   //   console.log("useeffectitems", selectedItems.department);
@@ -625,7 +632,11 @@ const AddReleasingInfo = (props) => {
     }
   }, [file, watch("receiver_img")]);
 
-  // console.log("receiver_img", watch("receiver_img"));
+  // useEffect(() => {
+  //   if (!!watch("department_id")) {
+  //     trigger("department_id");
+  //   }
+  // }, [watch("department_id")]);
 
   const handleOpenFileSelection = () => {
     dispatch(openDialog2());
@@ -950,7 +961,7 @@ const AddReleasingInfo = (props) => {
             name="company_id"
             control={control}
             options={companyData}
-            onOpen={() => (isCompanySuccess ? null : company())}
+            onOpen={() => (isCompanySuccess ? null : companyTrigger())}
             loading={isCompanyLoading}
             size="small"
             getOptionLabel={(option) => option.company_code + " - " + option.company_name}
@@ -1232,10 +1243,16 @@ const AddReleasingInfo = (props) => {
             setCapturedImage={setCapturedImage}
             close={handleCamClose}
             cancel={() => dispatch(closeDialog3())}
+            back={() => {
+              dispatch(closeDialog3());
+              setWebcamError(false);
+            }}
             submit={() => {
               dispatch(closeDialog3());
               dispatch(closeDialog2());
             }}
+            error={webcamError}
+            setError={setWebcamError}
           />
         </Box>
       </Dialog>
