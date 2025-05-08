@@ -33,9 +33,13 @@ import {
   closeDialog1,
   closeDialog2,
   closeDialog3,
+  closeDialog4,
+  closeDialog5,
   openDialog1,
   openDialog2,
   openDialog3,
+  openDialog4,
+  openDialog5,
 } from "../../../Redux/StateManagement/booleanStateSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { usePutAssetReleasingMutation, usePutSaveReleasingMutation } from "../../../Redux/Query/Request/AssetReleasing";
@@ -109,7 +113,7 @@ const schemaSave = yup.object().shape({
 const AddReleasingInfo = (props) => {
   const { data, refetch, warehouseNumber, hideWN, commonData, personalData, selectedItems } = props;
   // console.log("data", data);
-  // console.log("selectedItems", selectedItems.department);
+  // console.log("selectedItems", selectedItems);
   const userData = JSON.parse(localStorage.getItem("user"));
   // console.log("userData", userData);
   const [signature, setSignature] = useState();
@@ -120,6 +124,9 @@ const AddReleasingInfo = (props) => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [file, setFile] = useState(null);
   const [webcamError, setWebcamError] = useState(false);
+  const [capturedImageAuthorization, setCapturedImageAuthorization] = useState(null);
+  const [fileAuthorization, setFileAuthorization] = useState(null);
+  const [webcamErrorAuthorization, setWebcamErrorAuthorization] = useState(false);
 
   // console.log("file", file);
   // console.log("capturedImage", capturedImage);
@@ -132,6 +139,8 @@ const AddReleasingInfo = (props) => {
   const dialog = useSelector((state) => state.booleanState?.dialogMultiple?.dialog1);
   const dialog2 = useSelector((state) => state.booleanState?.dialogMultiple?.dialog2);
   const dialog3 = useSelector((state) => state.booleanState?.dialogMultiple?.dialog3);
+  const dialog4 = useSelector((state) => state.booleanState?.dialogMultiple?.dialog4);
+  const dialog5 = useSelector((state) => state.booleanState?.dialogMultiple?.dialog5);
 
   const {
     handleSubmit,
@@ -378,8 +387,9 @@ const AddReleasingInfo = (props) => {
     // Formats
     const receiverImgBase64 = formData?.receiver_img?.includes("base64") ? capturedImage : await fileToBase64(file);
     const assignmentMemoImgBase64 = formData?.assignment_memo_img && (await fileToBase64(formData.assignment_memo_img));
-    const authorizationLetterImgBase64 =
-      formData?.authorization_memo_img && (await fileToBase64(formData.authorization_memo_img));
+    const authorizationLetterImgBase64 = formData?.authorization_memo_img?.includes("base64")
+      ? capturedImageAuthorization
+      : await fileToBase64(formData.authorization_memo_img);
 
     const saveFormData = {
       warehouse_number_id: warehouseNumberData,
@@ -577,8 +587,10 @@ const AddReleasingInfo = (props) => {
         <IconButton
           onClick={() => {
             setValue(value, null);
-            setCapturedImage(null);
-            setFile(null);
+            value === "receiver_img" && setCapturedImage(null);
+            value === "receiver_img" && setFile(null);
+            value === "authorization_memo_img" && setCapturedImageAuthorization(null);
+            value === "authorization_memo_img" && setFileAuthorization(null);
             // ref.current.files = [];
           }}
           size="small"
@@ -632,6 +644,20 @@ const AddReleasingInfo = (props) => {
     }
   }, [file, watch("receiver_img")]);
 
+  useEffect(() => {
+    if (!!capturedImageAuthorization) {
+      setValue("authorization_memo_img", capturedImageAuthorization);
+    }
+  }, [capturedImageAuthorization, watch("authorization_memo_img")]);
+
+  console.log("fileAuthorization", watch("authorization_memo_img"));
+
+  useEffect(() => {
+    if (!!fileAuthorization) {
+      setValue("authorization_memo_img", fileAuthorization?.name);
+    }
+  }, [fileAuthorization, watch("authorization_memo_img")]);
+
   // useEffect(() => {
   //   if (!!watch("department_id")) {
   //     trigger("department_id");
@@ -642,10 +668,20 @@ const AddReleasingInfo = (props) => {
     dispatch(openDialog2());
   };
 
+  const handleOpenFileSelectionAuthorization = () => {
+    dispatch(openDialog4());
+  };
+
   const handleCamClose = () => {
     dispatch(closeDialog2());
     dispatch(closeDialog3());
     setCapturedImage(null);
+  };
+
+  const handleCamCloseAuthorization = () => {
+    dispatch(closeDialog4());
+    dispatch(closeDialog5());
+    setCapturedImageAuthorization(null);
   };
 
   const handleFileChange = (event) => {
@@ -655,6 +691,58 @@ const AddReleasingInfo = (props) => {
     setFile(files[0]);
     dispatch(closeDialog2());
   };
+
+  const handleFileChangeAuthorization = (event) => {
+    const files = event.target.files;
+    // console.log("Selected files:", files[0]);
+    setFileAuthorization(files[0]);
+    dispatch(closeDialog4());
+  };
+
+  // console.log("dept", watch("department_id"));
+  // console.log("company", watch("company_id"));
+  // console.log("business", watch("business_unit_id"));
+  // console.log("unit", watch("unit_id"));
+  // console.log("subunit", watch("subunit_id"));
+  // console.log("location", watch("location_id"));
+
+  const areAllCOASame = (assets) => {
+    if (assets) {
+      if (assets?.length === 0) return true; // No assets to compare
+
+      const firstDepartment = assets?.department?.department_name;
+      const firstBusinessUnit = assets?.business_unit?.business_unit_name;
+      const firstCompany = assets?.company?.company_name;
+      const firstUnit = assets?.unit?.unit_name;
+      const firstSubunit = assets?.subunit?.subunit_name;
+      const firstLocation = assets?.location?.location_name;
+
+      if (watch("department_id")?.department_name !== firstDepartment) {
+        return false; // Found a different department
+      }
+      if (watch("company_id")?.company_name !== firstCompany) {
+        return false; // Found a different business unit
+      }
+      if (watch("business_unit_id")?.business_unit_name !== firstBusinessUnit) {
+        return false; // Found a different company
+      }
+      if (watch("unit_id")?.unit_name !== firstUnit) {
+        return false; // Found a different unit
+      }
+      if (watch("subunit_id")?.subunit_name !== firstSubunit) {
+        return false; // Found a different subunit
+      }
+      if (watch("location_id")?.location_name !== firstLocation) {
+        return false; // Found a different location
+      }
+
+      return true; // All COA are the same
+    }
+  };
+
+  const result = areAllCOASame(selectedItems);
+
+  console.log("result", result);
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmitHandler)} gap={1} px={3} overflow="auto">
@@ -888,24 +976,64 @@ const AddReleasingInfo = (props) => {
               )}
             </Stack> */}
             <Stack flexDirection="row" gap={1} alignItems="center">
-              {watch("authorization_memo_img") !== null ? (
+              {capturedImageAuthorization !== null || fileAuthorization !== null ? (
                 <UpdateField
                   label={"Authorization Letter"}
-                  value={watch("authorization_memo_img")?.name}
+                  value={
+                    watch("authorization_memo_img")?.name ||
+                    (!!capturedImageAuthorization && "Webcam") ||
+                    (!!fileAuthorization && fileAuthorization?.name)
+                  }
                   watch={watch("authorization_memo_img")}
+                  requiredField={result === false && true}
                 />
               ) : (
-                <CustomImgAttachment
-                  control={control}
-                  name="authorization_memo_img"
+                // <CustomImgAttachment
+                //   control={control}
+                //   name="authorization_memo_img"
+                //   label="Authorization Letter"
+                //   // disabled={handleSaveValidation()}
+                //   inputRef={authorizationLetterRef}
+                //   error={!!errors?.authorization_memo_img?.message}
+                //   helperText={errors?.authorization_memo_img?.message}
+                //   requiredField={result === false && true}
+                // />
+                <TextField
                   label="Authorization Letter"
-                  // disabled={handleSaveValidation()}
-                  inputRef={authorizationLetterRef}
-                  error={!!errors?.authorization_memo_img?.message}
-                  helperText={errors?.authorization_memo_img?.message}
+                  variant="outlined"
+                  value={capturedImageAuthorization ? "WebcamCapture.jpeg" : "No file chosen"}
+                  onClick={handleOpenFileSelectionAuthorization}
+                  color="secondary"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <img src={AttachmentIcon} width="20px" />
+                      </InputAdornment>
+                    ),
+                  }}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  sx={{
+                    input: { cursor: "pointer" },
+                    ".MuiInputBase-root": {
+                      borderRadius: "10px",
+                      color: "#636363",
+                      bgcolor: result === false && "#f5c9861c",
+                      height: "40px",
+                    },
+                    ".MuiInputLabel-root.Mui-disabled": {
+                      backgroundColor: "transparent",
+                    },
+
+                    ".Mui-disabled": {
+                      backgroundColor: "background.light",
+                      borderRadius: "10px",
+                    },
+                  }}
                 />
               )}
-              {watch("authorization_memo_img") !== null && (
+              {(capturedImageAuthorization !== null || fileAuthorization !== null) && (
                 <RemoveFile title="Authorization Letter" value="authorization_memo_img" />
               )}
             </Stack>
@@ -1113,7 +1241,7 @@ const AddReleasingInfo = (props) => {
           size="small"
           type="submit"
           // sx={{ color: handleSaveValidation() && "white" }}
-          disabled={!isValid || !watch("receiver_img")}
+          disabled={!isValid || !watch("receiver_img") || (result === false && !watch("authorization_memo_img"))}
         >
           {
             // handleSaveValidation() ? "Save" :
@@ -1177,20 +1305,6 @@ const AddReleasingInfo = (props) => {
           </DialogTitle>
           <DialogContent>
             <Stack gap={2} justifyContent="center" alignItems="center" flexDirection="row">
-              {/* <Webcam setValue={setValue} name="receiver_img" />
-              <Stack flexDirection="row" gap={2}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                    setValue("receiver_img", null);
-                    dispatch(closeDialog2());
-                  }}
-                >
-                  Capture
-                </Button>
-              </Stack> */}
               <Card sx={{ maxWidth: 345 }} onClick={() => dispatch(openDialog3())}>
                 <CardActionArea>
                   <CardMedia component="img" height="200" image={WebCamSVG} alt="web cam" />
@@ -1253,6 +1367,81 @@ const AddReleasingInfo = (props) => {
             }}
             error={webcamError}
             setError={setWebcamError}
+          />
+        </Box>
+      </Dialog>
+
+      <Dialog open={dialog4} onClose={() => dispatch(closeDialog4())}>
+        <Box p={2} borderRadius="10px">
+          <DialogTitle>
+            <Typography fontFamily="Anton, Impact, Roboto" fontSize={20} color="secondary.main" px={1}>
+              Add Authorization Letter Image
+            </Typography>
+          </DialogTitle>
+          <DialogContent>
+            <Stack gap={2} justifyContent="center" alignItems="center" flexDirection="row">
+              <Card sx={{ maxWidth: 345 }} onClick={() => dispatch(openDialog5())}>
+                <CardActionArea>
+                  <CardMedia component="img" height="200" image={WebCamSVG} alt="web cam" />
+                  <CardContent>
+                    <Typography gutterBottom variant="h6" component="div">
+                      Take a photo.
+                    </Typography>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
+
+              <Box>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={authorizationLetterRef}
+                  onChange={handleFileChangeAuthorization}
+                  style={{ display: "none" }}
+                />
+                <Card sx={{ maxWidth: 345 }} onClick={() => authorizationLetterRef.current.click()}>
+                  <CardActionArea>
+                    <CardMedia component="img" height="200" image={uploadSVG} alt="web cam" />
+                    <CardContent>
+                      <Typography gutterBottom variant="h6" component="div">
+                        Upload a photo.
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Box>
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Button variant="outlined" size="small" color="secondary" onClick={() => dispatch(closeDialog4())}>
+              Close
+            </Button>
+          </DialogActions>
+        </Box>
+      </Dialog>
+
+      <Dialog
+        open={dialog5}
+        onClose={() => dispatch(closeDialog5())}
+        PaperProps={{ sx: { width: "1100px ", borderRadius: "10px", overflow: "hidden" } }}
+        fullScreen
+      >
+        <Box p={2} borderRadius="10px">
+          <CustomWebcam
+            capturedImage={capturedImageAuthorization}
+            setCapturedImage={setCapturedImageAuthorization}
+            close={handleCamCloseAuthorization}
+            cancel={() => dispatch(closeDialog5())}
+            back={() => {
+              dispatch(closeDialog5());
+              setWebcamErrorAuthorization(false);
+            }}
+            submit={() => {
+              dispatch(closeDialog5());
+              dispatch(closeDialog4());
+            }}
+            error={webcamErrorAuthorization}
+            setError={setWebcamErrorAuthorization}
           />
         </Box>
       </Dialog>
