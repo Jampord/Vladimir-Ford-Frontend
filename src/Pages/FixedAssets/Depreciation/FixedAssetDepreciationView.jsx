@@ -531,12 +531,12 @@ const FixedAssetDepreciationView = (props) => {
                       </Typography>
                     </Box>
 
-                    <Box className="tableCard__properties">
+                    {/* <Box className="tableCard__properties">
                       Account Title:
                       <Typography className="tableCard__info" fontSize="14px">
                         {`${dataApi?.data?.account_title.account_title_code} - ${dataApi?.data?.account_title.account_title_name}`}
                       </Typography>
-                    </Box>
+                    </Box> */}
                   </AccordionDetails>
                 </Accordion>
                 <Accordion>
