@@ -160,16 +160,13 @@ const AssignmentMemo = (props) => {
 
                   <TableBody>
                     {(arrayData || singleData)?.map((data, index) => {
-                      {
-                        // console.log(data);
-                      }
                       return (
                         <TableRow key={index}>
                           {/* <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.id}</TableCell> */}
                           <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.vladimir_tag_number}</TableCell>
                           {/* <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.accountable}</TableCell> */}
                           <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.supplier?.supplier_name}</TableCell>
-                          <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.receipt}</TableCell>
+                          <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.rr_number}</TableCell>
                           <TableCell sx={{ fontSize: "10px", py: 1 }}>{data?.asset_description}</TableCell>
                           <TableCell sx={{ fontSize: "10px", py: 1 }} align="center">
                             {data?.quantity}
