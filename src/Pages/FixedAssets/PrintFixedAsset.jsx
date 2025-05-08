@@ -206,7 +206,7 @@ const PrintFixedAsset = (props) => {
     setPage(page + 1);
   };
 
-  const { data: ip } = useGetIpApiQuery();
+  const { data: ip, isLoading: isIpLoading, isFetching: isIpFetching } = useGetIpApiQuery();
 
   const [printAsset, { data: printData, isLoading, isError: isPostError, isSuccess: isPostSuccess, error: postError }] =
     usePostPrintApiMutation();
@@ -845,11 +845,12 @@ const PrintFixedAsset = (props) => {
   };
 
   const tabBackgroundSx = {
-    background: "#ffffff",
+    background: "#f9aa33",
     boxShadow: "0px -3px 19px -10px rgba(166, 166, 166, 0.4)",
     fontWeight: "bold",
-    borderRadius: "5px",
+    borderRadius: "5px 5px 0px 0px",
     border: "1px solid #dedede",
+    color: "#fefeee !important",
   };
 
   return (
@@ -1063,6 +1064,13 @@ const PrintFixedAsset = (props) => {
                       </TableCell>
 
                       <TableCell>
+                        <TableSortLabel disabled>PR/PO/RR Number</TableSortLabel>
+                      </TableCell>
+
+                      <TableCell>
+                        <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
+                      </TableCell>
+                      <TableCell>
                         <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
                       </TableCell>
 
@@ -1144,6 +1152,18 @@ const PrintFixedAsset = (props) => {
 
                                   <Typography noWrap fontSize="12px" color="primary" fontWeight="bold">
                                     {data.type_of_request.type_of_request_name.toUpperCase()}
+                                  </Typography>
+                                </TableCell>
+
+                                <TableCell>
+                                  <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
+                                    PR - {data.pr_number}
+                                  </Typography>
+                                  <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
+                                    PO - {data.po_number}
+                                  </Typography>
+                                  <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
+                                    RR - {data.rr_number}
                                   </Typography>
                                 </TableCell>
 
@@ -1237,7 +1257,7 @@ const PrintFixedAsset = (props) => {
                 <LoadingButton
                   size="small"
                   variant="contained"
-                  loading={isLoading}
+                  loading={isLoading || isIpFetching || isIpLoading}
                   startIcon={isLoading ? null : <Print color={watch("tagNumber").length === 0 ? "gray" : "primary"} />}
                   disabled={watch("tagNumber").length === 0}
                   type="submit"
@@ -1428,6 +1448,10 @@ const PrintFixedAsset = (props) => {
                               </TableCell>
 
                               <TableCell>
+                                <TableSortLabel disabled>PR/PO/RR Number</TableSortLabel>
+                              </TableCell>
+
+                              <TableCell>
                                 <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
                               </TableCell>
 
@@ -1515,6 +1539,18 @@ const PrintFixedAsset = (props) => {
 
                                           <Typography noWrap fontSize="12px" color="primary" fontWeight="bold">
                                             {data.type_of_request.type_of_request_name.toUpperCase()}
+                                          </Typography>
+                                        </TableCell>
+
+                                        <TableCell>
+                                          <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
+                                            PR - {data.pr_number}
+                                          </Typography>
+                                          <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
+                                            PO - {data.po_number}
+                                          </Typography>
+                                          <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
+                                            RR - {data.rr_number}
                                           </Typography>
                                         </TableCell>
 
@@ -1692,7 +1728,7 @@ const PrintFixedAsset = (props) => {
                         <LoadingButton
                           size="small"
                           variant="contained"
-                          loading={isLoading}
+                          loading={isLoading || isIpFetching || isIpLoading}
                           startIcon={
                             isLoading ? null : <Print color={watch("tagNumber").length === 0 ? "gray" : "primary"} />
                           }
@@ -2125,6 +2161,29 @@ const PrintFixedAsset = (props) => {
                           loading={isLoading}
                           startIcon={
                             isLoading ? null : (
+                              <PriceChange
+                                color={
+                                  watch("tagNumber").length === 0 || printable === true || result === false
+                                    ? "gray"
+                                    : "primary"
+                                }
+                              />
+                            )
+                          }
+                          disabled={watch("tagNumber").length === 0 || printable === true || result === false}
+                          onClick={() => dispatch(openDialog3())}
+                          color={printMemo ? "tertiary" : "secondary"}
+                          sx={{ color: "white" }}
+                        >
+                          {isSmallScreen ? null : "Tag as Add Cost"}
+                        </LoadingButton>
+
+                        <LoadingButton
+                          size="small"
+                          variant="contained"
+                          loading={isLoading}
+                          startIcon={
+                            isLoading ? null : (
                               <HomeRepairService
                                 color={
                                   watch("tagNumber").length === 0 || watch("tagNumber").length === 1 || result === false
@@ -2141,7 +2200,7 @@ const PrintFixedAsset = (props) => {
                           color={printMemo ? "tertiary" : "secondary"}
                           sx={{ color: "white" }}
                         >
-                          {isSmallScreen ? null : "Group Small Tools"}
+                          {isSmallScreen ? null : "Group "}
                         </LoadingButton>
 
                         <LoadingButton
@@ -2168,7 +2227,7 @@ const PrintFixedAsset = (props) => {
                           color={printMemo ? "tertiary" : "warning"}
                           sx={{ color: "white" }}
                         >
-                          {isSmallScreen ? null : "Ungroup Small Tools"}
+                          {isSmallScreen ? null : "Ungroup "}
                         </LoadingButton>
 
                         <LoadingButton
@@ -2193,7 +2252,7 @@ const PrintFixedAsset = (props) => {
                         <LoadingButton
                           size="small"
                           variant="contained"
-                          loading={isLoading}
+                          loading={isLoading || isIpFetching || isIpLoading}
                           startIcon={
                             isLoading ? null : <Print color={watch("tagNumber").length === 0 ? "gray" : "primary"} />
                           }
