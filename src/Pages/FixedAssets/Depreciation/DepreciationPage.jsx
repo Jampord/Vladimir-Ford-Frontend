@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { TabContext, TabPanel } from "@mui/lab";
 import Depreciation from "../Depreciation";
 import ForDepreciation from "./ForDepreciation";
+import RunningDepreciation from "./RunningDepreciation";
+import FullyDepreciated from "./FullyDepreciated";
 
 const DepreciationPage = () => {
   const [value, setValue] = useState("1");
@@ -37,8 +39,8 @@ const DepreciationPage = () => {
               className={value === "1" ? "tab__background" : null}
             />
 
-            {/* <Tab label="Running Depreciation" value="2" className={value === "2" ? "tab__background" : null} />
-            <Tab label="Depreciated" value="3" className={value === "3" ? "tab__background" : null} /> */}
+            <Tab label="Running Depreciation" value="2" className={value === "2" ? "tab__background" : null} />
+            <Tab label="Fully Depreciated" value="3" className={value === "3" ? "tab__background" : null} />
           </Tabs>
 
           <TabPanel sx={{ p: 0 }} value="1" index="1">
@@ -46,11 +48,11 @@ const DepreciationPage = () => {
           </TabPanel>
 
           <TabPanel sx={{ p: 0 }} value="2" index="2">
-            {/* <ApprovedPullout /> */}
+            <RunningDepreciation />
           </TabPanel>
 
           <TabPanel sx={{ p: 0 }} value="3" index="3">
-            {/* <ApprovedPullout /> */}
+            <FullyDepreciated />
           </TabPanel>
         </TabContext>
       </Box>
