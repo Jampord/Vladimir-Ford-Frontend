@@ -41,7 +41,7 @@ const TransferApproving = () => {
             <Tabs onChange={handleChange} value={value}>
               <Tab
                 label={
-                  <Badge color="error" badgeContent={notifData?.toApproveCount}>
+                  <Badge color="error" badgeContent={notifData?.toTransferApproveCount}>
                     First Approving
                   </Badge>
                 }
@@ -50,7 +50,7 @@ const TransferApproving = () => {
               />
               <Tab
                 label={
-                  <Badge color="error" badgeContent={notifData?.toAcquisitionFaApproval}>
+                  <Badge color="error" badgeContent={notifData?.toTransferFaApproval}>
                     Second Approving
                   </Badge>
                 }
