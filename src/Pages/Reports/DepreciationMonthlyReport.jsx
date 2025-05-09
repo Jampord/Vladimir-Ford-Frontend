@@ -129,6 +129,8 @@ const DepreciationMonthlyReport = () => {
                     }}
                   >
                     <TableCell className="tbl-cell">Vladimir Tag Number</TableCell>
+                    <TableCell className="tbl-cell">Tag Number</TableCell>
+                    <TableCell className="tbl-cell">Old Tag Number</TableCell>
                     <TableCell className="tbl-cell">Asset Description</TableCell>
                     <TableCell className="tbl-cell">Asset Specification</TableCell>
                     <TableCell className="tbl-cell">Acquisition Cost</TableCell>
@@ -165,6 +167,16 @@ const DepreciationMonthlyReport = () => {
                             <TableCell className="tbl-cell">
                               <Typography fontSize="13px" fontWeight={700} color="black">
                                 {data?.vladimir_tag_number}
+                              </Typography>
+                            </TableCell>
+                            <TableCell className="tbl-cell">
+                              <Typography fontSize="13px" fontWeight={700} color="black">
+                                {data?.tag_number}
+                              </Typography>
+                            </TableCell>
+                            <TableCell className="tbl-cell">
+                              <Typography fontSize="13px" fontWeight={700} color="black">
+                                {data?.tag_number_old}
                               </Typography>
                             </TableCell>
                             <TableCell className="tbl-cell">{data?.asset_description}</TableCell>
