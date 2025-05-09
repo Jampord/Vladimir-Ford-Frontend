@@ -13,7 +13,14 @@ const CustomWebcam = ({ capturedImage, setCapturedImage, close, cancel, submit, 
   return (
     <>
       <Box
-        sx={{ display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column", gap: "20px" }}
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+          gap: "20px",
+          mt: "10%",
+        }}
       >
         {!capturedImage && (
           <>
@@ -32,6 +39,13 @@ const CustomWebcam = ({ capturedImage, setCapturedImage, close, cancel, submit, 
                   console.log("webcam error: ", err);
                   setError(true);
                 }}
+                style={{
+                  width: "100%",
+                  maxWidth: "800px", // Limit width for larger screens
+                  height: "auto", // Maintain aspect ratio
+                  borderRadius: "10px", // Add rounded corners
+                  boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)", // Add a subtle shadow
+                }}
               />
             )}
 
@@ -39,12 +53,19 @@ const CustomWebcam = ({ capturedImage, setCapturedImage, close, cancel, submit, 
               <img
                 src={WebCamError}
                 alt="webcam error"
-                style={{ width: "500px", height: "auto", marginTop: "100px" }}
+                style={{ width: "100%", maxWidth: "500px", height: "auto", marginTop: "100px" }}
               />
             )}
 
             {!error && (
-              <Box sx={{ display: "flex", gap: "10px", flexDirection: "row", mt: "20px" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: { xs: "5px", sm: "10px" },
+                  flexDirection: { xs: "column", sm: "row" },
+                  mt: "20px",
+                }}
+              >
                 <Button onClick={capture} variant="contained" color="secondary">
                   Capture photo
                 </Button>
@@ -79,10 +100,12 @@ const CustomWebcam = ({ capturedImage, setCapturedImage, close, cancel, submit, 
               src={capturedImage}
               alt="Captured"
               style={{
-                width: "1050px",
-                height: "auto",
-                border: "2px solid #ccc",
-                borderRadius: "10px",
+                width: "100%",
+                maxWidth: "1300px", // Limit width for larger screens
+                height: "auto", // Maintain aspect ratio
+                border: "2px solid #ccc", // Add a subtle border
+                borderRadius: "10px", // Add rounded corners
+                boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)", // Add a subtle shadow
               }}
             />
 
@@ -91,12 +114,16 @@ const CustomWebcam = ({ capturedImage, setCapturedImage, close, cancel, submit, 
                 onClick={() => setCapturedImage(null)} // Clear the captured image
                 variant="contained"
                 color="secondary"
-                sx={{ marginTop: "10px" }}
+                sx={{ marginTop: "10px", width: { xs: "100%", sm: "auto" } }}
               >
                 Retake Photo
               </Button>
 
-              <Button onClick={submit} variant="contained" sx={{ marginTop: "10px" }}>
+              <Button
+                onClick={submit}
+                variant="contained"
+                sx={{ marginTop: "10px", width: { xs: "100%", sm: "auto" } }}
+              >
                 Submit
               </Button>
 
