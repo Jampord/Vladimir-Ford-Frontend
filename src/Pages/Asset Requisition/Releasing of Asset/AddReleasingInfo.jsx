@@ -726,15 +726,15 @@ const AddReleasingInfo = (props) => {
       if (watch("business_unit_id")?.business_unit_name !== firstBusinessUnit) {
         return false; // Found a different company
       }
-      if (watch("unit_id")?.unit_name !== firstUnit) {
-        return false; // Found a different unit
-      }
-      if (watch("subunit_id")?.subunit_name !== firstSubunit) {
-        return false; // Found a different subunit
-      }
-      if (watch("location_id")?.location_name !== firstLocation) {
-        return false; // Found a different location
-      }
+      // if (watch("unit_id")?.unit_name !== firstUnit) {
+      //   return false; // Found a different unit
+      // }
+      // if (watch("subunit_id")?.subunit_name !== firstSubunit) {
+      //   return false; // Found a different subunit
+      // }
+      // if (watch("location_id")?.location_name !== firstLocation) {
+      //   return false; // Found a different location
+      // }
 
       return true; // All COA are the same
     }
@@ -1307,7 +1307,12 @@ const AddReleasingInfo = (props) => {
             <Stack gap={2} justifyContent="center" alignItems="center" flexDirection="row">
               <Card sx={{ maxWidth: 345 }} onClick={() => dispatch(openDialog3())}>
                 <CardActionArea>
-                  <CardMedia component="img" height="200" image={WebCamSVG} alt="web cam" />
+                  <CardMedia
+                    component="img"
+                    image={WebCamSVG}
+                    alt="web cam"
+                    sx={{ objectFit: "contain", maxWidth: "100%", height: "auto" }}
+                  />
                   <CardContent>
                     <Typography gutterBottom variant="h6" component="div">
                       Take a photo.
@@ -1326,7 +1331,12 @@ const AddReleasingInfo = (props) => {
                 />
                 <Card sx={{ maxWidth: 345 }} onClick={() => receiverMemoRef.current.click()}>
                   <CardActionArea>
-                    <CardMedia component="img" height="200" image={uploadSVG} alt="web cam" />
+                    <CardMedia
+                      component="img"
+                      image={uploadSVG}
+                      alt="web cam"
+                      sx={{ objectFit: "contain", maxWidth: "100%", height: "auto" }}
+                    />
                     <CardContent>
                       <Typography gutterBottom variant="h6" component="div">
                         Upload a photo.
@@ -1382,7 +1392,12 @@ const AddReleasingInfo = (props) => {
             <Stack gap={2} justifyContent="center" alignItems="center" flexDirection="row">
               <Card sx={{ maxWidth: 345 }} onClick={() => dispatch(openDialog5())}>
                 <CardActionArea>
-                  <CardMedia component="img" height="200" image={WebCamSVG} alt="web cam" />
+                  <CardMedia
+                    component="img"
+                    image={WebCamSVG}
+                    alt="web cam"
+                    sx={{ objectFit: "contain", maxWidth: "100%", height: "auto" }}
+                  />
                   <CardContent>
                     <Typography gutterBottom variant="h6" component="div">
                       Take a photo.
@@ -1401,7 +1416,12 @@ const AddReleasingInfo = (props) => {
                 />
                 <Card sx={{ maxWidth: 345 }} onClick={() => authorizationLetterRef.current.click()}>
                   <CardActionArea>
-                    <CardMedia component="img" height="200" image={uploadSVG} alt="web cam" />
+                    <CardMedia
+                      component="img"
+                      image={uploadSVG}
+                      alt="web cam"
+                      sx={{ objectFit: "contain", maxWidth: "100%", height: "auto" }}
+                    />
                     <CardContent>
                       <Typography gutterBottom variant="h6" component="div">
                         Upload a photo.
