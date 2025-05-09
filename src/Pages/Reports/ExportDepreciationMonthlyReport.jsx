@@ -37,8 +37,8 @@ const ExportDepreciationMonthlyReport = () => {
   };
 
   const handleExport = async (formData) => {
-    console.log("formData", formData);
-    console.log("Selected Date:", moment(selectedDate).format("YYYY-MM")); // Log the selected date
+    // console.log("formData", formData);
+    // console.log("Selected Date:", moment(selectedDate).format("YYYY-MM")); // Log the selected date
 
     try {
       const res = await trigger({
@@ -50,6 +50,8 @@ const ExportDepreciationMonthlyReport = () => {
       const newObj = res.flatMap((item) => {
         return {
           "Vladimir Tag Number": item?.vladimir_tag_number || "-",
+          "Tag Number": item?.tag_number || "-",
+          "Old Tag Number": item?.tag_number_old || "-",
           "Asset Description": item?.asset_description || "-",
           "Asset Specification": item?.asset_specification || "-",
           "Acquisition Cost (₱)": item?.acquisition_cost || "-",
