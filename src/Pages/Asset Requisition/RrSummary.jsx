@@ -394,15 +394,15 @@ const RrSummary = (props) => {
         open={dialog}
         TransitionComponent={Grow}
         onClose={() => dispatch(closeDialog())}
-        PaperProps={{ sx: { borderRadius: "10px", width: "min(800px, 900px)", p: 3 } }}
+        PaperProps={{ sx: { borderRadius: "10px", minWidth: "60%", p: 3 } }}
       >
-        <Stack maxWidth="800px" gap={2}>
+        <Stack gap={2}>
           <Typography fontSize={24} fontFamily="Anton" color="secondary" align="center">
             Tagged Items
           </Typography>
 
           <Stack gap={3}>
-            <TableContainer className="mcontainer__th-body">
+            <TableContainer className="mcontainer">
               <Table className="mcontainer__table" stickyHeader>
                 <TableHead>
                   <TableRow
