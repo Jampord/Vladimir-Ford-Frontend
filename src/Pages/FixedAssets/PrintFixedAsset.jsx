@@ -154,6 +154,7 @@ const PrintFixedAsset = (props) => {
     setPrintMemo(false);
     reset();
     refetch();
+    setPage(1);
   };
 
   // Table Sorting --------------------------------
@@ -1165,6 +1166,9 @@ const PrintFixedAsset = (props) => {
                                   <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
                                     RR - {data.rr_number}
                                   </Typography>
+                                  <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
+                                    Reference No. - {data.ymir_ref_number}
+                                  </Typography>
                                 </TableCell>
 
                                 <TableCell>
@@ -1551,6 +1555,9 @@ const PrintFixedAsset = (props) => {
                                           </Typography>
                                           <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
                                             RR - {data.rr_number}
+                                          </Typography>
+                                          <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
+                                            Reference No. - {data.ymir_ref_number}
                                           </Typography>
                                         </TableCell>
 
@@ -2027,6 +2034,9 @@ const PrintFixedAsset = (props) => {
                                           </Typography>
                                           <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
                                             RR - {data.rr_number}
+                                          </Typography>
+                                          <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
+                                            Reference No. - {data.ymir_ref_number}
                                           </Typography>
                                         </TableCell>
 
