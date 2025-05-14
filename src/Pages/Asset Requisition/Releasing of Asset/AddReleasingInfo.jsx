@@ -129,6 +129,7 @@ const AddReleasingInfo = (props) => {
   const [webcamErrorAuthorization, setWebcamErrorAuthorization] = useState(false);
 
   // console.log("file", file);
+  console.log("fileAuthorization", fileAuthorization);
   // console.log("capturedImage", capturedImage);
 
   const signatureRef = useRef();
@@ -371,7 +372,7 @@ const AddReleasingInfo = (props) => {
   // console.log(warehouseNumberData);
 
   const onSubmitHandler = async (formData) => {
-    // console.log({ formData });
+    console.log({ formData });
     // fileToBase64
     const fileToBase64 = (file) => {
       return new Promise((resolve, reject) => {
@@ -389,7 +390,7 @@ const AddReleasingInfo = (props) => {
     const assignmentMemoImgBase64 = formData?.assignment_memo_img && (await fileToBase64(formData.assignment_memo_img));
     const authorizationLetterImgBase64 = formData?.authorization_memo_img?.includes("base64")
       ? capturedImageAuthorization
-      : await fileToBase64(formData.authorization_memo_img);
+      : fileAuthorization !== null && (await fileToBase64(fileAuthorization));
 
     const saveFormData = {
       warehouse_number_id: warehouseNumberData,
@@ -650,8 +651,6 @@ const AddReleasingInfo = (props) => {
     }
   }, [capturedImageAuthorization, watch("authorization_memo_img")]);
 
-  console.log("fileAuthorization", watch("authorization_memo_img"));
-
   useEffect(() => {
     if (!!fileAuthorization) {
       setValue("authorization_memo_img", fileAuthorization?.name);
@@ -741,8 +740,6 @@ const AddReleasingInfo = (props) => {
   };
 
   const result = areAllCOASame(selectedItems);
-
-  console.log("result", result);
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmitHandler)} gap={1} px={3} overflow="auto">
