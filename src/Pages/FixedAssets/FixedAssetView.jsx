@@ -911,6 +911,13 @@ const FixedAssetView = (props) => {
                     </Box>
 
                     <Box className="tableCard__properties">
+                      Subunit:
+                      <Typography className="tableCard__info" fontSize="14px">
+                        {`${dataApi?.data?.subunit?.subunit_code} - ${dataApi?.data?.subunit?.subunit_name}`}
+                      </Typography>
+                    </Box>
+
+                    <Box className="tableCard__properties">
                       Location:
                       <Typography className="tableCard__info" fontSize="14px">
                         {`${dataApi?.data?.location.location_code} - ${dataApi?.data?.location.location_name}`}
