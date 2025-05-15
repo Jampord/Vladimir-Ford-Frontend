@@ -14,6 +14,7 @@ export const confirmSlice = createSlice({
     onDismiss: () => {},
     autoClose: false,
     remarks: false,
+    approval: false,
   },
 
   reducers: {
@@ -27,6 +28,7 @@ export const confirmSlice = createSlice({
       state.onDismiss = action.payload.onDismiss;
       state.autoClose = action.payload.autoClose || false;
       state.remarks = action.payload.remarks || "";
+      state.approval = action.payload.approval || "";
     },
 
     closeConfirm: (state) => {
