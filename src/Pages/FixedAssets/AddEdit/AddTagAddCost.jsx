@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import { LoadingButton } from "@mui/lab";
 import {
   fixedAssetApi,
+  useLazyGetFixedAssetSmallToolsAllApiQuery,
   useLazyGetFixedAssetSubunitAllApiQuery,
   usePostTagFixedAssetAddCostApiMutation,
 } from "../../../Redux/Query/FixedAsset/FixedAssets";
@@ -16,14 +17,17 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
+import CustomNumberField from "../../../Components/Reusable/CustomNumberField";
 
 const schema = yup.object().shape({
   //   selected_fixed_asset_id: yup.string().nullable(),
   fixed_asset_id: yup.object().required().typeError("Fixed Asset is a required field"),
+  usefulLife: yup.number().required().typeError("Useful Life is a required field"),
 });
 
-const AddTagAddCost = ({ data, resetHandler }) => {
+const AddTagAddCost = ({ data, resetHandler, tabValue }) => {
   console.log("data: ", data);
+  console.log("tabValue: ", tabValue);
   const selectedFixedAsset = data.map((item) => item?.vladimir_tag_number);
   //   console.log("selectedFixedAsset: ", selectedFixedAsset);
   const selectedFixedAssetId = data.map((item) => item?.id);
@@ -45,6 +49,19 @@ const AddTagAddCost = ({ data, resetHandler }) => {
   ] = useLazyGetFixedAssetSubunitAllApiQuery();
 
   const [
+    fixedAssetSmallToolsTrigger,
+    {
+      data: fixedAssetSmallToolsApiData = [],
+      isLoading: fixedAssetSmallToolsApiLoading,
+      isSuccess: fixedAssetSmallToolsApiSuccess,
+      isFetching: fixedAssetSmallToolsApiFetching,
+      isError: fixedAssetSmallToolsApiError,
+      error: fixedAssetSmallToolsErrorData,
+      refetch: fixedAssetSmallToolsApiRefetch,
+    },
+  ] = useLazyGetFixedAssetSmallToolsAllApiQuery();
+
+  const [
     postTagFixedAsset,
     { data: postData, isLoading: isPostLoading, isSuccess: isPostSuccess, isError: isPostError, error: postError },
   ] = usePostTagFixedAssetAddCostApiMutation();
@@ -62,7 +79,7 @@ const AddTagAddCost = ({ data, resetHandler }) => {
   } = useForm({
     resolver: yupResolver(schema),
     // mode: "onSubmit",
-    defaultValues: { selected_fixed_asset_id: selectedFixedAsset, fixed_asset_id: null },
+    defaultValues: { selected_fixed_asset_id: selectedFixedAsset, fixed_asset_id: null, usefulLife: 1 },
   });
 
   useEffect(() => {
@@ -95,6 +112,7 @@ const AddTagAddCost = ({ data, resetHandler }) => {
     const newFormData = {
       vTagNumber: formData?.fixed_asset_id?.vladimir_tag_number,
       addCost: selectedFixedAssetId,
+      usefulLife: formData?.usefulLife,
     };
     console.log("submit", newFormData);
 
@@ -167,7 +185,6 @@ const AddTagAddCost = ({ data, resetHandler }) => {
           name="selected_fixed_asset_id"
           control={control}
           options={[]}
-          loading={fixedAssetSubunitApiLoading}
           size="small"
           multiple
           readOnly
@@ -185,30 +202,50 @@ const AddTagAddCost = ({ data, resetHandler }) => {
           )}
         />
 
-        <CustomAutoComplete
-          name="fixed_asset_id"
-          control={control}
-          options={fixedAssetSubunitApiData}
-          onOpen={() =>
-            // fixedAssetSmallToolsApiSuccess
-            //   ? null
-            //   :
-            fixedAssetSubunitTrigger({ sub_unit_id: data[0]?.subunit?.id })
-          }
-          loading={fixedAssetSubunitApiLoading}
-          size="small"
-          getOptionLabel={(option) => `${option?.vladimir_tag_number} - ${option?.asset_description}`}
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-          renderInput={(params) => (
-            <TextField
-              color="secondary"
-              {...params}
-              label="Fixed Asset"
-              error={!!errors?.fixed_asset_id}
-              helperText={errors?.fixed_asset_id?.message}
-            />
-          )}
-        />
+        <Box display="flex" gap={1} flexDirection="row" justifyContent="flex-end">
+          <CustomAutoComplete
+            name="fixed_asset_id"
+            control={control}
+            options={tabValue === "2" ? fixedAssetSmallToolsApiData : fixedAssetSubunitApiData}
+            onOpen={() =>
+              // fixedAssetSmallToolsApiSuccess
+              //   ? null
+              //   :
+              tabValue === "2"
+                ? fixedAssetSmallToolsTrigger({ sub_unit_id: data[0]?.subunit?.id })
+                : fixedAssetSubunitTrigger({ sub_unit_id: data[0]?.subunit?.id })
+            }
+            loading={tabValue === "2" ? fixedAssetSmallToolsApiLoading : fixedAssetSubunitApiLoading}
+            size="small"
+            getOptionLabel={(option) => `${option?.vladimir_tag_number} - ${option?.asset_description}`}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderInput={(params) => (
+              <TextField
+                color="secondary"
+                {...params}
+                label="Fixed Asset"
+                error={!!errors?.fixed_asset_id}
+                helperText={errors?.fixed_asset_id?.message}
+              />
+            )}
+            fullWidth
+          />
+
+          <CustomNumberField
+            control={control}
+            color="secondary"
+            name="usefulLife"
+            label="Useful Life (Months)"
+            type="number"
+            size="small"
+            error={!!errors?.usefulLife}
+            helperText={errors?.usefulLife?.message}
+            isAllowed={(values) => {
+              const { floatValue } = values;
+              return floatValue >= 1 && floatValue < 241;
+            }}
+          />
+        </Box>
 
         <DialogActions>
           <LoadingButton
@@ -216,10 +253,10 @@ const AddTagAddCost = ({ data, resetHandler }) => {
             color="secondary"
             type="submit"
             onClick={(event) => event.stopPropagation()}
-            disabled={isPostLoading}
+            disabled={!isValid}
             loading={isPostLoading}
             size="small"
-            startIcon={<PriceChange color="primary" />}
+            startIcon={<PriceChange color={isValid ? "primary" : "gray"} />}
           >
             Tag
           </LoadingButton>
