@@ -130,6 +130,15 @@ export const fixedAssetApi = createApi({
       invalidatesTags: ["FixedAsset"],
     }),
 
+    patchFixedAssetDescriptionApi: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/fixed-asset/update-description/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["FixedAsset"],
+    }),
+
     postImportApi: builder.mutation({
       query: (data) => ({
         url: `/import-masterlist`,
@@ -327,6 +336,7 @@ export const {
   useArchiveFixedAssetStatusApiMutation,
   usePostFixedAssetApiMutation,
   useUpdateFixedAssetApiMutation,
+  usePatchFixedAssetDescriptionApiMutation,
   usePostImportApiMutation,
   useLazyGetExportApiQuery,
   usePostPrintApiMutation,
