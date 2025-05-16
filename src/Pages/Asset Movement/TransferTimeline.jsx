@@ -162,7 +162,9 @@ const TransferTimeline = (props) => {
                           <FactCheck sx={{ color: "success.main" }} />
                         ) : item?.action === "Removed PR Number" ? (
                           <CancelOutlined sx={{ color: "error.main" }} />
-                        ) : item.action === "Cancelled Remaining Items" || item.action === "Cancelled Item To PO" ? (
+                        ) : item.action === "Cancelled Remaining Items" ||
+                          item.action === "Rejected" ||
+                          item.action === "Cancelled Item To PO" ? (
                           <RemoveCircleOutline sx={{ color: "error.main" }} />
                         ) : (
                           <CheckCircleOutlineTwoTone sx={{ color: "secondary.main" }} />
@@ -181,7 +183,7 @@ const TransferTimeline = (props) => {
                               ? "#ff000017"
                               : item?.action === "Approved" || item?.action === "fully Received"
                               ? "#00800016"
-                              : item?.action === "Removed PR Number"
+                              : item.action === "Rejected" || item?.action === "Removed PR Number"
                               ? "#ff000017"
                               : "#0088880f",
                         }}
