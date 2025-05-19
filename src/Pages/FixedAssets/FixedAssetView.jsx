@@ -82,9 +82,16 @@ import useScanDetection from "use-scan-detection-react18";
 import { useGetIpApiQuery } from "../../Redux/Query/IpAddressSetup";
 import { useReactToPrint } from "react-to-print";
 import AssignmentMemo from "./AssignmentMemo";
-import { closeDialog, closeDialog1, openDialog, openDialog1 } from "../../Redux/StateManagement/booleanStateSlice";
+import {
+  closeDialog,
+  closeDialog1,
+  closeDialog2,
+  openDialog,
+  openDialog1,
+} from "../../Redux/StateManagement/booleanStateSlice";
 import AddInclusion from "../Asset Requisition/Received Asset/AddInclusion";
 import EditSmallTools from "./AddEdit/EditSmallTools";
+import EditAssetDescription from "./AddEdit/EditAssetDescription";
 
 const FixedAssetView = (props) => {
   const [search, setSearch] = useState(null);
@@ -164,6 +171,7 @@ const FixedAssetView = (props) => {
   const drawer = useSelector((state) => state.booleanState.drawer);
   const dialog = useSelector((state) => state.booleanState.dialog);
   const dialog1 = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
+  const dialog2 = useSelector((state) => state.booleanState.dialogMultiple.dialog2);
 
   const {
     data: dataApi,
@@ -694,6 +702,10 @@ const FixedAssetView = (props) => {
                     setStatusChange={setStatusChange}
                     onUpdateHandler={onUpdateHandler}
                   />
+                )}
+
+                {dataApi?.data?.is_depreciated === 1 && dataApi?.data?.can_update !== 1 && (
+                  <ActionMenu data={dataApi?.data} editAssetDescription hideEdit />
                 )}
               </Box>
             </Box>
@@ -1733,6 +1745,15 @@ const FixedAssetView = (props) => {
         PaperProps={{ sx: { borderRadius: "10px" } }}
       >
         <EditSmallTools data={smallToolsData} />
+      </Dialog>
+
+      <Dialog
+        open={dialog2}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog2())}
+        PaperProps={{ sx: { borderRadius: "10px" } }}
+      >
+        <EditAssetDescription data={dataApi?.data} />
       </Dialog>
     </>
   );
