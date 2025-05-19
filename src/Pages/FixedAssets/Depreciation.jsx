@@ -150,8 +150,8 @@ const formatCost = (value) => {
 const Depreciation = (props) => {
   const { setViewDepre, calcDepreApi, vladimirTag, refetch, nextRequest } = props;
 
-  console.log("calcDepreApi", calcDepreApi);
-  console.log("nextRequest", !!nextRequest);
+  // console.log("calcDepreApi", calcDepreApi);
+  // console.log("nextRequest", !!nextRequest);
 
   const isSmallScreen = useMediaQuery("(max-width: 1000px)");
 
@@ -290,8 +290,6 @@ const Depreciation = (props) => {
       isSuccess: isMinorCategorySmallToolsSuccess,
     },
   ] = useLazyGetMinorCategorySmallToolsApiQuery();
-
-  console.log("minorCategoryData", minorCategoryData);
 
   const [
     postDepreciation,
@@ -547,11 +545,11 @@ const Depreciation = (props) => {
       subunit_id: formData.subunit_id.id,
       location_id: formData.location_id.id,
       second_depreciation_credit_id:
-        watch("minor_category_id")?.minor_category_name !== data?.minor_category?.minor_category_name
+        watch("major_category_id")?.major_category_name !== data?.major_category?.major_category_name
           ? formData.second_depreciation_credit_id
           : "",
       second_depreciation_debit_id:
-        watch("minor_category_id")?.minor_category_name !== data?.minor_category?.minor_category_name
+        watch("major_category_id")?.major_category_name !== data?.major_category?.major_category_name
           ? formData.second_depreciation_debit_id
           : "",
     };
@@ -587,7 +585,7 @@ const Depreciation = (props) => {
 
             if (nextRequest) {
               const next = await getNextDepreciationRequest().unwrap();
-              console.log("next", next);
+              // console.log("next", next);
               setViewDepre(false);
               navigate(`/fixed-asset/depreciation/${next?.vladimir_tag_number}`, { state: next, replace: true });
             }
@@ -1113,17 +1111,19 @@ const Depreciation = (props) => {
                         />
                       )}
                       onChange={(_, value) => {
-                        console.log("value", value);
+                        // console.log("value", value);
                         if (value) {
                           setValue("major_category_id", value.major_category);
+                          setValue("second_depreciation_credit_id", value.initial_debit);
                         } else {
                           setValue("major_category_id", null);
+                          setValue("second_depreciation_credit_id", null);
                         }
                         return value;
                       }}
                     />
 
-                    {console.log("watch", watch("minor_category_id"))}
+                    {/* {console.log("watch", watch("second_depreciation_credit_id"))} */}
 
                     <Typography fontFamily="Anton" color="secondary">
                       Depreciate Asset
@@ -1214,7 +1214,7 @@ const Depreciation = (props) => {
                       )}
                     />
 
-                    {watch("minor_category_id")?.minor_category_name !== data?.minor_category?.minor_category_name && (
+                    {watch("major_category_id")?.major_category_name !== data?.major_category?.major_category_name && (
                       <>
                         <Divider />
                         <CustomAutoComplete
@@ -1222,7 +1222,7 @@ const Depreciation = (props) => {
                           name="second_depreciation_debit_id"
                           // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
                           control={control}
-                          options={watch("minor_category_id")?.initial_debit?.depreciation_debit || []}
+                          options={watch("second_depreciation_credit_id")?.depreciation_debit || []}
                           // loading={isAccountTitleLoading}
                           size="small"
                           getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
@@ -1233,7 +1233,7 @@ const Depreciation = (props) => {
                             <TextField
                               color="secondary"
                               {...params}
-                              label="Second Depreciation Debit"
+                              label="Asset Account/Adjusted Entries (Debit)"
                               error={!!errors?.second_depreciation_debit_id}
                               helperText={errors?.second_depreciation_debit_id?.message}
                             />
@@ -1256,7 +1256,7 @@ const Depreciation = (props) => {
                             <TextField
                               color="secondary"
                               {...params}
-                              label="Second Depreciation Credit"
+                              label="Asset Account/Adjusted Entries (Credit)"
                               error={!!errors?.second_depreciation_credit_id}
                               helperText={errors?.second_depreciation_credit_id?.message}
                             />
