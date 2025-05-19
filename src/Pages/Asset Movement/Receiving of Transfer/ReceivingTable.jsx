@@ -4,8 +4,10 @@ import {
   Button,
   Checkbox,
   Chip,
+  Dialog,
   Divider,
   FormControlLabel,
+  Grow,
   Stack,
   Table,
   TableBody,
@@ -33,9 +35,11 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { MoveDownOutlined, Warning } from "@mui/icons-material";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
+import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
+import RejectTransfer from "./component/RejectTransfer";
 
 const schema = yup.object().shape({
   transfer_ids: yup.array(),
@@ -48,6 +52,8 @@ const ReceivingTable = ({ received }) => {
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  const dialog = useSelector((state) => state.booleanState.dialog);
 
   const {
     data: receivingData,
@@ -111,6 +117,7 @@ const ReceivingTable = ({ received }) => {
     console.log({ transfer_ids: watch("transfer_ids").map(Number) });
     dispatch(
       openConfirm({
+        approval: true,
         icon: Warning,
         iconColor: "warning",
         message: (
@@ -131,6 +138,7 @@ const ReceivingTable = ({ received }) => {
             ?
             <Autocomplete
               multiple
+              freeSolo
               id="assets-readOnly"
               options={receivingData?.data
                 ?.filter((item) => watch("transfer_ids").includes(item.id.toString()))
@@ -185,6 +193,10 @@ const ReceivingTable = ({ received }) => {
               );
             }
           }
+        },
+
+        onDismiss: async () => {
+          dispatch(openDialog());
         },
       })
     );
@@ -354,6 +366,15 @@ const ReceivingTable = ({ received }) => {
           </Box>
         </>
       )}
+
+      <Dialog
+        open={dialog}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog())}
+        PaperProps={{ sx: { borderRadius: "10px" } }}
+      >
+        <RejectTransfer data={watch("transfer_ids").map(Number)} />
+      </Dialog>
     </Stack>
   );
 };
