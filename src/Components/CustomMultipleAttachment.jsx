@@ -6,7 +6,7 @@ import AttachmentError from "../Img/SVG/AttachmentError.svg";
 import { useRef, useState } from "react";
 
 const CustomMultipleAttachment = (props) => {
-  const { name, control, errors, inputRef, multiple, ...textfield } = props;
+  const { name, control, errors, inputRef, multiple, requiredField, ...textfield } = props;
   const [fileUpload, setFileUpload] = useState(0);
   const fileInputRef = useRef(null);
 
@@ -75,6 +75,7 @@ const CustomMultipleAttachment = (props) => {
                 ".MuiInputBase-root": {
                   borderRadius: "10px",
                   color: textfield.error ? "red" : "#636363",
+                  bgcolor: requiredField && "#f5c9861c",
                 },
                 ".MuiInputLabel-root.Mui-disabled": {
                   backgroundColor: "transparent",
