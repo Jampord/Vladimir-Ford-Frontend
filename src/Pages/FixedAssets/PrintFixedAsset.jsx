@@ -151,7 +151,7 @@ const PrintFixedAsset = (props) => {
 
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
-    setPrintMemo(false);
+    // setPrintMemo(false);
     reset();
     refetch();
     setPage(1);
@@ -884,7 +884,7 @@ const PrintFixedAsset = (props) => {
           </Stack>
 
           {/* {!!isRequest && ( */}
-          {!!isRequest && tabValue === "1" && (
+          {!!isRequest && (
             <FormControlLabel
               label={"Assignment Memo"}
               control={
@@ -1065,7 +1065,7 @@ const PrintFixedAsset = (props) => {
                       </TableCell>
 
                       <TableCell>
-                        <TableSortLabel disabled>PR/PO/RR Number</TableSortLabel>
+                        <TableSortLabel disabled>PR/PO/RR/Reference No.</TableSortLabel>
                       </TableCell>
 
                       <TableCell>
@@ -1452,7 +1452,7 @@ const PrintFixedAsset = (props) => {
                               </TableCell>
 
                               <TableCell>
-                                <TableSortLabel disabled>PR/PO/RR Number</TableSortLabel>
+                                <TableSortLabel disabled>PR/PO/RR/Reference No.</TableSortLabel>
                               </TableCell>
 
                               <TableCell>
@@ -1906,7 +1906,7 @@ const PrintFixedAsset = (props) => {
                               </TableCell>
 
                               <TableCell>
-                                <TableSortLabel disabled>PR/PO/RR Number</TableSortLabel>
+                                <TableSortLabel disabled>PR/PO/RR/Reference No.</TableSortLabel>
                               </TableCell>
 
                               <TableCell>
@@ -2165,99 +2165,109 @@ const PrintFixedAsset = (props) => {
                       )}
 
                       <Stack gap={1.2} flexDirection="row" alignSelf="flex-end" mt={1} mb={1}>
-                        <LoadingButton
-                          size="small"
-                          variant="contained"
-                          loading={isLoading}
-                          startIcon={
-                            isLoading ? null : (
-                              <PriceChange
-                                color={
-                                  watch("tagNumber").length === 0 || printable === true || result === false
-                                    ? "gray"
-                                    : "primary"
-                                }
-                              />
-                            )
-                          }
-                          disabled={watch("tagNumber").length === 0 || printable === true || result === false}
-                          onClick={() => dispatch(openDialog3())}
-                          color={printMemo ? "tertiary" : "secondary"}
-                          sx={{ color: "white" }}
-                        >
-                          {isSmallScreen ? null : "Tag as Add Cost"}
-                        </LoadingButton>
+                        {!printMemo && (
+                          <LoadingButton
+                            size="small"
+                            variant="contained"
+                            loading={isLoading}
+                            startIcon={
+                              isLoading ? null : (
+                                <PriceChange
+                                  color={
+                                    watch("tagNumber").length === 0 || printable === true || result === false
+                                      ? "gray"
+                                      : "primary"
+                                  }
+                                />
+                              )
+                            }
+                            disabled={watch("tagNumber").length === 0 || printable === true || result === false}
+                            onClick={() => dispatch(openDialog3())}
+                            color={printMemo ? "tertiary" : "secondary"}
+                            sx={{ color: "white" }}
+                          >
+                            {isSmallScreen ? null : "Tag as Add Cost"}
+                          </LoadingButton>
+                        )}
 
-                        <LoadingButton
-                          size="small"
-                          variant="contained"
-                          loading={isLoading}
-                          startIcon={
-                            isLoading ? null : (
-                              <HomeRepairService
-                                color={
-                                  watch("tagNumber").length === 0 || watch("tagNumber").length === 1 || result === false
-                                    ? "gray"
-                                    : "primary"
-                                }
-                              />
-                            )
-                          }
-                          disabled={
-                            watch("tagNumber").length === 0 || watch("tagNumber").length === 1 || result === false
-                          }
-                          onClick={() => dispatch(openDialog2())}
-                          color={printMemo ? "tertiary" : "secondary"}
-                          sx={{ color: "white" }}
-                        >
-                          {isSmallScreen ? null : "Group "}
-                        </LoadingButton>
+                        {!printMemo && (
+                          <LoadingButton
+                            size="small"
+                            variant="contained"
+                            loading={isLoading}
+                            startIcon={
+                              isLoading ? null : (
+                                <HomeRepairService
+                                  color={
+                                    watch("tagNumber").length === 0 ||
+                                    watch("tagNumber").length === 1 ||
+                                    result === false
+                                      ? "gray"
+                                      : "primary"
+                                  }
+                                />
+                              )
+                            }
+                            disabled={
+                              watch("tagNumber").length === 0 || watch("tagNumber").length === 1 || result === false
+                            }
+                            onClick={() => dispatch(openDialog2())}
+                            color={printMemo ? "tertiary" : "secondary"}
+                            sx={{ color: "white" }}
+                          >
+                            {isSmallScreen ? null : "Group "}
+                          </LoadingButton>
+                        )}
 
-                        <LoadingButton
-                          size="small"
-                          variant="contained"
-                          loading={isLoading}
-                          startIcon={
-                            isLoading ? null : (
-                              <HomeRepairService
-                                color={
-                                  watch("tagNumber").length === 0 ||
-                                  watch("tagNumber").length > 1 ||
-                                  printable === false
-                                    ? "gray"
-                                    : "primary"
-                                }
-                              />
-                            )
-                          }
-                          disabled={
-                            watch("tagNumber").length === 0 || watch("tagNumber").length > 1 || printable === false
-                          }
-                          onClick={onUngroupSmallToolsHandler}
-                          color={printMemo ? "tertiary" : "warning"}
-                          sx={{ color: "white" }}
-                        >
-                          {isSmallScreen ? null : "Ungroup "}
-                        </LoadingButton>
+                        {!printMemo && (
+                          <LoadingButton
+                            size="small"
+                            variant="contained"
+                            loading={isLoading}
+                            startIcon={
+                              isLoading ? null : (
+                                <HomeRepairService
+                                  color={
+                                    watch("tagNumber").length === 0 ||
+                                    watch("tagNumber").length > 1 ||
+                                    printable === false
+                                      ? "gray"
+                                      : "primary"
+                                  }
+                                />
+                              )
+                            }
+                            disabled={
+                              watch("tagNumber").length === 0 || watch("tagNumber").length > 1 || printable === false
+                            }
+                            onClick={onUngroupSmallToolsHandler}
+                            color={printMemo ? "tertiary" : "warning"}
+                            sx={{ color: "white" }}
+                          >
+                            {isSmallScreen ? null : "Ungroup "}
+                          </LoadingButton>
+                        )}
 
-                        <LoadingButton
-                          size="small"
-                          variant="contained"
-                          loading={isLoading}
-                          startIcon={
-                            isLoading ? null : (
-                              <PrintDisabled
-                                color={watch("tagNumber").length === 0 || printable === true ? "gray" : "primary"}
-                              />
-                            )
-                          }
-                          disabled={watch("tagNumber").length === 0 || printable === true}
-                          onClick={onTagNonPrintableHandler}
-                          color={printMemo ? "tertiary" : "secondary"}
-                          sx={{ color: "white" }}
-                        >
-                          {isSmallScreen ? null : "Tag as Non-Printable"}
-                        </LoadingButton>
+                        {!printMemo && (
+                          <LoadingButton
+                            size="small"
+                            variant="contained"
+                            loading={isLoading}
+                            startIcon={
+                              isLoading ? null : (
+                                <PrintDisabled
+                                  color={watch("tagNumber").length === 0 || printable === true ? "gray" : "primary"}
+                                />
+                              )
+                            }
+                            disabled={watch("tagNumber").length === 0 || printable === true}
+                            onClick={onTagNonPrintableHandler}
+                            color={printMemo ? "tertiary" : "secondary"}
+                            sx={{ color: "white" }}
+                          >
+                            {isSmallScreen ? null : "Tag as Non-Printable"}
+                          </LoadingButton>
+                        )}
 
                         <LoadingButton
                           size="small"
@@ -2344,7 +2354,7 @@ const PrintFixedAsset = (props) => {
             },
           }}
         >
-          <AddTagAddCost data={smallToolsData} resetHandler={reset} />
+          <AddTagAddCost data={smallToolsData} resetHandler={reset} tabValue={tabValue} />
         </Dialog>
 
         <Dialog
