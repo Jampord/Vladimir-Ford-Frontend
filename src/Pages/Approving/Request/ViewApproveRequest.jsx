@@ -83,6 +83,7 @@ import {
 import CustomTextField from "../../../Components/Reusable/CustomTextField";
 
 const schema = yup.object().shape({
+  major_category_id: yup.object().nullable(),
   minor_category_id: yup.object().required().label("Minor Category").typeError("Minor Category is a required field"),
   description: yup.string().required().label("Asset Description"),
 });
@@ -90,7 +91,7 @@ const schema = yup.object().shape({
 const ViewApproveRequest = (props) => {
   const { approving } = props;
   const { state: transactionData } = useLocation();
-  // console.log("transactionData", transactionData);
+  console.log("transactionData", transactionData);
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
   const [attachment, setAttachment] = useState("");
@@ -187,6 +188,7 @@ const ViewApproveRequest = (props) => {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
+      major_category_id: null,
       minor_category_id: null,
       description: "",
     },
@@ -546,6 +548,7 @@ const ViewApproveRequest = (props) => {
   const onUpdateHandler = (props) => {
     console.log("props", props);
     setReferenceNumber(props.reference_number);
+    setFormValue("major_category_id", props.major_category);
     setFormValue("minor_category_id", props.minor_category);
     setFormValue("description", props.asset_description);
     setIsSmallTools(Boolean(props.type_of_request.type_of_request_name === "Small Tools"));
@@ -674,9 +677,8 @@ const ViewApproveRequest = (props) => {
                       <TableCell className="tbl-cell">Cellphone #</TableCell>
                       <TableCell className="tbl-cell">Capex Num / Unit Charging</TableCell>
                       <TableCell className="tbl-cell">Attachments</TableCell>
-                      {(transactionData?.final || (nextData && nextData[0]?.final_approval === 1)) && (
-                        <TableCell className="tbl-cell">Action</TableCell>
-                      )}
+                      {((!isApproveLoading && approveRequestData?.data[0]?.fa_edit === 1) ||
+                        (nextData && nextData[0]?.fa_edit === 1)) && <TableCell className="tbl-cell">Action</TableCell>}
                     </TableRow>
                   </TableHead>
 
@@ -784,7 +786,6 @@ const ViewApproveRequest = (props) => {
                               <TableCell className="tbl-cell">{data.cellphone_number}</TableCell>
 
                               <TableCell className="tbl-cell">
-                                {" "}
                                 <Typography
                                   fontSize={14}
                                   fontWeight={400}
@@ -964,7 +965,7 @@ const ViewApproveRequest = (props) => {
                                   </Stack>
                                 )}
                               </TableCell>
-                              {(transactionData?.final || data?.final_approval === 1) && (
+                              {data?.fa_edit === 1 && (
                                 <TableCell className="tbl-cell">
                                   <ActionMenu onUpdateHandler={onUpdateHandler} data={data} />
                                 </TableCell>
@@ -1048,6 +1049,26 @@ const ViewApproveRequest = (props) => {
               <Divider />
 
               <CustomAutoComplete
+                autoComplete
+                name="major_category_id"
+                disabled
+                control={control}
+                options={[]}
+                size="small"
+                getOptionLabel={(option) => option.major_category_name}
+                isOptionEqualToValue={(option, value) => option.major_category_name === value?.major_category_name}
+                renderInput={(params) => (
+                  <TextField
+                    color="secondary"
+                    {...params}
+                    label="Major Category"
+                    error={!!errors?.major_category_id?.message}
+                    helperText={errors?.major_category_id?.message}
+                  />
+                )}
+              />
+
+              <CustomAutoComplete
                 name="minor_category_id"
                 control={control}
                 options={isSmallTools === true ? minorCategorySmallToolsData : minorCategoryData}
@@ -1073,6 +1094,15 @@ const ViewApproveRequest = (props) => {
                     helperText={errors?.minor_category_id?.message}
                   />
                 )}
+                onChange={(_, value) => {
+                  console.log("value", value);
+                  if (value) {
+                    setFormValue("major_category_id", value.major_category);
+                  } else {
+                    setFormValue("major_category_id", null);
+                  }
+                  return value;
+                }}
               />
 
               <CustomTextField
