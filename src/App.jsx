@@ -759,6 +759,7 @@ function App() {
     onDismiss: confirmDismiss,
     autoClose: confirmAutoClose,
     remarks: confirmRemarks,
+    approval: confirmApproval,
   } = useSelector((state) => state.confirm);
 
   const dispatch = useDispatch();
@@ -822,6 +823,7 @@ function App() {
             loading={confirmLoading}
             autoClose={confirmAutoClose}
             remarks={confirmRemarks}
+            approval={confirmApproval}
           />
         </Dialog>
       </ThemeProvider>

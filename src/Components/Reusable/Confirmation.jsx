@@ -23,6 +23,7 @@ import {
   Typography,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
+import { Close, GetApp } from "@mui/icons-material";
 
 const schema = yup.object().shape({
   remarks: yup.string().nullable(),
@@ -41,6 +42,7 @@ const Confirmation = (props) => {
     loading,
     autoClose,
     remarks,
+    approval,
     // control,
     status,
   } = props;
@@ -69,6 +71,14 @@ const Confirmation = (props) => {
   const handleClose = () => {
     dispatch(closeConfirm());
     onDismiss && onDismiss();
+  };
+
+  const handleApprovalClose = () => {
+    onDismiss && onDismiss();
+  };
+
+  const handleConfirmationClose = () => {
+    dispatch(closeConfirm());
   };
 
   // WORKING --------------------------
@@ -193,6 +203,75 @@ const Confirmation = (props) => {
         >
           No
         </Button>
+      </Stack>
+      {/* </DialogActions> */}
+    </Box>
+  ) : approval ? (
+    <Box className="confirmation" component="form" onSubmit={handleSubmit(handleConfirm)}>
+      <Close
+        sx={{
+          position: "absolute",
+          top: 16,
+          right: 16,
+          cursor: "pointer",
+          ":hover": { transform: "scale(1.1)" },
+        }}
+        onClick={handleConfirmationClose}
+      />
+
+      <SvgIcon
+        component={icon}
+        htmlColor={iconColor}
+        // htmlColor="info"
+        sx={{ fontSize: "50px", alignSelf: "center", ...iconProps }}
+      />
+      <DialogTitle
+        className="confirmation__title"
+        color="secondary"
+        sx={{ fontFamily: "Anton", fontSize: "1.5rem", padding: 0 }}
+      >
+        Confirmation
+      </DialogTitle>
+
+      <DialogContent sx={{ padding: 0 }}>
+        <DialogContentText component="div">{message}</DialogContentText>
+      </DialogContent>
+
+      {/* <DialogActions> */}
+      <Stack alignContent="flex-start" justifyContent="center" flexDirection="row" gap={2} marginTop={3}>
+        <LoadingButton
+          color="primary"
+          // onClick={handleConfirm}
+          loading={loading}
+          type="submit"
+          variant="contained"
+          size="small"
+          startIcon={<GetApp color="action" />}
+        >
+          Receive
+        </LoadingButton>
+
+        <Button
+          autoFocus
+          variant="contained"
+          color="warning"
+          onClick={handleApprovalClose}
+          disabled={loading === true}
+          size="small"
+        >
+          Reject
+        </Button>
+
+        {/* <Button
+          autoFocus
+          variant="outlined"
+          color="secondary"
+          onClick={handleClose}
+          disabled={loading === true}
+          size="small"
+        >
+          Cancel
+        </Button> */}
       </Stack>
       {/* </DialogActions> */}
     </Box>
