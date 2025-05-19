@@ -6,7 +6,9 @@ import {
   Box,
   Button,
   Card,
+  Dialog,
   Divider,
+  Grow,
   IconButton,
   Stack,
   Table,
@@ -25,20 +27,23 @@ import {
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import FaStatusChange from "../../../Components/Reusable/FaStatusComponent";
 import FixedAssetViewSkeleton from "../../FixedAssets/FixedAssetViewSkeleton";
 import ErrorFetchFA from "../../FixedAssets/ErrorFetchFA";
+import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
+import RejectTransfer from "./component/RejectTransfer";
 
 const AssetTransferView = () => {
   const { state: data } = useLocation();
-  // console.log("data: ", data);
+  console.log("data: ", data);
   const { movement_id } = useParams();
   // console.log("movement_id: ", movement_id);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dialog = useSelector((state) => state.booleanState.dialog);
 
   const isSmallScreen = useMediaQuery("(max-width: 350px)");
 
@@ -66,6 +71,7 @@ const AssetTransferView = () => {
   const handleReceiving = (id) => {
     dispatch(
       openConfirm({
+        approval: true,
         icon: Warning,
         iconColor: "warning",
         message: (
@@ -120,6 +126,10 @@ const AssetTransferView = () => {
               );
             }
           }
+        },
+
+        onDismiss: async () => {
+          dispatch(openDialog());
         },
       })
     );
@@ -565,6 +575,15 @@ const AssetTransferView = () => {
               </Box>
             </Box>
           </Box>
+
+          <Dialog
+            open={dialog}
+            TransitionComponent={Grow}
+            onClose={() => dispatch(closeDialog())}
+            PaperProps={{ sx: { borderRadius: "10px" } }}
+          >
+            <RejectTransfer data={[data?.id]} singleReceiving />
+          </Dialog>
         </Box>
       )}
     </>
