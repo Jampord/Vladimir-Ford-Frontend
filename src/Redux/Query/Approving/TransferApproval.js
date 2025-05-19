@@ -42,6 +42,15 @@ export const transferApprovalApi = createApi({
       invalidatesTags: ["TransferApproval"],
     }),
 
+    patchUpdateTransferDepreciationApprovalApi: builder.mutation({
+      query: (body) => ({
+        url: `/update-depreciation/${body.id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["TransferApproval"],
+    }),
+
     getNextRequest: builder.query({
       query: () => `/next-request`,
     }),
@@ -60,6 +69,7 @@ export const {
   useGetTransferApprovalAllApiQuery,
   useGetTransferApprovalIdApiQuery,
   usePatchTransferApprovalStatusApiMutation,
+  usePatchUpdateTransferDepreciationApprovalApiMutation,
   useGetNextRequestQuery,
   useLazyGetNextRequestQuery,
   useLazyDlAttachmentQuery,
