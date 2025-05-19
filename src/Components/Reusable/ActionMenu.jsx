@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 
 import { useDispatch } from "react-redux";
-import { openDialog, openDialog1, openDrawer } from "../../Redux/StateManagement/booleanStateSlice";
+import { openDialog, openDialog1, openDialog2, openDrawer } from "../../Redux/StateManagement/booleanStateSlice";
 
 import { Box, IconButton, MenuItem, Menu, Fade, ListItemIcon, ListItemText } from "@mui/material";
 import {
@@ -35,6 +35,8 @@ const ActionMenu = (props) => {
     onDisposedRestoreHandler,
     onResetHandler,
     onUpdateHandler,
+    updateSmallTools,
+    editAssetDescription,
     onDeleteHandler,
     onVoidHandler,
     status,
@@ -76,6 +78,9 @@ const ActionMenu = (props) => {
 
     //Receiver Settings
     receiverSettings,
+
+    //Small Tools
+    onUpdateSmallToolsHandler,
   } = props;
 
   // console.log("data", data);
@@ -166,8 +171,20 @@ const ActionMenu = (props) => {
     handleClose();
   };
 
-  const handleEditRequest = () => {
+  const handleEditSmallTools = () => {
     // console.log(data);
+    onUpdateSmallToolsHandler(data);
+    dispatch(openDialog1());
+    handleClose();
+  };
+
+  const handleEditAssetDescription = () => {
+    dispatch(openDialog2());
+    handleClose();
+  };
+
+  const handleEditRequest = () => {
+    // console.log("dataaaaaaaaaaaaaaaaa", data);
     addRequestAllApi ? setEditRequest(true) : setEditRequest(false);
     onUpdateHandler(data);
     setUpdateToggle(false);
@@ -414,6 +431,28 @@ const ActionMenu = (props) => {
               </ListItemIcon>
               <ListItemText disableTypography align="left">
                 Edit
+              </ListItemText>
+            </MenuItem>
+          )}
+
+          {updateSmallTools && onUpdateSmallToolsHandler && (
+            <MenuItem onClick={handleEditSmallTools} dense>
+              <ListItemIcon>
+                <BorderColor />
+              </ListItemIcon>
+              <ListItemText disableTypography align="left">
+                Edit
+              </ListItemText>
+            </MenuItem>
+          )}
+
+          {editAssetDescription && (
+            <MenuItem onClick={handleEditAssetDescription} dense>
+              <ListItemIcon>
+                <BorderColor />
+              </ListItemIcon>
+              <ListItemText disableTypography align="left">
+                Edit Asset Description
               </ListItemText>
             </MenuItem>
           )}
