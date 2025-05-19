@@ -117,6 +117,15 @@ export const transferApi = createApi({
       }),
       invalidatesTags: ["Transfer"],
     }),
+
+    patchRejectReceivingTransferApi: builder.mutation({
+      query: (body) => ({
+        url: `/reject-transfer`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Transfer"],
+    }),
   }),
 });
 
@@ -139,4 +148,5 @@ export const {
   useDownloadAttachmentApiMutation,
   usePatchTransferReceivingApiMutation,
   usePatchVoidTransferApiMutation,
+  usePatchRejectReceivingTransferApiMutation,
 } = transferApi;
