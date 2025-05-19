@@ -832,7 +832,7 @@ const AddTransfer = (props) => {
     );
   };
 
-  const UpdateField = ({ value, label }) => {
+  const UpdateField = ({ value, label, requiredField }) => {
     return (
       <Stack flexDirection="row" gap={1} alignItems="center">
         <TextField
@@ -857,6 +857,7 @@ const AddTransfer = (props) => {
             ".MuiInputBase-root": {
               borderRadius: "10px",
               // color: "#636363",
+              bgcolor: requiredField && "#f5c9861c",
             },
 
             ".MuiInputLabel-root.Mui-disabled": {
@@ -1591,7 +1592,7 @@ const AddTransfer = (props) => {
 
               <Stack flexDirection="row" gap={1} alignItems="center">
                 {watch("attachments") !== null ? (
-                  <UpdateField label={"Evaluation Form"} value={watch("attachments")?.length} />
+                  <UpdateField label={"Evaluation Form"} value={watch("attachments")?.length} requiredField />
                 ) : (
                   <CustomMultipleAttachment
                     control={control}
@@ -1604,6 +1605,7 @@ const AddTransfer = (props) => {
                     inputRef={AttachmentRef}
                     error={!!errors?.attachments?.message}
                     helperText={errors?.attachments?.message}
+                    requiredField
                   />
                 )}
 
