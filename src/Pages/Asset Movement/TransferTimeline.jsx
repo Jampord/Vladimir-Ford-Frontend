@@ -227,17 +227,16 @@ const TransferTimeline = (props) => {
                             </Typography>
                           )}
 
-                          {/* CLAIMED */}
-                          {/* {item?.action === "fully Received" && (
+                          {item?.vladimir_tag_number.length !== 0 && (
                             <>
                               <Typography fontSize={12} fontWeight={600} color="text.light">
                                 Tag Number: {item?.vladimir_tag_number}
                               </Typography>
                               <Typography fontSize={12} fontWeight={400} color="text.light">
-                                Asset Description: {item?.asset_description}
+                                Asset Description: {item?.description}
                               </Typography>
                             </>
-                          )} */}
+                          )}
 
                           {/* {item?.action === "fully Received" && (
                             <Typography fontSize={12} fontWeight={600} color="primary.dark">
