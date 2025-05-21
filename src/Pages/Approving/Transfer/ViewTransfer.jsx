@@ -39,6 +39,7 @@ import {
   ArrowBackIosRounded,
   BorderColor,
   Cancel,
+  ChangeCircle,
   Check,
   Create,
   Edit,
@@ -52,7 +53,7 @@ import {
 import { LoadingButton } from "@mui/lab";
 
 // RTK
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetCompanyAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Company";
 import { useLazyGetBusinessUnitAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/BusinessUnit";
 import {
@@ -91,7 +92,10 @@ import {
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import axios from "axios";
 import { usePatchApprovalStatusApiMutation } from "../../../Redux/Query/Approving/Approval";
-import { usePatchTransferApprovalStatusApiMutation } from "../../../Redux/Query/Approving/TransferApproval";
+import {
+  usePatchTransferApprovalStatusApiMutation,
+  usePatchUpdateTransferDepreciationApprovalApiMutation,
+} from "../../../Redux/Query/Approving/TransferApproval";
 import { useLazyGetUserAccountAllApiQuery } from "../../../Redux/Query/UserManagement/UserAccountsApi";
 import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 
@@ -151,6 +155,9 @@ const ViewTransfer = (props) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const permissions = useSelector((state) => state.userLogin?.user.role.access_permission);
+  console.log("permissions: ", permissions);
+
   const AttachmentRef = useRef(null);
 
   // console.log(transactionData);
@@ -200,6 +207,9 @@ const ViewTransfer = (props) => {
 
   const [patchApprovalStatus, { isLoading: isPatchApprovalLoading }] = usePatchTransferApprovalStatusApiMutation();
   const [getNextTransfer, { data: nextData, isLoading: isNextTransferLoading }] = useLazyGetNextTransferQuery();
+  console.log("nextData: ", nextData);
+  const [changeTransfer, { data: changeData, isLoading: isChangeLoading }] =
+    usePatchUpdateTransferDepreciationApprovalApiMutation();
 
   //* QUERY ------------------------------------------------------------------
 
@@ -215,7 +225,7 @@ const ViewTransfer = (props) => {
     { refetchOnMountOrArgChange: true }
   );
 
-  // console.log("transferData: ", transferData[0]);
+  console.log("transferData: ", transferData[0]);
 
   const [
     companyTrigger,
@@ -655,6 +665,86 @@ const ViewTransfer = (props) => {
     );
   };
 
+  const changedDepreciation = transferData[0]?.depreciation_debit?.id !== watch("depreciation_debit_id")?.id;
+  console.log("changedDepreciation: ", changedDepreciation);
+
+  const onApprovalChangeHandler = (transfer_number) => {
+    console.log("transfer_number: ", transfer_number);
+    const formData = { id: transfer_number, depreciation_debit_id: watch("depreciation_debit_id").sync_id };
+    console.log("formData: ", formData);
+    dispatch(
+      openConfirm({
+        icon: Help,
+        iconColor: "info",
+        message: (
+          <Box>
+            <Typography> Are you sure you want to</Typography>
+            <Typography
+              sx={{
+                display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+                fontFamily: "Raleway",
+              }}
+            >
+              CHANGE
+            </Typography>{" "}
+            this request?
+          </Box>
+        ),
+
+        onConfirm: async () => {
+          const noNextData = (err) => {
+            if (err?.status === 404) {
+              dispatch(
+                openToast({
+                  message: "Depreciation Debit changed successfully!",
+                  duration: 5000,
+                })
+              );
+            } else if (err?.status === 422) {
+              // navigate(`/approving/transfer`);
+              dispatch(
+                openToast({
+                  message: "Something went wrong. Please try again.",
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            } else if (err?.status !== 422) {
+              dispatch(
+                openToast({
+                  message: "Something went wrong. Please try again.",
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            }
+          };
+
+          try {
+            dispatch(onLoading());
+            const result = await changeTransfer({ ...formData }).unwrap();
+
+            isTransferRefetch();
+
+            dispatch(
+              openToast({
+                message: result.message,
+                duration: 5000,
+              })
+            );
+
+            dispatch(closeConfirm());
+          } catch (err) {
+            noNextData(err);
+            // navigate(`/approving/transfer`);
+          }
+        },
+      })
+    );
+  };
+
   const filterOptions = createFilterOptions({
     limit: 100,
     matchFrom: "any",
@@ -986,12 +1076,13 @@ const ViewTransfer = (props) => {
                     <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
                       ACCOUNTING ENTRIES
                     </Typography>
+                    {console.log("watchhhhh👀👀", watch("depreciation_debit_id"))}
 
                     <CustomAutoComplete
                       autoComplete
-                      freeSolo
+                      freeSolo={!permissions.includes("fixed-asset") || transactionData?.approved}
                       name="depreciation_debit_id"
-                      disabled
+                      disabled={!permissions.includes("fixed-asset") || transactionData?.approved}
                       control={control}
                       options={accountTitleData}
                       loading={isAccountTitleLoading}
@@ -1680,38 +1771,75 @@ const ViewTransfer = (props) => {
                 </Typography>
                 <Stack flexDirection="row" gap={2}>
                   <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap={2}>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      color="secondary"
-                      disabled={isTransferLoading || isTransferFetching}
-                      onClick={() =>
-                        onApprovalApproveHandler(
-                          transactionData?.id ? transactionData?.id : transactionData?.transfer_number
-                        )
-                      }
-                      startIcon={<Check color="primary" />}
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      disabled={isTransferLoading || isTransferFetching}
-                      onClick={() =>
-                        onApprovalReturnHandler(
-                          transactionData?.id ? transactionData?.id : transactionData?.transfer_number
-                        )
-                      }
-                      startIcon={<Undo sx={{ color: "#5f3030" }} />}
-                      sx={{
-                        color: "white",
-                        backgroundColor: "error.main",
-                        ":hover": { backgroundColor: "error.dark" },
-                      }}
-                    >
-                      Return
-                    </Button>
+                    {changedDepreciation === false ? (
+                      <>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          color="secondary"
+                          disabled={isTransferLoading || isTransferFetching}
+                          onClick={() =>
+                            onApprovalApproveHandler(
+                              transactionData?.id ? transactionData?.id : transactionData?.transfer_number
+                            )
+                          }
+                          startIcon={<Check color="primary" />}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          disabled={isTransferLoading || isTransferFetching}
+                          onClick={() =>
+                            onApprovalReturnHandler(
+                              transactionData?.id ? transactionData?.id : transactionData?.transfer_number
+                            )
+                          }
+                          startIcon={<Undo sx={{ color: "#5f3030" }} />}
+                          sx={{
+                            color: "white",
+                            backgroundColor: "error.main",
+                            ":hover": { backgroundColor: "error.dark" },
+                          }}
+                        >
+                          Return
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          color="primary"
+                          disabled={isTransferLoading || isTransferFetching || !watch("depreciation_debit_id")}
+                          onClick={() =>
+                            onApprovalChangeHandler(
+                              transactionData?.id ? transactionData?.id : transactionData?.transfer_number
+                            )
+                          }
+                          startIcon={<ChangeCircle color="secondary" />}
+                        >
+                          Change Depreciation Debit
+                        </Button>
+
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          disabled={isTransferLoading || isTransferFetching}
+                          onClick={() =>
+                            setValue(
+                              "depreciation_debit_id",
+                              transactionData?.depreciation_debit_id || transferData[0]?.depreciation_debit
+                            )
+                          }
+                          // startIcon={<Undo sx={{ color: "#5f3030" }} />}
+                          color="secondary"
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    )}
                   </Stack>
                 </Stack>
               </Stack>
