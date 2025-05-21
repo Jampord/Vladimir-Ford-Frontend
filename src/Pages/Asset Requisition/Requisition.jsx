@@ -66,6 +66,7 @@ import { useDeleteRequestContainerAllApiMutation } from "../../Redux/Query/Reque
 import ExportRequisition from "./ExportRequisition";
 import { TabContext, TabPanel } from "@mui/lab";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
+import { setRequisitionTabValue } from "../../Redux/StateManagement/tabSlice";
 
 const Requisition = () => {
   const [search, setSearch] = useState("");
@@ -73,16 +74,16 @@ const Requisition = () => {
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
   const [requestFilter, setRequestFilter] = useState([]);
-  const viewData = true;
-
-  const [value, setValue] = useState("1");
   const [claimed, setClaimed] = useState("");
 
-  // console.log(claimed);
-  // console.log("value", value);
+  const viewData = true;
+
+  const dispatch = useDispatch();
+  const tabValue = useSelector((state) => state.tab.requisitionTabValue);
+  const dialog = useSelector((state) => state.booleanState.dialog);
 
   const handleChange = (event, newValue) => {
-    setValue(newValue);
+    dispatch(setRequisitionTabValue(newValue));
     newValue === "1" ? setClaimed("") : setClaimed("Claimed");
   };
 
@@ -93,9 +94,6 @@ const Requisition = () => {
   const navigate = useNavigate();
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
   // const drawer = useSelector((state) => state.booleanState.drawer);
-  const dialog = useSelector((state) => state.booleanState.dialog);
-
-  const dispatch = useDispatch();
 
   const [postRequisitionStatusApi, { isLoading }] = usePatchRequisitionStatusApiMutation();
   const [voidRequisitionApi, { isVoidLoading }] = useVoidRequisitionApiMutation();
@@ -342,20 +340,20 @@ const Requisition = () => {
       </Typography>
 
       <Box>
-        <TabContext value={value}>
-          <Tabs onChange={handleChange} value={value}>
+        <TabContext value={tabValue}>
+          <Tabs onChange={handleChange} value={tabValue}>
             <Tab
               label={isSmallScreen ? "Pending" : "Pending Request"}
               value="1"
               claimed=""
-              className={value === "1" ? "tab__background" : null}
+              className={tabValue === "1" ? "tab__background" : null}
             />
 
             <Tab
               label={isSmallScreen ? "Claimed" : "Claimed Request"}
               value="2"
               claimed="claimed"
-              className={value === "2" ? "tab__background" : null}
+              className={tabValue === "2" ? "tab__background" : null}
             />
           </Tabs>
 
@@ -533,7 +531,7 @@ const Requisition = () => {
                                             //   transition: Zoom,
                                             // }}
                                           >
-                                            {data.acquisition_details}
+                                            <>{data.acquisition_details}</>
                                           </Tooltip>
                                         </Typography>
                                         <Typography fontSize={12} color="secondary.light">
@@ -796,7 +794,7 @@ const Requisition = () => {
                                             //   transition: Zoom,
                                             // }}
                                           >
-                                            {data.acquisition_details}
+                                            <>{data.acquisition_details}</>
                                           </Tooltip>
                                         </Typography>
                                         <Typography fontSize={12} color="secondary.light">
