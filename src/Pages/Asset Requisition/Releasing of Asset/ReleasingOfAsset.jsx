@@ -4,9 +4,12 @@ import { Badge, Box, Button, Tab, Tabs, Typography } from "@mui/material";
 
 import ReleasingTable from "./ReleasingTable";
 import { useGetNotificationApiQuery } from "../../../Redux/Query/Notification";
+import { useDispatch, useSelector } from "react-redux";
+import { setReleasingOfAssetTabValue } from "../../../Redux/StateManagement/tabSlice";
 
 const ReleasingOfAsset = () => {
-  const [value, setValue] = useState("1");
+  const dispatch = useDispatch();
+  const tabValue = useSelector((state) => state.tab.releasingOfAssetTabValue);
 
   const { data: notifData, refetch } = useGetNotificationApiQuery();
 
@@ -15,7 +18,7 @@ const ReleasingOfAsset = () => {
   }, [notifData]);
 
   const handleChange = (event, newValue) => {
-    setValue(newValue);
+    dispatch(setReleasingOfAssetTabValue(newValue));
   };
 
   return (
@@ -25,8 +28,8 @@ const ReleasingOfAsset = () => {
       </Typography>
 
       <Box>
-        <TabContext value={value}>
-          <Tabs onChange={handleChange} value={value}>
+        <TabContext value={tabValue}>
+          <Tabs onChange={handleChange} value={tabValue}>
             <Tab
               label={
                 <Badge color="error" badgeContent={notifData?.toRelease}>
@@ -34,10 +37,10 @@ const ReleasingOfAsset = () => {
                 </Badge>
               }
               value="1"
-              className={value === "1" ? "tab__background" : null}
+              className={tabValue === "1" ? "tab__background" : null}
             />
 
-            <Tab label="Released" value="2" className={value === "2" ? "tab__background" : null} />
+            <Tab label="Released" value="2" className={tabValue === "2" ? "tab__background" : null} />
           </Tabs>
 
           <TabPanel sx={{ p: 0 }} value="1" index="1">
