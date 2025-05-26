@@ -968,14 +968,14 @@ const Depreciation = (props) => {
                         </Typography>
                       </Box>
                       <Box className="tableCard__properties">
-                        Second Debit:
+                        Adjusted Entries (Debit):
                         <Typography className="tableCard__info" fontSize="14px">
                           {data?.second_depreciation_debit?.account_title_code} -{" "}
                           {data?.second_depreciation_debit?.account_title_name}
                         </Typography>
                       </Box>
                       <Box className="tableCard__properties">
-                        Second Credit:
+                        Adjusted Entries (Credit):
                         <Typography className="tableCard__info" fontSize="14px">
                           {data?.second_depreciation_credit?.account_title_code} -{" "}
                           {data?.second_depreciation_credit?.account_title_name}
@@ -1114,10 +1114,10 @@ const Depreciation = (props) => {
                         // console.log("value", value);
                         if (value) {
                           setValue("major_category_id", value.major_category);
-                          setValue("second_depreciation_credit_id", value.initial_debit);
+                          setValue("second_depreciation_debit_id", value.initial_debit);
                         } else {
                           setValue("major_category_id", null);
-                          setValue("second_depreciation_credit_id", null);
+                          setValue("second_depreciation_debit_id", null);
                         }
                         return value;
                       }}
@@ -1220,6 +1220,7 @@ const Depreciation = (props) => {
                         <CustomAutoComplete
                           autoComplete
                           name="second_depreciation_debit_id"
+                          disabled
                           // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
                           control={control}
                           options={watch("second_depreciation_credit_id")?.depreciation_debit || []}
