@@ -242,7 +242,7 @@ const AddTagAddCost = ({ data, resetHandler, tabValue }) => {
             helperText={errors?.usefulLife?.message}
             isAllowed={(values) => {
               const { floatValue } = values;
-              return floatValue >= 1 && floatValue < 241;
+              return floatValue >= 1;
             }}
           />
         </Box>
@@ -258,7 +258,7 @@ const AddTagAddCost = ({ data, resetHandler, tabValue }) => {
             size="small"
             startIcon={<PriceChange color={isValid ? "primary" : "gray"} />}
           >
-            Tag
+            Add
           </LoadingButton>
           <Button
             variant="outlined"
