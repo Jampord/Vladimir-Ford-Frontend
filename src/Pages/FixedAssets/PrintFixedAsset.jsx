@@ -1147,9 +1147,24 @@ const PrintFixedAsset = (props) => {
                                   <Typography noWrap variant="h6" fontSize="16px" color="secondary" fontWeight="bold">
                                     {data.vladimir_tag_number}
                                   </Typography>
-                                  <Typography noWrap fontSize="13px" color="gray">
+
+                                  <Typography noWrap fontSize="13px" color="secondary.main">
                                     {data.asset_description}
                                   </Typography>
+
+                                  <Tooltip title={data.asset_specification} placement="bottom-start" arrow>
+                                    <Typography
+                                      fontSize={12}
+                                      fontWeight={400}
+                                      width="100px"
+                                      overflow="hidden"
+                                      textOverflow="ellipsis"
+                                      color="text.light"
+                                      noWrap
+                                    >
+                                      {data.asset_specification}
+                                    </Typography>
+                                  </Tooltip>
 
                                   <Typography noWrap fontSize="12px" color="primary" fontWeight="bold">
                                     {data.type_of_request.type_of_request_name.toUpperCase()}
@@ -1537,9 +1552,31 @@ const PrintFixedAsset = (props) => {
                                           >
                                             {data.vladimir_tag_number}
                                           </Typography>
-                                          <Typography noWrap fontSize="13px" color="gray">
+
+                                          <Typography noWrap fontSize="13px" color="secondary.main">
                                             {data.asset_description}
                                           </Typography>
+
+                                          <Tooltip
+                                            title={data.asset_specification}
+                                            placement="bottom-start"
+                                            arrow
+                                            // slots={{
+                                            //   transition: Zoom,
+                                            // }}
+                                          >
+                                            <Typography
+                                              fontSize={12}
+                                              fontWeight={400}
+                                              width="100px"
+                                              overflow="hidden"
+                                              textOverflow="ellipsis"
+                                              color="text.light"
+                                              noWrap
+                                            >
+                                              {data.asset_specification}
+                                            </Typography>
+                                          </Tooltip>
 
                                           <Typography noWrap fontSize="12px" color="primary" fontWeight="bold">
                                             {data.type_of_request.type_of_request_name.toUpperCase()}
@@ -2003,18 +2040,20 @@ const PrintFixedAsset = (props) => {
                                             noWrap
                                             variant="h3"
                                             fontSize="14px"
-                                            color="secondary"
+                                            color="secondary.main"
                                             fontWeight="bold"
                                           >
                                             {data.asset_description}
                                           </Typography>
-                                          <Tooltip title={data.asset_specification} placement="bottom" arrow>
+
+                                          <Tooltip title={data.asset_specification} placement="bottom-start" arrow>
                                             <Typography
                                               fontSize="12px"
                                               color="text.light"
                                               textOverflow="ellipsis"
                                               width="100px"
                                               overflow="hidden"
+                                              noWrap
                                             >
                                               {data.asset_specification}
                                             </Typography>
