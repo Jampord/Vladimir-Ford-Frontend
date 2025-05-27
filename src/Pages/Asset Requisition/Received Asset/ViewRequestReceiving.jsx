@@ -57,6 +57,7 @@ import ViewReceivedReceipt from "./ViewReceivedReceipt";
 
 const ViewRequestReceiving = () => {
   const { state: transactionData } = useLocation();
+  // console.log("transactionData", transactionData);
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
   const [mainData, setMainData] = useState(null);
@@ -134,7 +135,7 @@ const ViewRequestReceiving = () => {
   };
 
   const handleOpenDialog = (data) => {
-    // console.log("data", data);
+    // console.log("dataaaaaaaaa", data);
     setMainData(data);
     dispatch(openDialog());
     handleClose();
@@ -164,6 +165,7 @@ const ViewRequestReceiving = () => {
       open={open}
       onClose={handleClose}
     >
+      {/* {console.log("MenuDatavsc", data)} */}
       <MenuItem onClick={() => handleOpenDialog(data)} dense>
         <ListItemIcon>
           <AddBox />
@@ -328,9 +330,9 @@ const ViewRequestReceiving = () => {
                           Item Status
                         </TableSortLabel>
                       </TableCell>
-                      <TableCell className="tbl-cell" align="center">
+                      {/* <TableCell className="tbl-cell" align="center">
                         Action
-                      </TableCell>
+                      </TableCell> */}
                       {/* {!transactionData?.received && <TableCell className="tbl-cell text-center">Action</TableCell>} */}
                     </TableRow>
                   </TableHead>
@@ -411,9 +413,9 @@ const ViewRequestReceiving = () => {
                                 <Typography fontSize={10} color="gray">
                                   {`(${data.location?.location_code}) - ${data.location?.location_name}`}
                                 </Typography>
-                                <Typography fontSize={10} color="gray">
+                                {/* <Typography fontSize={10} color="gray">
                                   {`(${data.account_title?.account_title_code}) - ${data.account_title?.account_title_name}`}
-                                </Typography>
+                                </Typography> */}
                               </TableCell>
 
                               <TableCell className="tbl-cell">
@@ -445,7 +447,7 @@ const ViewRequestReceiving = () => {
 
                               {/* <TableCell  className="tbl-cell" align="center"> */}
                               {/* {data?.type_of_request?.type_of_request_name === "Small Tools" && ( */}
-                              <TableCell className="tbl-cell" align="center">
+                              {/* <TableCell className="tbl-cell" align="center">
                                 <Stack alignItems="center" justifyContent="center">
                                   <Tooltip title="Add Information" placement="top" arrow>
                                     <IconButton onClick={handleOpen}>
@@ -454,7 +456,7 @@ const ViewRequestReceiving = () => {
                                   </Tooltip>
                                   <MenuItems data={data} />
                                 </Stack>
-                              </TableCell>
+                              </TableCell> */}
                               {/* )} */}
                             </TableRow>
                             // </Tooltip>
