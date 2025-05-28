@@ -6,9 +6,13 @@ import Depreciation from "../Depreciation";
 import ForDepreciation from "./ForDepreciation";
 import RunningDepreciation from "./RunningDepreciation";
 import FullyDepreciated from "./FullyDepreciated";
+import { useDispatch, useSelector } from "react-redux";
+import { setDepreciationPageTabValue } from "../../../Redux/StateManagement/tabSlice";
 
 const DepreciationPage = () => {
-  const [value, setValue] = useState("1");
+  const dispatch = useDispatch();
+  const tabValue = useSelector((state) => state.tab.depreciationPageTabValue);
+
   const { data: notifData, refetch } = useGetNotificationApiQuery();
 
   useEffect(() => {
@@ -17,7 +21,7 @@ const DepreciationPage = () => {
   }, [notifData]);
 
   const handleChange = (_, newValue) => {
-    setValue(newValue);
+    dispatch(setDepreciationPageTabValue(newValue));
   };
 
   return (
@@ -27,8 +31,8 @@ const DepreciationPage = () => {
       </Typography>
 
       <Box>
-        <TabContext value={value}>
-          <Tabs onChange={handleChange} value={value}>
+        <TabContext value={tabValue}>
+          <Tabs onChange={handleChange} value={tabValue}>
             <Tab
               label={
                 <Badge color="error" badgeContent={notifData?.toPulloutApproveCount}>
@@ -36,11 +40,11 @@ const DepreciationPage = () => {
                 </Badge>
               }
               value="1"
-              className={value === "1" ? "tab__background" : null}
+              className={tabValue === "1" ? "tab__background" : null}
             />
 
-            <Tab label="Running Depreciation" value="2" className={value === "2" ? "tab__background" : null} />
-            <Tab label="Fully Depreciated" value="3" className={value === "3" ? "tab__background" : null} />
+            <Tab label="Running Depreciation" value="2" className={tabValue === "2" ? "tab__background" : null} />
+            <Tab label="Fully Depreciated" value="3" className={tabValue === "3" ? "tab__background" : null} />
           </Tabs>
 
           <TabPanel sx={{ p: 0 }} value="1" index="1">
