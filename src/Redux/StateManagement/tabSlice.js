@@ -12,6 +12,11 @@ const tabSlice = createSlice({
     releasingOfAssetTabValue: "1",
 
     requisitionTabValue: "1",
+
+    depreciationPageTabValue: "1",
+
+    requestMonitoringTabValue: "1",
+    warehouseMonitoringTabValue: "1",
   },
   reducers: {
     setRequestApprovalTabValue: (state, action) => {
@@ -33,6 +38,15 @@ const tabSlice = createSlice({
     setRequisitionTabValue: (state, action) => {
       state.requisitionTabValue = action.payload;
     },
+    setDepreciationPageTabValue: (state, action) => {
+      state.depreciationPageTabValue = action.payload;
+    },
+    setRequestMonitoringTabValue: (state, action) => {
+      state.requestMonitoringTabValue = action.payload;
+    },
+    setWarehouseMonitoringTabValue: (state, action) => {
+      state.warehouseMonitoringTabValue = action.payload;
+    },
   },
 });
 
@@ -43,5 +57,8 @@ export const {
   setTransferSingleApprovalTabValue,
   setReleasingOfAssetTabValue,
   setRequisitionTabValue,
+  setDepreciationPageTabValue,
+  setRequestMonitoringTabValue,
+  setWarehouseMonitoringTabValue,
 } = tabSlice.actions;
 export default tabSlice.reducer;
