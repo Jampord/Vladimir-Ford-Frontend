@@ -44,6 +44,7 @@ import ExportRequestMonitoring from "./ExportRequestMonitoring";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 import { TabContext } from "@mui/lab";
 import ExportWarehouseMonitoring from "./ExportWarehouseMonitoring";
+import { setWarehouseMonitoringTabValue } from "../../Redux/StateManagement/tabSlice";
 
 const WarehouseMonitoring = () => {
   const [search, setSearch] = useState("");
@@ -52,11 +53,12 @@ const WarehouseMonitoring = () => {
   const [page, setPage] = useState(1);
   const [requestFilter, setRequestFilter] = useState([]);
   const [transactionIdData, setTransactionIdData] = useState();
-  const [filterValue, setFilterValue] = useState("2");
+  // const [filterValue, setFilterValue] = useState("2");
   const viewData = true;
   const warehouseMonitoring = true;
 
   const dispatch = useDispatch();
+  const filterValue = useSelector((state) => state.tab.warehouseMonitoringTabValue);
 
   const navigate = useNavigate();
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
@@ -66,7 +68,8 @@ const WarehouseMonitoring = () => {
   const { excelExport } = useExcel();
 
   const handleChange = (event, newValue) => {
-    setFilterValue(newValue);
+    // setFilterValue(newValue);
+    dispatch(setWarehouseMonitoringTabValue(newValue));
     setPage(1);
   };
 
@@ -244,7 +247,7 @@ const WarehouseMonitoring = () => {
       <Box>
         <TabContext value={filterValue}>
           <Tabs onChange={handleChange} value={filterValue} variant="scrollable" scrollButtons="auto">
-            {/* <Tab label="ALL" value="1" className={filterValue === "1" ? "tab__background" : null} /> */}
+            <Tab label="ALL" value="1" className={filterValue === "1" ? "tab__background" : null} />
             <Tab label="For Approval" value="2" className={filterValue === "2" ? "tab__background" : null} />
             <Tab label="For FA Approval" value="3" className={filterValue === "3" ? "tab__background" : null} />
             <Tab label="Sent to Ymir" value="4" className={filterValue === "4" ? "tab__background" : null} />
