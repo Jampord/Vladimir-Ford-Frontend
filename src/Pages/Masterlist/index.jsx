@@ -23,10 +23,18 @@ import {
   HomeRepairService,
   StoreRounded,
   Warehouse,
+  LooksOne,
 } from "@mui/icons-material";
 import Cards from "../../Components/Reusable/Cards";
 
 const MasterlistList = [
+  {
+    icon: <LooksOne />,
+    label: "One RDF Charging",
+    description: "Viewing of One RDF Masterlist",
+    path: "/masterlist/one-rdf-charging",
+  },
+
   {
     icon: <Apartment />,
     label: "Company",
