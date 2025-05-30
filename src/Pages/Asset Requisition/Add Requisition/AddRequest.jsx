@@ -2984,6 +2984,8 @@ const AddRequisition = (props) => {
                                       sx={attachmentSx}
                                       onClick={() => {
                                         data.attachments.letter_of_request.file_name.includes("pdf") ||
+                                        data.attachments.letter_of_request.file_name.includes("jpg") ||
+                                        data.attachments.letter_of_request.file_name.includes("jpeg") ||
                                         data.attachments.letter_of_request.file_name.includes("svg") ||
                                         data.attachments.letter_of_request.file_name.includes("png")
                                           ? handleOpenDrawer({
@@ -3010,6 +3012,8 @@ const AddRequisition = (props) => {
                                       sx={attachmentSx}
                                       onClick={() => {
                                         data.attachments.quotation.file_name.includes("pdf") ||
+                                        data.attachments.quotation.file_name.includes("jpg") ||
+                                        data.attachments.quotation.file_name.includes("jpeg") ||
                                         data.attachments.quotation.file_name.includes("svg") ||
                                         data.attachments.quotation.file_name.includes("png")
                                           ? handleOpenDrawer({
@@ -3036,6 +3040,8 @@ const AddRequisition = (props) => {
                                       sx={attachmentSx}
                                       onClick={() => {
                                         data.attachments.specification_form.file_name.includes("pdf") ||
+                                        data.attachments.specification_form.file_name.includes("jpg") ||
+                                        data.attachments.specification_form.file_name.includes("jpeg") ||
                                         data.attachments.specification_form.file_name.includes("svg") ||
                                         data.attachments.specification_form.file_name.includes("png")
                                           ? handleOpenDrawer({
@@ -3062,6 +3068,8 @@ const AddRequisition = (props) => {
                                       sx={attachmentSx}
                                       onClick={() => {
                                         data.attachments.tool_of_trade.file_name.includes("pdf") ||
+                                        data.attachments.tool_of_trade.file_name.includes("jpg") ||
+                                        data.attachments.tool_of_trade.file_name.includes("jpeg") ||
                                         data.attachments.tool_of_trade.file_name.includes("svg") ||
                                         data.attachments.tool_of_trade.file_name.includes("png")
                                           ? handleOpenDrawer({
@@ -3088,6 +3096,8 @@ const AddRequisition = (props) => {
                                       sx={attachmentSx}
                                       onClick={() => {
                                         data.attachments.other_attachments.file_name.includes("pdf") ||
+                                        data.attachments.other_attachments.file_name.includes("jpg") ||
+                                        data.attachments.other_attachments.file_name.includes("jpeg") ||
                                         data.attachments.other_attachments.file_name.includes("svg") ||
                                         data.attachments.other_attachments.file_name.includes("png")
                                           ? handleOpenDrawer({
