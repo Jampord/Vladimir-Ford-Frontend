@@ -1156,7 +1156,7 @@ const PrintFixedAsset = (props) => {
                                     <Typography
                                       fontSize={12}
                                       fontWeight={400}
-                                      width="100px"
+                                      width="300px"
                                       overflow="hidden"
                                       textOverflow="ellipsis"
                                       color="text.light"
@@ -1568,7 +1568,7 @@ const PrintFixedAsset = (props) => {
                                             <Typography
                                               fontSize={12}
                                               fontWeight={400}
-                                              width="100px"
+                                              width="300px"
                                               overflow="hidden"
                                               textOverflow="ellipsis"
                                               color="text.light"
@@ -2051,7 +2051,7 @@ const PrintFixedAsset = (props) => {
                                               fontSize="12px"
                                               color="text.light"
                                               textOverflow="ellipsis"
-                                              width="100px"
+                                              width="300px"
                                               overflow="hidden"
                                               noWrap
                                             >
