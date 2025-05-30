@@ -79,6 +79,8 @@ const ExportPrintFixedAsset = ({ tabValue }) => {
           "PR Number": item.pr_number,
           "PO Number": item.po_number,
           "RR Number": item.rr_number,
+          "Ymir Reference Number": item.ymir_ref_number,
+          "Acquisition Cost (₱)": item.acquisition_cost,
           Supplier: item.supplier.supplier_name,
           "Company Code": item?.company.company_code,
           Company: item?.company.company_name,
