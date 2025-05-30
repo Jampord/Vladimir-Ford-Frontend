@@ -192,7 +192,7 @@ const RrSummary = (props) => {
             if (err?.status === 422) {
               dispatch(
                 openToast({
-                  message: err.errors.detail || err.data.message,
+                  message: err?.data?.errors?.detail || err.data.message,
                   duration: 5000,
                   variant: "error",
                 })
@@ -274,7 +274,7 @@ const RrSummary = (props) => {
                           direction={orderBy === `created_at` ? order : `asc`}
                           onClick={() => onSort(`created_at`)}
                         >
-                          Date Approved
+                          Date Received
                         </TableSortLabel>
                       </TableCell>
 
