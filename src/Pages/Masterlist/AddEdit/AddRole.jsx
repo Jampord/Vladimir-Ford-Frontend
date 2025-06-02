@@ -146,6 +146,7 @@ const AddRole = (props) => {
     "setup-settings",
 
     // Masterlist
+    "one-rdf-charging",
     "company",
     "business-unit",
     "department",
@@ -219,6 +220,7 @@ const AddRole = (props) => {
   ];
 
   const masterlistValue = [
+    "one-rdf-charging",
     "company",
     "business-unit",
     "department",
@@ -372,6 +374,7 @@ const AddRole = (props) => {
 
   const Masterlist = () => {
     const masterlist1 = [
+      { label: "One RDF Charing", value: "one-rdf-charging" },
       { label: "Company", value: "company" },
       { label: "Business Unit", value: "business-unit" },
       { label: "Department", value: "department" },
@@ -821,6 +824,7 @@ const AddRole = (props) => {
                                   ...new Set([
                                     ...watch("access_permission"),
                                     "masterlist",
+                                    "one-rdf-charging",
                                     "company",
                                     "business-unit",
                                     "department",
