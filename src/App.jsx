@@ -107,6 +107,7 @@ import FixedAssetDepreciationView from "./Pages/FixedAssets/Depreciation/FixedAs
 import PurchaseRequestRecon from "./Pages/Reports/PurchaseRequestRecon";
 import WarehouseMonitoring from "./Pages/Asset Requisition/WarehouseMonitoring";
 import DepreciationMonthlyReport from "./Pages/Reports/DepreciationMonthlyReport";
+import OneRDFCharging from "./Pages/Masterlist/OneRDFCharging";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -158,6 +159,11 @@ const router = createBrowserRouter([
                 path: "company",
                 element: <Company />,
                 handle: { permission: "company" },
+              },
+              {
+                path: "one-rdf-charging",
+                element: <OneRDFCharging />,
+                handle: { permission: "one-rdf-charging" },
               },
               {
                 path: "business-unit",
