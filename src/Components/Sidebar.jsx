@@ -100,6 +100,7 @@ import {
   PriceChange,
   Radar,
   RequestQuote,
+  LooksOne,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -152,9 +153,9 @@ const Sidebar = () => {
   // NOTIFICATION
   const { data: notifData, refetch } = useGetNotificationApiQuery(null, { refetchOnMountOrArgChange: true });
   // console.log("notif", notifData);
-  useEffect(() => {
-    refetch();
-  }, [notifData]);
+  // useEffect(() => {
+  //   refetch();
+  // }, [notifData]);
 
   const { pathname } = useLocation();
   const location = useLocation();
@@ -227,6 +228,13 @@ const Sidebar = () => {
         // },
 
         // * Synching
+        {
+          label: "One RDF Charging",
+          icon: LooksOne,
+          path: "/masterlist/one-rdf-charging",
+          permission: "one-rdf-charging",
+        },
+
         {
           label: "Company",
           icon: Apartment,
@@ -401,6 +409,7 @@ const Sidebar = () => {
           icon: InventoryRounded,
           path: "/fixed-asset/fixed-asset",
           permission: "fixed-asset",
+          notification: notifData?.toTagCount + notifData?.toSmallToolTagging,
         },
         {
           label: "Depreciation",
