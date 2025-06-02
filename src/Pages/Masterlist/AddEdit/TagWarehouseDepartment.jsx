@@ -124,6 +124,7 @@ const TagWarehouseDepartment = ({ data }) => {
           loading={isDepartmentLoading}
           size="small"
           getOptionLabel={(option) => `${option.department_code} - ${option.department_name}`}
+          getOptionKey={(option, index) => `${option.id}-${index}`}
           //   getOptionDisabled={(option) => !data?.department?.some((item) => item?.id !== option?.id)}
           getOptionDisabled={(option) =>
             option?.warehouse !== null && !data?.department?.some((item) => item?.sync_id === option?.sync_id)
