@@ -53,6 +53,7 @@ import { useLazyGetBusinessUnitAllApiQuery } from "../../../Redux/Query/Masterli
 import { useLazyGetDepartmentAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Department";
 import { useLazyGetLocationAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Location";
 import { useLazyGetWarehouseAllApiQuery } from "../../../Redux/Query/Masterlist/Warehouse";
+import { useLazyGetOneRDFChargingAllApiQuery } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
 
 const schema = yup.object().shape({
   id: yup.string().nullable(),
@@ -60,45 +61,52 @@ const schema = yup.object().shape({
   sedar_employee: yup.object().typeError("Employee ID is a required field").required(),
   firstname: yup.string().required(),
   lastname: yup.string().required(),
-  company_id: yup
+  one_charging_id: yup
     .string()
     .transform((value) => {
       return value?.id.toString();
+    })
+    .required()
+    .label("One RDF Charging"),
+  company_id: yup
+    .string()
+    .transform((value) => {
+      return value?.company_id.toString();
     })
     .required()
     .label("Company"),
   business_unit_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.business_unit_id.toString();
     })
     .required()
     .label("Business Unit"),
   department_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.department_id.toString();
     })
     .required()
     .label("Department"),
   unit_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.unit_id.toString();
     })
     .required()
     .label("Unit"),
   subunit_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.subunit_id.toString();
     })
     .required()
     .label("Sub Unit"),
   location_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.location_id.toString();
     })
     .required()
     .label("Location"),
@@ -146,6 +154,17 @@ const AddUserAccount = (props) => {
     isSuccess: isSedarSuccess,
     isError: isSedarError,
   } = useGetSedarUsersApiQuery();
+
+  const [
+    oneChargingTrigger,
+    {
+      data: oneChargingData = [],
+      isLoading: isOneChargingLoading,
+      isSuccess: isOneChargingSuccess,
+      isError: isOneChargingError,
+      refetch: isOneChargingRefetch,
+    },
+  ] = useLazyGetOneRDFChargingAllApiQuery();
 
   const [
     companyTrigger,
@@ -247,6 +266,7 @@ const AddUserAccount = (props) => {
       employee_id: null || "",
       firstname: "",
       lastname: "",
+      one_charging_id: null,
       company_id: null,
       business_unit_id: null,
       department_id: null,
@@ -301,7 +321,7 @@ const AddUserAccount = (props) => {
     }
   }, [isPostSuccess, isUpdateSuccess]);
 
-  // console.log("data", data);
+  console.log("data", data);
 
   useEffect(() => {
     if (data.status) {
@@ -314,6 +334,7 @@ const AddUserAccount = (props) => {
       });
       setValue("firstname", data.firstname);
       setValue("lastname", data.lastname);
+      setValue("one_charging_id", data.one_charging);
       setValue("company_id", data.company);
       setValue("business_unit_id", data.business_unit);
       setValue("department_id", data.department);
@@ -967,12 +988,54 @@ const AddUserAccount = (props) => {
 
             <CustomAutoComplete
               autoComplete
+              control={control}
+              name="one_charging_id"
+              options={oneChargingData || []}
+              onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
+              loading={isOneChargingLoading}
+              size="small"
+              getOptionLabel={(option) => option.code + " - " + option.name}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  color="secondary"
+                  {...params}
+                  label="One RDF Charging"
+                  error={!!errors?.one_charging_id}
+                  helperText={errors?.one_charging_id?.message}
+                />
+              )}
+              onChange={(_, value) => {
+                console.log("value", value);
+
+                if (value) {
+                  setValue("department_id", value);
+                  setValue("company_id", value);
+                  setValue("business_unit_id", value);
+                  setValue("unit_id", value);
+                  setValue("subunit_id", value);
+                  setValue("location_id", value);
+                } else {
+                  setValue("department_id", null);
+                  setValue("company_id", null);
+                  setValue("business_unit_id", null);
+                  setValue("unit_id", null);
+                  setValue("subunit_id", null);
+                  setValue("location_id", null);
+                }
+                return value;
+              }}
+            />
+
+            <CustomAutoComplete
+              autoComplete
               name="department_id"
               control={control}
               options={departmentData}
               onOpen={() =>
                 isDepartmentSuccess ? null : (departmentTrigger(), companyTrigger(), businessUnitTrigger())
               }
+              disabled
               loading={isDepartmentLoading}
               size="small"
               getOptionLabel={(option) => option.department_code + " - " + option.department_name}
@@ -986,24 +1049,24 @@ const AddUserAccount = (props) => {
                   helperText={errors?.department_id?.message}
                 />
               )}
-              onChange={(_, value) => {
-                const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
-                const businessUnitID = businessUnitData?.find(
-                  (item) => item.sync_id === value.business_unit.business_unit_sync_id
-                );
+              // onChange={(_, value) => {
+              //   const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
+              //   const businessUnitID = businessUnitData?.find(
+              //     (item) => item.sync_id === value.business_unit.business_unit_sync_id
+              //   );
 
-                if (value) {
-                  setValue("company_id", companyID);
-                  setValue("business_unit_id", businessUnitID);
-                } else {
-                  setValue("company_id", null);
-                  setValue("business_unit_id", null);
-                }
-                setValue("unit_id", null);
-                setValue("subunit_id", null);
-                setValue("location_id", null);
-                return value;
-              }}
+              //   if (value) {
+              //     setValue("company_id", companyID);
+              //     setValue("business_unit_id", businessUnitID);
+              //   } else {
+              //     setValue("company_id", null);
+              //     setValue("business_unit_id", null);
+              //   }
+              //   setValue("unit_id", null);
+              //   setValue("subunit_id", null);
+              //   setValue("location_id", null);
+              //   return value;
+              // }}
             />
 
             <CustomAutoComplete
@@ -1064,6 +1127,7 @@ const AddUserAccount = (props) => {
               size="small"
               getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
               isOptionEqualToValue={(option, value) => option.id === value.id}
+              disabled
               renderInput={(params) => (
                 <TextField
                   color="secondary"
@@ -1073,17 +1137,18 @@ const AddUserAccount = (props) => {
                   helperText={errors?.unit_id?.message}
                 />
               )}
-              onChange={(_, value) => {
-                setValue("subunit_id", null);
-                setValue("location_id", null);
-                return value;
-              }}
+              // onChange={(_, value) => {
+              //   setValue("subunit_id", null);
+              //   setValue("location_id", null);
+              //   return value;
+              // }}
             />
 
             <CustomAutoComplete
               autoComplete
               name="subunit_id"
               control={control}
+              disabled
               options={
                 unitData?.filter((obj) => {
                   return obj?.id === watch("unit_id")?.id;
@@ -1114,6 +1179,7 @@ const AddUserAccount = (props) => {
                 });
               })}
               loading={isLocationLoading}
+              disabled
               size="small"
               getOptionLabel={(option) => option.location_code + " - " + option.location_name}
               isOptionEqualToValue={(option, value) => option.id === value.id}
