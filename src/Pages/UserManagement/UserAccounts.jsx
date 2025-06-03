@@ -54,6 +54,7 @@ const UserAccounts = () => {
     employee_id: "",
     firstname: "",
     lastname: "",
+    one_charging_id: null,
     company_id: null,
     business_unit_id: null,
     department_id: null,
@@ -201,6 +202,7 @@ const UserAccounts = () => {
       id,
       employee_id,
       firstname,
+      one_charging,
       lastname,
       company,
       business_unit,
@@ -221,6 +223,7 @@ const UserAccounts = () => {
       employee_id,
       firstname,
       lastname,
+      one_charging,
       company,
       business_unit,
       department,
@@ -243,6 +246,7 @@ const UserAccounts = () => {
       employee_id: null,
       firstname: "",
       lastname: "",
+      one_charging: null,
       company: null,
       business_unit: null,
       department: null,
@@ -516,6 +520,9 @@ const UserAccounts = () => {
                               )}
                             </TableCell>
                             <TableCell className="tbl-cell">
+                              <Typography fontSize={10} color="gray">
+                                {`(${users?.one_charging?.code}) - ${users?.one_charging?.name}`}
+                              </Typography>
                               <Typography fontSize={10} color="gray">
                                 {`(${users.company?.company_code}) - ${users.company?.company_name}`}
                               </Typography>
