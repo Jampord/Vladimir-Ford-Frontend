@@ -1188,6 +1188,10 @@ const PrintFixedAsset = (props) => {
 
                                 <TableCell>
                                   <Typography noWrap fontSize="10px" color="gray">
+                                    {data?.one_charging?.code}
+                                    {" - "} {data?.one_charging?.name}
+                                  </Typography>
+                                  <Typography noWrap fontSize="10px" color="gray">
                                     {data.company.company_code}
                                     {" - "} {data.company.company_name}
                                   </Typography>
@@ -1599,6 +1603,10 @@ const PrintFixedAsset = (props) => {
                                         </TableCell>
 
                                         <TableCell>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data?.one_charging?.code}
+                                            {" - "} {data?.one_charging?.name}
+                                          </Typography>
                                           <Typography noWrap fontSize="10px" color="gray">
                                             {data.company.company_code}
                                             {" - "} {data.company.company_name}
@@ -2080,6 +2088,10 @@ const PrintFixedAsset = (props) => {
                                         </TableCell>
 
                                         <TableCell>
+                                          <Typography noWrap fontSize="10px" color="gray">
+                                            {data?.one_charging?.code}
+                                            {" - "} {data?.one_charging?.name}
+                                          </Typography>
                                           <Typography noWrap fontSize="10px" color="gray">
                                             {data.company.company_code}
                                             {" - "} {data.company.company_name}
