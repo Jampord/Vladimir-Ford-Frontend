@@ -116,6 +116,7 @@ import {
   useLazyGetFixedAssetSmallToolsAllApiQuery,
 } from "../../../Redux/Query/FixedAsset/FixedAssets";
 import { useDownloadAttachment } from "../../../Hooks/useDownloadAttachment";
+import { useLazyGetOneRDFChargingAllApiQuery } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
 // import { useLazyGetMajorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MajorCategory";
 
 const schema = yup.object().shape({
@@ -130,6 +131,7 @@ const schema = yup.object().shape({
   // receiving_warehouse_id: yup.object().required().label("Warehouse").typeError("Warehouse is a required field"),
   minor_category_id: yup.object().required().label("Minor Category").typeError("Minor Category is a required field"),
 
+  one_charging_id: yup.object().required().label("One RDF Charging").typeError("One RDF Charging is a required field"),
   department_id: yup.object().required().label("Department").typeError("Department is a required field"),
   company_id: yup.object().required().label("Company").typeError("Company is a required field"),
   business_unit_id: yup.object().required().label("Business Unit").typeError("Business Unit is a required field"),
@@ -213,6 +215,7 @@ const AddRequisition = (props) => {
     major_category_id: null,
     minor_category_id: null,
 
+    one_charging_id: null,
     department_id: null,
     company_id: null,
     business_unit_id: null,
@@ -426,6 +429,17 @@ const AddRequisition = (props) => {
   ] = useLazyGetWarehouseAllApiQuery();
 
   const [
+    oneChargingTrigger,
+    {
+      data: oneChargingData = [],
+      isLoading: isOneChargingLoading,
+      isSuccess: isOneChargingSuccess,
+      isError: isOneChargingError,
+      refetch: isOneChargingRefetch,
+    },
+  ] = useLazyGetOneRDFChargingAllApiQuery();
+
+  const [
     companyTrigger,
     {
       data: companyData = [],
@@ -557,6 +571,8 @@ const AddRequisition = (props) => {
   } = useGetRequestContainerAllApiQuery({}, { refetchOnMountOrArgChange: true });
   // } = useGetRequestContainerAllApiQuery({ page: page, per_page: perPage }, { refetchOnMountOrArgChange: true });
 
+  console.log("addRequestAllApi", addRequestAllApi);
+
   const hasRequest = addRequestAllApi.length > 0;
   // console.log("hasRequest", hasRequest);
 
@@ -603,6 +619,7 @@ const AddRequisition = (props) => {
       major_category_id: null,
       minor_category_id: null,
 
+      one_charging_id: null,
       company_id: null,
       business_unit_id: null,
       department_id: null,
@@ -642,14 +659,17 @@ const AddRequisition = (props) => {
     // deleteAllRequest();
   }, []);
 
+  console.log("userCoa", userCoa);
+
   useEffect(() => {
     if (!transactionData) {
-      setValue("department_id", userCoa?.department);
-      setValue("company_id", userCoa?.company);
-      setValue("business_unit_id", userCoa?.business_unit);
-      setValue("unit_id", userCoa?.unit);
-      setValue("subunit_id", userCoa?.subunit);
-      setValue("location_id", userCoa?.location);
+      setValue("one_charging_id", userCoa?.one_charging);
+      setValue("department_id", userCoa?.one_charging);
+      setValue("company_id", userCoa?.one_charging);
+      setValue("business_unit_id", userCoa?.one_charging);
+      setValue("unit_id", userCoa?.one_charging);
+      setValue("subunit_id", userCoa?.one_charging);
+      setValue("location_id", userCoa?.one_charging);
     }
     isRequisitionRefetch();
   }, [transactionData]);
@@ -677,6 +697,7 @@ const AddRequisition = (props) => {
       setValue("major_category_id", updateRequest?.major_category?.id);
       setValue("minor_category_id", updateRequest?.minor_category);
 
+      setValue("one_charging_id", updateRequest?.one_charging);
       setValue("department_id", updateRequest?.department);
       setValue("company_id", updateRequest?.company);
       setValue("business_unit_id", updateRequest?.business_unit);
@@ -760,10 +781,9 @@ const AddRequisition = (props) => {
   //  * CONTAINER
   // Adding of Request
   const addRequestHandler = (formData) => {
-    // console.log("formData👀", formData);
+    console.log("formData👀", formData);
     const cipNumberFormat = formData?.cip_number === "" ? "" : formData?.cip_number?.toString();
-    const updatingCoa = (fields, name) =>
-      updateRequest ? formData?.[fields]?.id : formData?.[fields]?.[name]?.id.toString();
+    // const updatingCoa = (fields, name) => (updateRequest ? formData?.[fields] : formData?.[fields]?.[name]?.toString());
     const accountableFormat =
       formData?.accountable === null ? "" : formData?.accountable?.general_info?.full_id_number_full_name?.toString();
     const smallToolFormat = formData?.small_tool_id === null ? "" : formData?.small_tool_id?.id?.toString();
@@ -783,12 +803,15 @@ const AddRequisition = (props) => {
       initial_debit_id: formData?.minor_category_id?.initial_debit?.sync_id.toString(),
       depreciation_credit_id: formData?.minor_category_id?.depreciation_credit?.sync_id.toString(),
 
-      department_id: formData?.department_id.id?.toString(),
-      company_id: updatingCoa("company_id", "company"),
-      business_unit_id: updatingCoa("business_unit_id", "business_unit"),
-      unit_id: formData.unit_id.id?.toString(),
-      subunit_id: formData.subunit_id.id?.toString(),
-      location_id: formData?.location_id.id?.toString(),
+      one_charging_id: formData?.one_charging_id?.id?.toString(),
+      department_id: formData?.one_charging_id?.department_id?.toString(),
+      // company_id: updatingCoa("company_id", "company"),
+      // business_unit_id: updatingCoa("business_unit_id", "business_unit"),
+      company_id: formData?.one_charging_id?.company_id?.toString(),
+      business_unit_id: formData?.one_charging_id?.business_unit_id?.toString(),
+      unit_id: formData.one_charging_id?.unit_id?.toString(),
+      subunit_id: formData.one_charging_id?.subunit_id?.toString(),
+      location_id: formData?.one_charging_id?.location_id?.toString(),
       // account_title_id: formData?.account_title_id.id?.toString(),
       small_tool_id: smallToolFormat,
       accountability: formData?.accountability?.toString(),
@@ -927,6 +950,7 @@ const AddRequisition = (props) => {
                           major_category_id: formData?.major_category_id,
                           minor_category_id: formData?.minor_category_id,
 
+                          one_charging_id: formData?.one_charging_id,
                           company_id: formData?.company_id,
                           business_unit_id: formData?.business_unit_id,
                           department_id: formData?.department_id,
@@ -1024,6 +1048,7 @@ const AddRequisition = (props) => {
                     major_category_id: formData?.major_category_id,
                     minor_category_id: formData?.minor_category_id,
 
+                    one_charging_id: formData?.one_charging_id,
                     company_id: formData?.company_id,
                     business_unit_id: formData?.business_unit_id,
                     department_id: formData?.department_id,
@@ -1187,12 +1212,13 @@ const AddRequisition = (props) => {
               const res = await postRequisition(addRequestAllApi).unwrap();
               deleteAllRequest();
               reset({
-                company_id: userCoa?.company,
-                business_unit_id: userCoa?.business_unit,
-                department_id: userCoa?.department,
-                unit_id: userCoa?.unit,
-                subunit_id: userCoa?.subunit,
-                location_id: userCoa?.location,
+                one_charging_id: userCoa?.one_charging,
+                company_id: userCoa?.one_charging,
+                business_unit_id: userCoa?.one_charging,
+                department_id: userCoa?.one_charging,
+                unit_id: userCoa?.one_charging,
+                subunit_id: userCoa?.one_charging,
+                location_id: userCoa?.one_charging,
 
                 letter_of_request: null,
                 quotation: null,
@@ -1499,6 +1525,7 @@ const AddRequisition = (props) => {
       major_category,
       minor_category,
 
+      one_charging,
       company,
       business_unit,
       department,
@@ -1537,6 +1564,7 @@ const AddRequisition = (props) => {
       major_category,
       minor_category,
 
+      one_charging,
       company,
       business_unit,
       department,
@@ -1579,6 +1607,7 @@ const AddRequisition = (props) => {
       // receiving_warehouse_id: null,
       minor_category_id: null,
 
+      one_charging_id: null,
       company_id: null,
       department_id: null,
       subunit_id: null,
@@ -1820,11 +1849,58 @@ const AddRequisition = (props) => {
 
             <Box sx={BoxStyle}>
               <Typography sx={sxSubtitle}>Charging Information</Typography>
+
+              <CustomAutoComplete
+                autoComplete
+                control={control}
+                name="one_charging_id"
+                disabled={updateRequest && disable}
+                options={oneChargingData || []}
+                onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
+                loading={isOneChargingLoading}
+                size="small"
+                getOptionLabel={(option) => option.code + " - " + option.name}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                  <TextField
+                    color="secondary"
+                    {...params}
+                    label="One RDF Charging"
+                    error={!!errors?.one_charging_id}
+                    helperText={errors?.one_charging_id?.message}
+                  />
+                )}
+                onChange={(_, value) => {
+                  console.log("value", value);
+
+                  if (value) {
+                    setValue("department_id", value);
+                    setValue("company_id", value);
+                    setValue("business_unit_id", value);
+                    setValue("unit_id", value);
+                    setValue("subunit_id", value);
+                    setValue("location_id", value);
+                  } else {
+                    setValue("company_id", null);
+                    setValue("business_unit_id", null);
+                    setValue("unit_id", null);
+                    setValue("subunit_id", null);
+                    setValue("location_id", null);
+                  }
+                  setValue("fixed_asset_id", null);
+                  setValue("small_tool_item", null);
+                  setValue("asset_description", "");
+                  setValue("asset_specification", "");
+                  return value;
+                }}
+              />
+
               <CustomAutoComplete
                 autoComplete
                 control={control}
                 name="department_id"
-                disabled={updateRequest && disable}
+                // disabled={updateRequest && disable}
+                disabled
                 options={departmentData}
                 onOpen={() =>
                   isDepartmentSuccess ? null : (departmentTrigger(), companyTrigger(), businessUnitTrigger())
@@ -1832,7 +1908,8 @@ const AddRequisition = (props) => {
                 loading={isDepartmentLoading}
                 size="small"
                 getOptionLabel={(option) => option.department_code + " - " + option.department_name}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
+                isOptionEqualToValue={(option, value) => option.department_id === value.department_id}
+                getOptionKey={(option, index) => `${option.id}-${index}`}
                 renderInput={(params) => (
                   <TextField
                     color="secondary"
@@ -1842,28 +1919,28 @@ const AddRequisition = (props) => {
                     helperText={errors?.department_id?.message}
                   />
                 )}
-                onChange={(_, value) => {
-                  const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
-                  const businessUnitID = businessUnitData?.find(
-                    (item) => item.sync_id === value.business_unit.business_unit_sync_id
-                  );
+                // onChange={(_, value) => {
+                //   const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
+                //   const businessUnitID = businessUnitData?.find(
+                //     (item) => item.sync_id === value.business_unit.business_unit_sync_id
+                //   );
 
-                  if (value) {
-                    setValue("company_id", companyID);
-                    setValue("business_unit_id", businessUnitID);
-                  } else {
-                    setValue("company_id", null);
-                    setValue("business_unit_id", null);
-                  }
-                  setValue("unit_id", null);
-                  setValue("subunit_id", null);
-                  setValue("location_id", null);
-                  setValue("fixed_asset_id", null);
-                  setValue("small_tool_item", null);
-                  setValue("asset_description", "");
-                  setValue("asset_specification", "");
-                  return value;
-                }}
+                //   if (value) {
+                //     setValue("company_id", companyID);
+                //     setValue("business_unit_id", businessUnitID);
+                //   } else {
+                //     setValue("company_id", null);
+                //     setValue("business_unit_id", null);
+                //   }
+                //   setValue("unit_id", null);
+                //   setValue("subunit_id", null);
+                //   setValue("location_id", null);
+                //   setValue("fixed_asset_id", null);
+                //   setValue("small_tool_item", null);
+                //   setValue("asset_description", "");
+                //   setValue("asset_specification", "");
+                //   return value;
+                // }}
               />
 
               <CustomAutoComplete
@@ -1913,13 +1990,14 @@ const AddRequisition = (props) => {
                 autoComplete
                 name="unit_id"
                 control={control}
-                disabled={updateRequest && disable}
+                // disabled={updateRequest && disable}
+                disabled
                 options={departmentData?.filter((obj) => obj?.id === watch("department_id")?.id)[0]?.unit || []}
                 onOpen={() => (isUnitSuccess ? null : (unitTrigger(), subunitTrigger(), locationTrigger()))}
                 loading={isUnitLoading}
                 size="small"
                 getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
-                isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                isOptionEqualToValue={(option, value) => option?.unit_id === value?.unit_id}
                 renderInput={(params) => (
                   <TextField
                     color="secondary"
@@ -1940,12 +2018,13 @@ const AddRequisition = (props) => {
                 autoComplete
                 name="subunit_id"
                 control={control}
-                disabled={updateRequest && disable}
+                // disabled={updateRequest && disable}
+                disabled
                 options={unitData?.filter((obj) => obj?.id === watch("unit_id")?.id)[0]?.subunit || []}
                 loading={isSubUnitLoading}
                 size="small"
                 getOptionLabel={(option) => option.subunit_code + " - " + option.subunit_name}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
+                isOptionEqualToValue={(option, value) => option.subunit_id === value.subunit_id}
                 renderInput={(params) => (
                   <TextField
                     color="secondary"
@@ -1961,7 +2040,8 @@ const AddRequisition = (props) => {
                 autoComplete
                 name="location_id"
                 control={control}
-                disabled={updateRequest && disable}
+                // disabled={updateRequest && disable}
+                disabled
                 options={locationData?.filter((item) => {
                   return item.subunit.some((subunit) => {
                     return subunit?.sync_id === watch("subunit_id")?.sync_id;
@@ -2845,22 +2925,25 @@ const AddRequisition = (props) => {
 
                             <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
                               <Typography fontSize={10} color="gray">
-                                {`(${data.company?.company_code}) - ${data.company?.company_name}`}
+                                {`(${data.one_charging?.code}) - ${data.one_charging?.name}`}
                               </Typography>
                               <Typography fontSize={10} color="gray">
-                                {`(${data.business_unit?.business_unit_code}) - ${data.business_unit?.business_unit_name}`}
+                                {`(${data.one_charging?.company_code}) - ${data.one_charging?.company_name}`}
                               </Typography>
                               <Typography fontSize={10} color="gray">
-                                {`(${data.department?.department_code}) - ${data.department?.department_name}`}
+                                {`(${data.one_charging?.business_unit_code}) - ${data.one_charging?.business_unit_name}`}
                               </Typography>
                               <Typography fontSize={10} color="gray">
-                                {`(${data.unit?.unit_code}) - ${data.unit?.unit_name}`}
+                                {`(${data.department?.department_code}) - ${data.one_charging?.department_name}`}
                               </Typography>
                               <Typography fontSize={10} color="gray">
-                                {`(${data.subunit?.subunit_code}) - ${data.subunit?.subunit_name}`}
+                                {`(${data.one_charging?.unit_code}) - ${data.one_charging?.unit_name}`}
                               </Typography>
                               <Typography fontSize={10} color="gray">
-                                {`(${data.location?.location_code}) - ${data.location?.location_name}`}
+                                {`(${data.one_charging?.subunit_code}) - ${data.one_charging?.subunit_name}`}
+                              </Typography>
+                              <Typography fontSize={10} color="gray">
+                                {`(${data.one_charging?.location_code}) - ${data.one_charging?.location_name}`}
                               </Typography>
                               {/* <Typography fontSize={10} color="gray">
                                 {`(${data.account_title?.account_title_code}) - ${data.account_title?.account_title_name}`}
