@@ -51,6 +51,7 @@ const UnitApprovers = () => {
     status: false,
     id: null,
     // action: "view",
+    one_charging_id: null,
     requester_id: null,
     approver_id: [],
   });
@@ -238,10 +239,12 @@ const UnitApprovers = () => {
   };
 
   const onUpdateHandler = (props) => {
-    const { id, unit, subunit, approvers } = props;
+    console.log({ props });
+    const { id, unit, subunit, approvers, one_charging } = props;
     setUpdateUnitApprovers({
       status: true,
       action: "update",
+      one_charging,
       unit,
       subunit,
       approvers,
@@ -252,6 +255,7 @@ const UnitApprovers = () => {
     setUpdateUnitApprovers({
       status: false,
       // action: "view",
+      one_charging_id: null,
       unit_id: null,
       subunit_id: null,
       approvers: [],
@@ -259,10 +263,11 @@ const UnitApprovers = () => {
   };
 
   const onViewHandler = (props) => {
-    const { unit, subunit, approvers } = props;
+    const { unit, subunit, approvers, one_charging } = props;
     setUpdateUnitApprovers({
       status: true,
       action: "view",
+      one_charging,
       unit,
       subunit,
       approvers,
@@ -405,7 +410,7 @@ const UnitApprovers = () => {
         open={drawer}
         TransitionComponent={Grow}
         PaperProps={{
-          sx: { borderRadius: "10px", maxWidth: "1200px" },
+          sx: { borderRadius: "10px", maxWidth: "1300px", width: "40%", minWidth: "300px" },
         }}
       >
         {updateUnitApprovers !== null && (
