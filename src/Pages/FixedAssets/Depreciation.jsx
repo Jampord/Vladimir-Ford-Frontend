@@ -75,6 +75,7 @@ import {
   useLazyGetMinorCategoryAllApiQuery,
   useLazyGetMinorCategorySmallToolsApiQuery,
 } from "../../Redux/Query/Masterlist/Category/MinorCategory";
+import { useLazyGetOneRDFChargingAllApiQuery } from "../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -134,6 +135,7 @@ const schema = yup.object().shape({
     })
     .required()
     .label("Minor Category"),
+  one_charging_id: yup.object().required().label("One Charging").typeError("One Charging is a required field"),
   department_id: yup.object().required().label("Department").typeError("Department is a required field"),
   company_id: yup.object().required().label("Company").typeError("Company is a required field"),
   business_unit_id: yup.object().required().label("Business Unit").typeError("Business Unit is a required field"),
@@ -173,6 +175,7 @@ const Depreciation = (props) => {
       depreciation_debit_id: null,
       initial_credit_id: null,
       initial_debit_id: null,
+      one_charging_id: null,
       department_id: null,
       company_id: null,
       business_unit_id: null,
@@ -198,6 +201,17 @@ const Depreciation = (props) => {
     isLoading: isAccountTitleLoading,
     isSuccess: isAccountTitleSuccess,
   } = useGetAccountTitleAllApiQuery();
+
+  const [
+    oneChargingTrigger,
+    {
+      data: oneChargingData = [],
+      isLoading: isOneChargingLoading,
+      isSuccess: isOneChargingSuccess,
+      isError: isOneChargingError,
+      refetch: isOneChargingRefetch,
+    },
+  ] = useLazyGetOneRDFChargingAllApiQuery();
 
   const [
     companyTrigger,
@@ -330,11 +344,12 @@ const Depreciation = (props) => {
   // const combinedHistoryData = joinDepreciationByYear(historyData?.depreciation_history);
 
   useEffect(() => {
-    // console.log("data", data);
+    // console.log("data🧨", data);
     if (data) {
       setValue("initial_debit_id", data?.initial_debit);
       setValue("initial_credit_id", data?.initial_credit);
       setValue("depreciation_credit_id", data?.depreciation_credit);
+      setValue("one_charging_id", data?.one_charging);
       setValue("department_id", data?.department);
       setValue("company_id", data?.company);
       setValue("business_unit_id", data?.business_unit);
@@ -534,16 +549,17 @@ const Depreciation = (props) => {
   };
 
   const onSubmitHandler = (formData) => {
-    // console.log("formData", formData);
+    console.log("formData", formData);
 
     const newFormData = {
       ...formData,
-      department_id: formData.department_id.id,
-      company_id: formData.company_id.id,
-      business_unit_id: formData.business_unit_id.id,
-      unit_id: formData.unit_id.id,
-      subunit_id: formData.subunit_id.id,
-      location_id: formData.location_id.id,
+      one_charging_id: formData.one_charging_id.id,
+      department_id: formData.department_id.department_id,
+      company_id: formData.company_id.company_id,
+      business_unit_id: formData.business_unit_id.business_unit_id,
+      unit_id: formData.unit_id.unit_id,
+      subunit_id: formData.subunit_id.subunit_id,
+      location_id: formData.location_id.location_id,
       second_depreciation_credit_id:
         watch("major_category_id")?.major_category_name !== data?.major_category?.major_category_name
           ? formData.second_depreciation_credit_id
@@ -1000,39 +1016,51 @@ const Depreciation = (props) => {
 
                     <Box>
                       <Box className="tableCard__properties">
+                        One RDF:
+                        <Typography className="tableCard__info" fontSize="14px">
+                          {data?.one_charging?.code} - {data?.one_charging?.name}
+                        </Typography>
+                      </Box>
+                      <Box className="tableCard__properties">
                         Department:
                         <Typography className="tableCard__info" fontSize="14px">
-                          {data?.department?.department_code} - {data?.department?.department_name}
+                          {data?.one_charging?.department_code || data?.department?.department_code} -{" "}
+                          {data?.one_charging?.department_name || data?.department?.department_name}
                         </Typography>
                       </Box>
                       <Box className="tableCard__properties">
                         Company:
                         <Typography className="tableCard__info" fontSize="14px">
-                          {data?.company?.company_code} - {data?.company?.company_name}
+                          {data?.one_charging?.company_code || data?.company?.company_code} -{" "}
+                          {data?.one_charging?.company_name || data?.company?.company_name}
                         </Typography>
                       </Box>
                       <Box className="tableCard__properties">
                         Business Unit:
                         <Typography className="tableCard__info" fontSize="14px">
-                          {data?.business_unit?.business_unit_code} - {data?.business_unit?.business_unit_name}
+                          {data?.one_charging?.business_unit_code || data?.business_unit?.business_unit_code} -{" "}
+                          {data?.one_charging?.business_unit_name || data?.business_unit?.business_unit_name}
                         </Typography>
                       </Box>
                       <Box className="tableCard__properties">
                         Unit:
                         <Typography className="tableCard__info" fontSize="14px">
-                          {data?.unit?.unit_code} - {data?.unit?.unit_name}
+                          {data?.one_charging?.unit_code || data?.unit?.unit_code} -{" "}
+                          {data?.one_charging?.unit_name || data?.unit?.unit_name}
                         </Typography>
                       </Box>
                       <Box className="tableCard__properties">
                         Sub Unit:
                         <Typography className="tableCard__info" fontSize="14px">
-                          {data?.sub_unit?.subunit_code} - {data?.sub_unit?.subunit_name}
+                          {data?.one_charging?.subunit_code || data?.sub_unit?.subunit_code} -{" "}
+                          {data?.one_charging?.subunit_name || data?.sub_unit?.subunit_name}
                         </Typography>
                       </Box>
                       <Box className="tableCard__properties">
                         Location:
                         <Typography className="tableCard__info" fontSize="14px">
-                          {data?.location?.location_code} - {data?.location?.location_name}
+                          {data?.one_charging?.location_code || data?.location?.location_code} -{" "}
+                          {data?.one_charging?.location_name || data?.location?.location_name}
                         </Typography>
                       </Box>
                     </Box>
@@ -1273,6 +1301,45 @@ const Depreciation = (props) => {
                     <CustomAutoComplete
                       autoComplete
                       control={control}
+                      name="one_charging_id"
+                      options={oneChargingData || []}
+                      onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
+                      loading={isOneChargingLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.code + " - " + option.name}
+                      isOptionEqualToValue={(option, value) => option.id === value.id}
+                      renderInput={(params) => (
+                        <TextField
+                          color="secondary"
+                          {...params}
+                          label="One RDF Charging"
+                          error={!!errors?.one_charging_id}
+                          helperText={errors?.one_charging_id?.message}
+                        />
+                      )}
+                      onChange={(_, value) => {
+                        if (value) {
+                          setValue("department_id", value);
+                          setValue("company_id", value);
+                          setValue("business_unit_id", value);
+                          setValue("unit_id", value);
+                          setValue("subunit_id", value);
+                          setValue("location_id", value);
+                        } else {
+                          setValue("department_id", null);
+                          setValue("company_id", null);
+                          setValue("business_unit_id", null);
+                          setValue("unit_id", null);
+                          setValue("subunit_id", null);
+                          setValue("location_id", null);
+                        }
+                        return value;
+                      }}
+                    />
+
+                    <CustomAutoComplete
+                      autoComplete
+                      control={control}
                       name="department_id"
                       options={departmentData}
                       onOpen={() =>
@@ -1280,7 +1347,7 @@ const Depreciation = (props) => {
                       }
                       loading={isDepartmentLoading}
                       // disabled={handleSaveValidation()}
-                      // disabled
+                      disabled
                       disableClearable
                       size="small"
                       getOptionLabel={(option) => option.department_code + " - " + option.department_name}
@@ -1294,24 +1361,24 @@ const Depreciation = (props) => {
                           helperText={errors?.department_id?.message}
                         />
                       )}
-                      onChange={(_, value) => {
-                        const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
-                        const businessUnitID = businessUnitData?.find(
-                          (item) => item.sync_id === value.business_unit.business_unit_sync_id
-                        );
+                      // onChange={(_, value) => {
+                      //   const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
+                      //   const businessUnitID = businessUnitData?.find(
+                      //     (item) => item.sync_id === value.business_unit.business_unit_sync_id
+                      //   );
 
-                        if (value) {
-                          setValue("company_id", companyID);
-                          setValue("business_unit_id", businessUnitID);
-                        } else {
-                          setValue("company_id", null);
-                          setValue("business_unit_id", null);
-                        }
-                        setValue("unit_id", null);
-                        setValue("subunit_id", null);
-                        setValue("location_id", null);
-                        return value;
-                      }}
+                      //   if (value) {
+                      //     setValue("company_id", companyID);
+                      //     setValue("business_unit_id", businessUnitID);
+                      //   } else {
+                      //     setValue("company_id", null);
+                      //     setValue("business_unit_id", null);
+                      //   }
+                      //   setValue("unit_id", null);
+                      //   setValue("subunit_id", null);
+                      //   setValue("location_id", null);
+                      //   return value;
+                      // }}
                     />
 
                     <CustomAutoComplete
@@ -1365,7 +1432,7 @@ const Depreciation = (props) => {
                       onOpen={() => (isUnitSuccess ? null : (unitTrigger(), subunitTrigger(), locationTrigger()))}
                       loading={isUnitLoading}
                       // disabled={handleSaveValidation()}
-                      // disabled
+                      disabled
                       disableClearable
                       size="small"
                       getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
@@ -1379,11 +1446,11 @@ const Depreciation = (props) => {
                           helperText={errors?.unit_id?.message}
                         />
                       )}
-                      onChange={(_, value) => {
-                        setValue("subunit_id", null);
-                        setValue("location_id", null);
-                        return value;
-                      }}
+                      // onChange={(_, value) => {
+                      //   setValue("subunit_id", null);
+                      //   setValue("location_id", null);
+                      //   return value;
+                      // }}
                     />
 
                     <CustomAutoComplete
@@ -1393,7 +1460,7 @@ const Depreciation = (props) => {
                       options={unitData?.filter((obj) => obj?.id === watch("unit_id")?.id)[0]?.subunit || []}
                       loading={isSubUnitLoading}
                       // disabled={handleSaveValidation()}
-                      // disabled
+                      disabled
                       disableClearable
                       size="small"
                       getOptionLabel={(option) => option.subunit_code + " - " + option.subunit_name}
@@ -1420,7 +1487,7 @@ const Depreciation = (props) => {
                       })}
                       loading={isLocationLoading}
                       // disabled={handleSaveValidation()}
-                      // disabled
+                      disabled
                       disableClearable
                       size="small"
                       getOptionLabel={(option) => option.location_code + " - " + option.location_name}
