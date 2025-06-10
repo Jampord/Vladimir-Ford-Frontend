@@ -317,8 +317,10 @@ const Depreciation = (props) => {
 
   const data = calcDepreApi?.data;
   const depreciationDebit = calcDepreApi?.data?.initial_debit?.depreciation_debit;
-  // console.log("dataaaaaaaaaaa", data);
-  // console.log("👀👀👀", depreciationDebit);
+  const minorCategoryDepreciationDebit = watch("minor_category_id")?.initial_debit?.depreciation_debit;
+
+  console.log("minorCategoryDepreciationDebit", minorCategoryDepreciationDebit);
+
   const dispatch = useDispatch();
   const dialog = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
   const navigate = useNavigate();
@@ -344,7 +346,7 @@ const Depreciation = (props) => {
   // const combinedHistoryData = joinDepreciationByYear(historyData?.depreciation_history);
 
   useEffect(() => {
-    // console.log("data🧨", data);
+    console.log("data🧨", data);
     if (data) {
       setValue("initial_debit_id", data?.initial_debit);
       setValue("initial_credit_id", data?.initial_credit);
@@ -1139,13 +1141,17 @@ const Depreciation = (props) => {
                         />
                       )}
                       onChange={(_, value) => {
-                        // console.log("value", value);
+                        console.log("value", value);
                         if (value) {
                           setValue("major_category_id", value.major_category);
                           setValue("second_depreciation_debit_id", value.initial_debit);
+                          setValue("depreciation_credit_id", value.depreciation_credit);
+                          setValue("depreciation_debit_id", null);
                         } else {
                           setValue("major_category_id", null);
                           setValue("second_depreciation_debit_id", null);
+                          setValue("depreciation_credit_id", data?.depreciation_credit);
+                          setValue("depreciation_debit_id", null);
                         }
                         return value;
                       }}
@@ -1204,7 +1210,11 @@ const Depreciation = (props) => {
                       name="depreciation_debit_id"
                       // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
                       control={control}
-                      options={depreciationDebit}
+                      options={
+                        (watch("major_category_id")?.major_category_name !== data?.major_category?.major_category_name
+                          ? minorCategoryDepreciationDebit
+                          : depreciationDebit) || []
+                      }
                       // loading={isAccountTitleLoading}
                       size="small"
                       getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
@@ -1244,7 +1254,10 @@ const Depreciation = (props) => {
 
                     {watch("major_category_id")?.major_category_name !== data?.major_category?.major_category_name && (
                       <>
-                        <Divider />
+                        <Typography fontFamily="Anton" color="secondary">
+                          Adjusted Entries
+                        </Typography>
+
                         <CustomAutoComplete
                           autoComplete
                           name="second_depreciation_debit_id"
@@ -1291,6 +1304,8 @@ const Depreciation = (props) => {
                             />
                           )}
                         />
+
+                        <Divider />
                       </>
                     )}
 
