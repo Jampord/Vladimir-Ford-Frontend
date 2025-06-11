@@ -86,6 +86,7 @@ const schema = yup.object().shape({
   major_category_id: yup.object().nullable(),
   minor_category_id: yup.object().required().label("Minor Category").typeError("Minor Category is a required field"),
   description: yup.string().required().label("Asset Description"),
+  specification: yup.string().required().label("Asset Specification"),
 });
 
 const ViewApproveRequest = (props) => {
@@ -191,6 +192,7 @@ const ViewApproveRequest = (props) => {
       major_category_id: null,
       minor_category_id: null,
       description: "",
+      specification: "",
     },
   });
 
@@ -303,10 +305,12 @@ const ViewApproveRequest = (props) => {
                     pr_number: requestData.pr_number,
                     pr_description: requestData.acquisition_details,
                   });
-                  // console.log("patchYmirData", patchYmirData);
+                  ///************* */
+                  console.log("Resubmit - patchYmirData", patchYmirData);
                 } else {
                   const postYmirData = await postPr(getYmirDataApi);
-                  // console.log("postYmirData", postYmirData);
+                  //*********** */
+                  console.log("Submit(Asset Sync) - postYmirData", postYmirData);
                 }
 
                 const next = await getNextRequest({
@@ -551,6 +555,7 @@ const ViewApproveRequest = (props) => {
     setFormValue("major_category_id", props.major_category);
     setFormValue("minor_category_id", props.minor_category);
     setFormValue("description", props.asset_description);
+    setFormValue("specification", props.asset_specification);
     setIsSmallTools(Boolean(props.type_of_request.type_of_request_name === "Small Tools"));
     dispatch(openDialog1());
   };
@@ -561,6 +566,7 @@ const ViewApproveRequest = (props) => {
       major_category_id: formData.minor_category_id?.major_category?.id,
       minor_category_id: formData.minor_category_id?.id,
       description: formData.description,
+      specification: formData.specification,
       id: referenceNumber,
     };
     console.log("newFormData: ", newFormData);
@@ -620,6 +626,7 @@ const ViewApproveRequest = (props) => {
     setReferenceNumber("");
     setFormValue("minor_category_id", null);
     setFormValue("description", "");
+    setFormValue("specification", "");
     setIsSmallTools(false);
   };
 
@@ -678,7 +685,8 @@ const ViewApproveRequest = (props) => {
                       <TableCell className="tbl-cell">Capex Num / Unit Charging</TableCell>
                       <TableCell className="tbl-cell">Attachments</TableCell>
                       {((!isApproveLoading && approveRequestData?.data[0]?.fa_edit === 1) ||
-                        (nextData && nextData[0]?.fa_edit === 1)) && <TableCell className="tbl-cell">Action</TableCell>}
+                        (nextData && nextData[0]?.fa_edit === 1)) &&
+                        !transactionData?.approved && <TableCell className="tbl-cell">Action</TableCell>}
                     </TableRow>
                   </TableHead>
 
@@ -739,22 +747,25 @@ const ViewApproveRequest = (props) => {
 
                               <TableCell className="tbl-cell">
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.company?.company_code}) - ${data.company?.company_name}`}
+                                  {`(${data.one_charging?.code}) - ${data.one_charging?.name}`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.business_unit?.business_unit_code}) - ${data.business_unit?.business_unit_name}`}
+                                  {`(${data.one_charging?.company_code}) - ${data.one_charging?.company_name}`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.department?.department_code}) - ${data.department?.department_name}`}
+                                  {`(${data.one_charging?.business_unit_code}) - ${data.one_charging?.business_unit_name}`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.unit?.unit_code}) - ${data.unit?.unit_name}`}
+                                  {`(${data.one_charging?.department_code}) - ${data.one_charging?.department_name}`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.subunit?.subunit_code}) - ${data.subunit?.subunit_name}`}
+                                  {`(${data.one_charging?.unit_code}) - ${data.one_charging?.unit_name}`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.location?.location_code}) - ${data.location?.location_name}`}
+                                  {`(${data.one_charging?.subunit_code}) - ${data.one_charging?.subunit_name}`}
+                                </Typography>
+                                <Typography fontSize={10} color="gray">
+                                  {`(${data.one_charging?.location_code}) - ${data.one_charging?.location_name}`}
                                 </Typography>
                                 {/* <Typography fontSize={10} color="gray">
                                 {`(${data.account_title?.account_title_code}) - ${data.account_title?.account_title_name}`}
@@ -965,7 +976,7 @@ const ViewApproveRequest = (props) => {
                                   </Stack>
                                 )}
                               </TableCell>
-                              {data?.fa_edit === 1 && (
+                              {data?.fa_edit === 1 && !transactionData?.approved && (
                                 <TableCell className="tbl-cell">
                                   <ActionMenu onUpdateHandler={onUpdateHandler} data={data} />
                                 </TableCell>
@@ -1113,6 +1124,19 @@ const ViewApproveRequest = (props) => {
                 allowSpecialCharacters
                 error={!!errors?.description}
                 helperText={errors?.description?.message}
+                fullWidth
+                multiline
+                maxRows={5}
+              />
+
+              <CustomTextField
+                control={control}
+                name="specification"
+                label="Asset Specification"
+                type="text"
+                allowSpecialCharacters
+                error={!!errors?.specification}
+                helperText={errors?.specification?.message}
                 fullWidth
                 multiline
                 maxRows={5}
