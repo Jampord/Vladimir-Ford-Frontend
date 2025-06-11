@@ -75,7 +75,7 @@ const ViewRequestReleasing = (props) => {
     }
   );
 
-  // console.log("releasingdata", [releasingData]);
+  console.log("releasingdata", [releasingData]);
 
   const handleReleasing = () => {
     dispatch(openDialog());
@@ -329,6 +329,13 @@ const ViewRequestReleasing = (props) => {
 
                 <AccordionDetails>
                   <Box className="tableCard__properties">
+                    One RDF:
+                    <Typography className="tableCard__info" fontSize="14px">
+                      {`${releasingData?.one_charging?.code} - ${releasingData?.one_charging?.name}`}
+                    </Typography>
+                  </Box>
+
+                  <Box className="tableCard__properties">
                     Company:
                     <Typography className="tableCard__info" fontSize="14px">
                       {`${releasingData?.company.company_code} - ${releasingData?.company.company_name}`}
@@ -363,12 +370,12 @@ const ViewRequestReleasing = (props) => {
                     </Typography>
                   </Box>
 
-                  <Box className="tableCard__properties">
+                  {/* <Box className="tableCard__properties">
                     Account Title:
                     <Typography className="tableCard__info" fontSize="14px">
                       {`${releasingData?.account_title.account_title_code} - ${releasingData?.account_title.account_title_name}`}
                     </Typography>
-                  </Box>
+                  </Box> */}
                 </AccordionDetails>
               </Accordion>
 
@@ -690,7 +697,7 @@ const ViewRequestReleasing = (props) => {
                   <Box className="tableCard__properties">
                     Acquisition Cost:
                     <Typography className="tableCard__info" fontSize="14px">
-                      ₱{releasingData?.acquisition_cost.toLocaleString()}
+                      ₱{releasingData?.acquisition_cost?.toLocaleString()}
                     </Typography>
                   </Box>
 
@@ -704,14 +711,14 @@ const ViewRequestReleasing = (props) => {
                   <Box className="tableCard__properties">
                     Scrap Value:
                     <Typography className="tableCard__info" fontSize="14px">
-                      ₱{releasingData?.scrap_value.toLocaleString()}
+                      ₱{releasingData?.scrap_value?.toLocaleString()}
                     </Typography>
                   </Box>
 
                   <Box className="tableCard__properties">
                     Depreciable Basis:
                     <Typography className="tableCard__info" fontSize="14px">
-                      ₱{releasingData?.depreciable_basis.toLocaleString()}
+                      ₱{releasingData?.depreciable_basis?.toLocaleString()}
                     </Typography>
                   </Box>
                 </AccordionDetails>
@@ -754,7 +761,7 @@ const ViewRequestReleasing = (props) => {
                       <TableContainer>
                         <Table>
                           <TableBody>
-                            {releasingData.data.additional_cost?.map((mapData, index) => {
+                            {releasingData?.data?.additional_cost?.map((mapData, index) => {
                               return (
                                 <TableRow
                                   key={index}
@@ -783,7 +790,7 @@ const ViewRequestReleasing = (props) => {
 
                                   <TableCell>
                                     <Typography fontSize="12px" fontWeight="bold" noWrap>
-                                      {`₱${mapData?.acquisition_cost.toLocaleString()}`}
+                                      {`₱${mapData?.acquisition_cost?.toLocaleString()}`}
                                     </Typography>
                                     <Typography fontSize="10px" color="gray" noWrap>
                                       Acquisition Cost
@@ -824,7 +831,7 @@ const ViewRequestReleasing = (props) => {
                               Main Cost :
                             </Typography>
                             <Typography color="secondary.light">
-                              ₱{releasingData?.acquisition_cost.toLocaleString()}
+                              ₱{releasingData?.acquisition_cost?.toLocaleString()}
                             </Typography>
                           </Stack>
                           {`+`}
@@ -833,7 +840,7 @@ const ViewRequestReleasing = (props) => {
                               Total Additional Cost :
                             </Typography>
                             <Typography color="secondary.light">
-                              ₱{releasingData?.total_adcost.toLocaleString()}
+                              ₱{releasingData?.total_adcost?.toLocaleString()}
                             </Typography>
                           </Stack>
                         </Stack>
@@ -855,7 +862,7 @@ const ViewRequestReleasing = (props) => {
                             TOTAL COST :
                           </Typography>
                           <Typography fontWeight="bold" color="secondary.main">
-                            ₱{releasingData?.total_cost.toLocaleString()}
+                            ₱{releasingData?.total_cost?.toLocaleString()}
                           </Typography>
                         </Stack>
                       </TableContainer>
@@ -918,14 +925,14 @@ const ViewRequestReleasing = (props) => {
                             </Typography>
                           </TableCell>
 
-                          <TableCell>
+                          {/*<TableCell>
                             <Typography fontSize="12px" fontWeight="bold">
                               {releasingData?.acquisition_cost}
                             </Typography>
                             <Typography fontSize="10px" color="gray" noWrap>
                               Acquisition Cost
                             </Typography>
-                          </TableCell>
+                          </TableCell>*/}
 
                           <TableCell>
                             <Typography fontSize="12px" fontWeight="bold">
