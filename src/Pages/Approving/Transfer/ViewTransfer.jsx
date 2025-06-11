@@ -98,6 +98,7 @@ import {
 } from "../../../Redux/Query/Approving/TransferApproval";
 import { useLazyGetUserAccountAllApiQuery } from "../../../Redux/Query/UserManagement/UserAccountsApi";
 import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
+import { useLazyGetOneRDFChargingAllApiQuery } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -114,6 +115,7 @@ const schema = yup.object().shape({
   receiver_id: yup.object().required().label("Receiver Id").typeError("Receiver Id is required"),
 
   department_id: yup.object().required().label("Department").typeError("Department is a required field"),
+  one_charging_id: yup.object().required().label("One Charging").typeError("One Charging is a required field"),
   company_id: yup.object().required().label("Company").typeError("Company is a required field"),
   business_unit_id: yup.object().required().label("Business Unit").typeError("Business Unit is a required field"),
   unit_id: yup.object().required().label("Unit").typeError("Unit is a required field"),
@@ -226,6 +228,17 @@ const ViewTransfer = (props) => {
   );
 
   console.log("transferData: ", transferData[0]);
+
+  const [
+    oneChargingTrigger,
+    {
+      data: oneChargingData = [],
+      isLoading: isOneChargingLoading,
+      isSuccess: isOneChargingSuccess,
+      isError: isOneChargingError,
+      refetch: isOneChargingRefetch,
+    },
+  ] = useLazyGetOneRDFChargingAllApiQuery();
 
   const [
     companyTrigger,
@@ -345,6 +358,7 @@ const ViewTransfer = (props) => {
       accountability: null,
       accountable: null,
 
+      one_charging_id: null,
       department_id: null,
       company_id: null,
       business_unit_id: null,
@@ -410,6 +424,7 @@ const ViewTransfer = (props) => {
       // setValue("accountability", transferNumberData?.accountability);
       // setValue("accountable", transferNumberData?.accountable);
       // setValue("receiver_id", transferNumberData?.receiver);
+      setValue("one_charging_id", transferNumberData?.one_charging);
       setValue("department_id", transferNumberData?.department);
       setValue("company_id", transferNumberData?.company);
       setValue("business_unit_id", transferNumberData?.business_unit);
@@ -916,6 +931,62 @@ const ViewTransfer = (props) => {
                       )}
                     />
                   )} */}
+
+                  <CustomAutoComplete
+                    autoComplete
+                    control={control}
+                    disabled
+                    name="one_charging_id"
+                    options={oneChargingData || []}
+                    onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
+                    loading={isOneChargingLoading}
+                    size="small"
+                    getOptionLabel={(option) => option.code + " - " + option.name}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    renderInput={(params) => (
+                      <TextField
+                        color="secondary"
+                        {...params}
+                        label="One RDF Charging"
+                        error={!!errors?.one_charging_id}
+                        helperText={errors?.one_charging_id?.message}
+                      />
+                    )}
+                    // onChange={(_, value) => {
+                    //   console.log("value", value);
+
+                    //   if (value) {
+                    //     setValue("department_id", value);
+                    //     setValue("company_id", value);
+                    //     setValue("business_unit_id", value);
+                    //     setValue("unit_id", value);
+                    //     setValue("subunit_id", value);
+                    //     setValue("location_id", value);
+                    //   } else {
+                    //     setValue("department_id", null);
+                    //     setValue("company_id", null);
+                    //     setValue("business_unit_id", null);
+                    //     setValue("unit_id", null);
+                    //     setValue("subunit_id", null);
+                    //     setValue("location_id", null);
+                    //   }
+
+                    //   // fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
+                    //   fields.forEach((item, index) => setValue(`assets.${index}.receiver_id`, null));
+                    //   fields.forEach((item, index) => setValue(`assets.${index}.accountable`, null));
+                    //   fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
+                    //   fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
+                    //   fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
+                    //   fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
+                    //   fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
+                    //   fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
+                    //   fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
+                    //   fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
+                    //   fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
+
+                    //   return value;
+                    // }}
+                  />
 
                   <CustomAutoComplete
                     autoComplete
