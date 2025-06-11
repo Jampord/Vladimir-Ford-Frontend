@@ -17,6 +17,7 @@ import {
   Box,
   Chip,
   Dialog,
+  Grow,
   IconButton,
   Stack,
   Table,
@@ -36,19 +37,22 @@ import {
   useLazyGetNextRequestQuery,
   usePatchApprovalStatusApiMutation,
 } from "../../../Redux/Query/Approving/Approval";
-import { openDrawer } from "../../../Redux/StateManagement/booleanStateSlice";
+import { closeDialog, openDialog, openDrawer } from "../../../Redux/StateManagement/booleanStateSlice";
 import { useNavigate } from "react-router-dom";
 
 import { notificationApi } from "../../../Redux/Query/Notification";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
+import RequestTimeline from "../../Asset Requisition/RequestTimeline";
 
 const FinalApproval = ({ final }) => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("For Approval");
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
+  const [transactionIdData, setTransactionIdData] = useState();
 
   const drawer = useSelector((state) => state.booleanState.drawer);
+  const dialog = useSelector((state) => state.booleanState.dialog);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -262,6 +266,11 @@ const FinalApproval = ({ final }) => {
     });
   };
 
+  const handleViewTimeline = (data) => {
+    dispatch(openDialog());
+    setTransactionIdData(data);
+  };
+
   return (
     <Stack className="category_height">
       {approvalLoading && <MasterlistSkeleton category={true} onAdd={true} />}
@@ -415,12 +424,16 @@ const FinalApproval = ({ final }) => {
                             <TableCell className="tbl-cell-category text-center capitalized">
                               <Chip
                                 size="small"
+                                onClick={() => handleViewTimeline(data)}
                                 variant="contained"
                                 sx={{
                                   background: "#f5cc2a2f",
                                   color: "#c59e00",
                                   fontSize: "0.7rem",
                                   px: 1,
+                                  "&:hover": {
+                                    background: "#DBD2AA",
+                                  },
                                 }}
                                 label="PENDING"
                               />
@@ -459,6 +472,15 @@ const FinalApproval = ({ final }) => {
           />
         </Box>
       )}
+
+      <Dialog
+        open={dialog}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog())}
+        PaperProps={{ sx: { borderRadius: "10px", maxWidth: "700px" } }}
+      >
+        <RequestTimeline data={transactionIdData?.asset_request} />
+      </Dialog>
     </Stack>
   );
 };
