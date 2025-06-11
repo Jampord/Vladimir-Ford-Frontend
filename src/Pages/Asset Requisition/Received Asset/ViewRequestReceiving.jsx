@@ -396,6 +396,9 @@ const ViewRequestReceiving = () => {
 
                               <TableCell className="tbl-cell">
                                 <Typography fontSize={10} color="gray">
+                                  {`(${data.one_charging?.code}) - ${data.one_charging?.name}`}
+                                </Typography>
+                                <Typography fontSize={10} color="gray">
                                   {`(${data.company?.company_code}) - ${data.company?.company_name}`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
