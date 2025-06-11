@@ -492,6 +492,10 @@ const FixedAsset = (props) => {
 
                               <TableCell className="tbl-cell-fa">
                                 <Typography fontSize="10px" color="gray">
+                                  {data?.one_charging?.code}
+                                  {" - "} {data?.one_charging?.name}
+                                </Typography>
+                                <Typography fontSize="10px" color="gray">
                                   {data.company.company_code}
                                   {" - "} {data.company.company_name}
                                 </Typography>
