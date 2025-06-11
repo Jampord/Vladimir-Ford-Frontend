@@ -54,8 +54,6 @@ const ForDepreciation = () => {
     filter: "To Depreciate",
   });
 
-  console.log("fixedAssetData", fixedAssetData);
-
   const handleTableData = (data) => {
     navigate(`/fixed-asset/depreciation/${data.vladimir_tag_number}`, {
       state: { ...data, status },
@@ -185,6 +183,10 @@ const ForDepreciation = () => {
                             </TableCell> */}
 
                               <TableCell className="tbl-cell-fa">
+                                <Typography fontSize="10px" color="gray">
+                                  {data?.one_charging?.code}
+                                  {" - "} {data?.one_charging?.name}
+                                </Typography>
                                 <Typography fontSize="10px" color="gray">
                                   {data.company.company_code}
                                   {" - "} {data.company.company_name}
