@@ -59,6 +59,7 @@ import { AddBox, Close } from "@mui/icons-material";
 import { useLazyGetMajorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MajorCategory";
 import { useLazyGetUnitOfMeasurementAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/UnitOfMeasurement";
 import { useLazyGetCreditAllQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Credit";
+import { useLazyGetOneRDFChargingAllApiQuery } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -110,45 +111,52 @@ const schema = yup.object().shape({
     })
     .required()
     .label("Minor Category"),
-  company_id: yup
+  one_charging_id: yup
     .string()
     .transform((value) => {
       return value?.id.toString();
     })
     .required()
     .label("Company"),
+  company_id: yup
+    .string()
+    .transform((value) => {
+      return value?.company_id.toString();
+    })
+    .required()
+    .label("Company"),
   business_unit_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.business_unit_id.toString();
     })
     .required()
     .label("Business Unit"),
   department_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.department_id.toString();
     })
     .required()
     .label("Department"),
   unit_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.unit_id.toString();
     })
     .required()
     .label("Unit"),
   subunit_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.subunit_id.toString();
     })
     .required()
     .label("Sub Unit"),
   location_id: yup
     .string()
     .transform((value) => {
-      return value?.id.toString();
+      return value?.location_id.toString();
     })
     .required()
     .label("Location"),
@@ -310,6 +318,17 @@ const AddFa = (props) => {
       isError: isMinorCategoryError,
     },
   ] = useLazyGetMinorCategoryAllApiQuery();
+
+  const [
+    oneChargingTrigger,
+    {
+      data: oneChargingData = [],
+      isLoading: isOneChargingLoading,
+      isSuccess: isOneChargingSuccess,
+      isError: isOneChargingError,
+      refetch: isOneChargingRefetch,
+    },
+  ] = useLazyGetOneRDFChargingAllApiQuery();
 
   const [
     companyTrigger,
@@ -483,6 +502,7 @@ const AddFa = (props) => {
       major_category_id: null,
       minor_category_id: null,
 
+      one_charging_id: null,
       company_id: null,
       business_unit_id: null,
       department_id: null,
@@ -584,6 +604,7 @@ const AddFa = (props) => {
       setValue("major_category_id", data.major_category === "-" ? [] : data.major_category);
       setValue("minor_category_id", data.minor_category === "-" ? [] : data.minor_category);
 
+      setValue("one_charging_id", data?.one_charging);
       setValue("company_id", data.company);
       setValue("business_unit_id", data.business_unit);
       setValue("department_id", data.department);
@@ -646,7 +667,7 @@ const AddFa = (props) => {
 
   // SUBMIT HANDLER
   const onSubmitHandler = (formData) => {
-    // console.log("formData", formData);
+    console.log("formData", formData);
 
     const newObj = {
       ...formData,
@@ -963,11 +984,53 @@ const AddFa = (props) => {
           >
             <Typography sx={sxSubtitle}>Chart of Accounts (COA)</Typography>
 
+            <CustomAutoComplete
+              autoComplete
+              control={control}
+              name="one_charging_id"
+              options={oneChargingData || []}
+              onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
+              loading={isOneChargingLoading}
+              size="small"
+              getOptionLabel={(option) => option.code + " - " + option.name}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  color="secondary"
+                  {...params}
+                  label="One RDF Charging"
+                  error={!!errors?.one_charging_id}
+                  helperText={errors?.one_charging_id?.message}
+                />
+              )}
+              onChange={(_, value) => {
+                console.log("value", value);
+
+                if (value) {
+                  setValue("department_id", value);
+                  setValue("company_id", value);
+                  setValue("business_unit_id", value);
+                  setValue("unit_id", value);
+                  setValue("subunit_id", value);
+                  setValue("location_id", value);
+                } else {
+                  setValue("department_id", null);
+                  setValue("company_id", null);
+                  setValue("business_unit_id", null);
+                  setValue("unit_id", null);
+                  setValue("subunit_id", null);
+                  setValue("location_id", null);
+                }
+                return value;
+              }}
+            />
+
             {/* OLD Departments */}
             <CustomAutoComplete
               autoComplete
               name="department_id"
               control={control}
+              disabled
               options={departmentData}
               onOpen={() =>
                 isDepartmentSuccess ? null : (departmentTrigger(), companyTrigger(), businessUnitTrigger())
@@ -985,24 +1048,24 @@ const AddFa = (props) => {
                   helperText={errors?.department_id?.message}
                 />
               )}
-              onChange={(_, value) => {
-                const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
-                const businessUnitID = businessUnitData?.find(
-                  (item) => item.sync_id === value.business_unit.business_unit_sync_id
-                );
+              // onChange={(_, value) => {
+              //   const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
+              //   const businessUnitID = businessUnitData?.find(
+              //     (item) => item.sync_id === value.business_unit.business_unit_sync_id
+              //   );
 
-                if (value) {
-                  setValue("company_id", companyID);
-                  setValue("business_unit_id", businessUnitID);
-                } else {
-                  setValue("company_id", null);
-                  setValue("business_unit_id", null);
-                }
-                setValue("unit_id", null);
-                setValue("subunit_id", null);
-                setValue("location_id", null);
-                return value;
-              }}
+              //   if (value) {
+              //     setValue("company_id", companyID);
+              //     setValue("business_unit_id", businessUnitID);
+              //   } else {
+              //     setValue("company_id", null);
+              //     setValue("business_unit_id", null);
+              //   }
+              //   setValue("unit_id", null);
+              //   setValue("subunit_id", null);
+              //   setValue("location_id", null);
+              //   return value;
+              // }}
             />
 
             <CustomAutoComplete
@@ -1053,6 +1116,7 @@ const AddFa = (props) => {
               autoComplete
               name="unit_id"
               control={control}
+              disabled
               options={
                 departmentData?.filter((obj) => {
                   return obj?.id === watch("department_id")?.id;
@@ -1072,17 +1136,18 @@ const AddFa = (props) => {
                   helperText={errors?.unit_id?.message}
                 />
               )}
-              onChange={(_, value) => {
-                setValue("subunit_id", null);
-                setValue("location_id", null);
-                return value;
-              }}
+              // onChange={(_, value) => {
+              //   setValue("subunit_id", null);
+              //   setValue("location_id", null);
+              //   return value;
+              // }}
             />
 
             <CustomAutoComplete
               autoComplete
               name="subunit_id"
               control={control}
+              disabled
               options={
                 unitData?.filter((obj) => {
                   return obj?.id === watch("unit_id")?.id;
@@ -1107,6 +1172,7 @@ const AddFa = (props) => {
               autoComplete
               name="location_id"
               control={control}
+              disabled
               options={locationData?.filter((item) => {
                 return item.subunit.some((subunit) => {
                   return subunit?.id === watch("subunit_id")?.id;
