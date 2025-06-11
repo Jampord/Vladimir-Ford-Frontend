@@ -98,7 +98,7 @@ const Confirmation = (props) => {
         dispatch(closeConfirm());
       }
     } catch (error) {
-      console.log(error?.errors?.remarks[0]);
+      console.log(error);
     }
   };
 
