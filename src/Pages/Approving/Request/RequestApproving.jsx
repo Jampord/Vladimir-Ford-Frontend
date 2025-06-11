@@ -20,7 +20,7 @@ const RequestApproving = () => {
   useEffect(() => {
     // console.log("refetched data");
     refetch();
-  }, [notifData]);
+  }, []);
 
   const handleChange = (event, newValue) => {
     permissions.includes("final-approving")

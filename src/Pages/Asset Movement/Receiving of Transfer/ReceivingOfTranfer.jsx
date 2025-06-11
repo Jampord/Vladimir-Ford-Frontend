@@ -15,7 +15,7 @@ const ReceivingOfTransfer = () => {
 
   useEffect(() => {
     refetch();
-  }, [notifData, handleChange]);
+  }, [notifData]);
 
   return (
     <Box className="mcontainer">
