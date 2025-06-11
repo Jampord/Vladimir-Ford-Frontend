@@ -434,9 +434,21 @@ const ReleasingTable = (props) => {
                                 <Typography fontSize={14} fontWeight={600}>
                                   {data.asset_description}
                                 </Typography>
-                                <Typography fontSize={12} color="secondary.light">
-                                  {data.asset_specification}
-                                </Typography>
+
+                                <Tooltip title={data.asset_specification} placement="bottom-start" arrow>
+                                  <Typography
+                                    fontSize={12}
+                                    fontWeight={400}
+                                    width="350px"
+                                    overflow="hidden"
+                                    textOverflow="ellipsis"
+                                    color="text.light"
+                                    noWrap
+                                  >
+                                    {data.asset_specification}
+                                  </Typography>
+                                </Tooltip>
+
                                 <Typography fontSize={12} fontWeight={600} color="primary.main">
                                   {data.type_of_request?.type_of_request_name.toUpperCase()}
                                 </Typography>
@@ -456,6 +468,9 @@ const ReleasingTable = (props) => {
                               </TableCell>
 
                               <TableCell onClick={() => handleViewData(data)} className="tbl-cell">
+                                <Typography fontSize={10} color="gray">
+                                  ({data?.one_charging?.code}) - {data?.one_charging?.name}
+                                </Typography>
                                 <Typography fontSize={10} color="gray">
                                   ({data.company?.company_code}) - {data.company?.company_name}
                                 </Typography>
