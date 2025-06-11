@@ -62,8 +62,10 @@ import AttachmentError from "../../../Img/SVG/AttachmentError.svg";
 import Webcam from "react-webcam";
 import WebCamSVG from "../../../Img/SVG/WebCam.svg";
 import uploadSVG from "../../../Img/SVG/upload.svg";
+import { useLazyGetOneRDFChargingAllApiQuery } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
 
 const schema = yup.object().shape({
+  one_charging_id: yup.object().required().label("One Charging").typeError("One Charging is a required field"),
   department_id: yup.object().required().label("Department").typeError("Department is a required field"),
   company_id: yup.object().required().label("Company").typeError("Company is a required field"),
   business_unit_id: yup.object().required().label("Business Unit").typeError("Business Unit is a required field"),
@@ -113,7 +115,7 @@ const schemaSave = yup.object().shape({
 const AddReleasingInfo = (props) => {
   const { data, refetch, warehouseNumber, hideWN, commonData, personalData, selectedItems } = props;
   // console.log("data", data);
-  // console.log("selectedItems", selectedItems);
+  console.log("selectedItems", selectedItems);
   const userData = JSON.parse(localStorage.getItem("user"));
   // console.log("userData", userData);
   const [signature, setSignature] = useState();
@@ -129,7 +131,7 @@ const AddReleasingInfo = (props) => {
   const [webcamErrorAuthorization, setWebcamErrorAuthorization] = useState(false);
 
   // console.log("file", file);
-  console.log("fileAuthorization", fileAuthorization);
+  // console.log("fileAuthorization", fileAuthorization);
   // console.log("capturedImage", capturedImage);
 
   const signatureRef = useRef();
@@ -159,6 +161,7 @@ const AddReleasingInfo = (props) => {
     resolver: yupResolver(currentSchema),
     defaultValues: {
       warehouse_number_id: warehouseNumber?.warehouse_number_id,
+      one_charging_id: selectedItems?.one_charging || null,
       department_id: selectedItems?.department || null,
       company_id: selectedItems?.company || null,
       business_unit_id: selectedItems?.business_unit || null,
@@ -176,6 +179,17 @@ const AddReleasingInfo = (props) => {
       authorization_memo_img: null,
     },
   });
+
+  const [
+    oneChargingTrigger,
+    {
+      data: oneChargingData = [],
+      isLoading: isOneChargingLoading,
+      isSuccess: isOneChargingSuccess,
+      isError: isOneChargingError,
+      refetch: isOneChargingRefetch,
+    },
+  ] = useLazyGetOneRDFChargingAllApiQuery();
 
   const [
     companyTrigger,
@@ -402,17 +416,18 @@ const AddReleasingInfo = (props) => {
       ...formData,
       warehouse_number_id: warehouseNumberData,
       // department_id: handleSaveValidation() ? null : formData?.department_id?.id?.toString(),
-      department_id: formData?.department_id?.id?.toString(),
+      one_charging_id: formData?.one_charging_id?.id?.toString(),
+      department_id: formData?.department_id?.department_id?.toString(),
       // company_id: handleSaveValidation() ? null : formData.company_id?.id?.toString(),
-      company_id: formData.company_id?.id?.toString(),
+      company_id: formData.company_id?.company_id?.toString(),
       // business_unit_id: handleSaveValidation() ? null : formData.business_unit_id?.id?.toString(),
-      business_unit_id: formData.business_unit_id?.id?.toString(),
+      business_unit_id: formData.business_unit_id?.business_unit_id?.toString(),
       // unit_id: handleSaveValidation() ? null : formData.unit_id?.id?.toString(),
-      unit_id: formData.unit_id?.id?.toString(),
+      unit_id: formData.unit_id?.unit_id?.toString(),
       // subunit_id: handleSaveValidation() ? null : formData.subunit_id?.id?.toString(),
-      subunit_id: formData.subunit_id?.id?.toString(),
+      subunit_id: formData.subunit_id?.subunit_id?.toString(),
       // location_id: handleSaveValidation() ? null : formData?.location_id?.id?.toString(),
-      location_id: formData?.location_id?.id?.toString(),
+      location_id: formData?.location_id?.location_id?.toString(),
       // account_title_id: formData?.account_title_id.id?.toString(),
       accountable: formData?.accountable?.general_info?.full_id_number_full_name?.toString(),
       received_by: formData?.received_by?.general_info?.full_id_number_full_name?.toString(),
@@ -422,7 +437,7 @@ const AddReleasingInfo = (props) => {
       authorization_memo_img: authorizationLetterImgBase64,
     };
 
-    // console.log("newFormData", newFormData);
+    console.log("newFormData", newFormData);
 
     dispatch(
       openConfirm({
@@ -706,6 +721,7 @@ const AddReleasingInfo = (props) => {
   // console.log("location", watch("location_id"));
 
   const areAllCOASame = (assets) => {
+    console.log("assets", assets);
     if (assets) {
       if (assets?.length === 0) return true; // No assets to compare
 
@@ -719,12 +735,12 @@ const AddReleasingInfo = (props) => {
       if (watch("department_id")?.department_name !== firstDepartment) {
         return false; // Found a different department
       }
-      if (watch("company_id")?.company_name !== firstCompany) {
-        return false; // Found a different business unit
-      }
-      if (watch("business_unit_id")?.business_unit_name !== firstBusinessUnit) {
-        return false; // Found a different company
-      }
+      // if (watch("company_id")?.company_name !== firstCompany) {
+      //   return false; // Found a different business unit
+      // }
+      // if (watch("business_unit_id")?.business_unit_name !== firstBusinessUnit) {
+      //   return false; // Found a different company
+      // }
       // if (watch("unit_id")?.unit_name !== firstUnit) {
       //   return false; // Found a different unit
       // }
@@ -1042,12 +1058,53 @@ const AddReleasingInfo = (props) => {
           <CustomAutoComplete
             autoComplete
             control={control}
+            name="one_charging_id"
+            options={oneChargingData || []}
+            onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
+            loading={isOneChargingLoading}
+            size="small"
+            getOptionLabel={(option) => option.code + " - " + option.name}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderInput={(params) => (
+              <TextField
+                color="secondary"
+                {...params}
+                label="One RDF Charging"
+                error={!!errors?.one_charging_id}
+                helperText={errors?.one_charging_id?.message}
+              />
+            )}
+            onChange={(_, value) => {
+              console.log("value", value);
+
+              if (value) {
+                setValue("department_id", value);
+                setValue("company_id", value);
+                setValue("business_unit_id", value);
+                setValue("unit_id", value);
+                setValue("subunit_id", value);
+                setValue("location_id", value);
+              } else {
+                setValue("department_id", null);
+                setValue("company_id", null);
+                setValue("business_unit_id", null);
+                setValue("unit_id", null);
+                setValue("subunit_id", null);
+                setValue("location_id", null);
+              }
+              return value;
+            }}
+          />
+
+          <CustomAutoComplete
+            autoComplete
+            control={control}
             name="department_id"
             options={departmentData}
             onOpen={() => (isDepartmentSuccess ? null : (departmentTrigger(), companyTrigger(), businessUnitTrigger()))}
             loading={isDepartmentLoading}
             // disabled={handleSaveValidation()}
-            // disabled
+            disabled
             disableClearable
             size="small"
             getOptionLabel={(option) => option.department_code + " - " + option.department_name}
@@ -1061,24 +1118,24 @@ const AddReleasingInfo = (props) => {
                 helperText={errors?.department_id?.message}
               />
             )}
-            onChange={(_, value) => {
-              const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
-              const businessUnitID = businessUnitData?.find(
-                (item) => item.sync_id === value.business_unit.business_unit_sync_id
-              );
+            // onChange={(_, value) => {
+            //   const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
+            //   const businessUnitID = businessUnitData?.find(
+            //     (item) => item.sync_id === value.business_unit.business_unit_sync_id
+            //   );
 
-              if (value) {
-                setValue("company_id", companyID);
-                setValue("business_unit_id", businessUnitID);
-              } else {
-                setValue("company_id", null);
-                setValue("business_unit_id", null);
-              }
-              setValue("unit_id", null);
-              setValue("subunit_id", null);
-              setValue("location_id", null);
-              return value;
-            }}
+            //   if (value) {
+            //     setValue("company_id", companyID);
+            //     setValue("business_unit_id", businessUnitID);
+            //   } else {
+            //     setValue("company_id", null);
+            //     setValue("business_unit_id", null);
+            //   }
+            //   setValue("unit_id", null);
+            //   setValue("subunit_id", null);
+            //   setValue("location_id", null);
+            //   return value;
+            // }}
           />
 
           <CustomAutoComplete
@@ -1132,7 +1189,7 @@ const AddReleasingInfo = (props) => {
             onOpen={() => (isUnitSuccess ? null : (unitTrigger(), subunitTrigger(), locationTrigger()))}
             loading={isUnitLoading}
             // disabled={handleSaveValidation()}
-            // disabled
+            disabled
             disableClearable
             size="small"
             getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
@@ -1146,11 +1203,11 @@ const AddReleasingInfo = (props) => {
                 helperText={errors?.unit_id?.message}
               />
             )}
-            onChange={(_, value) => {
-              setValue("subunit_id", null);
-              setValue("location_id", null);
-              return value;
-            }}
+            // onChange={(_, value) => {
+            //   setValue("subunit_id", null);
+            //   setValue("location_id", null);
+            //   return value;
+            // }}
           />
 
           <CustomAutoComplete
@@ -1160,7 +1217,7 @@ const AddReleasingInfo = (props) => {
             options={unitData?.filter((obj) => obj?.id === watch("unit_id")?.id)[0]?.subunit || []}
             loading={isSubUnitLoading}
             // disabled={handleSaveValidation()}
-            // disabled
+            disabled
             disableClearable
             size="small"
             getOptionLabel={(option) => option.subunit_code + " - " + option.subunit_name}
@@ -1187,7 +1244,7 @@ const AddReleasingInfo = (props) => {
             })}
             loading={isLocationLoading}
             // disabled={handleSaveValidation()}
-            // disabled
+            disabled
             disableClearable
             size="small"
             getOptionLabel={(option) => option.location_code + " - " + option.location_name}
