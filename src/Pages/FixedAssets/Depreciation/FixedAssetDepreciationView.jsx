@@ -497,6 +497,13 @@ const FixedAssetDepreciationView = (props) => {
 
                   <AccordionDetails>
                     <Box className="tableCard__properties">
+                      One RDF:
+                      <Typography className="tableCard__info" fontSize="14px">
+                        {`${dataApi?.data?.one_charging?.code} - ${dataApi?.data?.one_charging?.name}`}
+                      </Typography>
+                    </Box>
+
+                    <Box className="tableCard__properties">
                       Company:
                       <Typography className="tableCard__info" fontSize="14px">
                         {`${dataApi?.data?.company.company_code} - ${dataApi?.data?.company.company_name}`}
