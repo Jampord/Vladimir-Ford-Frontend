@@ -17,6 +17,7 @@ import {
   Box,
   Chip,
   Dialog,
+  Grow,
   IconButton,
   Stack,
   Table,
@@ -35,19 +36,22 @@ import {
   useLazyGetNextRequestQuery,
   usePatchApprovalStatusApiMutation,
 } from "../../../Redux/Query/Approving/Approval";
-import { openDrawer } from "../../../Redux/StateManagement/booleanStateSlice";
+import { closeDialog, openDialog, openDrawer } from "../../../Redux/StateManagement/booleanStateSlice";
 import { useNavigate } from "react-router-dom";
 
 import { notificationApi } from "../../../Redux/Query/Notification";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
+import RequestTimeline from "../../Asset Requisition/RequestTimeline";
 
 const PendingRequest = (props) => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("For Approval");
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
+  const [transactionIdData, setTransactionIdData] = useState();
 
   const drawer = useSelector((state) => state.booleanState.drawer);
+  const dialog = useSelector((state) => state.booleanState.dialog);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -260,6 +264,11 @@ const PendingRequest = (props) => {
     });
   };
 
+  const handleViewTimeline = (data) => {
+    dispatch(openDialog());
+    setTransactionIdData(data);
+  };
+
   return (
     <Stack className="category_height">
       {approvalLoading && <MasterlistSkeleton category={true} onAdd={true} />}
@@ -370,15 +379,12 @@ const PendingRequest = (props) => {
                             }}
                           >
                             <TableCell className="tbl-cell-category tr-cen-pad45">{data.id}</TableCell>
-
                             <TableCell className="tbl-cell-category ">
                               {data.asset_request?.transaction_number}
                             </TableCell>
-
                             <TableCell className="tbl-cell-category ">
                               {data.asset_request?.acquisition_details}
                             </TableCell>
-
                             <TableCell className="tbl-cell-category">
                               <Typography fontSize={14} fontWeight={600} color={"secondary"} noWrap>
                                 {data.requester?.employee_id}
@@ -387,7 +393,6 @@ const PendingRequest = (props) => {
                                 {data.requester?.firstname}
                               </Typography>
                             </TableCell>
-
                             {/* <TableCell className="tbl-cell-category">
                                 <Typography
                                   fontSize={14}
@@ -401,17 +406,15 @@ const PendingRequest = (props) => {
                                   {data.approver?.firstname}
                                 </Typography>
                               </TableCell> */}
-
                             <TableCell className="tbl-cell-category ">{data.number_of_item}</TableCell>
-
                             <TableCell className="tbl-cell-category text-center">
                               <IconButton onClick={() => handleViewRequisition(data)}>
                                 <Visibility color="secondary" />
                               </IconButton>
                             </TableCell>
-
                             <TableCell className="tbl-cell-category text-center capitalized">
                               <Chip
+                                onClick={() => handleViewTimeline(data)}
                                 size="small"
                                 variant="contained"
                                 sx={{
@@ -419,25 +422,23 @@ const PendingRequest = (props) => {
                                   color: "#c59e00",
                                   fontSize: "0.7rem",
                                   px: 1,
+                                  "&:hover": {
+                                    background: "#DBD2AA",
+                                  },
                                 }}
                                 label="PENDING"
                               />
                             </TableCell>
-
-                            <TableCell className="tbl-cell-category tr-cen-pad45">
+                            <TableCell
+                              className="tbl-cell-category tr-cen-pad45"
+                              sx={{
+                                "&:hover": {
+                                  backgroundColor: "#f5f5f5",
+                                },
+                              }}
+                            >
                               {Moment(data.asset_request?.date_requested).format("MMM DD, YYYY")}
                             </TableCell>
-
-                            {/* <TableCell className="tbl-cell-category text-center">
-                              <ActionMenu
-                                status={status}
-                                data={data}
-                                showApprover
-                                onApprovalApproveHandler={onApprovalApproveHandler}
-                                onApprovalReturnHandler={onApprovalReturnHandler}
-                                hideArchive
-                              />
-                            </TableCell> */}
                           </TableRow>
                         ))}
                     </>
@@ -457,6 +458,15 @@ const PendingRequest = (props) => {
           />
         </Box>
       )}
+
+      <Dialog
+        open={dialog}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog())}
+        PaperProps={{ sx: { borderRadius: "10px", maxWidth: "700px" } }}
+      >
+        <RequestTimeline data={transactionIdData?.asset_request} />
+      </Dialog>
     </Stack>
   );
 };
