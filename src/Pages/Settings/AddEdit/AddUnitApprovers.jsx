@@ -22,6 +22,7 @@ import {
   Zoom,
   Grow,
   Slide,
+  useMediaQuery,
 } from "@mui/material";
 
 import { closeDrawer } from "../../../Redux/StateManagement/booleanStateSlice";
@@ -36,10 +37,12 @@ import {
 } from "../../../Redux/Query/Settings/UnitApprovers";
 import { useGetSubUnitAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/SubUnit";
 import { useGetUnitAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Unit";
+import { useLazyGetOneRDFChargingAllApiQuery } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
 
 const schema = yup.object().shape({
   id: yup.string(),
 
+  one_charging_id: yup.object().required().typeError("One RDF Charging is required").label("One RDF Charging"),
   unit_id: yup.object().required().typeError("Unit is required").label("Unit"),
   subunit_id: yup.object().required().typeError("Sub Unit is required").label("Sub Unit"),
 
@@ -51,11 +54,23 @@ const AddUnitApprovers = (props) => {
   const [selectedApprovers, setSelectedApprovers] = useState(null);
   const [checked, setChecked] = useState(true);
   const dispatch = useDispatch();
+  const isSmallScreen = useMediaQuery("(max-width:1200px)");
 
   const [
     postUnitApprovers,
     { data: postData, isLoading: isPostLoading, isSuccess: isPostSuccess, isError: isPostError, error: postError },
   ] = usePostUnitApproversApiMutation();
+
+  const [
+    oneChargingTrigger,
+    {
+      data: oneChargingData = [],
+      isLoading: isOneChargingLoading,
+      isSuccess: isOneChargingSuccess,
+      isError: isOneChargingError,
+      refetch: isOneChargingRefetch,
+    },
+  ] = useLazyGetOneRDFChargingAllApiQuery();
 
   const [
     updateApproverSettings,
@@ -110,8 +125,13 @@ const AddUnitApprovers = (props) => {
     resolver: yupResolver(schema),
     defaultValues: {
       id: "",
+      one_charging_id: null,
+      department_id: null,
+      company_id: null,
+      business_unit_id: null,
       unit_id: null,
       subunit_id: null,
+      location_id: null,
       approver_id: [],
     },
   });
@@ -156,9 +176,15 @@ const AddUnitApprovers = (props) => {
   }, [isPostSuccess, isUpdateSuccess]);
 
   useEffect(() => {
+    console.log("data", data);
     if (data.status) {
+      setValue("one_charging_id", data?.one_charging);
+      setValue("department_id", data?.one_charging);
+      setValue("company_id", data?.one_charging);
+      setValue("business_unit_id", data?.one_charging);
       setValue("unit_id", data.unit);
       setValue("subunit_id", data.subunit);
+      setValue("location_id", data?.one_charging);
       setValue(
         "approver_id",
         data.approvers?.map((item) => {
@@ -191,10 +217,14 @@ const AddUnitApprovers = (props) => {
   };
 
   const onSubmitHandler = (formData) => {
+    console.log("formData", formData);
     const newFormData = {
-      subunit_id: formData.subunit_id?.id,
+      one_charging_id: formData.one_charging_id?.id,
+      subunit_id: formData.one_charging_id?.subunit_id,
       approver_id: formData.approver_id?.map((item) => item?.id),
     };
+
+    console.log("newFormData", newFormData);
 
     if (data.status) {
       updateApproverSettings(newFormData);
@@ -218,7 +248,7 @@ const AddUnitApprovers = (props) => {
   });
 
   return (
-    <Box className="add-masterlist" width="550px">
+    <Box className="add-masterlist" width="100%" overflow="auto">
       <Typography
         color="secondary.main"
         sx={{
@@ -237,212 +267,368 @@ const AddUnitApprovers = (props) => {
       <Box component="form" onSubmit={handleSubmit(onSubmitHandler)} className="add-masterlist__content" gap={1.5}>
         <Divider />
 
-        <CustomAutoComplete
-          autoComplete
-          name="unit_id"
-          control={control}
-          options={unitData}
-          loading={isUnitLoading}
-          size="small"
-          disabled={data?.action === "view" || data?.action === "update"}
-          getOptionLabel={(option) => `${option.unit_code} - ${option.unit_name}`}
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-          renderInput={(params) => (
-            <TextField
-              color="secondary"
-              {...params}
-              label="Unit"
-              error={!!errors?.unit_id?.message}
-              helperText={errors?.unit_id?.message}
-            />
-          )}
-          fullWidth
-          onChange={(_, value) => {
-            setValue("subunit_id", null);
-            return value;
-          }}
-        />
-
-        <CustomAutoComplete
-          autoComplete
-          name="subunit_id"
-          control={control}
-          options={subUnitData?.filter((item) => item?.unit?.id === watch("unit_id")?.id)}
-          loading={isSubUnitLoading}
-          size="small"
-          disabled={data?.action === "view" || data?.action === "update"}
-          getOptionLabel={(option) => `${option.subunit_code} - ${option.subunit_name}`}
-          isOptionEqualToValue={(option, value) => option.id === value.id}
-          renderInput={(params) => (
-            <TextField
-              color="secondary"
-              {...params}
-              label="Subunit"
-              error={!!errors?.subunit_id}
-              helperText={errors?.subunit_id?.message}
-            />
-          )}
-        />
-
-        <Stack
-          sx={{
-            outline: "1px solid lightgray",
-            borderRadius: "10px",
-            p: 2,
-          }}
-        >
-          <Stack flexDirection="row" gap={2} width="100%" alignItems="flex-start">
-            <Autocomplete
-              value={selectedApprovers}
-              loading={isApproverLoading}
-              disabled={data?.action === "view"}
+        <Stack flexDirection={isSmallScreen ? "column" : "row"} gap={2} width="100%">
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              gap: 1,
+              width: isSmallScreen ? "100%" : "70%",
+            }}
+          >
+            <CustomAutoComplete
+              autoComplete
+              control={control}
+              name="one_charging_id"
+              options={oneChargingData || []}
+              onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
+              loading={isOneChargingLoading}
               size="small"
-              fullWidth
-              filterOptions={filterOptions}
-              getOptionDisabled={(option) => {
-                return (
-                  option?.approver?.employee_id === watch("subunit_id")?.employee_id ||
-                  watch("approver_id").some((data) => data?.id === option.id)
-                );
-              }}
-              options={
-                approverData
-                //   approverData?.filter(
-                //   (item) => item?.subunit?.id === watch("subunit_id")?.id
-                // )
-              }
-              getOptionLabel={(option) =>
-                `(${option?.approver?.employee_id}) - ${option?.approver?.firstname} ${option?.approver?.lastname}`
-              }
-              isOptionEqualToValue={(option, value) => {
-                return option?.id === value?.id;
-              }}
+              getOptionLabel={(option) => option.code + " - " + option.name}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
               renderInput={(params) => (
                 <TextField
-                  {...params}
-                  label="Approver"
                   color="secondary"
-                  error={!!errors?.approver_id?.message}
-                  helperText={errors?.approver_id?.message}
-                  sx={{
-                    ".MuiInputBase-root": {
-                      borderRadius: "10px",
-                    },
-                  }}
+                  {...params}
+                  label="One RDF Charging"
+                  error={!!errors?.one_charging_id}
+                  helperText={errors?.one_charging_id?.message}
                 />
               )}
               onChange={(_, value) => {
-                // console.log(selectedApprovers);
-                setSelectedApprovers(() => value);
+                console.log("value", value);
+
+                if (value) {
+                  setValue("department_id", value);
+                  setValue("company_id", value);
+                  setValue("business_unit_id", value);
+                  setValue("unit_id", value);
+                  setValue("subunit_id", value);
+                  setValue("location_id", value);
+                } else {
+                  setValue("department_id", null);
+                  setValue("company_id", null);
+                  setValue("business_unit_id", null);
+                  setValue("unit_id", null);
+                  setValue("subunit_id", null);
+                  setValue("location_id", null);
+                }
+                return value;
               }}
             />
 
-            <Button
-              variant="contained"
+            {/* OLD Departments */}
+            <CustomAutoComplete
+              autoComplete
+              name="department_id"
+              control={control}
+              disabled
+              options={oneChargingData || []}
+              loading={isOneChargingLoading}
               size="small"
-              color="secondary"
-              onClick={() => {
-                addApproverHandler();
-              }}
-              disabled={selectedApprovers === null}
-              sx={{
-                width: "100px",
-                gap: 0.5,
-                alignSelf: "flex-start",
-                justifySelf: "center",
-                mt: "5px",
-              }}
-            >
-              <Add
-                sx={{
-                  fontSize: "18px",
-                  color: selectedApprovers === null ? "gray" : "primary.main",
+              getOptionLabel={(option) => option.department_code + " - " + option.department_name}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  color="secondary"
+                  {...params}
+                  label="Department"
+                  error={!!errors?.department_id}
+                  helperText={errors?.department_id?.message}
+                />
+              )}
+              // onChange={(_, value) => {
+              //   const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
+              //   const businessUnitID = businessUnitData?.find(
+              //     (item) => item.sync_id === value.business_unit.business_unit_sync_id
+              //   );
+
+              //   if (value) {
+              //     setValue("company_id", companyID);
+              //     setValue("business_unit_id", businessUnitID);
+              //   } else {
+              //     setValue("company_id", null);
+              //     setValue("business_unit_id", null);
+              //   }
+              //   setValue("unit_id", null);
+              //   setValue("subunit_id", null);
+              //   setValue("location_id", null);
+              //   return value;
+              // }}
+            />
+
+            <CustomAutoComplete
+              autoComplete
+              name="company_id"
+              control={control}
+              options={oneChargingData || []}
+              loading={isOneChargingLoading}
+              size="small"
+              getOptionLabel={(option) => option.company_code + " - " + option.company_name}
+              isOptionEqualToValue={(option, value) => option.company_id === value.company_id}
+              renderInput={(params) => (
+                <TextField
+                  color="secondary"
+                  {...params}
+                  label="Company"
+                  error={!!errors?.company_id}
+                  helperText={errors?.company_id?.message}
+                />
+              )}
+              disabled
+            />
+
+            <CustomAutoComplete
+              autoComplete
+              name="business_unit_id"
+              control={control}
+              options={oneChargingData || []}
+              loading={isOneChargingLoading}
+              size="small"
+              getOptionLabel={(option) => option.business_unit_code + " - " + option.business_unit_name}
+              isOptionEqualToValue={(option, value) => option.business_unit_id === value.business_unit_id}
+              renderInput={(params) => (
+                <TextField
+                  color="secondary"
+                  {...params}
+                  label="Business Unit"
+                  error={!!errors?.business_unit_id}
+                  helperText={errors?.business_unit_id?.message}
+                />
+              )}
+              disabled
+            />
+
+            <CustomAutoComplete
+              autoComplete
+              name="unit_id"
+              control={control}
+              disabled
+              options={oneChargingData || []}
+              loading={isOneChargingLoading}
+              size="small"
+              getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  color="secondary"
+                  {...params}
+                  label="Unit"
+                  error={!!errors?.unit_id}
+                  helperText={errors?.unit_id?.message}
+                />
+              )}
+              // onChange={(_, value) => {
+              //   setValue("subunit_id", null);
+              //   setValue("location_id", null);
+              //   return value;
+              // }}
+            />
+
+            <CustomAutoComplete
+              autoComplete
+              name="subunit_id"
+              control={control}
+              disabled
+              options={oneChargingData || []}
+              loading={isOneChargingLoading}
+              size="small"
+              getOptionLabel={(option) => option.subunit_code + " - " + option.subunit_name}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  color="secondary"
+                  {...params}
+                  label="Sub Unit"
+                  error={!!errors?.subunit_id}
+                  helperText={errors?.subunit_id?.message}
+                />
+              )}
+            />
+
+            <CustomAutoComplete
+              autoComplete
+              name="location_id"
+              control={control}
+              disabled
+              options={oneChargingData || []}
+              loading={isOneChargingLoading}
+              size="small"
+              getOptionLabel={(option) => option.location_code + " - " + option.location_name}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              renderInput={(params) => (
+                <TextField
+                  color="secondary"
+                  {...params}
+                  label="Location"
+                  error={!!errors?.location_id}
+                  helperText={errors?.location_id?.message}
+                />
+              )}
+            />
+          </Box>
+
+          <Stack
+            sx={{
+              outline: "1px solid lightgray",
+              borderRadius: "10px",
+              p: 2,
+              width: "100%",
+            }}
+          >
+            <Stack flexDirection="row" gap={2} width="100%" alignItems="flex-start">
+              <Autocomplete
+                value={selectedApprovers}
+                loading={isApproverLoading}
+                disabled={data?.action === "view"}
+                size="small"
+                fullWidth
+                filterOptions={filterOptions}
+                getOptionDisabled={(option) => {
+                  return (
+                    option?.approver?.employee_id === watch("subunit_id")?.employee_id ||
+                    watch("approver_id").some((data) => data?.id === option.id)
+                  );
+                }}
+                options={
+                  approverData
+                  //   approverData?.filter(
+                  //   (item) => item?.subunit?.id === watch("subunit_id")?.id
+                  // )
+                }
+                getOptionLabel={(option) =>
+                  `(${option?.approver?.employee_id}) - ${option?.approver?.firstname} ${option?.approver?.lastname}`
+                }
+                isOptionEqualToValue={(option, value) => {
+                  return option?.id === value?.id;
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Approver"
+                    color="secondary"
+                    error={!!errors?.approver_id?.message}
+                    helperText={errors?.approver_id?.message}
+                    sx={{
+                      ".MuiInputBase-root": {
+                        borderRadius: "10px",
+                      },
+                    }}
+                  />
+                )}
+                onChange={(_, value) => {
+                  // console.log(selectedApprovers);
+                  setSelectedApprovers(() => value);
                 }}
               />
-              <Typography sx={{ textTransform: "capitalized" }}>Add</Typography>
-            </Button>
-          </Stack>
 
-          <Stack>
-            <Box
-              maxHeight="330px"
-              overflow="overlay"
-              pr="3px"
-              mr="-3px"
-              sx={{ cursor: data?.action === "view" ? "" : "pointer" }}
-            >
-              <ReactSortable
-                disabled={data?.action === "view"}
-                group="groupName"
-                animation={200}
-                delayOnTouchStart={true}
-                delay={2}
-                list={watch("approver_id")}
-                setList={setListApprovers}
+              <Button
+                variant="contained"
+                size="small"
+                color="secondary"
+                onClick={() => {
+                  addApproverHandler();
+                }}
+                disabled={selectedApprovers === null}
+                sx={{
+                  width: "100px",
+                  gap: 0.5,
+                  alignSelf: "flex-start",
+                  justifySelf: "center",
+                  mt: "5px",
+                }}
               >
-                {watch("approver_id")?.map((approver, index) => (
-                  <Stack key={index} flexDirection="row" justifyContent="space-between" alignItems="center" my={1}>
-                    <Slide
-                      direction={data?.action === "view" ? "down" : "left"}
-                      in={checked}
-                      timeout={500}
-                      mountOnEnter
-                      unmountOnExit
-                    >
-                      <Stack
-                        flexDirection="row"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        p={1}
-                        sx={{
-                          backgroundColor: "background.light",
-                          width: "100%",
-                          borderRadius: "8px",
-                        }}
+                <Add
+                  sx={{
+                    fontSize: "18px",
+                    color: selectedApprovers === null ? "gray" : "primary.main",
+                  }}
+                />
+                <Typography sx={{ textTransform: "capitalized" }}>Add</Typography>
+              </Button>
+            </Stack>
+
+            <Stack>
+              <Box
+                maxHeight="330px"
+                overflow="overlay"
+                pr="3px"
+                mr="-3px"
+                sx={{ cursor: data?.action === "view" ? "" : "pointer" }}
+              >
+                <ReactSortable
+                  disabled={data?.action === "view"}
+                  group="groupName"
+                  animation={200}
+                  delayOnTouchStart={true}
+                  delay={2}
+                  list={watch("approver_id")}
+                  setList={setListApprovers}
+                >
+                  {watch("approver_id")?.map((approver, index) => (
+                    <Stack key={index} flexDirection="row" justifyContent="space-between" alignItems="center" my={1}>
+                      <Slide
+                        direction={data?.action === "view" ? "down" : "left"}
+                        in={checked}
+                        timeout={500}
+                        mountOnEnter
+                        unmountOnExit
                       >
-                        <Stack flexDirection="row" alignItems="center" gap={2.5}>
-                          <DragIndicator sx={{ color: "black.light" }} />
-                          <Avatar
-                            sx={{
-                              width: 24,
-                              height: 24,
-                              backgroundColor: data?.action === "view" ? "gray" : "primary.main",
-                              fontSize: "16px",
-                            }}
-                          >
-                            {index + 1}
-                          </Avatar>
-                          <Stack>
-                            <Typography>{`${approver?.approver?.firstname} ${approver?.approver?.lastname}`}</Typography>
-                            <Typography fontSize="12px" color="gray" mt="-2px">
-                              {approver?.approver?.employee_id}
-                            </Typography>
+                        <Stack
+                          flexDirection="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                          p={1}
+                          sx={{
+                            backgroundColor: "background.light",
+                            width: "100%",
+                            borderRadius: "8px",
+                          }}
+                        >
+                          <Stack flexDirection="row" alignItems="center" gap={2.5}>
+                            <DragIndicator sx={{ color: "black.light" }} />
+                            <Avatar
+                              sx={{
+                                width: 24,
+                                height: 24,
+                                backgroundColor: data?.action === "view" ? "gray" : "primary.main",
+                                fontSize: "16px",
+                              }}
+                            >
+                              {index + 1}
+                            </Avatar>
+                            <Stack>
+                              <Typography>{`${approver?.approver?.firstname} ${approver?.approver?.lastname}`}</Typography>
+                              <Typography fontSize="12px" color="gray" mt="-2px">
+                                {approver?.approver?.employee_id}
+                              </Typography>
+                            </Stack>
                           </Stack>
+                          {(!data.action === "view" || data.action === "update" || data.status === false) && (
+                            <Tooltip title="Remove" TransitionComponent={Zoom} arrow>
+                              <span>
+                                <IconButton
+                                  aria-label="Delete"
+                                  disabled={data?.action === "view"}
+                                  onClick={() => {
+                                    deleteApproverHandler(approver?.id);
+                                  }}
+                                >
+                                  <Close sx={{ fontSize: "18px" }} />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                          )}
                         </Stack>
-                        {(!data.action === "view" || data.action === "update" || data.status === false) && (
-                          <Tooltip title="Remove" TransitionComponent={Zoom} arrow>
-                            <span>
-                              <IconButton
-                                aria-label="Delete"
-                                disabled={data?.action === "view"}
-                                onClick={() => {
-                                  deleteApproverHandler(approver?.id);
-                                }}
-                              >
-                                <Close sx={{ fontSize: "18px" }} />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
-                        )}
-                      </Stack>
-                    </Slide>
-                  </Stack>
-                ))}
-              </ReactSortable>
-            </Box>
+                      </Slide>
+                    </Stack>
+                  ))}
+                </ReactSortable>
+              </Box>
+            </Stack>
           </Stack>
         </Stack>
-
         <Divider />
 
         <Box className="add-masterlist__buttons">
