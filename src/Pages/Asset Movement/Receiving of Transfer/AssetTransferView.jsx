@@ -352,6 +352,12 @@ const AssetTransferView = () => {
 
                   <AccordionDetails>
                     <Box className="tableCard__properties">
+                      One RDF Charging:
+                      <Typography className="tableCard__info" fontSize="14px">
+                        {`${dataApi?.one_charging?.code} - ${dataApi?.one_charging.name}`}
+                      </Typography>
+                    </Box>
+                    <Box className="tableCard__properties">
                       Company:
                       <Typography className="tableCard__info" fontSize="14px">
                         {`${dataApi?.company.company_code} - ${dataApi?.company.company_name}`}
@@ -386,12 +392,12 @@ const AssetTransferView = () => {
                       </Typography>
                     </Box>
 
-                    <Box className="tableCard__properties">
+                    {/* <Box className="tableCard__properties">
                       Account Title:
                       <Typography className="tableCard__info" fontSize="14px">
                         {`${dataApi?.account_title.account_title_code} - ${dataApi?.account_title.account_title_name}`}
                       </Typography>
-                    </Box>
+                    </Box> */}
                   </AccordionDetails>
                 </Accordion>
 
