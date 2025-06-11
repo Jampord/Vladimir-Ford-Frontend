@@ -381,8 +381,6 @@ const FixedAssetView = (props) => {
       can_update,
     } = props;
 
-    console.log({ props });
-
     setUpdateFixedAsset({
       status: true,
       id: id,
@@ -895,44 +893,69 @@ const FixedAssetView = (props) => {
 
                   <AccordionDetails>
                     <Box className="tableCard__properties">
+                      One RDF:
+                      <Typography className="tableCard__info" fontSize="14px">
+                        {`${dataApi?.data?.one_charging?.code} - ${dataApi?.data?.one_charging?.name}`}
+                      </Typography>
+                    </Box>
+
+                    <Box className="tableCard__properties">
                       Company:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {`${dataApi?.data?.company.company_code} - ${dataApi?.data?.company.company_name}`}
+                        {`${dataApi?.data?.one_charging?.company_code || dataApi?.data?.company.company_code} - ${
+                          dataApi?.data?.one_charging?.company_name || dataApi?.data?.company.company_name
+                        }`}
                       </Typography>
                     </Box>
 
                     <Box className="tableCard__properties">
                       Business Unit:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {`${dataApi?.data?.business_unit.business_unit_code} - ${dataApi?.data?.business_unit.business_unit_name}`}
+                        {`${
+                          dataApi?.data?.one_charging?.business_unit_code ||
+                          dataApi?.data?.business_unit.business_unit_code
+                        } - ${
+                          dataApi?.data?.one_charging?.business_unit_name ||
+                          dataApi?.data?.business_unit.business_unit_name
+                        }`}
                       </Typography>
                     </Box>
 
                     <Box className="tableCard__properties">
                       Department:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {`${dataApi?.data?.department.department_code} - ${dataApi?.data?.department.department_name}`}
+                        {`${
+                          dataApi?.data?.one_charging?.department_code || dataApi?.data?.department.department_code
+                        } - ${
+                          dataApi?.data?.one_charging?.department_name || dataApi?.data?.department.department_name
+                        }`}
                       </Typography>
                     </Box>
 
                     <Box className="tableCard__properties">
                       Unit:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {`${dataApi?.data?.unit.unit_code} - ${dataApi?.data?.unit.unit_name}`}
+                        {`${dataApi?.data?.one_charging?.unit_code || dataApi?.data?.unit.unit_code} - ${
+                          dataApi?.data?.one_charging?.unit_name || dataApi?.data?.unit.unit_name
+                        }`}
                       </Typography>
                     </Box>
 
                     <Box className="tableCard__properties">
                       Subunit:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {`${dataApi?.data?.subunit?.subunit_code} - ${dataApi?.data?.subunit?.subunit_name}`}
+                        {`${dataApi?.data?.one_charging?.subunit_code || dataApi?.data?.subunit?.subunit_code} - ${
+                          dataApi?.data?.one_charging?.subunit_name || dataApi?.data?.subunit?.subunit_name
+                        }`}
                       </Typography>
                     </Box>
 
                     <Box className="tableCard__properties">
                       Location:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {`${dataApi?.data?.location.location_code} - ${dataApi?.data?.location.location_name}`}
+                        {`${dataApi?.data?.one_charging?.location_code || dataApi?.data?.location.location_code} - ${
+                          dataApi?.data?.one_charging?.location_name || dataApi?.data?.location.location_name
+                        }`}
                       </Typography>
                     </Box>
 
