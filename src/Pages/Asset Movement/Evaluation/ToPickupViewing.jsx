@@ -93,32 +93,30 @@ const ToPickupViewing = () => {
         ),
 
         onConfirm: async () => {
-          //   const noNextData = (err) => {
-          //     if (err?.status === 404) {
-          //       navigate(`/asset-movement/evaluation`);
-          //     } else if (err?.status === 422) {
-          //       //   dispatch(
-          //       //     openToast({
-          //       //       // message: err.data.message,
-          //       //       message: err.data.errors?.detail,
-          //       //       duration: 5000,
-          //       //       variant: "error",
-          //       //     })
-          //       //   );
-          //       console.log("💣");
-          //       navigate(`/asset-movement/evaluation`);
-          //     } else if (err?.status !== 422) {
-          //       dispatch(
-          //         openToast({
-          //           message: "Something went wrong. Please try again.",
-          //           duration: 5000,
-          //           variant: "error",
-          //         })
-          //       );
+          const noNextData = (err) => {
+            if (err?.status === 404) {
+              navigate(`/asset-movement/evaluation`);
+            } else if (err?.status === 422) {
+              dispatch(
+                openToast({
+                  // message: err.data.message,
+                  message: err.data.errors?.detail,
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            } else if (err?.status !== 422) {
+              dispatch(
+                openToast({
+                  message: "Something went wrong. Please try again.",
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
 
-          //       navigate(`/asset-movement/evaluation`);
-          //     }
-          //   };
+              navigate(`/asset-movement/evaluation`);
+            }
+          };
 
           try {
             dispatch(onLoading());
@@ -200,6 +198,7 @@ const ToPickupViewing = () => {
                     fullWidth
                     multiline
                   />
+
                   <CustomTextField
                     control={control}
                     name="care_of"
