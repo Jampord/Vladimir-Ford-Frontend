@@ -82,6 +82,8 @@ const ViewPullout = () => {
   const [patchApprovalStatus, { isLoading: isPatchApprovalLoading }] = usePatchPulloutApprovalStatusApiMutation();
   const [getNextPullout, { data: nextData, isLoading: isNextPulloutLoading }] = useLazyGetNextPulloutRequestQuery();
 
+  const pulloutNumberData = pulloutData.at(0);
+
   const {
     handleSubmit,
     control,
@@ -96,12 +98,28 @@ const ViewPullout = () => {
     resolver: yupResolver(schema),
     defaultValues: {
       id: "",
-      description: "",
-      care_of: null,
-      remarks: "",
-      attachments: null,
+      description: pulloutNumberData?.description || "",
+      care_of: pulloutNumberData?.care_of || "",
+      remarks: pulloutNumberData?.remarks || "",
+      attachments: pulloutNumberData?.attachments || "",
 
-      assets: [{ id: null, fixed_asset_id: null, asset_accountable: "", created_at: null }],
+      assets: [
+        pulloutNumberData?.assets?.map((asset) => ({
+          id: asset.id,
+          fixed_asset_id: +asset.vladimir_tag_number + " - " + asset.asset_description,
+          asset_accountable: asset.accountable === "-" ? "Common" : asset.accountable,
+          created_at: asset.created_at || asset.acquisition_date,
+          company_id: asset.company?.company_name,
+          business_unit_id: asset.business_unit?.business_unit_name,
+          department_id: asset.department?.department_name,
+          unit_id: asset.unit?.unit_name,
+          sub_unit_id: asset.subunit?.subunit_name,
+          location_id: asset.location?.location_name,
+          accountability: asset?.new_accountability,
+          accountable: asset?.new_accountable,
+          receiver_id: asset?.receiver,
+        })),
+      ],
     },
   });
 
@@ -249,7 +267,7 @@ const ViewPullout = () => {
             dispatch(closeConfirm());
             const next = await getNextPullout().unwrap();
             console.log("next: ", next);
-            navigate(`/approving/pull-out/${next?.id}`, { state: next, replace: true });
+            navigate(`/approving/pull-out/${next?.pullout_number}`, { state: next, replace: true });
           } catch (err) {
             noNextData(err);
 
@@ -289,8 +307,12 @@ const ViewPullout = () => {
         onConfirm: async (data) => {
           const noNextData = (err) => {
             if (err?.status === 404) {
+              console.log(err);
+
               navigate(`/approving/pull-out`);
             } else if (err?.status === 422) {
+              console.log(err);
+
               // dispatch(
               //   openToast({
               //     // message: err.data.message,
@@ -301,6 +323,7 @@ const ViewPullout = () => {
               // );
               navigate(`/approving/pull-out`);
             } else if (err?.status !== 422) {
+              console.log(err);
               dispatch(
                 openToast({
                   message: "Something went wrong. Please try again.",
@@ -329,7 +352,7 @@ const ViewPullout = () => {
 
             dispatch(closeConfirm());
             const next = await getNextPullout().unwrap();
-            navigate(`/approving/pull-out/${next?.id}`, { state: next, view, replace: true });
+            navigate(`/approving/pull-out/${next?.pullout_number}`, { state: next, view, replace: true });
           } catch (err) {
             noNextData(err);
           }
@@ -372,7 +395,7 @@ const ViewPullout = () => {
         <Box className="request mcontainer__wrapper" p={2}>
           <Box>
             <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
-              TRANSACTION No. {transactionData && transactionData?.id}
+              TRANSACTION No. {pulloutNumberData?.id}
             </Typography>
 
             <Box id="requestForm" className="request__form">
@@ -431,6 +454,15 @@ const ViewPullout = () => {
                       />
                     )}
                   </Stack>
+                  <Box mt="-13px" ml="10px">
+                    {watch("attachments")
+                      ? watch("attachments").map((item, index) => (
+                          <Typography fontSize="12px" fontWeight="bold" color="gray" key={index}>
+                            {item.name}
+                          </Typography>
+                        ))
+                      : null}
+                  </Box>
                 </Box>
               </Stack>
             </Box>
@@ -442,9 +474,7 @@ const ViewPullout = () => {
               sx={{ height: transactionData?.approved ? "calc(100vh - 230px)" : "calc(100vh - 280px)", pt: 0 }}
             >
               <Table className="mcontainer__table " stickyHeader>
-                {" "}
                 <TableHead>
-                  {" "}
                   <TableRow
                     sx={{
                       "& > *": {
@@ -466,7 +496,6 @@ const ViewPullout = () => {
                     fields.map((item, index) => (
                       <TableRow key={item.id}>
                         <TableCell className="tbl-cell" align="center">
-                          {" "}
                           <Avatar
                             sx={{
                               width: 24,
