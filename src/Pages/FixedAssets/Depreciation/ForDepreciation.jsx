@@ -1,5 +1,8 @@
 import {
   Box,
+  Button,
+  Dialog,
+  Grow,
   Stack,
   Table,
   TableBody,
@@ -20,6 +23,10 @@ import CustomTablePagination from "../../../Components/Reusable/CustomTablePagin
 import { useNavigate } from "react-router-dom";
 import MasterlistSkeleton from "../../Skeleton/MasterlistSkeleton";
 import ErrorFetching from "../../ErrorFetching";
+import { IosShareRounded } from "@mui/icons-material";
+import { closeExport, openExport } from "../../../Redux/StateManagement/booleanStateSlice";
+import ExportFixedAssetDepreciation from "./ExportFixedAssetDepreciation";
+import { useDispatch, useSelector } from "react-redux";
 
 const ForDepreciation = () => {
   const [search, setSearch] = useState("");
@@ -28,6 +35,8 @@ const ForDepreciation = () => {
   const [page, setPage] = useState(1);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const exportFile = useSelector((state) => state.booleanState.exportFile);
 
   const perPageHandler = (e) => {
     setPage(1);
@@ -58,6 +67,10 @@ const ForDepreciation = () => {
     navigate(`/fixed-asset/depreciation/${data.vladimir_tag_number}`, {
       state: { ...data, status },
     });
+  };
+
+  const handleOpenExport = () => {
+    dispatch(openExport());
   };
 
   return (
@@ -262,17 +275,53 @@ const ForDepreciation = () => {
             </TableContainer>
           </Box>
 
-          <CustomTablePagination
-            total={fixedAssetData?.total}
-            success={fixedAssetSuccess}
-            current_page={fixedAssetData?.current_page}
-            per_page={fixedAssetData?.per_page}
-            onPageChange={pageHandler}
-            onRowsPerPageChange={perPageHandler}
-            removeShadow
-          />
+          <Box className="mcontainer__pagination-export">
+            <Button
+              className="mcontainer__export"
+              variant="outlined"
+              size="small"
+              color="text"
+              startIcon={<IosShareRounded color="primary" />}
+              // onClick={handleExport}
+              onClick={handleOpenExport}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                margin: "10px 20px",
+              }}
+            >
+              EXPORT
+            </Button>
+            <CustomTablePagination
+              total={fixedAssetData?.total}
+              success={fixedAssetSuccess}
+              current_page={fixedAssetData?.current_page}
+              per_page={fixedAssetData?.per_page}
+              onPageChange={pageHandler}
+              onRowsPerPageChange={perPageHandler}
+              removeShadow
+            />
+          </Box>
         </Box>
       )}
+
+      <Dialog
+        open={exportFile}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeExport())}
+        PaperProps={{
+          sx: {
+            borderRadius: "10px",
+            margin: "0",
+            maxWidth: "90%",
+            padding: "20px",
+            backgroundColor: "background.light",
+          },
+        }}
+      >
+        <ExportFixedAssetDepreciation />
+      </Dialog>
     </Stack>
   );
 };
