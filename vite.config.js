@@ -85,5 +85,6 @@ export default defineConfig({
     "process.env.FISTO_KEY_ADMIN": `"${process.env.FISTO_KEY_ADMIN}"`,
     "process.env.VLADIMIR_BASE_URL": `"${process.env.VLADIMIR_BASE_URL}"`,
     "process.env.GL_KEY": `"${process.env.GL_KEY}"`,
+    "process.env.ONE_RDF_BASE_URL": `"${process.env.ONE_RDF_BASE_URL}"`,
   },
 });
