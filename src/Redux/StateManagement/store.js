@@ -110,6 +110,7 @@ import { creditApi } from "../Query/Masterlist/YmirCoa/Credit";
 import { generalLedgerReportApi } from "../Query/Reports/GeneralLedgerReport";
 import { purchaseRequestReconApi } from "../Query/Reports/PurchaseRequestRecon";
 import { oneRDFApi } from "../Query/Masterlist/OneRDF/OneRDFCharging";
+import { oneRDFCoaApi } from "../Query/Masterlist/OneRDF/OneRDFCoa";
 
 export const store = configureStore({
   reducer: {
@@ -160,6 +161,7 @@ export const store = configureStore({
     [ymirPrApi.reducerPath]: ymirPrApi.reducer,
 
     [oneRDFApi.reducerPath]: oneRDFApi.reducer,
+    [oneRDFCoaApi.reducerPath]: oneRDFCoaApi.reducer,
     [companyApi.reducerPath]: companyApi.reducer,
     [businessUnitApi.reducerPath]: businessUnitApi.reducer,
     [departmentApi.reducerPath]: departmentApi.reducer,
@@ -259,6 +261,7 @@ export const store = configureStore({
 
       oneRDFApi.middleware,
       companyApi.middleware,
+      oneRDFCoaApi.middleware,
       businessUnitApi.middleware,
       departmentApi.middleware,
       unitApi.middleware,
@@ -311,6 +314,7 @@ export const store = configureStore({
       // Approval
       approvalApi.middleware,
       transferApprovalApi.middleware,
+      pulloutApprovalApi.middleware,
       evaluationApprovalApi.middleware,
 
       assetReceivingApi.middleware,
