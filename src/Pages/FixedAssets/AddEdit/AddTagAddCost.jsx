@@ -212,8 +212,8 @@ const AddTagAddCost = ({ data, resetHandler, tabValue }) => {
               //   ? null
               //   :
               tabValue === "2"
-                ? fixedAssetSmallToolsTrigger({ sub_unit_id: data[0]?.subunit?.id })
-                : fixedAssetSubunitTrigger({ sub_unit_id: data[0]?.subunit?.id })
+                ? fixedAssetSmallToolsTrigger({ one_charging_id: data[0]?.one_charging?.id })
+                : fixedAssetSubunitTrigger({ one_charging_id: data[0]?.one_charging?.id })
             }
             loading={tabValue === "2" ? fixedAssetSmallToolsApiLoading : fixedAssetSubunitApiLoading}
             size="small"
