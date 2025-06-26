@@ -37,13 +37,13 @@ export const fixedAssetApi = createApi({
     }),
 
     getFixedAssetSubunitAllApi: builder.query({
-      query: (params) => `fixed-asset?pagination=none&add_cost=1&sub_unit_id=${params.sub_unit_id}`,
+      query: (params) => `fixed-asset?pagination=none&add_cost=1&one_charging_id=${params.one_charging_id}`,
       transformResponse: (response) => response.data,
       providesTags: ["FixedAsset"],
     }),
 
     getFixedAssetSmallToolsAllApi: builder.query({
-      query: (params) => `/fixed-asset?pagination=none&small_tools=1&sub_unit_id=${params.sub_unit_id}`,
+      query: (params) => `/fixed-asset?pagination=none&small_tools=1&one_charging_id=${params.one_charging_id}`,
       transformResponse: (response) => response.data,
       providesTags: ["FixedAsset"],
     }),
@@ -152,6 +152,12 @@ export const fixedAssetApi = createApi({
       query: (params) => ({
         url: `/export-masterlist?search=${params.search}&startDate=${params.startDate}&endDate=${params.endDate}`,
         // providesTags: ["FixedAsset"]
+      }),
+    }),
+
+    getExportDepreciationApi: builder.query({
+      query: (params) => ({
+        url: `/export-masterlist?search=${params.search}&startDate=${params.startDate}&endDate=${params.endDate}&filter=${params.filter}`,
       }),
     }),
 
@@ -339,6 +345,7 @@ export const {
   usePatchFixedAssetDescriptionApiMutation,
   usePostImportApiMutation,
   useLazyGetExportApiQuery,
+  useLazyGetExportDepreciationApiQuery,
   usePostPrintApiMutation,
   usePutMemoPrintApiMutation,
   usePutSmallToolsPrintableApiMutation,
