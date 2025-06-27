@@ -37,6 +37,9 @@ export const oneRDFApi = createApi({
         if (params.status) {
           queryParams.push(`status=${params.status}`);
         }
+        if (params.user_id) {
+          queryParams.push(`user_id=${params.user_id}`);
+        }
 
         const queryString = queryParams.join("&");
         return `/one-charging?${queryString}`;
