@@ -320,7 +320,7 @@ const ForDepreciation = () => {
           },
         }}
       >
-        <ExportFixedAssetDepreciation />
+        <ExportFixedAssetDepreciation type={"for depreciation"} />
       </Dialog>
     </Stack>
   );
