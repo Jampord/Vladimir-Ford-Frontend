@@ -70,8 +70,8 @@ export const assetTransferApi = createApi({
     // }),
 
     deleteAssetTransferApi: builder.mutation({
-      query: ({ subunit_id }) => ({
-        url: `/asset-transfer-approver/${subunit_id}`,
+      query: ({ one_charging_id }) => ({
+        url: `/asset-transfer-approver/${one_charging_id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["AssetTransfer"],
