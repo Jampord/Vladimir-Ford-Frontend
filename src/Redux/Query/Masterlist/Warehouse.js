@@ -71,9 +71,9 @@ export const warehouseApi = createApi({
       invalidatesTags: ["Warehouse"],
     }),
 
-    putWarehouseDepartmentTaggingApi: builder.mutation({
+    putWarehouseOneChargingTaggingApi: builder.mutation({
       query: ({ id, ...data }) => ({
-        url: `/warehouse/department-tagging/${id}`,
+        url: `/warehouse/one-charging-tagging/${id}`,
         method: "PUT",
         body: data,
       }),
@@ -91,5 +91,5 @@ export const {
   usePostWarehouseApiMutation,
   useUpdateWarehouseApiMutation,
   usePutWarehouseLocationTaggingApiMutation,
-  usePutWarehouseDepartmentTaggingApiMutation,
+  usePutWarehouseOneChargingTaggingApiMutation,
 } = warehouseApi;
