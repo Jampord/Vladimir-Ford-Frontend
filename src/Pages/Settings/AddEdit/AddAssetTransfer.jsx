@@ -176,8 +176,8 @@ const AddAssetTransfer = (props) => {
       setValue("department_id", data?.one_charging);
       setValue("company_id", data?.one_charging);
       setValue("business_unit_id", data?.one_charging);
-      setValue("unit_id", data.unit);
-      setValue("subunit_id", data.subunit);
+      setValue("unit_id", data?.one_charging);
+      setValue("subunit_id", data?.one_charging);
       setValue("location_id", data?.one_charging);
       setValue(
         "approver_id",
@@ -214,6 +214,7 @@ const AddAssetTransfer = (props) => {
     console.log("formData", formData);
     const newFormData = {
       one_charging_id: formData.one_charging_id?.id,
+      unit_id: formData.one_charging_id?.unit_id,
       subunit_id: formData.one_charging_id?.subunit_id,
       approver_id: formData.approver_id?.map((item) => item?.id),
     };
