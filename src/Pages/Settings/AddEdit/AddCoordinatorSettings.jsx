@@ -47,11 +47,13 @@ import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { resetGetData } from "../../../Redux/StateManagement/actionMenuSlice";
 import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 import { onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
+import { useLazyGetOneRDFChargingAllApiQuery } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
 
 const schema = yup.object().shape({
   user_id: yup.object().required().label("Coordinator").typeError("Coordinator is required"),
   // handles: yup.array().of(
   //   yup.object().shape({
+  one_charging_id: yup.object().nullable(),
   company_id: yup.number().nullable(),
   business_unit_id: yup.number().nullable(),
   department_id: yup.number().nullable(),
@@ -68,7 +70,7 @@ const AddCoordinatorSettings = ({ data }) => {
   const open = Boolean(anchorEl);
 
   // console.log("handles", handles);
-  // console.log("data", data);
+  console.log("data", data);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -83,6 +85,17 @@ const AddCoordinatorSettings = ({ data }) => {
       refetch: isCoordinatorRefetch,
     },
   ] = useLazyGetCoordinatorAccountApiQuery();
+
+  const [
+    oneChargingTrigger,
+    {
+      data: oneChargingData = [],
+      isLoading: isOneChargingLoading,
+      isSuccess: isOneChargingSuccess,
+      isError: isOneChargingError,
+      refetch: isOneChargingRefetch,
+    },
+  ] = useLazyGetOneRDFChargingAllApiQuery();
 
   const [
     companyTrigger,
@@ -170,6 +183,7 @@ const AddCoordinatorSettings = ({ data }) => {
       user_id: null,
       // handles: [
       //   {
+      one_charging_id: null,
       company_id: null,
       business_unit_id: null,
       department_id: null,
@@ -205,16 +219,18 @@ const AddCoordinatorSettings = ({ data }) => {
 
   const addHandle = () => {
     const newHandle = {
-      company_id: watch(`company_id`)?.id,
-      business_unit_id: watch(`business_unit_id`).id,
-      department_id: watch(`department_id`).id,
-      unit_id: watch(`unit_id`).id,
-      subunit_id: watch(`subunit_id`).id,
-      location_id: watch(`location_id`).id,
+      one_charging_id: watch(`one_charging_id`)?.id,
+      company_id: watch(`company_id`)?.company_id,
+      business_unit_id: watch(`business_unit_id`).business_unit_id,
+      department_id: watch(`department_id`).department_id,
+      unit_id: watch(`unit_id`).unit_id,
+      subunit_id: watch(`subunit_id`).subunit_id,
+      location_id: watch(`location_id`).location_id,
     };
 
     setHandles((prevHandles) => [...prevHandles, newHandle]);
 
+    setValue("one_charging_id", null);
     setValue("department_id", null);
     setValue("company_id", null);
     setValue("business_unit_id", null);
@@ -365,15 +381,22 @@ const AddCoordinatorSettings = ({ data }) => {
 
   useEffect(() => {
     if (data) {
-      companyTrigger(), businessUnitTrigger(), departmentTrigger(), unitTrigger(), subunitTrigger(), locationTrigger();
+      companyTrigger(),
+        businessUnitTrigger(),
+        departmentTrigger(),
+        unitTrigger(),
+        subunitTrigger(),
+        locationTrigger(),
+        oneChargingTrigger({ pagination: "none" });
       setHandles(
         data.handles.map((handle) => ({
-          company_id: handle.company.id,
-          business_unit_id: handle.business_unit.id,
-          department_id: handle.department.id,
-          unit_id: handle.unit.id,
-          subunit_id: handle.subunit.id,
-          location_id: handle.location.id,
+          one_charging_id: handle?.one_charging?.id,
+          company_id: handle?.one_charging?.company_id,
+          business_unit_id: handle?.one_charging?.business_unit_id,
+          department_id: handle?.one_charging?.department_id,
+          unit_id: handle?.one_charging?.unit_id,
+          subunit_id: handle?.one_charging?.subunit_id,
+          location_id: handle?.one_charging?.location_id,
         }))
       );
       setValue("user_id", data.user);
@@ -436,12 +459,54 @@ const AddCoordinatorSettings = ({ data }) => {
               <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
                 CHART OF ACCOUNT
               </Typography>
+              <CustomAutoComplete
+                autoComplete
+                control={control}
+                name="one_charging_id"
+                options={oneChargingData || []}
+                onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
+                loading={isOneChargingLoading}
+                size="small"
+                getOptionLabel={(option) => option.code + " - " + option.name}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                  <TextField
+                    color="secondary"
+                    {...params}
+                    label="One RDF Charging"
+                    error={!!errors?.one_charging_id}
+                    helperText={errors?.one_charging_id?.message}
+                  />
+                )}
+                onChange={(_, value) => {
+                  console.log("value", value);
+
+                  if (value) {
+                    setValue("department_id", value);
+                    setValue("company_id", value);
+                    setValue("business_unit_id", value);
+                    setValue("unit_id", value);
+                    setValue("subunit_id", value);
+                    setValue("location_id", value);
+                  } else {
+                    setValue("department_id", null);
+                    setValue("company_id", null);
+                    setValue("business_unit_id", null);
+                    setValue("unit_id", null);
+                    setValue("subunit_id", null);
+                    setValue("location_id", null);
+                  }
+
+                  return value;
+                }}
+              />
 
               <CustomAutoComplete
                 autoComplete
                 control={control}
                 name={`department_id`}
                 // disabled={edit ? false : transactionData?.view}
+                disabled
                 options={departmentData}
                 onOpen={() =>
                   isDepartmentSuccess ? null : (departmentTrigger(), companyTrigger(), businessUnitTrigger())
@@ -460,24 +525,24 @@ const AddCoordinatorSettings = ({ data }) => {
                     // helperText={errors?.department_id?.message}
                   />
                 )}
-                onChange={(_, value) => {
-                  if (value) {
-                    const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
-                    const businessUnitID = businessUnitData?.find(
-                      (item) => item.sync_id === value.business_unit.business_unit_sync_id
-                    );
-                    setValue(`company_id`, companyID);
-                    setValue(`business_unit_id`, businessUnitID);
-                  } else if (value === null) {
-                    setValue(`company_id`, null);
-                    setValue(`business_unit_id`, null);
-                  }
-                  setValue(`unit_id`, null);
-                  setValue(`subunit_id`, null);
-                  setValue(`location_id`, null);
+                // onChange={(_, value) => {
+                //   if (value) {
+                //     const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
+                //     const businessUnitID = businessUnitData?.find(
+                //       (item) => item.sync_id === value.business_unit.business_unit_sync_id
+                //     );
+                //     setValue(`company_id`, companyID);
+                //     setValue(`business_unit_id`, businessUnitID);
+                //   } else if (value === null) {
+                //     setValue(`company_id`, null);
+                //     setValue(`business_unit_id`, null);
+                //   }
+                //   setValue(`unit_id`, null);
+                //   setValue(`subunit_id`, null);
+                //   setValue(`location_id`, null);
 
-                  return value;
-                }}
+                //   return value;
+                // }}
               />
 
               <CustomAutoComplete
@@ -528,6 +593,7 @@ const AddCoordinatorSettings = ({ data }) => {
                 autoComplete
                 name={`unit_id`}
                 // disabled={edit ? false : transactionData?.view}
+                disabled
                 control={control}
                 options={departmentData?.filter((obj) => obj?.id === watch(`department_id`)?.id)[0]?.unit || []}
                 onOpen={() => (isUnitSuccess ? null : (unitTrigger(), subunitTrigger(), locationTrigger()))}
@@ -545,18 +611,19 @@ const AddCoordinatorSettings = ({ data }) => {
                     // helperText={errors?.unit_id?.message}
                   />
                 )}
-                onChange={(_, value) => {
-                  setValue(`subunit_id`, null);
-                  setValue(`location_id`, null);
+                // onChange={(_, value) => {
+                //   setValue(`subunit_id`, null);
+                //   setValue(`location_id`, null);
 
-                  return value;
-                }}
+                //   return value;
+                // }}
               />
 
               <CustomAutoComplete
                 autoComplete
                 name={`subunit_id`}
                 // disabled={edit ? false : transactionData?.view}
+                disabled
                 control={control}
                 options={unitData?.filter((obj) => obj?.id === watch(`unit_id`)?.id)[0]?.subunit || []}
                 loading={isSubUnitLoading}
@@ -572,17 +639,18 @@ const AddCoordinatorSettings = ({ data }) => {
                     helperText={errors?.subunit_id?.message}
                   />
                 )}
-                onChange={(_, value) => {
-                  setValue(`location_id`, null);
+                // onChange={(_, value) => {
+                //   setValue(`location_id`, null);
 
-                  return value;
-                }}
+                //   return value;
+                // }}
               />
 
               <CustomAutoComplete
                 autoComplete
                 name={`location_id`}
                 // disabled={edit ? false : transactionData?.view}
+                disabled
                 control={control}
                 options={locationData?.filter((item) => {
                   return item.subunit.some((subunit) => {
@@ -592,6 +660,7 @@ const AddCoordinatorSettings = ({ data }) => {
                 loading={isLocationLoading}
                 size="small"
                 getOptionLabel={(option) => option.location_code + " - " + option.location_name}
+                getOptionKey={(option, index) => `${option.id}-${index}`}
                 isOptionEqualToValue={(option, value) => option.location_id === value.location_id}
                 renderInput={(params) => (
                   <TextField
@@ -633,6 +702,7 @@ const AddCoordinatorSettings = ({ data }) => {
                   }}
                 >
                   <TableCell className="tbl-cell">Index</TableCell>
+                  <TableCell className="tbl-cell">One RDF Charging</TableCell>
                   <TableCell className="tbl-cell">Department</TableCell>
                   <TableCell className="tbl-cell">Company</TableCell>
                   <TableCell className="tbl-cell">Business Unit</TableCell>
@@ -644,38 +714,38 @@ const AddCoordinatorSettings = ({ data }) => {
                   </TableCell>
                 </TableRow>
               </TableHead>
+              {console.log("handles", handles)}
 
               <TableBody>
-                {(isDepartmentLoading ||
-                  isCompanyLoading ||
-                  isBusinessUnitLoading ||
-                  isUnitLoading ||
-                  isSubUnitLoading ||
-                  isLocationLoading) &&
-                data ? (
+                {isOneChargingLoading && data ? (
                   <LoadingData />
                 ) : (
                   handles.map((item, index) => (
                     <TableRow key={index}>
                       <TableCell className="tbl-cell text-weight">{index + 1}</TableCell>
                       <TableCell className="tbl-cell">
-                        {departmentData.find((data) => data.id === item.department_id)?.department_name}
+                        {oneChargingData.find((data) => data.id === item.one_charging_id)?.name}
                       </TableCell>
                       <TableCell className="tbl-cell">
-                        {companyData.find((data) => data.id === item.company_id)?.company_name}
+                        {oneChargingData.find((data) => data.department_id === item.department_id)?.department_name}
                       </TableCell>
                       <TableCell className="tbl-cell">
-                        {businessUnitData.find((data) => data.id === item.business_unit_id)?.business_unit_name}
+                        {oneChargingData.find((data) => data.company_id === item.company_id)?.company_name}
                       </TableCell>
                       <TableCell className="tbl-cell">
-                        {unitData.find((data) => data.id === item.unit_id)?.unit_name}
+                        {
+                          oneChargingData.find((data) => data.business_unit_id === item.business_unit_id)
+                            ?.business_unit_name
+                        }
                       </TableCell>
                       <TableCell className="tbl-cell">
-                        {subUnitData.find((data) => data.id === item.subunit_id)?.subunit_name}
+                        {oneChargingData.find((data) => data.unit_id === item.unit_id)?.unit_name}
                       </TableCell>
                       <TableCell className="tbl-cell">
-                        {" "}
-                        {locationData.find((data) => data.id === item.location_id)?.location_name}
+                        {oneChargingData.find((data) => data.subunit_id === item.subunit_id)?.subunit_name}
+                      </TableCell>
+                      <TableCell className="tbl-cell">
+                        {oneChargingData.find((data) => data.location_id === item.location_id)?.location_name}
                       </TableCell>
                       <TableCell className="tbl-cell" align="center" placement="top">
                         {
