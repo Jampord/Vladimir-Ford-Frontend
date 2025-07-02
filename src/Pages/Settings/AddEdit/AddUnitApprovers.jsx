@@ -220,6 +220,7 @@ const AddUnitApprovers = (props) => {
     console.log("formData", formData);
     const newFormData = {
       one_charging_id: formData.one_charging_id?.id,
+      unit_id: formData.one_charging_id?.unit_id,
       subunit_id: formData.one_charging_id?.subunit_id,
       approver_id: formData.approver_id?.map((item) => item?.id),
     };
@@ -281,6 +282,7 @@ const AddUnitApprovers = (props) => {
               autoComplete
               control={control}
               name="one_charging_id"
+              disabled={data?.action === "view" || data?.action === "update"}
               options={oneChargingData || []}
               onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
               loading={isOneChargingLoading}
