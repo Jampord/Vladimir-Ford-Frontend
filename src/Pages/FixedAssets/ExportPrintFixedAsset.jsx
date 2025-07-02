@@ -82,6 +82,8 @@ const ExportPrintFixedAsset = ({ tabValue }) => {
           "Ymir Reference Number": item.ymir_ref_number,
           "Acquisition Cost (₱)": item.acquisition_cost,
           Supplier: item.supplier.supplier_name,
+          "One Charging Code": item?.one_charging.code,
+          "One Charging": item?.one_charging.name,
           "Company Code": item?.company.company_code,
           Company: item?.company.company_name,
           "Business Unit Code": item?.business_unit.business_unit_code,
