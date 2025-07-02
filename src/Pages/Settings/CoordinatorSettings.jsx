@@ -375,6 +375,15 @@ const CoordinatorSettings = () => {
                   <Stack sx={{ "&>div": { flexDirection: "row", gap: 1 } }}>
                     <Stack>
                       <Typography color="secondary" fontWeight="bold" fontSize={14}>
+                        One RDF Charging:
+                      </Typography>
+                      <Typography color="secondary.light" fontSize={14}>
+                        {item.one_charging.name}
+                      </Typography>
+                    </Stack>
+
+                    <Stack>
+                      <Typography color="secondary" fontWeight="bold" fontSize={14}>
                         Company:
                       </Typography>
                       <Typography color="secondary.light" fontSize={14}>
@@ -438,7 +447,7 @@ const CoordinatorSettings = () => {
         open={dialog1}
         TransitionComponent={Grow}
         // onClose={() => dispatch(closeDialog1())}
-        PaperProps={{ sx: { maxWidth: "1300px", minWidth: "700px", borderRadius: "10px", p: 3 } }}
+        PaperProps={{ sx: { maxWidth: "1200px", minWidth: "700px", borderRadius: "10px", p: 3 } }}
       >
         <AddCoordinatorSettings data={actionMenuData} />
       </Dialog>
