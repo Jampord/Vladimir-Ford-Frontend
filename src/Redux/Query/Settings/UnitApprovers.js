@@ -70,8 +70,8 @@ export const unitApproversApi = createApi({
     // }),
 
     deleteUnitApproversApi: builder.mutation({
-      query: ({ subunit_id }) => ({
-        url: `/department-unit-approvers/${subunit_id}`,
+      query: ({ one_charging_id }) => ({
+        url: `/department-unit-approvers/${one_charging_id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["UnitApprovers"],
