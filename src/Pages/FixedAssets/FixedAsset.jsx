@@ -369,6 +369,8 @@ const FixedAsset = (props) => {
                       </TableSortLabel>
                     </TableCell>
 
+                    <TableCell className="tbl-cell-fa">Requestor</TableCell>
+
                     <TableCell className="tbl-cell-fa">
                       <TableSortLabel
                         active={orderBy === `company_code`}
@@ -487,6 +489,15 @@ const FixedAsset = (props) => {
                               <TableCell className="tbl-cell-fa">
                                 <Typography fontSize="14px" color="secondary">
                                   {data.division.division_name}
+                                </Typography>
+                              </TableCell>
+
+                              <TableCell className="tbl-cell-fa">
+                                <Typography fontSize={12} fontWeight={700} color="secondary.main">
+                                  {data.requestor.first_name}
+                                </Typography>
+                                <Typography fontSize={11} fontWeight={600} color="secondary.main">
+                                  {data.requestor.last_name}
                                 </Typography>
                               </TableCell>
 
