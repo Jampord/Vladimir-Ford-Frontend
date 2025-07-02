@@ -626,8 +626,11 @@ const Sidebar = () => {
       path: "/approving",
       permission: "approving",
       notification: permissions.includes("final-approving")
-        ? notifData?.toApproveCount + notifData?.toAcquisitionFaApproval
-        : notifData?.toApproveCount,
+        ? notifData?.toApproveCount +
+          notifData?.toAcquisitionFaApproval +
+          notifData?.toTransferApproveCount +
+          notifData?.toTransferFaApproval
+        : notifData?.toApproveCount || notifData?.toTransferApproveCount,
       children: [
         {
           label: "Request",
