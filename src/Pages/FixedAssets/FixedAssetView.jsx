@@ -184,7 +184,7 @@ const FixedAssetView = (props) => {
     refetchOnMountOrArgChange: true,
   });
 
-  // console.log("FAData", dataApi);
+  console.log("FAData", dataApi);
   // console.log("Data", data);
 
   const [getCalcDepreApi, { data: calcDepreApi, refetch: calcDepreApiRefetch }] = useLazyGetCalcDepreApiQuery();
@@ -726,6 +726,31 @@ const FixedAssetView = (props) => {
                     label="ADDITIONAL COST"
                   />
                 )}
+                <Card className="tableCard__cardCapex" sx={{ bgcolor: "primary.main" }}>
+                  <Typography
+                    color="secondary.main"
+                    sx={{
+                      fontFamily: "Anton",
+                      fontSize: "1rem",
+                      color: "secondary.main",
+                    }}
+                  >
+                    Requestor
+                  </Typography>
+
+                  <Box sx={{ py: "5px" }}>
+                    <Box className="tableCard__requestor">
+                      <Typography fontSize="14px" color={"secondary.main"}>
+                        User:
+                      </Typography>
+                      <Typography className="tableCard__infoCapex" fontSize="14px" color={"secondary.main"}>
+                        {dataApi?.data?.requestor?.employee_id} {dataApi?.data?.requestor?.first_name}{" "}
+                        {dataApi?.data?.requestor?.last_name}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Card>
+
                 <Card className="tableCard__cardCapex" sx={{ bgcolor: "secondary.main" }}>
                   <Typography
                     color="secondary.main"
@@ -1695,6 +1720,7 @@ const FixedAssetView = (props) => {
           setViewDepre={setViewDepre}
           refetch={calcDepreApiRefetch}
           vladimirTag={dataApi?.data?.vladimir_tag_number}
+          requestor={dataApi?.data?.requestor}
         />
       </Dialog>
 
