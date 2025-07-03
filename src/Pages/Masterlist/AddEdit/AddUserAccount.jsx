@@ -281,7 +281,7 @@ const AddUserAccount = (props) => {
   });
 
   // console.log("errors:", errors);
-  // console.log("coordinator:", watch("is_coordinator"));
+  // console.log("coordinator:", watch("location_id"));
 
   useEffect(() => {
     const errorData = (isPostError || isUpdateError) && (postError?.status === 422 || updateError?.status === 422);
@@ -335,12 +335,12 @@ const AddUserAccount = (props) => {
       setValue("firstname", data.firstname);
       setValue("lastname", data.lastname);
       setValue("one_charging_id", data.one_charging);
-      setValue("company_id", data.company);
-      setValue("business_unit_id", data.business_unit);
-      setValue("department_id", data.department);
-      setValue("unit_id", data.unit);
-      setValue("subunit_id", data.subunit);
-      setValue("location_id", data.location);
+      setValue("company_id", data.one_charging || data.company);
+      setValue("business_unit_id", data.one_charging || data.business_unit);
+      setValue("department_id", data.one_charging || data.department);
+      setValue("unit_id", data.one_charging || data.unit);
+      setValue("subunit_id", data.one_charging || data.subunit);
+      setValue("location_id", data.one_charging || data.location);
       // setValue("position", data.position);
       setValue("username", data.username);
       setValue("role_id", data.role);
