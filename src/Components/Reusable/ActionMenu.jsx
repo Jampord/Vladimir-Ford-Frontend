@@ -132,7 +132,7 @@ const ActionMenu = (props) => {
   };
 
   const handleDelete = () => {
-    onDeleteHandler(data?.id || data?.subunit?.id || data);
+    onDeleteHandler(data?.id || data?.one_charging?.id || data?.subunit?.id || data);
     handleClose();
   };
 
