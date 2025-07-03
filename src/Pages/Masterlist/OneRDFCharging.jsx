@@ -7,6 +7,7 @@ import MasterlistToolbar from "../../Components/Reusable/MasterlistToolbar";
 import NoRecordsFound from "../../Layout/NoRecordsFound";
 import moment from "moment";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
+import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 
 const OneRDFCharging = () => {
   const [search, setSearch] = useState("");
@@ -74,7 +75,9 @@ const OneRDFCharging = () => {
                   </TableHead>
 
                   <TableBody>
-                    {oneChargingApiData?.data.length === 0 ? (
+                    {oneChargingApiFetching ? (
+                      <LoadingData />
+                    ) : oneChargingApiData?.data.length === 0 ? (
                       <NoRecordsFound heightData="medium" />
                     ) : (
                       <>
