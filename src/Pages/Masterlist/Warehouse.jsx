@@ -218,24 +218,24 @@ const Warehouse = () => {
 
   const onUpdateHandler = (props) => {
     console.log("props", props);
-    const { id, warehouse_name, department, sync_id } = props;
+    const { id, warehouse_name, one_charging, sync_id } = props;
     setUpdateWarehouse({
       status: true,
       id: id,
       sync_id: sync_id,
-      department: department,
+      one_charging: one_charging,
       warehouse_name: warehouse_name,
     });
   };
 
   const onViewDepartmentHandler = (props) => {
-    const { id, warehouse_name, department, sync_id } = props;
+    const { id, warehouse_name, one_charging, sync_id } = props;
     setUpdateWarehouse({
       status: true,
       action: "view",
       id: id,
       sync_id: sync_id,
-      department: department,
+      one_charging: one_charging,
       warehouse_name: warehouse_name,
     });
   };
