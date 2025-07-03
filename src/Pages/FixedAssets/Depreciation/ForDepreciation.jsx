@@ -101,6 +101,7 @@ const ForDepreciation = () => {
                     }}
                   >
                     <TableCell className="tbl-cell-category ">Vladimir Tag #</TableCell>
+                    <TableCell className="tbl-cell-category ">Requestor</TableCell>
                     <TableCell className="tbl-cell-category ">Chart of Account</TableCell>
                     <TableCell className="tbl-cell-category ">Accounting Entries</TableCell>
                     <TableCell className="tbl-cell-category text-center">Status</TableCell>
@@ -166,7 +167,7 @@ const ForDepreciation = () => {
                                     ? data.is_additional_cost === 0
                                       ? `MAIN ASSET - ${data.additional_cost_count}`
                                       : `(ADDITIONAL COST)`
-                                    : null} */}
+                                      : null} */}
                                   {data.is_additional_cost === 0
                                     ? `MAIN ASSET - ${data.additional_cost_count}`
                                     : `(ADDITIONAL COST)`}
@@ -176,24 +177,17 @@ const ForDepreciation = () => {
                                 </Typography>
                               </TableCell>
 
-                              {/* <TableCell className="tbl-cell-fa">
-                              <Typography variant="p" fontSize="14px" color="secondary" fontWeight="bold">
-                                {data.capex.capex}
-                              </Typography>
-                              <Typography fontSize="12px" color="gray">
-                                {data.capex.project_name}
-                              </Typography>
-
-                              <Typography variant="p" fontSize="12px" color="secondary.light" fontWeight="bold">
-                                {data.sub_capex.sub_capex} ({data.sub_capex.sub_project})
-                              </Typography>
-                            </TableCell>
-
-                            <TableCell className="tbl-cell-fa">
-                              <Typography fontSize="14px" color="secondary">
-                                {data.division.division_name}
-                              </Typography>
-                            </TableCell> */}
+                              <TableCell className="tbl-cell-fa">
+                                <Typography fontSize={12} fontWeight={700} color="secondary.main">
+                                  {data.requestor.employee_id}
+                                </Typography>
+                                <Typography fontSize={11} fontWeight={600} color="secondary.main">
+                                  {data.requestor.first_name}
+                                </Typography>
+                                <Typography fontSize={11} fontWeight={600} color="secondary.main">
+                                  {data.requestor.last_name}
+                                </Typography>
+                              </TableCell>
 
                               <TableCell className="tbl-cell-fa">
                                 <Typography fontSize="10px" color="gray">
