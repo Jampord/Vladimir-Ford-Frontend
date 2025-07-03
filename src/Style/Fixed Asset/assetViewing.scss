@@ -83,6 +83,19 @@
     font-size: 14px;
   }
 
+  &__requestor {
+    display: flex;
+    color: #344955;
+    padding: 10px 0;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    border-bottom: 1px solid #5c6d77;
+    font-size: 14px;
+  }
+
   &__infoCapex {
     text-align: right;
     padding-left: 10px;
