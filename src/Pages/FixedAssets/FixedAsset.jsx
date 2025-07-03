@@ -494,6 +494,9 @@ const FixedAsset = (props) => {
 
                               <TableCell className="tbl-cell-fa">
                                 <Typography fontSize={12} fontWeight={700} color="secondary.main">
+                                  {data.requestor.employee_id}
+                                </Typography>
+                                <Typography fontSize={11} fontWeight={600} color="secondary.main">
                                   {data.requestor.first_name}
                                 </Typography>
                                 <Typography fontSize={11} fontWeight={600} color="secondary.main">
