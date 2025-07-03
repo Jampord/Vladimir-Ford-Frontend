@@ -10,6 +10,7 @@ import {
   DialogActions,
   Divider,
   Grow,
+  Link,
   Stack,
   Table,
   TableBody,
@@ -630,6 +631,45 @@ const ViewApproveRequest = (props) => {
     setIsSmallTools(false);
   };
 
+  // Global cache to track opened windows and their blob URLs
+  const blobUrlCache = new Map();
+
+  const handleViewFile = async (id) => {
+    try {
+      const response = await fetch(`${process.env.VLADIMIR_BASE_URL}/file/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "x-api-key": process.env.GL_KEY },
+      });
+      const blob = await response.blob();
+      const fileURL = URL.createObjectURL(blob);
+
+      // Open new window and store reference
+      const newWindow = window.open(fileURL, "_blank");
+
+      if (newWindow) {
+        // Add to cache and setup cleanup listener
+        blobUrlCache.set(newWindow, fileURL);
+        newWindow.addEventListener("unload", () => {
+          URL.revokeObjectURL(fileURL);
+          blobUrlCache.delete(newWindow);
+        });
+      } else {
+        // Revoke immediately if window failed to open
+        URL.revokeObjectURL(fileURL);
+      }
+    } catch (err) {
+      console.error("Error handling file view:", err);
+    }
+  };
+
+  // Cleanup for main window close (optional safety net)
+  window.addEventListener("beforeunload", () => {
+    blobUrlCache.forEach((url, win) => {
+      URL.revokeObjectURL(url);
+      blobUrlCache.delete(win);
+    });
+  });
+
   return (
     <>
       {isError && <ErrorFetching refetch={isApproveRefetch} error={errorData} />}
@@ -747,25 +787,39 @@ const ViewApproveRequest = (props) => {
 
                               <TableCell className="tbl-cell">
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.one_charging?.code}) - ${data.one_charging?.name}`}
+                                  {`(${data.one_charging?.code || ""}) - ${data.one_charging?.name || ""}`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.one_charging?.company_code}) - ${data.one_charging?.company_name}`}
+                                  {`(${data.one_charging?.company_code || data?.company?.company_code}) - ${
+                                    data.one_charging?.company_name || data?.company?.company_name
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.one_charging?.business_unit_code}) - ${data.one_charging?.business_unit_name}`}
+                                  {`(${
+                                    data.one_charging?.business_unit_code || data?.business_unit?.business_unit_code
+                                  }) - ${
+                                    data.one_charging?.business_unit_name || data?.business_unit?.business_unit_name
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.one_charging?.department_code}) - ${data.one_charging?.department_name}`}
+                                  {`(${data.one_charging?.department_code || data?.department?.department_code}) - ${
+                                    data.one_charging?.department_name || data?.department?.department_name
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.one_charging?.unit_code}) - ${data.one_charging?.unit_name}`}
+                                  {`(${data.one_charging?.unit_code || data?.unit?.unit_code}) - ${
+                                    data.one_charging?.unit_name || data?.unit?.unit_name
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.one_charging?.subunit_code}) - ${data.one_charging?.subunit_name}`}
+                                  {`(${data.one_charging?.subunit_code || data?.subunit?.subunit_code}) - ${
+                                    data.one_charging?.subunit_name || data?.subunit?.subunit_name
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.one_charging?.location_code}) - ${data.one_charging?.location_name}`}
+                                  {`(${data.one_charging?.location_code || data?.location?.location_code}) - ${
+                                    data.one_charging?.location_name || data?.location?.location_name
+                                  }`}
                                 </Typography>
                                 {/* <Typography fontSize={10} color="gray">
                                 {`(${data.account_title?.account_title_code}) - ${data.account_title?.account_title_name}`}
@@ -854,17 +908,7 @@ const ViewApproveRequest = (props) => {
                                     <Tooltip title={"View or Download Letter of Request"} arrow>
                                       <Typography
                                         sx={attachmentSx}
-                                        onClick={() => {
-                                          data.attachments.letter_of_request.file_name.includes("pdf") ||
-                                          data.attachments.letter_of_request.file_name.includes("svg") ||
-                                          data.attachments.letter_of_request.file_name.includes("png")
-                                            ? handleOpenDialog({
-                                                value: data.attachments.letter_of_request,
-                                                data: data,
-                                                name: "letter_of_request",
-                                              })
-                                            : handleDownloadAttachment({ value: "letter_of_request", id: data?.id });
-                                        }}
+                                        onClick={() => handleViewFile(data?.attachments?.letter_of_request?.id)}
                                       >
                                         {data?.attachments?.letter_of_request?.file_name}
                                       </Typography>
@@ -880,17 +924,7 @@ const ViewApproveRequest = (props) => {
                                     <Tooltip title={"View or Download Quotation"} arrow>
                                       <Typography
                                         sx={attachmentSx}
-                                        onClick={() => {
-                                          data.attachments.quotation.file_name.includes("pdf") ||
-                                          data.attachments.quotation.file_name.includes("svg") ||
-                                          data.attachments.quotation.file_name.includes("png")
-                                            ? handleOpenDialog({
-                                                value: data.attachments.quotation,
-                                                data: data,
-                                                name: "quotation",
-                                              })
-                                            : handleDownloadAttachment({ value: "quotation", id: data?.id });
-                                        }}
+                                        onClick={() => handleViewFile(data?.attachments?.quotation?.id)}
                                       >
                                         {data?.attachments?.quotation?.file_name}
                                       </Typography>
@@ -906,17 +940,7 @@ const ViewApproveRequest = (props) => {
                                     <Tooltip title={"View or Download Specification Form"} arrow>
                                       <Typography
                                         sx={attachmentSx}
-                                        onClick={() => {
-                                          data.attachments.specification_form.file_name.includes("pdf") ||
-                                          data.attachments.specification_form.file_name.includes("svg") ||
-                                          data.attachments.specification_form.file_name.includes("png")
-                                            ? handleOpenDialog({
-                                                value: data.attachments.specification_form,
-                                                data: data,
-                                                name: "specification_form",
-                                              })
-                                            : handleDownloadAttachment({ value: "specification_form", id: data?.id });
-                                        }}
+                                        onClick={() => handleViewFile(data?.attachments?.specification_form?.id)}
                                       >
                                         {data?.attachments?.specification_form?.file_name}
                                       </Typography>
@@ -932,17 +956,7 @@ const ViewApproveRequest = (props) => {
                                     <Tooltip title={"View or Download Tool of Trade"} arrow>
                                       <Typography
                                         sx={attachmentSx}
-                                        onClick={() => {
-                                          data.attachments.tool_of_trade.file_name.includes("pdf") ||
-                                          data.attachments.tool_of_trade.file_name.includes("svg") ||
-                                          data.attachments.tool_of_trade.file_name.includes("png")
-                                            ? handleOpenDialog({
-                                                value: data.attachments.tool_of_trade,
-                                                data: data,
-                                                name: "tool_of_trade",
-                                              })
-                                            : handleDownloadAttachment({ value: "tool_of_trade", id: data?.id });
-                                        }}
+                                        onClick={() => handleViewFile(data?.attachments?.tool_of_trade?.id)}
                                       >
                                         {data?.attachments?.tool_of_trade?.file_name}
                                       </Typography>
@@ -958,17 +972,7 @@ const ViewApproveRequest = (props) => {
                                     <Tooltip title={"View or Download Other Attachment"} arrow>
                                       <Typography
                                         sx={attachmentSx}
-                                        onClick={() => {
-                                          data.attachments.other_attachments.file_name.includes("pdf") ||
-                                          data.attachments.other_attachments.file_name.includes("svg") ||
-                                          data.attachments.other_attachments.file_name.includes("png")
-                                            ? handleOpenDialog({
-                                                value: data.attachments.other_attachments,
-                                                data: data,
-                                                name: "other_attachments",
-                                              })
-                                            : handleDownloadAttachment({ value: "other_attachments", id: data?.id });
-                                        }}
+                                        onClick={() => handleViewFile(data?.attachments?.other_attachments?.id)}
                                       >
                                         {data?.attachments?.other_attachments?.file_name}
                                       </Typography>
@@ -1160,7 +1164,7 @@ const ViewApproveRequest = (props) => {
           </Dialog>
 
           <Dialog
-            open={dialog}
+            // open={dialog}
             TransitionComponent={Grow}
             // PaperProps={{ sx: { borderRadius: "10px" } }}
             onClose={handleCloseDialog}
