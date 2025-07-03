@@ -360,35 +360,53 @@ const AssetTransferView = () => {
                     <Box className="tableCard__properties">
                       Company:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {`${dataApi?.company.company_code} - ${dataApi?.company.company_name}`}
+                        {`${dataApi?.one_charging?.company_code || dataApi?.company.company_code} - ${
+                          dataApi?.one_charging?.company_name || dataApi?.company.company_name
+                        }`}
                       </Typography>
                     </Box>
 
                     <Box className="tableCard__properties">
                       Business Unit:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {`${dataApi?.business_unit.business_unit_code} - ${dataApi?.business_unit.business_unit_name}`}
+                        {`${dataApi?.one_charging?.business_unit_code || dataApi?.business_unit.business_unit_code} - ${
+                          dataApi?.one_charging?.business_unit_name || dataApi?.business_unit.business_unit_name
+                        }`}
                       </Typography>
                     </Box>
 
                     <Box className="tableCard__properties">
                       Department:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {`${dataApi?.department.department_code} - ${dataApi?.department.department_name}`}
+                        {`${dataApi?.one_charging?.department_code || dataApi?.department.department_code} - ${
+                          dataApi?.one_charging?.department_name || dataApi?.department.department_name
+                        }`}
                       </Typography>
                     </Box>
 
                     <Box className="tableCard__properties">
                       Unit:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {`${dataApi?.unit.unit_code} - ${dataApi?.unit.unit_name}`}
+                        {`${dataApi?.one_charging?.unit_code || dataApi?.unit.unit_code} - ${
+                          dataApi?.one_charging?.unit_name || dataApi?.unit.unit_name
+                        }`}
+                      </Typography>
+                    </Box>
+                    <Box className="tableCard__properties">
+                      Subunit:
+                      <Typography className="tableCard__info" fontSize="14px">
+                        {`${dataApi?.one_charging?.subunit_code || dataApi?.subunit.subunit_code} - ${
+                          dataApi?.one_charging?.subunit_name || dataApi?.subunit.subunit_name
+                        }`}
                       </Typography>
                     </Box>
 
                     <Box className="tableCard__properties">
                       Location:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {`${dataApi?.location.location_code} - ${dataApi?.location.location_name}`}
+                        {`${dataApi?.one_charging?.location_code || dataApi?.location.location_code} - ${
+                          dataApi?.one_charging?.location_name || dataApi?.location.location_name
+                        }`}
                       </Typography>
                     </Box>
 
