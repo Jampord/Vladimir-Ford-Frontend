@@ -204,7 +204,7 @@ const UnitApprovers = () => {
         onConfirm: async () => {
           try {
             dispatch(onLoading());
-            let result = await deleteUnitApproversApi({ id: id, subunit_id: id }).unwrap();
+            let result = await deleteUnitApproversApi({ one_charging_id: id }).unwrap();
             // console.log(result);
             setPage(1);
             dispatch(
@@ -355,10 +355,12 @@ const UnitApprovers = () => {
                               <TableCell className="tbl-cell capitalized">{index + 1}</TableCell>
                               <TableCell className="tbl-cell capitalized">
                                 <Typography fontSize={14} fontWeight={600} color="secondary">
-                                  {data?.subunit?.subunit_code} - {data?.subunit?.subunit_name}
+                                  {data?.one_charging?.subunit_code || data?.subunit?.subunit_code} -{" "}
+                                  {data?.one_charging?.subunit_name || data?.subunit?.subunit_name}
                                 </Typography>
                                 <Typography fontSize={12} color="secondary.light">
-                                  {data?.unit?.unit_code} - {data?.unit?.unit_name}
+                                  {data?.one_charging?.unit_code || data?.unit?.unit_code} -{" "}
+                                  {data?.one_charging?.unit_name || data?.unit?.unit_name}
                                 </Typography>
                               </TableCell>
 
