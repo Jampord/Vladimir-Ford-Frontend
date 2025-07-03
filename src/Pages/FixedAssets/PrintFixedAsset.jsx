@@ -1067,10 +1067,13 @@ const PrintFixedAsset = (props) => {
                       <TableCell>
                         <TableSortLabel disabled>PR/PO/RR/Reference No.</TableSortLabel>
                       </TableCell>
-
                       <TableCell>
-                        <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
+                        <TableSortLabel disabled>Acquisition Cost</TableSortLabel>
                       </TableCell>
+                      <TableCell>
+                        <TableSortLabel disabled>Requestor</TableSortLabel>
+                      </TableCell>
+
                       <TableCell>
                         <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
                       </TableCell>
@@ -1183,6 +1186,25 @@ const PrintFixedAsset = (props) => {
                                   </Typography>
                                   <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
                                     Reference No. - {data.ymir_ref_number}
+                                  </Typography>
+                                </TableCell>
+
+                                <TableCell>
+                                  {" "}
+                                  <Typography noWrap fontSize="13px" color="secondary.main">
+                                    ₱{data?.acquisition_cost || " "}
+                                  </Typography>
+                                </TableCell>
+
+                                <TableCell>
+                                  <Typography fontSize={12} fontWeight={600} color="secondary.main">
+                                    {data.requestor.employee_id}
+                                  </Typography>
+                                  <Typography fontSize={11} fontWeight={500} color="secondary.main">
+                                    {data.requestor.first_name}
+                                  </Typography>
+                                  <Typography fontSize={11} fontWeight={500} color="secondary.main">
+                                    {data.requestor.last_name}
                                   </Typography>
                                 </TableCell>
 
@@ -1475,6 +1497,14 @@ const PrintFixedAsset = (props) => {
                               </TableCell>
 
                               <TableCell>
+                                <TableSortLabel disabled>Acquisition Cost</TableSortLabel>
+                              </TableCell>
+
+                              <TableCell>
+                                <TableSortLabel disabled>Requestor</TableSortLabel>
+                              </TableCell>
+
+                              <TableCell>
                                 <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
                               </TableCell>
 
@@ -1599,6 +1629,24 @@ const PrintFixedAsset = (props) => {
                                           </Typography>
                                           <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
                                             Reference No. - {data.ymir_ref_number}
+                                          </Typography>
+                                        </TableCell>
+
+                                        <TableCell>
+                                          <Typography noWrap fontSize="13px" color="secondary.main">
+                                            ₱{data?.acquisition_cost || " "}
+                                          </Typography>
+                                        </TableCell>
+
+                                        <TableCell>
+                                          <Typography fontSize={12} fontWeight={600} color="secondary.main">
+                                            {data.requestor.employee_id}
+                                          </Typography>
+                                          <Typography fontSize={11} fontWeight={500} color="secondary.main">
+                                            {data.requestor.first_name}
+                                          </Typography>
+                                          <Typography fontSize={11} fontWeight={500} color="secondary.main">
+                                            {data.requestor.last_name}
                                           </Typography>
                                         </TableCell>
 
@@ -1955,6 +2003,14 @@ const PrintFixedAsset = (props) => {
                               </TableCell>
 
                               <TableCell>
+                                <TableSortLabel disabled>Acquisition Cost</TableSortLabel>
+                              </TableCell>
+
+                              <TableCell>
+                                <TableSortLabel disabled>Requestor</TableSortLabel>
+                              </TableCell>
+
+                              <TableCell>
                                 <TableSortLabel disabled>Chart Of Accounts</TableSortLabel>
                               </TableCell>
 
@@ -2084,6 +2140,25 @@ const PrintFixedAsset = (props) => {
                                           </Typography>
                                           <Typography noWrap fontSize="11px" fontWeight="700" color="gray">
                                             Reference No. - {data.ymir_ref_number}
+                                          </Typography>
+                                        </TableCell>
+
+                                        <TableCell>
+                                          {" "}
+                                          <Typography noWrap fontSize="13px" color="secondary.main">
+                                            ₱{data?.acquisition_cost || " "}
+                                          </Typography>
+                                        </TableCell>
+
+                                        <TableCell>
+                                          <Typography fontSize={12} fontWeight={600} color="secondary.main">
+                                            {data.requestor.employee_id}
+                                          </Typography>
+                                          <Typography fontSize={11} fontWeight={500} color="secondary.main">
+                                            {data.requestor.first_name}
+                                          </Typography>
+                                          <Typography fontSize={11} fontWeight={500} color="secondary.main">
+                                            {data.requestor.last_name}
                                           </Typography>
                                         </TableCell>
 
