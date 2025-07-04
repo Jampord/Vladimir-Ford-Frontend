@@ -347,7 +347,12 @@ const FixedAssetDepreciationView = (props) => {
                       <Typography fontSize="14px" color={"secondary.main"}>
                         User:
                       </Typography>
-                      <Typography className="tableCard__infoCapex" fontSize="14px" color={"secondary.main"}>
+                      <Typography
+                        className="tableCard__infoCapex"
+                        fontSize="14px"
+                        fontWeight={700}
+                        color={"secondary.main"}
+                      >
                         {dataApi?.data?.requestor?.employee_id} {dataApi?.data?.requestor?.first_name}{" "}
                         {dataApi?.data?.requestor?.last_name}
                       </Typography>
