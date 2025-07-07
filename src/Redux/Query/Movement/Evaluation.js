@@ -18,7 +18,7 @@ export const evaluationApi = createApi({
 
   endpoints: (builder) => ({
     getAssetsToEvaluateApi: builder.query({
-      query: (params) => `items-to-evaluate?per_page=${params.per_page}&page=${params.page}&search`,
+      query: (params) => ({ url: `items-to-evaluate`, params }),
       providesTags: ["Evaluation"],
     }),
 
@@ -37,7 +37,7 @@ export const evaluationApi = createApi({
         url: `pick-up/${params.id}`,
         method: "PATCH",
       }),
-      invalidatesTags: ["Evaluation"],
+      // invalidatesTags: ["Evaluation"],
     }),
   }),
 });
