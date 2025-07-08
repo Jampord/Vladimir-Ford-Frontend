@@ -34,6 +34,7 @@ import { Help } from "@mui/icons-material";
 import MasterlistSkeleton from "../Skeleton/MasterlistSkeleton";
 import NoRecordsFound from "../../Layout/NoRecordsFound";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
+import { useLazyGetBusinessUnitOneRDFAllApiQuery } from "../../Redux/Query/Masterlist/OneRDF/OneRDFCoa";
 
 const BusinessUnit = () => {
   const [search, setSearch] = useState("");
@@ -82,6 +83,18 @@ const BusinessUnit = () => {
     setPage(page + 1);
   };
 
+  // const [
+  //   trigger,
+  //   {
+  //     data: ymirBusinessUnitApi,
+  //     isLoading: ymirBusinessUnitApiLoading,
+  //     isSuccess: ymirBusinessUnitApiSuccess,
+  //     isFetching: ymirBusinessUnitApiFetching,
+  //     isError: ymirBusinessUnitApiError,
+
+  //     refetch: ymirBusinessUnitApiRefetch,
+  //   },
+  // ] = useLazyGetYmirBusinessUnitAllApiQuery();
   const [
     trigger,
     {
@@ -93,7 +106,7 @@ const BusinessUnit = () => {
 
       refetch: ymirBusinessUnitApiRefetch,
     },
-  ] = useLazyGetYmirBusinessUnitAllApiQuery();
+  ] = useLazyGetBusinessUnitOneRDFAllApiQuery();
 
   const {
     data: businessUnitApiData,
