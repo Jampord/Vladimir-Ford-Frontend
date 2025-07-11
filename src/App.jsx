@@ -108,6 +108,7 @@ import PurchaseRequestRecon from "./Pages/Reports/PurchaseRequestRecon";
 import WarehouseMonitoring from "./Pages/Asset Requisition/WarehouseMonitoring";
 import DepreciationMonthlyReport from "./Pages/Reports/DepreciationMonthlyReport";
 import OneRDFCharging from "./Pages/Masterlist/OneRDFCharging";
+import PulloutConfirmation from "./Pages/Asset Movement/Pullout Confirmation/PulloutConfirmation";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -472,6 +473,11 @@ const router = createBrowserRouter([
               {
                 path: "pull-out/add-pull-out",
                 element: <AddPullout />,
+                handle: { permission: "pull-out" },
+              },
+              {
+                path: "pull-out-confirmation",
+                element: <PulloutConfirmation />,
                 handle: { permission: "pull-out" },
               },
               {
