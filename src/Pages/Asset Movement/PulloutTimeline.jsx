@@ -10,6 +10,10 @@ import {
   HowToReg,
   ManageHistoryTwoTone,
   RemoveCircleOutline,
+  ScreenSearchDesktop,
+  ShoppingCart,
+  SwapHorizontalCircle,
+  ThumbUp,
   TimelineTwoTone,
 } from "@mui/icons-material";
 import { closeDialog } from "../../Redux/StateManagement/booleanStateSlice";
@@ -160,8 +164,16 @@ const PulloutTimeline = (props) => {
                           <HowToReg sx={{ color: "success.main" }} />
                         ) : item?.action === "Approved" ? (
                           <FactCheck sx={{ color: "success.main" }} />
+                        ) : item?.action === "Picked up" ? (
+                          <ShoppingCart sx={{ color: "success.main" }} />
                         ) : item?.action === "Removed PR Number" ? (
                           <CancelOutlined sx={{ color: "error.main" }} />
+                        ) : item?.action === "Evaluated" ? (
+                          <ScreenSearchDesktop sx={{ color: "success.main" }} />
+                        ) : item?.action === "Change of Care-of" ? (
+                          <SwapHorizontalCircle sx={{ color: "primary.main" }} />
+                        ) : item?.action === "Received" ? (
+                          <ThumbUp sx={{ color: "success.main" }} />
                         ) : item.action === "Cancelled Remaining Items" || item.action === "Cancelled Item To PO" ? (
                           <RemoveCircleOutline sx={{ color: "error.main" }} />
                         ) : (
@@ -179,10 +191,16 @@ const PulloutTimeline = (props) => {
                             item?.action === "Cancelled Remaining Items" ||
                             item.action === "Cancelled Item To PO"
                               ? "#ff000017"
-                              : item?.action === "Approved" || item?.action === "fully Received"
+                              : item?.action === "Approved" ||
+                                item?.action === "fully Received" ||
+                                item?.action === "Picked up" ||
+                                item?.action === "Evaluated" ||
+                                item?.action === "Received"
                               ? "#00800016"
                               : item?.action === "Removed PR Number"
                               ? "#ff000017"
+                              : item?.action === "Change of Care-of"
+                              ? "#FFCF86"
                               : "#0088880f",
                         }}
                         ml={1}
@@ -197,10 +215,16 @@ const PulloutTimeline = (props) => {
                               item?.action === "Cancelled Remaining Items" ||
                               item.action === "Cancelled Item To PO"
                                 ? "error.light"
-                                : item?.action === "Approved" || item?.action === "fully Received"
+                                : item?.action === "Approved" ||
+                                  item?.action === "fully Received" ||
+                                  item?.action === "Picked up" ||
+                                  item?.action === "Evaluated" ||
+                                  item?.action === "Received"
                                 ? "success.light"
                                 : item?.action === "Removed PR Number"
                                 ? "error.light"
+                                : item?.action === "Change of Care-of"
+                                ? "primary.main"
                                 : "secondary.light",
                             width: "3px",
                             height: item?.action === "fully Received" ? "70px" : "50px",
