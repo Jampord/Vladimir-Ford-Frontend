@@ -5,6 +5,7 @@ import {
   CancelOutlined,
   CheckCircleOutlineTwoTone,
   Close,
+  Construction,
   Error,
   FactCheck,
   HowToReg,
@@ -162,7 +163,7 @@ const PulloutTimeline = (props) => {
                           <Error sx={{ color: "error.light" }} />
                         ) : item?.action === "fully Received" || item?.action === "item Received" ? (
                           <HowToReg sx={{ color: "success.main" }} />
-                        ) : item?.action === "Approved" ? (
+                        ) : item?.action === "Approved" || item?.action === " FA Approved" ? (
                           <FactCheck sx={{ color: "success.main" }} />
                         ) : item?.action === "Picked up" ? (
                           <ShoppingCart sx={{ color: "success.main" }} />
@@ -170,10 +171,12 @@ const PulloutTimeline = (props) => {
                           <CancelOutlined sx={{ color: "error.main" }} />
                         ) : item?.action === "Evaluated" ? (
                           <ScreenSearchDesktop sx={{ color: "success.main" }} />
-                        ) : item?.action === "Change of Care-of" ? (
+                        ) : item?.action === "Change of Care-of" || item?.action === "Change Care of" ? (
                           <SwapHorizontalCircle sx={{ color: "primary.main" }} />
                         ) : item?.action === "Received" ? (
                           <ThumbUp sx={{ color: "success.main" }} />
+                        ) : item?.action === "Repaired" ? (
+                          <Construction sx={{ color: "success.main" }} />
                         ) : item.action === "Cancelled Remaining Items" || item.action === "Cancelled Item To PO" ? (
                           <RemoveCircleOutline sx={{ color: "error.main" }} />
                         ) : (
@@ -185,21 +188,18 @@ const PulloutTimeline = (props) => {
                         className="timelineSteps__box"
                         sx={{
                           backgroundColor:
-                            item?.action === "Declined" ||
-                            item?.action === "Returned" ||
-                            item?.action === "Cancelled" ||
-                            item?.action === "Cancelled Remaining Items" ||
-                            item.action === "Cancelled Item To PO"
+                            item?.action === "Declined" || item?.action === "Returned" || item?.action === "Cancelled"
                               ? "#ff000017"
                               : item?.action === "Approved" ||
-                                item?.action === "fully Received" ||
+                                item?.action === " FA Approved" ||
                                 item?.action === "Picked up" ||
                                 item?.action === "Evaluated" ||
-                                item?.action === "Received"
+                                item?.action === "Received" ||
+                                item?.action === "Repaired"
                               ? "#00800016"
                               : item?.action === "Removed PR Number"
                               ? "#ff000017"
-                              : item?.action === "Change of Care-of"
+                              : item?.action === "Change of Care-of" || item?.action === "Change Care of"
                               ? "#FFCF86"
                               : "#0088880f",
                         }}
@@ -209,21 +209,18 @@ const PulloutTimeline = (props) => {
                           orientation="vertical"
                           sx={{
                             backgroundColor:
-                              item?.action === "Declined" ||
-                              item?.action === "Returned" ||
-                              item?.action === "Cancelled" ||
-                              item?.action === "Cancelled Remaining Items" ||
-                              item.action === "Cancelled Item To PO"
+                              item?.action === "Declined" || item?.action === "Returned" || item?.action === "Cancelled"
                                 ? "error.light"
                                 : item?.action === "Approved" ||
-                                  item?.action === "fully Received" ||
+                                  item?.action === " FA Approved" ||
                                   item?.action === "Picked up" ||
                                   item?.action === "Evaluated" ||
-                                  item?.action === "Received"
+                                  item?.action === "Received" ||
+                                  item?.action === "Repaired"
                                 ? "success.light"
                                 : item?.action === "Removed PR Number"
                                 ? "error.light"
-                                : item?.action === "Change of Care-of"
+                                : item?.action === "Change of Care-of" || item?.action === "Change Care of"
                                 ? "primary.main"
                                 : "secondary.light",
                             width: "3px",
@@ -247,6 +244,30 @@ const PulloutTimeline = (props) => {
                             <Typography fontSize={12} fontWeight={600} color="text.light">
                               Asset Description: {item?.asset_description}
                             </Typography>
+                          )}
+
+                          {item?.action === "Change Care of" && (
+                            <>
+                              <Typography fontSize={12} fontWeight={600} color="text">
+                                Vladimir Tag Number: {item?.vladimir_tag_number}
+                              </Typography>
+                              <Typography fontSize={12} fontWeight={600} color="text.light">
+                                Asset Description: {item?.description}
+                              </Typography>
+                              <Typography fontSize={12} fontWeight={600} color="text.light">
+                                Change to: {item?.to}
+                              </Typography>
+                            </>
+                          )}
+                          {item?.action === "Repaired" && (
+                            <>
+                              <Typography fontSize={12} fontWeight={600} color="text">
+                                Vladimir Tag Number: {item?.vladimir_tag_number}
+                              </Typography>
+                              <Typography fontSize={12} fontWeight={600} color="text.light">
+                                Asset Description: {item?.description}
+                              </Typography>
+                            </>
                           )}
 
                           {/* CANCELLED */}
