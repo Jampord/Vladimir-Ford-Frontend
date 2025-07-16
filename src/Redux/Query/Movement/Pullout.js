@@ -81,6 +81,20 @@ export const pulloutApi = createApi({
       }),
       invalidatesTags: ["Pullout"],
     }),
+
+    getPulloutConfirmationApi: builder.query({
+      query: (params) => ({ url: `evaluation-confirmation`, params }),
+      providesTags: ["Pullout"],
+    }),
+
+    postPulloutConfirmationApi: builder.mutation({
+      query: (data) => ({
+        url: `receive-repair`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Pullout"],
+    }),
   }),
 });
 
@@ -96,4 +110,6 @@ export const {
   useLazyGetNextPulloutQuery,
   useDownloadAttachmentApiMutation,
   usePatchVoidPulloutApiMutation,
+  useGetPulloutConfirmationApiQuery,
+  usePostPulloutConfirmationApiMutation,
 } = pulloutApi;
