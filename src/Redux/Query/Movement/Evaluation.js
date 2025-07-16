@@ -39,6 +39,14 @@ export const evaluationApi = createApi({
       }),
       // invalidatesTags: ["Evaluation"],
     }),
+    postEvaluateAssetApi: builder.mutation({
+      query: (body) => ({
+        url: `/evaluate-pullout`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Evaluation"],
+    }),
   }),
 });
 
@@ -47,4 +55,5 @@ export const {
   useGetAssetsToPickupApiQuery,
   useGetAssetToPickupByIdApiQuery,
   usePatchPickupAssetApiMutation,
+  usePostEvaluateAssetApiMutation,
 } = evaluationApi;
