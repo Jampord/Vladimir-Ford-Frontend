@@ -3,6 +3,7 @@ import { useGetAssetsToPickupApiQuery } from "../../../Redux/Query/Movement/Eval
 import {
   Box,
   Button,
+  Chip,
   IconButton,
   Stack,
   Table,
@@ -110,9 +111,7 @@ const ToPickup = () => {
                     <TableCell className="tbl-cell-category" align="center">
                       Request #
                     </TableCell>
-                    <TableCell className="tbl-cell-category" align="center">
-                      Description
-                    </TableCell>
+                    <TableCell className="tbl-cell-category">Description</TableCell>
                     <TableCell className="tbl-cell-category" align="center">
                       Care of
                     </TableCell>
@@ -144,13 +143,12 @@ const ToPickup = () => {
                               borderBottom: 0,
                             },
                           }}
+                          hover
                         >
                           <TableCell className="tbl-cell text-weight" align="center">
-                            {item?.id}
+                            <Chip label={item?.id} color="primary" size="small" />
                           </TableCell>
-                          <TableCell className="tbl-cell" align="center">
-                            {item?.description}
-                          </TableCell>
+                          <TableCell className="tbl-cell">{item?.description}</TableCell>
                           <TableCell className="tbl-cell " align="center">
                             <Typography fontSize="12px" color="black" fontWeight="500">
                               {item?.care_of}
@@ -167,7 +165,7 @@ const ToPickup = () => {
                             {item?.asset_count}
                           </TableCell>
                           <TableCell className="tbl-cell" align="center">
-                            {item?.remarks === null ? "None" : item.remarks}
+                            {item?.remarks === null ? "-" : item.remarks}
                           </TableCell>
                           <TableCell className="tbl-cell" align="center">
                             <Typography fontSize="12px" color="black" fontWeight="bold">
