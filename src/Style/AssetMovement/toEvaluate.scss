@@ -1,0 +1,21 @@
+@use "../../index.scss";
+
+.evaluation {
+  margin: 15px;
+  min-height: 400px;
+  max-height: 600px;
+
+  &__wrapper {
+    position: relative;
+    padding-top: 5px;
+    background: #fdfdfd;
+    border: #34495515 solid 1px;
+    border-radius: 10px;
+    padding-inline: 10px;
+  }
+
+  &__table {
+    border-radius: 10px;
+    position: relative;
+  }
+}
