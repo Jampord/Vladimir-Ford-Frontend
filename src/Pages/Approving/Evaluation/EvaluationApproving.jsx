@@ -31,14 +31,14 @@ const EvaluationApproving = () => {
             <Tab
               label={
                 <Badge color="error" badgeContent={notifData?.toPulloutApproveCount}>
-                  Pending Pullout{"  "}
+                  Pending Evaluation
                 </Badge>
               }
               value="1"
               className={value === "1" ? "tab__background" : null}
             />
 
-            <Tab label="Approved Pullout" value="2" className={value === "2" ? "tab__background" : null} />
+            <Tab label="Approved Evaluation" value="2" className={value === "2" ? "tab__background" : null} />
           </Tabs>
 
           <TabPanel sx={{ p: 0 }} value="1" index="1">
