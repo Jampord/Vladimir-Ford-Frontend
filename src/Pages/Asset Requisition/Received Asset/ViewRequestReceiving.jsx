@@ -399,22 +399,36 @@ const ViewRequestReceiving = () => {
                                   {`(${data.one_charging?.code}) - ${data.one_charging?.name}`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.company?.company_code}) - ${data.company?.company_name}`}
+                                  {`(${data.one_charging?.company_code || data.company?.company_code}) - ${
+                                    data.one_charging?.company_name || data.company?.company_name
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.business_unit?.business_unit_code}) - ${data.business_unit?.business_unit_name}`}
+                                  {`(${
+                                    data.one_charging?.business_unit_code || data.business_unit?.business_unit_code
+                                  }) - ${
+                                    data.one_charging?.business_unit_name || data.business_unit?.business_unit_name
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.department?.department_code}) - ${data.department?.department_name}`}
+                                  {`(${data.one_charging?.department_code || data.department?.department_code}) - ${
+                                    data.one_charging?.department_name || data.department?.department_name
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.unit?.unit_code}) - ${data.unit?.unit_name}`}
+                                  {`(${data.one_charging?.unit_code || data.unit?.unit_code}) - ${
+                                    data.one_charging?.unit_name || data.unit?.unit_name
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.subunit?.subunit_code}) - ${data.subunit?.subunit_name}`}
+                                  {`(${data.one_charging?.subunit_code || data.subunit?.subunit_code}) - ${
+                                    data.one_charging?.subunit_code || data.subunit?.subunit_name
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.location?.location_code}) - ${data.location?.location_name}`}
+                                  {`(${data.one_charging?.location_code || data.location?.location_code}) - ${
+                                    data.one_charging?.location_name || data.location?.location_name
+                                  }`}
                                 </Typography>
                                 {/* <Typography fontSize={10} color="gray">
                                   {`(${data.account_title?.account_title_code}) - ${data.account_title?.account_title_name}`}
