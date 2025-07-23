@@ -20,8 +20,13 @@ import {
   Chip,
   Dialog,
   Divider,
+  FormControl,
+  FormControlLabel,
+  FormLabel,
   Grow,
   IconButton,
+  Radio,
+  RadioGroup,
   Slide,
   Stack,
   Table,
@@ -121,6 +126,7 @@ const schema = yup.object().shape({
     })
     .required()
     .label("Initial Debit"),
+  depreciation_method: yup.string().required().label("Depreciation Method"),
   major_category_id: yup
     .string()
     .transform((value) => {
@@ -150,14 +156,18 @@ const formatCost = (value) => {
 };
 
 const Depreciation = (props) => {
-  const { setViewDepre, calcDepreApi, vladimirTag, refetch, nextRequest } = props;
+  const { setViewDepre, calcDepreApi, vladimirTag, refetch, nextRequest, requestor } = props;
 
   // console.log("calcDepreApi", calcDepreApi);
+  console.log("requestor", requestor);
   // console.log("nextRequest", !!nextRequest);
 
   const isSmallScreen = useMediaQuery("(max-width: 1000px)");
+  const currentDate = moment();
 
   const [openHistory, setOpenHistory] = useState(false);
+  const [backDateValue, setBackDateValue] = useState("no");
+  console.log("backDateValue", backDateValue);
 
   const {
     handleSubmit,
@@ -182,10 +192,12 @@ const Depreciation = (props) => {
       unit_id: null,
       subunit_id: null,
       location_id: null,
+      depreciation_method: null,
       major_category_id: null,
       minor_category_id: null,
       second_depreciation_debit_id: null,
       second_depreciation_credit_id: null,
+      back_date: null,
     },
   });
 
@@ -556,12 +568,12 @@ const Depreciation = (props) => {
     const newFormData = {
       ...formData,
       one_charging_id: formData.one_charging_id.id,
-      department_id: formData.department_id.department_id,
-      company_id: formData.company_id.company_id,
-      business_unit_id: formData.business_unit_id.business_unit_id,
-      unit_id: formData.unit_id.unit_id,
-      subunit_id: formData.subunit_id.subunit_id,
-      location_id: formData.location_id.location_id,
+      department_id: formData.one_charging_id.department_id,
+      company_id: formData.one_charging_id.company_id,
+      business_unit_id: formData.one_charging_id.business_unit_id,
+      unit_id: formData.one_charging_id.unit_id,
+      subunit_id: formData.one_charging_id.subunit_id,
+      location_id: formData.one_charging_id.location_id,
       second_depreciation_credit_id:
         watch("major_category_id")?.major_category_name !== data?.major_category?.major_category_name
           ? formData.second_depreciation_credit_id
@@ -570,6 +582,7 @@ const Depreciation = (props) => {
         watch("major_category_id")?.major_category_name !== data?.major_category?.major_category_name
           ? formData.second_depreciation_debit_id
           : "",
+      back_date: backDateValue === "yes" ? backDate : null,
     };
 
     console.log("newFormData", newFormData);
@@ -652,6 +665,14 @@ const Depreciation = (props) => {
       })
     );
   };
+
+  const handleChange = (event) => {
+    setBackDateValue(event.target.value);
+    setValue("back_date", null);
+  };
+
+  const backDate = currentDate.diff(moment(watch("back_date")), "days");
+  console.log("backDate", watch("back_date"));
 
   return (
     <Stack>
@@ -934,6 +955,30 @@ const Depreciation = (props) => {
                 }}
               >
                 <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "rem" }}>
+                  Requestor
+                </Typography>
+
+                <Box>
+                  <Box className="tableCard__properties">
+                    User:
+                    <Typography className="tableCard__info" fontSize="14px">
+                      {requestor?.employee_id} {requestor?.first_name} {requestor?.last_name}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Card>
+
+              <Card
+                className="tableCard__card"
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  mt: "10px",
+                  mx: "5px",
+                }}
+              >
+                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "rem" }}>
                   Initial
                 </Typography>
 
@@ -1083,7 +1128,76 @@ const Depreciation = (props) => {
                     p: "20px",
                   }}
                 >
+                  {" "}
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 1,
+                      // justifyContent: "space-between",
+                      // alignItems: "center",
+                    }}
+                  >
+                    <FormControl>
+                      <FormLabel>
+                        <Typography fontSize={"14px"} color={"secondary.main"}>
+                          Do you want to add and select backdate?
+                        </Typography>
+                      </FormLabel>
+                      <RadioGroup row name="backdate" value={backDateValue || "no"} onChange={handleChange}>
+                        <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+                        <FormControlLabel value="no" control={<Radio />} label="No" />
+                      </RadioGroup>
+                    </FormControl>
+
+                    <Box flex={1}>
+                      <Typography fontFamily="Anton" color="secondary" mb={1}>
+                        Backdate
+                      </Typography>
+                      <CustomDatePicker
+                        autoComplete
+                        name="back_date"
+                        control={control}
+                        size="small"
+                        disabled={backDateValue === "no"}
+                        maxDate={moment().subtract(1, "days").toDate()}
+                        minDate={moment().subtract(7, "days").toDate()}
+                        fullWidth
+                      />
+                    </Box>
+                  </Box>
+                </Card>
+                <Card
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    flexDirection: "column",
+                    mt: "10px",
+                    mx: "5px",
+                    p: "20px",
+                  }}
+                >
                   <Stack gap={2} component="form" onSubmit={handleSubmit(onSubmitHandler)}>
+                    <Typography fontFamily="Anton" color="secondary">
+                      Depreciation Method
+                    </Typography>
+                    <CustomAutoComplete
+                      autoComplete
+                      name="depreciation_method"
+                      control={control}
+                      options={["One Time", "STL"]}
+                      size="small"
+                      getOptionLabel={(option) => option}
+                      renderInput={(params) => (
+                        <TextField
+                          color="secondary"
+                          {...params}
+                          label="Depreciation Method"
+                          error={!!errors?.depreciation_method?.message}
+                          helperText={errors?.depreciation_method?.message}
+                        />
+                      )}
+                    />
                     <Typography fontFamily="Anton" color="secondary">
                       Category
                     </Typography>
@@ -1128,6 +1242,7 @@ const Depreciation = (props) => {
                       }
                       size="small"
                       getOptionLabel={(option) => option.minor_category_name}
+                      getOptionKey={(option, index) => `${option.id}-${index}`}
                       isOptionEqualToValue={(option, value) =>
                         option.minor_category_name === value?.minor_category_name
                       }
@@ -1528,7 +1643,8 @@ const Depreciation = (props) => {
                           !isValid ||
                           (watch("minor_category_id")?.minor_category_name !==
                             data?.minor_category?.minor_category_name &&
-                            (!watch("second_depreciation_credit_id") || !watch("second_depreciation_debit_id")))
+                            (!watch("second_depreciation_credit_id") || !watch("second_depreciation_debit_id"))) ||
+                          (backDateValue === "yes" && !watch("back_date"))
                         }
                         sx={{ alignSelf: "end" }}
                       >
