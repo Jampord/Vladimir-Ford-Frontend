@@ -109,6 +109,7 @@ import WarehouseMonitoring from "./Pages/Asset Requisition/WarehouseMonitoring";
 import DepreciationMonthlyReport from "./Pages/Reports/DepreciationMonthlyReport";
 import OneRDFCharging from "./Pages/Masterlist/OneRDFCharging";
 import PulloutConfirmation from "./Pages/Asset Movement/Pullout Confirmation/PulloutConfirmation";
+import ReleasingOfAssetMonitoring from "./Pages/Asset Requisition/Releasing of Asset/ReleasingOfAssetMonitoring";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -423,9 +424,19 @@ const router = createBrowserRouter([
                 handle: { permission: "requisition-releasing" },
               },
               {
+                path: "requisition-releasing-monitoring",
+                element: <ReleasingOfAssetMonitoring />,
+                handle: { permission: "requisition-releasing-monitoring" },
+              },
+              {
                 path: "requisition-releasing/:warehouse_number",
                 element: <ViewRequestReleasing />,
                 handle: { permission: "requisition-releasing" },
+              },
+              {
+                path: "requisition-releasing-monitoring/:warehouse_number",
+                element: <ViewRequestReleasing view />,
+                handle: { permission: "requisition-releasing-monitoring" },
               },
               {
                 path: "small-tools-releasing",
