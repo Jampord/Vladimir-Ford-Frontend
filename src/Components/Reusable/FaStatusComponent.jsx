@@ -13,17 +13,19 @@ import {
   SwapHorizontalCircle,
 } from "@mui/icons-material";
 
-const faStatusComponent = ({ faStatus, data }) => {
-  if (faStatus === "Good") {
+const faStatusComponent = ({ faStatus, data, hover }) => {
+  if (faStatus === "Good" || faStatus === "Repaired") {
     return (
       <Chip
         size="small"
         variant="contained"
         icon={<CheckCircleRounded size="small" color="#00ba34" />}
-        label="Good"
+        label={faStatus}
         sx={{
           backgroundColor: "#e6f8eb",
           color: "#00ba34",
+
+          ":hover": hover && { backgroundColor: "#ADFFC4", cursor: "pointer" },
 
           p: "0 5px",
         }}
@@ -44,16 +46,18 @@ const faStatusComponent = ({ faStatus, data }) => {
         }}
       />
     );
-  } else if (faStatus === "For Releasing") {
+  } else if (faStatus === "For Releasing" || faStatus === "Not yet evaluated") {
     return (
       <Chip
         size="small"
         variant="contained"
         icon={<Pending size="small" color="#0288d1" />}
-        label="For Releasing"
+        label={faStatus}
         sx={{
           backgroundColor: "#61c3f831",
           color: "#0288d1",
+
+          ":hover": hover && { backgroundColor: "#A4C7DB", cursor: "pointer" },
 
           p: "0 5px",
         }}
@@ -69,6 +73,8 @@ const faStatusComponent = ({ faStatus, data }) => {
         sx={{
           backgroundColor: "#fd8e6c3a",
           color: "#d13202",
+
+          ":hover": hover && { backgroundColor: "#FFB098", cursor: "pointer" },
 
           p: "0 5px",
         }}
@@ -143,6 +149,23 @@ const faStatusComponent = ({ faStatus, data }) => {
         sx={{
           backgroundColor: "#ff979749",
           color: "#a32424",
+
+          p: "0 5px",
+        }}
+      />
+    );
+  } else if (faStatus === "Change Care-of" || faStatus === "Change Care of") {
+    return (
+      <Chip
+        size="small"
+        variant="contained"
+        icon={<SwapHorizontalCircle size="small" color="primary.dark" />}
+        label="Change Care of"
+        sx={{
+          backgroundColor: "primary.light",
+          color: "primary",
+
+          ":hover": hover && { backgroundColor: "primary.main", cursor: "pointer" },
 
           p: "0 5px",
         }}
