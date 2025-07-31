@@ -101,6 +101,8 @@ import {
   Radar,
   RequestQuote,
   LooksOne,
+  AddToQueue,
+  LocalShipping,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -289,6 +291,12 @@ const Sidebar = () => {
           icon: StoreRounded,
           path: "/masterlist/supplier",
           permission: "supplier",
+        },
+        {
+          label: "Ship To",
+          icon: LocalShipping,
+          path: "/masterlist/ship-to",
+          permission: "ship-to",
         },
         {
           label: "Unit of Measurement",
@@ -530,6 +538,14 @@ const Sidebar = () => {
           notification: notifData?.toRelease,
           setter: closeCollapse,
         },
+        {
+          label: "Releasing Monitoring",
+          icon: AddToQueue,
+          path: "/asset-requisition/requisition-releasing-monitoring",
+          permission: "requisition-releasing-monitoring",
+          // notification: notifData?.toRelease,
+          setter: closeCollapse,
+        },
         // {
         //   label: "Small Tools Releasing",
         //   icon: Construction,
@@ -568,9 +584,32 @@ const Sidebar = () => {
           setter: closeCollapse,
         },
         {
+          label: "Receiving of Transfer",
+          icon: MoveDownOutlined,
+          path: "/asset-movement/transfer-receiving",
+          permission: "transfer-receiving",
+          notification: notifData?.toTransferReceiving,
+          setter: closeCollapse,
+        },
+        {
           label: "Pull Out",
           icon: RemoveFromQueue,
           path: "/asset-movement/pull-out",
+          permission: "pull-out",
+          setter: closeCollapse,
+        },
+        {
+          label: "Evaluation",
+          icon: ScreenSearchDesktop,
+          path: "/asset-movement/evaluation",
+          permission: "evaluation",
+          // notification: notifData?.toTransferReceiving,
+          setter: closeCollapse,
+        },
+        {
+          label: "Pull Out Confirmation",
+          icon: AssignmentTurnedIn,
+          path: "/asset-movement/pull-out-confirmation",
           permission: "pull-out",
           setter: closeCollapse,
         },
@@ -586,22 +625,6 @@ const Sidebar = () => {
           icon: PlaylistRemoveRounded,
           path: "/asset-movement/disposal",
           permission: "disposal",
-          setter: closeCollapse,
-        },
-        {
-          label: "Receiving of Transfer",
-          icon: MoveDownOutlined,
-          path: "/asset-movement/transfer-receiving",
-          permission: "transfer-receiving",
-          notification: notifData?.toTransferReceiving,
-          setter: closeCollapse,
-        },
-        {
-          label: "Evaluation",
-          icon: ScreenSearchDesktop,
-          path: "/asset-movement/evaluation",
-          permission: "evaluation",
-          // notification: notifData?.toTransferReceiving,
           setter: closeCollapse,
         },
       ],
