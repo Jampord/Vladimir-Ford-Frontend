@@ -19,31 +19,10 @@ export const oneRDFApi = createApi({
 
   endpoints: (builder) => ({
     getOneRDFChargingAllApi: builder.query({
-      query: (params) => {
-        const queryParams = [];
-
-        if (params.page) {
-          queryParams.push(`page=${params.page}`);
-        }
-        if (params.per_page) {
-          queryParams.push(`per_page=${params.per_page}`);
-        }
-        if (params.pagination) {
-          queryParams.push(`pagination=${params.pagination}`);
-        }
-        if (params.search) {
-          queryParams.push(`search=${params.search}`);
-        }
-        if (params.status) {
-          queryParams.push(`status=${params.status}`);
-        }
-        if (params.user_id) {
-          queryParams.push(`user_id=${params.user_id}`);
-        }
-
-        const queryString = queryParams.join("&");
-        return `/one-charging?${queryString}`;
-      },
+      query: (params) => ({
+        url: `/one-charging`,
+        params,
+      }),
       providesTags: ["OneRDFCharging"],
       keepUnusedDataFor: 300,
     }),
