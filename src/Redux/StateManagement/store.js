@@ -112,6 +112,7 @@ import { purchaseRequestReconApi } from "../Query/Reports/PurchaseRequestRecon";
 import { oneRDFApi } from "../Query/Masterlist/OneRDF/OneRDFCharging";
 import { oneRDFCoaApi } from "../Query/Masterlist/OneRDF/OneRDFCoa";
 import { assetEvaluationApi } from "../Query/Settings/AssetEvaluation";
+import { shipToApi } from "../Query/Masterlist/YmirCoa/ShipTo";
 
 export const store = configureStore({
   reducer: {
@@ -171,6 +172,7 @@ export const store = configureStore({
     [locationApi.reducerPath]: locationApi.reducer,
     [accountTitleApi.reducerPath]: accountTitleApi.reducer,
     [supplierApi.reducerPath]: supplierApi.reducer,
+    [shipToApi.reducerPath]: shipToApi.reducer,
     [unitOfMeasurementApi.reducerPath]: unitOfMeasurementApi.reducer,
     [smallToolsApi.reducerPath]: smallToolsApi.reducer,
 
@@ -271,6 +273,7 @@ export const store = configureStore({
       locationApi.middleware,
       accountTitleApi.middleware,
       supplierApi.middleware,
+      shipToApi.middleware,
       unitOfMeasurementApi.middleware,
       smallToolsApi.middleware,
 
