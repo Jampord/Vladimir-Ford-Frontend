@@ -38,10 +38,11 @@ import { Help, ReportProblem } from "@mui/icons-material";
 import ViewTagged from "../../Components/Reusable/ViewTagged";
 import { openDialog } from "../../Redux/StateManagement/booleanStateSlice";
 import { useLazyGetYmirSubUnitAllApiQuery } from "../../Redux/Query/Masterlist/YmirCoa/YmirApi";
+import { useLazyGetSubunitOneRDFAllApiQuery } from "../../Redux/Query/Masterlist/OneRDF/OneRDFCoa";
 
 const SubUnit = () => {
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(5);
+  const [perPage, setPerPage] = useState(10);
   const [status, setStatus] = useState("active");
   const [search, setSearch] = useState("");
   const [viewLocation, setViewLocation] = useState({
@@ -96,6 +97,18 @@ const SubUnit = () => {
     setPage(1);
   };
 
+  // const [
+  //   trigger,
+  //   {
+  //     data: ymirSubUnitApi,
+  //     isLoading: ymirSubUnitApiLoading,
+  //     isSuccess: ymirSubUnitApiSuccess,
+  //     isFetching: ymirSubUnitApiFetching,
+  //     isError: ymirSubUnitApiError,
+
+  //     refetch: ymirSubUnitApiRefetch,
+  //   },
+  // ] = useLazyGetYmirSubUnitAllApiQuery();
   const [
     trigger,
     {
@@ -107,7 +120,7 @@ const SubUnit = () => {
 
       refetch: ymirSubUnitApiRefetch,
     },
-  ] = useLazyGetYmirSubUnitAllApiQuery();
+  ] = useLazyGetSubunitOneRDFAllApiQuery();
 
   const {
     data: subUnitData,
@@ -288,7 +301,7 @@ const SubUnit = () => {
                         Sub Unit
                       </TableSortLabel>
                     </TableCell>
-
+                    {/* 
                     <TableCell className="tbl-cell">
                       <TableSortLabel
                         active={orderBy === `unit`}
@@ -297,9 +310,9 @@ const SubUnit = () => {
                       >
                         Unit
                       </TableSortLabel>
-                    </TableCell>
+                    </TableCell> */}
 
-                    <TableCell className="tbl-cell" align="center">
+                    {/* <TableCell className="tbl-cell" align="center">
                       <TableSortLabel
                         active={orderBy === `location`}
                         direction={orderBy === `location` ? order : `asc`}
@@ -307,7 +320,7 @@ const SubUnit = () => {
                       >
                         Location
                       </TableSortLabel>
-                    </TableCell>
+                    </TableCell> */}
 
                     <TableCell className="tbl-cell text-center">Status</TableCell>
 
@@ -346,15 +359,13 @@ const SubUnit = () => {
                             <TableCell className="tbl-cell text-weight">
                               ({data.subunit_code}) - {data.subunit_name}
                             </TableCell>
-
+                            {/* 
                             <TableCell className="tbl-cell">
                               ({data?.unit?.unit_code}) - {data?.unit?.unit_name}
-                            </TableCell>
+                            </TableCell> */}
 
-                            <TableCell className="tbl-cell" align="center">
-                              {/* {data.location?.location_code +
-                                    " - " +
-                                    data.location?.location_name} */}
+                            {/* <TableCell className="tbl-cell" align="center">
+                     
                               <Button
                                 sx={{
                                   textTransform: "capitalize",
@@ -368,7 +379,7 @@ const SubUnit = () => {
                               >
                                 <Typography fontSize={13}>View</Typography>
                               </Button>
-                            </TableCell>
+                            </TableCell> */}
 
                             <TableCell className="tbl-cell text-center">
                               <CustomChip status={status} />
