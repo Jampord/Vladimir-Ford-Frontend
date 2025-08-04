@@ -36,11 +36,12 @@ import NoRecordsFound from "../../Layout/NoRecordsFound";
 import ViewTagged from "../../Components/Reusable/ViewTagged";
 import { closeDialog, openDialog, openDrawer } from "../../Redux/StateManagement/booleanStateSlice";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
+import { useLazyGetDepartmentOneRDFAllApiQuery } from "../../Redux/Query/Masterlist/OneRDF/OneRDFCoa";
 
 const Department = () => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("active");
-  const [perPage, setPerPage] = useState(5);
+  const [perPage, setPerPage] = useState(10);
   const [page, setPage] = useState(1);
   const [viewLocation, setViewLocation] = useState({
     id: null,
@@ -89,6 +90,18 @@ const Department = () => {
     setPage(page + 1);
   };
 
+  // const [
+  //   trigger,
+  //   {
+  //     data: ymirDepartmentApi,
+  //     isLoading: ymirDepartmentApiLoading,
+  //     isSuccess: ymirDepartmentApiSuccess,
+  //     isFetching: ymirDepartmentApiFetching,
+  //     isError: ymirDepartmentApiError,
+  //     refetch: ymirDepartmentApiRefetch,
+  //   },
+  // ] = useLazyGetYmirDepartmentAllApiQuery();
+
   const [
     trigger,
     {
@@ -99,7 +112,7 @@ const Department = () => {
       isError: ymirDepartmentApiError,
       refetch: ymirDepartmentApiRefetch,
     },
-  ] = useLazyGetYmirDepartmentAllApiQuery();
+  ] = useLazyGetDepartmentOneRDFAllApiQuery();
 
   const {
     data: departmentApiData,
@@ -298,7 +311,7 @@ const Department = () => {
                         </TableSortLabel>
                       </TableCell>
 
-                      <TableCell className="tbl-cell">
+                      {/* <TableCell className="tbl-cell">
                         <TableSortLabel
                           active={orderBy === `company_code`}
                           direction={orderBy === `company_code` ? order : `asc`}
@@ -306,7 +319,7 @@ const Department = () => {
                         >
                           Business Unit
                         </TableSortLabel>
-                      </TableCell>
+                      </TableCell> */}
 
                       {/*<TableCell className="tbl-cell" align="center">
                         <TableSortLabel
@@ -367,11 +380,11 @@ const Department = () => {
                               <TableCell className="tbl-cell">{data.department_code}</TableCell>
                               <TableCell className="tbl-cell">{data.department_name}</TableCell>
 
-                              <TableCell className="tbl-cell">
+                              {/* <TableCell className="tbl-cell">
                                 {data.business_unit?.business_unit_code +
                                   " - " +
                                   data.business_unit?.business_unit_name}
-                              </TableCell>
+                              </TableCell> */}
 
                               {/* <TableCell className="tbl-cell" align="center">
                                 {data.location?.location_code +
