@@ -31,11 +31,12 @@ import { Help } from "@mui/icons-material";
 import MasterlistSkeleton from "../Skeleton/MasterlistSkeleton";
 import NoRecordsFound from "../../Layout/NoRecordsFound";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
+import { useLazyGetUnitOneRDFAllApiQuery } from "../../Redux/Query/Masterlist/OneRDF/OneRDFCoa";
 
 const Unit = () => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("active");
-  const [perPage, setPerPage] = useState(5);
+  const [perPage, setPerPage] = useState(10);
   const [page, setPage] = useState(1);
 
   const dispatch = useDispatch();
@@ -79,6 +80,18 @@ const Unit = () => {
     setPage(page + 1);
   };
 
+  // const [
+  //   trigger,
+  //   {
+  //     data: ymirUnitApi,
+  //     isLoading: ymirUnitApiLoading,
+  //     isSuccess: ymirUnitApiSuccess,
+  //     isFetching: ymirUnitApiFetching,
+  //     isError: ymirUnitApiError,
+
+  //     refetch: ymirUnitApiRefetch,
+  //   },
+  // ] = useLazyGetYmirUnitAllApiQuery();
   const [
     trigger,
     {
@@ -90,7 +103,7 @@ const Unit = () => {
 
       refetch: ymirUnitApiRefetch,
     },
-  ] = useLazyGetYmirUnitAllApiQuery();
+  ] = useLazyGetUnitOneRDFAllApiQuery();
 
   const {
     data: unitApiData,
@@ -259,7 +272,7 @@ const Unit = () => {
                         </TableSortLabel>
                       </TableCell>
 
-                      <TableCell className="tbl-cell">
+                      {/* <TableCell className="tbl-cell">
                         <TableSortLabel
                           active={orderBy === `unit_name`}
                           direction={orderBy === `unit_name` ? order : `asc`}
@@ -267,7 +280,7 @@ const Unit = () => {
                         >
                           Department
                         </TableSortLabel>
-                      </TableCell>
+                      </TableCell> */}
 
                       <TableCell className="tbl-cell text-center">Status</TableCell>
 
@@ -302,7 +315,7 @@ const Unit = () => {
                               <TableCell className="tbl-cell tr-cen-pad45 tbl-coa">{data.id}</TableCell>
                               <TableCell className="tbl-cell">{data.unit_code}</TableCell>
                               <TableCell className="tbl-cell">{data.unit_name}</TableCell>
-                              <TableCell className="tbl-cell">{`${data.department?.department_code} - ${data.department?.department_name}`}</TableCell>
+                              {/* <TableCell className="tbl-cell">{`${data.department?.department_code} - ${data.department?.department_name}`}</TableCell> */}
                               <TableCell className="tbl-cell text-center">
                                 {data.is_active ? (
                                   <Chip
