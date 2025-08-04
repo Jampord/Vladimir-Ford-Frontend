@@ -34,11 +34,12 @@ import NoRecordsFound from "../../Layout/NoRecordsFound";
 import ViewTagged from "../../Components/Reusable/ViewTagged";
 import { closeDialog, openDialog } from "../../Redux/StateManagement/booleanStateSlice";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
+import { useLazyGetLocationOneRDFAllApiQuery } from "../../Redux/Query/Masterlist/OneRDF/OneRDFCoa";
 
 const Location = () => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("active");
-  const [perPage, setPerPage] = useState(5);
+  const [perPage, setPerPage] = useState(10);
   const [page, setPage] = useState(1);
   const [viewSubUnit, setViewSubUnit] = useState({
     id: null,
@@ -87,6 +88,18 @@ const Location = () => {
     setPage(page + 1);
   };
 
+  // const [
+  //   trigger,
+  //   {
+  //     data: ymirLocationApi,
+  //     isLoading: ymirLocationApiLoading,
+  //     isSuccess: ymirLocationApiSuccess,
+  //     isFetching: ymirLocationApiFetching,
+  //     isError: ymirLocationApiError,
+  //     refetch: ymirLocationApiRefetch,
+  //   },
+  // ] = useLazyGetYmirLocationAllApiQuery();
+
   const [
     trigger,
     {
@@ -97,7 +110,7 @@ const Location = () => {
       isError: ymirLocationApiError,
       refetch: ymirLocationApiRefetch,
     },
-  ] = useLazyGetYmirLocationAllApiQuery();
+  ] = useLazyGetLocationOneRDFAllApiQuery();
 
   const {
     data: locationApiData,
@@ -294,7 +307,7 @@ const Location = () => {
                         </TableSortLabel>
                       </TableCell>
 
-                      <TableCell className="tbl-cell" align="center">
+                      {/* <TableCell className="tbl-cell" align="center">
                         <TableSortLabel
                           sx={{ ml: "30px" }}
                           active={orderBy === `location_name`}
@@ -303,7 +316,7 @@ const Location = () => {
                         >
                           Subunit
                         </TableSortLabel>
-                      </TableCell>
+                      </TableCell> */}
 
                       <TableCell className="tbl-cell text-center">Status</TableCell>
 
@@ -342,7 +355,7 @@ const Location = () => {
 
                               <TableCell className="tbl-cell">{data.location_name}</TableCell>
 
-                              <TableCell className="tbl-cell" align="center">
+                              {/* <TableCell className="tbl-cell" align="center">
                                 <Button
                                   sx={{
                                     textTransform: "capitalize",
@@ -355,7 +368,7 @@ const Location = () => {
                                 >
                                   <Typography fontSize={13}>View</Typography>
                                 </Button>
-                              </TableCell>
+                              </TableCell> */}
 
                               <TableCell className="tbl-cell text-center">
                                 {data.is_active ? (
