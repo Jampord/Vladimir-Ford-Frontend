@@ -31,6 +31,7 @@ import { Help } from "@mui/icons-material";
 import MasterlistSkeleton from "../Skeleton/MasterlistSkeleton";
 import NoRecordsFound from "../../Layout/NoRecordsFound";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
+import { useLazyGetCompanyOneRDFAllApiQuery } from "../../Redux/Query/Masterlist/OneRDF/OneRDFCoa";
 
 const Company = () => {
   const [search, setSearch] = useState("");
@@ -79,6 +80,18 @@ const Company = () => {
     setPage(page + 1);
   };
 
+  // const [
+  //   trigger,
+  //   {
+  //     data: ymirCompanyApi,
+  //     isLoading: ymirCompanyApiLoading,
+  //     isSuccess: ymirCompanyApiSuccess,
+  //     isFetching: ymirCompanyApiFetching,
+  //     isError: ymirCompanyApiError,
+
+  //     refetch: ymirCompanyApiRefetch,
+  //   },
+  // ] = useLazyGetYmirCompanyAllApiQuery();
   const [
     trigger,
     {
@@ -90,7 +103,7 @@ const Company = () => {
 
       refetch: ymirCompanyApiRefetch,
     },
-  ] = useLazyGetYmirCompanyAllApiQuery();
+  ] = useLazyGetCompanyOneRDFAllApiQuery();
 
   const {
     data: companyApiData,
