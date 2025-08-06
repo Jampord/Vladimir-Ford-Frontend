@@ -27,13 +27,6 @@ const AddTransferSkeleton = () => {
         <Skeleton variant="rounded" width={210} height={30} />
       </Stack>
 
-      <Stack mt={3}>
-        <Skeleton variant="text" width={110} height={35} />
-      </Stack>
-      <Stack direction="column" spacing={1} mt={1}>
-        <Skeleton variant="rounded" width={210} height={30} />
-      </Stack>
-
       <Stack mt={2}>
         <Skeleton variant="text" width={120} height={40} />
       </Stack>
