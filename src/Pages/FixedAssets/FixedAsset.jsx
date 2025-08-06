@@ -85,6 +85,8 @@ const FixedAsset = (props) => {
   const [steps, setSteps] = useState(0);
   // const [scanAsset, setScanAsset] = useState(false);
   // const [faStatus, setFaStatus] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [updateFixedAsset, setUpdateFixedAsset] = useState({
     status: false,
     id: "",
@@ -209,8 +211,12 @@ const FixedAsset = (props) => {
       status: status,
       search: search,
       filter: faFilter,
+      date_from: dateFrom,
+      date_to: dateTo,
+    },
+    {
+      refetchOnMountOrArgChange: true,
     }
-    // { refetchOnMountOrArgChange: true }
   );
 
   const onUpdateResetHandler = () => {
@@ -315,6 +321,11 @@ const FixedAsset = (props) => {
             hideArchive
             isRequest
             setIsRequest={setIsRequest}
+            showDateFilter
+            dateFrom={dateFrom}
+            setDateFrom={setDateFrom}
+            dateTo={dateTo}
+            setDateTo={setDateTo}
           />
 
           <Box>
