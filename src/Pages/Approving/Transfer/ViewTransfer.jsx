@@ -99,6 +99,7 @@ import {
 import { useLazyGetUserAccountAllApiQuery } from "../../../Redux/Query/UserManagement/UserAccountsApi";
 import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 import { useLazyGetOneRDFChargingAllApiQuery } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
+import ApprovalViewTransferSkeleton from "./Skeleton/ApprovalViewTransferSkeleton";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -152,17 +153,15 @@ const ViewTransfer = (props) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { state: transactionData } = useLocation();
-  console.log("transactionData: ", transactionData);
+
+  const isSmallScreen = useMediaQuery("(min-width:640px)");
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const permissions = useSelector((state) => state.userLogin?.user.role.access_permission);
-  console.log("permissions: ", permissions);
 
   const AttachmentRef = useRef(null);
-
-  // console.log(transactionData);
 
   const [updateRequest, setUpdateRequest] = useState({
     id: "",
@@ -209,7 +208,6 @@ const ViewTransfer = (props) => {
 
   const [patchApprovalStatus, { isLoading: isPatchApprovalLoading }] = usePatchTransferApprovalStatusApiMutation();
   const [getNextTransfer, { data: nextData, isLoading: isNextTransferLoading }] = useLazyGetNextTransferQuery();
-  console.log("nextData: ", nextData);
   const [changeTransfer, { data: changeData, isLoading: isChangeLoading }] =
     usePatchUpdateTransferDepreciationApprovalApiMutation();
 
@@ -226,8 +224,6 @@ const ViewTransfer = (props) => {
     { transfer_number: transactionData?.id ? transactionData?.id : transactionData?.transfer_number },
     { refetchOnMountOrArgChange: true }
   );
-
-  console.log("transferData: ", transferData[0]);
 
   const [
     oneChargingTrigger,
@@ -337,7 +333,6 @@ const ViewTransfer = (props) => {
     userAccountTrigger,
     { data: userData = [], isLoading: isUserLoading, isSuccess: isUserSuccess, isError: isUserError },
   ] = useLazyGetUserAccountAllApiQuery();
-  // console.log("userData: ", userData);
 
   //* useForm --------------------------------------------------------------------
   const {
@@ -408,8 +403,6 @@ const ViewTransfer = (props) => {
   const transferNumberData = transferData?.at(0);
 
   useEffect(() => {
-    console.log("transferNumberData", transferNumberData);
-
     if (transferNumberData) {
       fixedAssetTrigger();
       // const accountable = {
@@ -448,12 +441,13 @@ const ViewTransfer = (props) => {
           asset_accountable: asset.accountable === "-" ? "Common" : asset.accountable,
           created_at: asset.created_at || asset.acquisition_date,
           remaining_book_value: asset.remaining_book_value,
-          company_id: asset.company?.company_name,
-          business_unit_id: asset.business_unit?.business_unit_name,
-          department_id: asset.department?.department_name,
-          unit_id: asset.unit?.unit_name,
-          sub_unit_id: asset.subunit?.subunit_name,
-          location_id: asset.location?.location_name,
+          one_charging_id: asset.one_charging?.name,
+          company_id: asset.one_charging?.company_name || asset.company?.company_name,
+          business_unit_id: asset.one_charging?.business_unit_name || asset.business_unit?.business_unit_name,
+          department_id: asset.one_charging?.department_name || asset.department?.department_name,
+          unit_id: asset.one_charging?.unit_name || asset.unit?.unit_name,
+          sub_unit_id: asset.one_charging?.subunit_name || asset.subunit?.subunit_name,
+          location_id: asset.one_charging?.location_name || asset.location?.location_name,
           accountability: asset?.new_accountability,
           accountable: asset?.new_accountable,
           receiver_id: asset?.receiver,
@@ -461,9 +455,6 @@ const ViewTransfer = (props) => {
       );
     }
   }, [transferData, edit, transferNumberData, transactionData, transferData[0]]);
-
-  // console.log("asset", watch("asset"));
-  // console.log("asset", data?.asset);
 
   const UpdateField = ({ value, label }) => {
     return (
@@ -583,7 +574,7 @@ const ViewTransfer = (props) => {
             const next = await getNextTransfer({
               final_approval: transactionData?.final || transferData[0]?.final_approval === 1 ? 1 : 0,
             }).unwrap();
-            console.log("next: ", next);
+
             navigate(`/approving/transfer/${next?.transfer_number}`, { state: next, replace: true });
           } catch (err) {
             noNextData(err);
@@ -681,12 +672,10 @@ const ViewTransfer = (props) => {
   };
 
   const changedDepreciation = transferData[0]?.depreciation_debit?.id !== watch("depreciation_debit_id")?.id;
-  console.log("changedDepreciation: ", changedDepreciation);
 
   const onApprovalChangeHandler = (transfer_number) => {
-    console.log("transfer_number: ", transfer_number);
     const formData = { id: transfer_number, depreciation_debit_id: watch("depreciation_debit_id").sync_id };
-    console.log("formData: ", formData);
+
     dispatch(
       openConfirm({
         icon: Help,
@@ -765,6 +754,42 @@ const ViewTransfer = (props) => {
     matchFrom: "any",
   });
 
+  const handleViewFile = async (id) => {
+    try {
+      const response = await fetch(`${process.env.VLADIMIR_BASE_URL}/file/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "x-api-key": process.env.GL_KEY },
+      });
+      const blob = await response.blob();
+      const fileURL = URL.createObjectURL(blob);
+
+      // Open new window and store reference
+      const newWindow = window.open(fileURL, "_blank");
+
+      if (newWindow) {
+        // Add to cache and setup cleanup listener
+        blobUrlCache.set(newWindow, fileURL);
+        newWindow.addEventListener("unload", () => {
+          URL.revokeObjectURL(fileURL);
+          blobUrlCache.delete(newWindow);
+        });
+      } else {
+        // Revoke immediately if window failed to open
+        URL.revokeObjectURL(fileURL);
+      }
+    } catch (err) {
+      console.error("Error handling file view:", err);
+    }
+  };
+
+  // Cleanup for main window close (optional safety net)
+  window.addEventListener("beforeunload", () => {
+    blobUrlCache.forEach((url, win) => {
+      URL.revokeObjectURL(url);
+      blobUrlCache.delete(win);
+    });
+  });
+
   //* Styles ----------------------------------------------------------------
   const BoxStyle = {
     display: "flex",
@@ -818,73 +843,88 @@ const ViewTransfer = (props) => {
               )} */}
         </Stack>
 
-        <Box className="request mcontainer__wrapper" p={2} component="form">
-          <Box>
-            <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem", pt: 1 }}>
-              TRANSFER NO. {transferData[0]?.movement_id}
-            </Typography>
+        <Box className={isSmallScreen ? "request request__wrapper" : "request__wrapper"} p={2} component="form">
+          {isTransferFetching || isTransferLoading ? (
+            <ApprovalViewTransferSkeleton />
+          ) : (
+            <Box>
+              <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem", pt: 1 }}>
+                TRANSFER NO. {transferData[0]?.movement_id}
+              </Typography>
 
-            <Box id="requestForm" className="request__form">
-              <Stack gap={2} py={1}>
-                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px" }}>
-                  REQUEST DETAILS
-                </Typography>
-                <Box sx={BoxStyle}>
-                  <CustomTextField
-                    control={control}
-                    name="description"
-                    disabled={edit ? false : view}
-                    label="Description"
-                    type="text"
-                    error={!!errors?.description}
-                    helperText={errors?.description?.message}
-                    fullWidth
-                    multiline
-                  />
-
-                  <CustomTextField
-                    control={control}
-                    name="remarks"
-                    disabled={edit ? false : view}
-                    label="Remarks (Optional)"
-                    optional
-                    type="text"
-                    error={!!errors?.remarks}
-                    helperText={errors?.remarks?.message}
-                    fullWidth
-                    multiline
-                  />
-
-                  <Stack flexDirection="row" gap={1} alignItems="center">
-                    {watch("attachments") !== null ? (
-                      <UpdateField label={"Attachments"} value={watch("attachments")?.length} />
-                    ) : (
-                      <CustomMultipleAttachment
-                        control={control}
-                        name="attachments"
-                        disabled={edit ? false : view}
-                        label="Attachments"
-                        inputRef={AttachmentRef}
-                        error={!!errors?.attachments?.message}
-                        helperText={errors?.attachments?.message}
-                      />
-                    )}
-                  </Stack>
-                  <Box mt="-13px" ml="10px">
-                    {watch("attachments")
-                      ? watch("attachments").map((item, index) => (
-                          <Typography fontSize="12px" fontWeight="bold" color="gray" key={index}>
-                            {item.name}
-                          </Typography>
-                        ))
-                      : null}
-                  </Box>
-
-                  <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "15px" }}>
-                    CHART OF ACCOUNTS
+              <Box id="requestForm" className="request__form">
+                <Stack gap={2} py={1}>
+                  <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px" }}>
+                    REQUEST DETAILS
                   </Typography>
+                  <Box sx={BoxStyle}>
+                    <CustomTextField
+                      control={control}
+                      name="description"
+                      disabled={edit ? false : view}
+                      label="Description"
+                      type="text"
+                      error={!!errors?.description}
+                      helperText={errors?.description?.message}
+                      fullWidth
+                      multiline
+                    />
 
-                  {/* <CustomAutoComplete
+                    <CustomTextField
+                      control={control}
+                      name="remarks"
+                      disabled={edit ? false : view}
+                      label="Remarks (Optional)"
+                      optional
+                      type="text"
+                      error={!!errors?.remarks}
+                      helperText={errors?.remarks?.message}
+                      fullWidth
+                      multiline
+                    />
+
+                    <Stack flexDirection="row" gap={1} alignItems="center">
+                      {watch("attachments") !== null ? (
+                        <UpdateField label={"Attachments"} value={watch("attachments")?.length} />
+                      ) : (
+                        <CustomMultipleAttachment
+                          control={control}
+                          name="attachments"
+                          disabled={edit ? false : view}
+                          label="Attachments"
+                          inputRef={AttachmentRef}
+                          error={!!errors?.attachments?.message}
+                          helperText={errors?.attachments?.message}
+                        />
+                      )}
+                    </Stack>
+                    <Box mt="-13px" ml="10px">
+                      {watch("attachments")
+                        ? watch("attachments").map((item, index) => (
+                            <Typography
+                              fontSize="12px"
+                              fontWeight="bold"
+                              color="gray"
+                              key={index}
+                              onClick={() => handleViewFile(item?.id)}
+                              sx={{
+                                cursor: "pointer",
+                                textDecoration: "underline",
+                                mb: 1,
+                              }}
+                              maxWidth={"265px"}
+                            >
+                              • {item.name}
+                            </Typography>
+                          ))
+                        : null}
+                    </Box>
+
+                    <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "15px" }}>
+                      CHART OF ACCOUNTS
+                    </Typography>
+
+                    {/* <CustomAutoComplete
                     control={control}
                     name="accountability"
                     disabled={edit ? false : view}
@@ -932,249 +972,214 @@ const ViewTransfer = (props) => {
                     />
                   )} */}
 
-                  <CustomAutoComplete
-                    autoComplete
-                    control={control}
-                    disabled
-                    name="one_charging_id"
-                    options={oneChargingData || []}
-                    onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
-                    loading={isOneChargingLoading}
-                    size="small"
-                    getOptionLabel={(option) => option.code + " - " + option.name}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                    renderInput={(params) => (
-                      <TextField
-                        color="secondary"
-                        {...params}
-                        label="One RDF Charging"
-                        error={!!errors?.one_charging_id}
-                        helperText={errors?.one_charging_id?.message}
-                      />
-                    )}
-                    // onChange={(_, value) => {
-                    //   console.log("value", value);
-
-                    //   if (value) {
-                    //     setValue("department_id", value);
-                    //     setValue("company_id", value);
-                    //     setValue("business_unit_id", value);
-                    //     setValue("unit_id", value);
-                    //     setValue("subunit_id", value);
-                    //     setValue("location_id", value);
-                    //   } else {
-                    //     setValue("department_id", null);
-                    //     setValue("company_id", null);
-                    //     setValue("business_unit_id", null);
-                    //     setValue("unit_id", null);
-                    //     setValue("subunit_id", null);
-                    //     setValue("location_id", null);
-                    //   }
-
-                    //   // fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
-                    //   fields.forEach((item, index) => setValue(`assets.${index}.receiver_id`, null));
-                    //   fields.forEach((item, index) => setValue(`assets.${index}.accountable`, null));
-                    //   fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
-                    //   fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
-                    //   fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
-                    //   fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
-                    //   fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
-                    //   fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
-                    //   fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
-                    //   fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
-                    //   fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
-
-                    //   return value;
-                    // }}
-                  />
-
-                  <CustomAutoComplete
-                    autoComplete
-                    freeSolo
-                    control={control}
-                    name="department_id"
-                    disabled={edit ? false : view}
-                    options={departmentData}
-                    onOpen={() =>
-                      isDepartmentSuccess ? null : (departmentTrigger(), companyTrigger(), businessUnitTrigger())
-                    }
-                    loading={isDepartmentLoading}
-                    size="small"
-                    // clearIcon={null}
-                    getOptionLabel={(option) => option.department_code + " - " + option.department_name}
-                    isOptionEqualToValue={(option, value) => option.id === value.id}
-                    renderInput={(params) => (
-                      <TextField
-                        multiline
-                        color="secondary"
-                        {...params}
-                        label="Department"
-                        error={!!errors?.department_id}
-                        helperText={errors?.department_id?.message}
-                      />
-                    )}
-                  />
-
-                  <CustomAutoComplete
-                    name="company_id"
-                    freeSolo
-                    control={control}
-                    options={companyData}
-                    onOpen={() => (isCompanySuccess ? null : company())}
-                    loading={isCompanyLoading}
-                    size="small"
-                    getOptionLabel={(option) => option.company_code + " - " + option.company_name}
-                    isOptionEqualToValue={(option, value) => option.company_id === value.company_id}
-                    renderInput={(params) => (
-                      <TextField
-                        multiline
-                        maxRows={2}
-                        color="secondary"
-                        {...params}
-                        label="Company"
-                        error={!!errors?.company_id}
-                        helperText={errors?.company_id?.message}
-                      />
-                    )}
-                    disabled
-                  />
-
-                  <CustomAutoComplete
-                    autoComplete
-                    freeSolo
-                    name="business_unit_id"
-                    control={control}
-                    options={businessUnitData}
-                    loading={isBusinessUnitLoading}
-                    size="small"
-                    getOptionLabel={(option) => option.business_unit_code + " - " + option.business_unit_name}
-                    isOptionEqualToValue={(option, value) => option.business_unit_id === value.business_unit_id}
-                    renderInput={(params) => (
-                      <TextField
-                        multiline
-                        color="secondary"
-                        {...params}
-                        label="Business Unit"
-                        error={!!errors?.business_unit_id}
-                        helperText={errors?.business_unit_id?.message}
-                      />
-                    )}
-                    disabled
-                  />
-
-                  <CustomAutoComplete
-                    autoComplete
-                    freeSolo
-                    name="unit_id"
-                    disabled={edit ? false : view}
-                    control={control}
-                    options={departmentData?.filter((obj) => obj?.id === watch("department_id")?.id)[0]?.unit || []}
-                    onOpen={() => (isUnitSuccess ? null : (unitTrigger(), subunitTrigger(), locationTrigger()))}
-                    loading={isUnitLoading}
-                    size="small"
-                    getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
-                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                    renderInput={(params) => (
-                      <TextField
-                        multiline
-                        color="secondary"
-                        {...params}
-                        label="Unit"
-                        error={!!errors?.unit_id}
-                        helperText={errors?.unit_id?.message}
-                      />
-                    )}
-                    onChange={(_, value) => {
-                      setValue("subunit_id", null);
-                      setValue("location_id", null);
-                      return value;
-                    }}
-                  />
-
-                  <CustomAutoComplete
-                    autoComplete
-                    freeSolo
-                    name="subunit_id"
-                    disabled={edit ? false : view}
-                    control={control}
-                    options={unitData?.filter((obj) => obj?.id === watch("unit_id")?.id)[0]?.subunit || []}
-                    loading={isSubUnitLoading}
-                    size="small"
-                    getOptionLabel={(option) => option.subunit_code + " - " + option.subunit_name}
-                    isOptionEqualToValue={(option, value) => {
-                      console.log("option&value", option, value);
-                      return option.id === value.id;
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        multiline
-                        color="secondary"
-                        {...params}
-                        label="Sub Unit"
-                        error={!!errors?.subunit_id}
-                        helperText={errors?.subunit_id?.message}
-                      />
-                    )}
-                  />
-
-                  <CustomAutoComplete
-                    autoComplete
-                    freeSolo
-                    name="location_id"
-                    disabled={edit ? false : view}
-                    control={control}
-                    options={locationData?.filter((item) => {
-                      return item.subunit.some((subunit) => {
-                        return subunit?.sync_id === watch("subunit_id")?.sync_id;
-                      });
-                    })}
-                    loading={isLocationLoading}
-                    size="small"
-                    getOptionLabel={(option) => option.location_code + " - " + option.location_name}
-                    isOptionEqualToValue={(option, value) => option.location_id === value.location_id}
-                    renderInput={(params) => (
-                      <TextField
-                        color="secondary"
-                        {...params}
-                        label="Location"
-                        error={!!errors?.location_id}
-                        helperText={errors?.location_id?.message}
-                      />
-                    )}
-                  />
-
-                  <Stack gap={2}>
-                    <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
-                      ACCOUNTING ENTRIES
-                    </Typography>
-                    {console.log("watchhhhh👀👀", watch("depreciation_debit_id"))}
+                    <CustomAutoComplete
+                      autoComplete
+                      control={control}
+                      freeSolo
+                      disabled
+                      name="one_charging_id"
+                      options={oneChargingData || []}
+                      onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
+                      loading={isOneChargingLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.code + " - " + option.name}
+                      isOptionEqualToValue={(option, value) => option.id === value.id}
+                      renderInput={(params) => (
+                        <TextField
+                          multiline
+                          color="secondary"
+                          {...params}
+                          label="One RDF Charging"
+                          error={!!errors?.one_charging_id}
+                          helperText={errors?.one_charging_id?.message}
+                        />
+                      )}
+                    />
 
                     <CustomAutoComplete
                       autoComplete
-                      freeSolo={!permissions.includes("fixed-asset") || transactionData?.approved}
-                      name="depreciation_debit_id"
-                      disabled={!permissions.includes("fixed-asset") || transactionData?.approved}
+                      freeSolo
                       control={control}
-                      options={accountTitleData}
-                      loading={isAccountTitleLoading}
-                      onOpen={() => (isAccountTitleSuccess ? null : accountTitleTrigger())}
+                      name="department_id"
+                      disabled={edit ? false : view}
+                      options={departmentData}
+                      onOpen={() =>
+                        isDepartmentSuccess ? null : (departmentTrigger(), companyTrigger(), businessUnitTrigger())
+                      }
+                      loading={isDepartmentLoading}
                       size="small"
-                      getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
-                      isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
+                      getOptionLabel={(option) => option.department_code + " - " + option.department_name}
+                      isOptionEqualToValue={(option, value) => option.id === value.id}
+                      renderInput={(params) => (
+                        <TextField
+                          multiline
+                          color="secondary"
+                          {...params}
+                          label="Department"
+                          error={!!errors?.department_id}
+                          helperText={errors?.department_id?.message}
+                        />
+                      )}
+                    />
+
+                    <CustomAutoComplete
+                      name="company_id"
+                      freeSolo
+                      control={control}
+                      options={companyData}
+                      onOpen={() => (isCompanySuccess ? null : company())}
+                      loading={isCompanyLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.company_code + " - " + option.company_name}
+                      isOptionEqualToValue={(option, value) => option.company_id === value.company_id}
+                      renderInput={(params) => (
+                        <TextField
+                          multiline
+                          maxRows={2}
+                          color="secondary"
+                          {...params}
+                          label="Company"
+                          error={!!errors?.company_id}
+                          helperText={errors?.company_id?.message}
+                        />
+                      )}
+                      disabled
+                    />
+
+                    <CustomAutoComplete
+                      autoComplete
+                      freeSolo
+                      name="business_unit_id"
+                      control={control}
+                      options={businessUnitData}
+                      loading={isBusinessUnitLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.business_unit_code + " - " + option.business_unit_name}
+                      isOptionEqualToValue={(option, value) => option.business_unit_id === value.business_unit_id}
+                      renderInput={(params) => (
+                        <TextField
+                          multiline
+                          color="secondary"
+                          {...params}
+                          label="Business Unit"
+                          error={!!errors?.business_unit_id}
+                          helperText={errors?.business_unit_id?.message}
+                        />
+                      )}
+                      disabled
+                    />
+
+                    <CustomAutoComplete
+                      autoComplete
+                      freeSolo
+                      name="unit_id"
+                      disabled={edit ? false : view}
+                      control={control}
+                      options={departmentData?.filter((obj) => obj?.id === watch("department_id")?.id)[0]?.unit || []}
+                      onOpen={() => (isUnitSuccess ? null : (unitTrigger(), subunitTrigger(), locationTrigger()))}
+                      loading={isUnitLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
+                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                      renderInput={(params) => (
+                        <TextField
+                          multiline
+                          color="secondary"
+                          {...params}
+                          label="Unit"
+                          error={!!errors?.unit_id}
+                          helperText={errors?.unit_id?.message}
+                        />
+                      )}
+                      onChange={(_, value) => {
+                        setValue("subunit_id", null);
+                        setValue("location_id", null);
+                        return value;
+                      }}
+                    />
+
+                    <CustomAutoComplete
+                      autoComplete
+                      freeSolo
+                      name="subunit_id"
+                      disabled={edit ? false : view}
+                      control={control}
+                      options={unitData?.filter((obj) => obj?.id === watch("unit_id")?.id)[0]?.subunit || []}
+                      loading={isSubUnitLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.subunit_code + " - " + option.subunit_name}
+                      isOptionEqualToValue={(option, value) => {
+                        return option.id === value.id;
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          multiline
+                          color="secondary"
+                          {...params}
+                          label="Sub Unit"
+                          error={!!errors?.subunit_id}
+                          helperText={errors?.subunit_id?.message}
+                        />
+                      )}
+                    />
+
+                    <CustomAutoComplete
+                      autoComplete
+                      freeSolo
+                      name="location_id"
+                      disabled={edit ? false : view}
+                      control={control}
+                      options={locationData?.filter((item) => {
+                        return item.subunit.some((subunit) => {
+                          return subunit?.sync_id === watch("subunit_id")?.sync_id;
+                        });
+                      })}
+                      loading={isLocationLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.location_code + " - " + option.location_name}
+                      isOptionEqualToValue={(option, value) => option.location_id === value.location_id}
                       renderInput={(params) => (
                         <TextField
                           color="secondary"
                           {...params}
-                          label="Depreciation Debit"
-                          error={!!errors?.depreciation_debit_id}
-                          helperText={errors?.depreciation_debit_id?.message}
-                          multiline
+                          label="Location"
+                          error={!!errors?.location_id}
+                          helperText={errors?.location_id?.message}
                         />
                       )}
                     />
-                  </Stack>
 
-                  {/* <CustomAutoComplete
+                    <Stack gap={2}>
+                      <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
+                        ACCOUNTING ENTRIES
+                      </Typography>
+
+                      <CustomAutoComplete
+                        autoComplete
+                        freeSolo={!permissions.includes("fixed-asset") || transactionData?.approved}
+                        name="depreciation_debit_id"
+                        disabled={!permissions.includes("fixed-asset") || transactionData?.approved}
+                        control={control}
+                        options={accountTitleData}
+                        loading={isAccountTitleLoading}
+                        onOpen={() => (isAccountTitleSuccess ? null : accountTitleTrigger())}
+                        size="small"
+                        getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
+                        isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
+                        renderInput={(params) => (
+                          <TextField
+                            color="secondary"
+                            {...params}
+                            label="Depreciation Debit"
+                            error={!!errors?.depreciation_debit_id}
+                            helperText={errors?.depreciation_debit_id?.message}
+                            multiline
+                          />
+                        )}
+                      />
+                    </Stack>
+
+                    {/* <CustomAutoComplete
                     name="receiver_id"
                     disabled={edit ? false : view}
                     control={control}
@@ -1199,7 +1204,7 @@ const ViewTransfer = (props) => {
                     )}
                   /> */}
 
-                  {/* <CustomAutoComplete
+                    {/* <CustomAutoComplete
                     name="account_title_id"
                     disabled={edit ? false : view}
                     control={control}
@@ -1218,10 +1223,11 @@ const ViewTransfer = (props) => {
                       />
                     )}
                   /> */}
-                </Box>
-              </Stack>
+                  </Box>
+                </Stack>
+              </Box>
             </Box>
-          </Box>
+          )}
 
           {/* TABLE */}
           <Box className="request__table">
@@ -1292,7 +1298,6 @@ const ViewTransfer = (props) => {
                                   !!fields.find((item) => item.fixed_asset_id?.id === option.id) &&
                                   option?.transfer === 1
                                 }
-                                // getOptionDisabled={(option) => !!fields.find((item) => console.log(item))}
                                 onChange={(_, newValue) => {
                                   if (newValue) {
                                     // onChange(newValue.id);
@@ -1446,7 +1451,6 @@ const ViewTransfer = (props) => {
                                       />
                                     )}
                                     onChange={(_, newValue) => {
-                                      // console.log("New Custodian newValue: ", newValue);
                                       onChange(newValue);
                                       if (newValue) {
                                         setValue(`assets.${index}.receiver_id`, newValue);
@@ -1528,7 +1532,6 @@ const ViewTransfer = (props) => {
                                     />
                                   )}
                                   onChange={(_, newValue) => {
-                                    // console.log("New Custodian newValue: ", newValue);
                                     onChange(newValue);
                                     if (newValue) {
                                       setValue("receiver_id", newValue);
@@ -1633,6 +1636,35 @@ const ViewTransfer = (props) => {
 
                         <TableCell className="tbl-cell">
                           <Stack width="250px" rowGap={0}>
+                            <TextField
+                              {...register(`assets.${index}.one_charging_id`)}
+                              variant="outlined"
+                              disabled
+                              type="text"
+                              size="small"
+                              sx={{
+                                backgroundColor: "transparent",
+                                border: "none",
+
+                                ml: "-10px",
+                                "& .MuiOutlinedInput-root": {
+                                  "& fieldset": {
+                                    border: "none",
+                                  },
+                                },
+                                "& .MuiInputBase-input": {
+                                  backgroundColor: "transparent",
+                                  fontWeight: "bold",
+                                  fontSize: "11px",
+                                  textOverflow: "ellipsis",
+                                },
+                                "& .Mui-disabled": {
+                                  color: "red",
+                                },
+                                marginTop: "-15px",
+                              }}
+                            />
+
                             <TextField
                               {...register(`assets.${index}.company_id`)}
                               variant="outlined"
@@ -1901,7 +1933,7 @@ const ViewTransfer = (props) => {
                           onClick={() =>
                             setValue(
                               "depreciation_debit_id",
-                              transactionData?.depreciation_debit_id || transferData[0]?.depreciation_debit
+                              transferData[0]?.depreciation_debit || transactionData?.depreciation_debit_id
                             )
                           }
                           // startIcon={<Undo sx={{ color: "#5f3030" }} />}
