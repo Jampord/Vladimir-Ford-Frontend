@@ -156,6 +156,7 @@ const AddRole = (props) => {
     "account-title",
     "credit",
     "supplier",
+    "ship-to",
     "unit-of-measurement",
 
     "division",
@@ -184,6 +185,7 @@ const AddRole = (props) => {
     "requisition-received-asset",
     "requisition-rr-summary",
     "requisition-releasing",
+    "requisition-releasing-monitoring",
 
     //Asset Movement
     "transfer",
@@ -198,7 +200,7 @@ const AddRole = (props) => {
     "approving-request",
     "approving-transfer",
     "final-approving",
-    "approving-pull-out",
+    // "approving-pull-out",
     "approving-disposal",
     "approving-evaluation",
 
@@ -237,15 +239,21 @@ const AddRole = (props) => {
   ];
   const userManagement = ["user-accounts", "role-management"];
   const settings = ["approver-settings", "form-settings", "coordinator-settings", "receiver-settings"];
-  const assetRequisition = ["requisition", "purchase-request", "requisition-received-asset", "requisition-releasing"];
+  const assetRequisition = [
+    "requisition",
+    "purchase-request",
+    "requisition-received-asset",
+    "requisition-releasing",
+    "requisition-releasing-monitoring",
+  ];
   const assetMovement = ["transfer", "pull-out", "disposal", "transfer-receiving", "evaluation"];
   const approving = [
     "approving-request",
     "approving-transfer",
     "final-approving",
-    "approving-pull-out",
+    // "approving-pull-out",
     "approving-disposal",
-    "approving-evaluation",
+    // "approving-evaluation",
   ];
   const reports = [
     "pr-report",
@@ -384,6 +392,7 @@ const AddRole = (props) => {
       { label: "Account Title", value: "account-title" },
       { label: "Credit", value: "credit" },
       { label: "Supplier", value: "supplier" },
+      { label: "Ship To", value: "ship-to" },
       { label: "Unit of Measurement", value: "unit-of-measurement" },
       // { label: "Small Tools", value: "small-tools" },
     ];
@@ -485,6 +494,7 @@ const AddRole = (props) => {
       { label: "Received Asset", value: "requisition-received-asset" },
       { label: "RR Summary", value: "requisition-rr-summary" },
       { label: "Releasing", value: "requisition-releasing" },
+      { label: "Releasing Monitoring", value: "requisition-releasing-monitoring" },
     ];
 
     const assetRequisition2 = [
@@ -574,7 +584,7 @@ const AddRole = (props) => {
             ml: 3,
           }}
         >
-          <FormControlLabel
+          {/* <FormControlLabel
             disabled={data.action === "view"}
             label="Approving Pull Out"
             value="approving-pull-out"
@@ -584,7 +594,7 @@ const AddRole = (props) => {
                 checked={watch("access_permission")?.includes("approving-pull-out")}
               />
             }
-          />
+          /> */}
 
           <FormControlLabel
             disabled={data.action === "view"}
@@ -598,7 +608,7 @@ const AddRole = (props) => {
             }
           />
 
-          <FormControlLabel
+          {/* <FormControlLabel
             disabled={data.action === "view"}
             label="Approving Evaluation"
             value="approving-evaluation"
@@ -608,7 +618,7 @@ const AddRole = (props) => {
                 checked={watch("access_permission")?.includes("approving-evaluation")}
               />
             }
-          />
+          /> */}
         </FormGroup>
       </Stack>
     );
@@ -834,6 +844,7 @@ const AddRole = (props) => {
                                     "account-title",
                                     "credit",
                                     "supplier",
+                                    "ship-to",
                                     "sub-unit",
                                     "division",
                                     "type-of-request",
@@ -1010,6 +1021,7 @@ const AddRole = (props) => {
                                     "requisition-received-asset",
                                     "requisition-rr-summary",
                                     "requisition-releasing",
+                                    "requisition-releasing-monitoring",
                                   ]),
                                 ]);
                               } else {
@@ -1126,9 +1138,9 @@ const AddRole = (props) => {
                                     "approving-request",
                                     "approving-transfer",
                                     "final-approving",
-                                    "approving-pull-out",
+                                    // "approving-pull-out",
                                     "approving-disposal",
-                                    "approving-evaluation",
+                                    // "approving-evaluation",
                                   ]),
                                 ]);
                               } else {
