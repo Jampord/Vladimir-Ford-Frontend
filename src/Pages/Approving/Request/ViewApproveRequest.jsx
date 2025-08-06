@@ -1,16 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import "../../../Style/Request/request.scss";
 import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 
 import {
   Box,
   Button,
-  Chip,
   Dialog,
   DialogActions,
   Divider,
   Grow,
-  Link,
   Stack,
   Table,
   TableBody,
@@ -23,22 +21,7 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import {
-  ArrowBackIosRounded,
-  Cancel,
-  Check,
-  Description,
-  Done,
-  Download,
-  Edit,
-  Help,
-  InsertDriveFile,
-  RemoveShoppingCart,
-  Report,
-  Undo,
-  ZoomIn,
-  ZoomOut,
-} from "@mui/icons-material";
+import { ArrowBackIosRounded, Check, Done, Edit, Help, Report, Undo } from "@mui/icons-material";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
@@ -52,26 +35,17 @@ import NoRecordsFound from "../../../Layout/NoRecordsFound";
 import { useGetRequestContainerAllApiQuery } from "../../../Redux/Query/Request/RequestContainer";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import {
-  approvalApi,
   useGetApprovalIdApiQuery,
-  useGetNextRequestQuery,
-  useLazyDlAttachmentQuery,
   useLazyGetNextRequestQuery,
   usePatchApprovalStatusApiMutation,
   usePutFinalApprovalEditApiMutation,
 } from "../../../Redux/Query/Approving/Approval";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
-import MasterlistToolbar from "../../../Components/Reusable/MasterlistToolbar";
-import {
-  closeDialog,
-  openDialog,
-  closeDialog1,
-  openDialog1,
-  closeDrawer,
-} from "../../../Redux/StateManagement/booleanStateSlice";
+
+import { closeDialog1, openDialog1, closeDrawer } from "../../../Redux/StateManagement/booleanStateSlice";
 import { useRemovePurchaseRequestApiMutation } from "../../../Redux/Query/Request/PurchaseRequest";
 import ErrorFetching from "../../ErrorFetching";
-import { useDownloadAttachment } from "../../../Hooks/useDownloadAttachment";
+
 import { usePatchPrYmirApiMutation, usePostPrYmirApiMutation } from "../../../Redux/Query/Masterlist/YmirCoa/YmirApi";
 import { useGetYmirPrApiQuery, useLazyGetYmirPrApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/YmirPr";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
@@ -96,13 +70,9 @@ const ViewApproveRequest = (props) => {
   console.log("transactionData", transactionData);
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
-  const [attachment, setAttachment] = useState("");
-  const [base64, setBase64] = useState("");
-  const [image, setImage] = useState(false);
-  const [value, setValue] = useState();
-  const [name, setName] = useState("");
+
   const [referenceNumber, setReferenceNumber] = useState("");
-  const [scale, setScale] = useState(1);
+
   const [isSmallTools, setIsSmallTools] = useState(false);
   console.log("isSmallTools", isSmallTools);
 
@@ -110,7 +80,6 @@ const ViewApproveRequest = (props) => {
   const navigate = useNavigate();
   const isSmallScreen = useMediaQuery("(min-width: 700px)");
 
-  const dialog = useSelector((state) => state.booleanState.dialog);
   const dialog1 = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
 
   const [patchApprovalStatus, { isLoading }] = usePatchApprovalStatusApiMutation();
@@ -158,22 +127,7 @@ const ViewApproveRequest = (props) => {
     },
   ] = useLazyGetMinorCategorySmallToolsApiQuery();
 
-  // console.log("approveRequest", approveRequestData);
-
-  // const {
-  //   data: ymirData,
-  //   isLoading: isYmirDataLoading,
-  //   isSuccess: isYmirDataSuccess,
-  //   refetch: isYmirDataRefetch,
-  // } = useGetYmirPrApiQuery(
-  //   // { page: page, per_page: perPage, transaction_number: transactionData?.transaction_number },
-  //   { transaction_number: transactionData?.transaction_number },
-  //   { refetchOnMountOrArgChange: true }
-  // );
-
   const [getYmirData, { isSuccess: isYmirDataSuccess }] = useLazyGetYmirPrApiQuery();
-
-  const [downloadAttachment] = useLazyDlAttachmentQuery({ attachment: attachment, id: approveRequestData?.id });
 
   const [putFinalApproval, { data: postData }] = usePutFinalApprovalEditApiMutation();
 
@@ -196,34 +150,6 @@ const ViewApproveRequest = (props) => {
       specification: "",
     },
   });
-
-  // Table Sorting --------------------------------
-  const [order, setOrder] = useState("desc");
-  const [orderBy, setOrderBy] = useState("id");
-
-  const descendingComparator = (a, b, orderBy) => {
-    if (b[orderBy] < a[orderBy]) {
-      return -1;
-    }
-    if (b[orderBy] > a[orderBy]) {
-      return 1;
-    }
-    return 0;
-  };
-
-  const comparator = (order, orderBy) => {
-    return order === "desc"
-      ? (a, b) => descendingComparator(a, b, orderBy)
-      : (a, b) => -descendingComparator(a, b, orderBy);
-  };
-
-  const onSort = (property) => {
-    const isAsc = orderBy === property && order === "asc";
-    setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
-  };
-  // console.log(approveRequestData?.data?.map((data) => data?.fa_approval).includes(1));
-  // console.log(requestData.is_pr_returned);
 
   const onApprovalApproveHandler = (transaction_number) => {
     const nextData = dispatch(
@@ -278,20 +204,7 @@ const ViewApproveRequest = (props) => {
               transaction_number: transaction_number,
             }).unwrap();
 
-            // console.log("Responsesssssss", approveRequestData?.data);
-            // const refetchResult = await isApproveRefetch({ force: true });
-            // console.log("refetchResult", refetchResult);
-            // const updatedData = refetchResult?.data;
-            // console.log("updatedData", updatedData?.data);
-            // console.log(
-            //   "Response",
-            //   updatedData?.data.map((item) => item.fa_approval)
-            // );
-
             if (
-              // updatedData?.data.map((data) => data?.fa_approval).includes(1) ||
-              // updatedData?.data.map((data) => data?.final_approval).includes(1)
-              // || approveRequestData?.data.map((data) => data?.fa_approval).includes(1) ||
               approveRequestData?.data.map((data) => data?.final_approval).includes(1) ||
               transactionData?.final === true
             ) {
@@ -463,63 +376,6 @@ const ViewApproveRequest = (props) => {
       })
     );
   };
-
-  const handleDownloadAttachment = (value) => {
-    useDownloadAttachment({ attachment: value?.value, id: value?.id });
-  };
-
-  const base64ToBlob = (base64, mimeType) => {
-    const binaryString = atob(base64); // Decode Base64 to binary string
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i); // Convert to byte array
-    }
-    return new Blob([bytes], { type: mimeType });
-  };
-
-  const handleOpenDialog = (value) => {
-    // console.log("valueeeeeee", value);
-
-    const blob = base64ToBlob(value?.value?.base64, value?.value?.mime_type);
-    const url = URL.createObjectURL(blob);
-
-    dispatch(openDialog());
-    setBase64(url);
-    (value?.value?.file_name.includes("jpg") ||
-      value?.value?.file_name.includes("png") ||
-      value?.value?.file_name.includes("jpeg")) &&
-      setImage(true);
-    setValue(value.data);
-    setName(value.name);
-  };
-
-  const handleCloseDialog = () => {
-    dispatch(closeDialog()) || dispatch(closeDialog1());
-    setBase64("");
-    setImage(false);
-    setValue(null);
-    setName("");
-    setScale(1);
-  };
-
-  // Zoom handlers
-  const handleZoomIn = () => {
-    setScale((prev) => Math.min(prev + 0.2, 4)); // Limit max zoom to 3x
-  };
-
-  const handleZoomOut = () => {
-    setScale((prev) => Math.max(prev - 0.2, 0.5)); // Limit min zoom to 0.5x
-  };
-
-  // const perPageHandler = (e) => {
-  //   setPage(1);
-  //   setPerPage(parseInt(e.target.value));
-  // };
-
-  // const pageHandler = (_, page) => {
-  //   // console.log(page + 1);
-  //   setPage(page + 1);
-  // };
 
   const attachmentSx = {
     textDecoration: "underline",
@@ -714,6 +570,7 @@ const ViewApproveRequest = (props) => {
                       <TableCell className="tbl-cell">Ref. No.</TableCell>
                       <TableCell className="tbl-cell">Type of Request</TableCell>
                       <TableCell className="tbl-cell">Warehouse</TableCell>
+                      <TableCell className="tbl-cell">Ship To</TableCell>
                       <TableCell className="tbl-cell">Acquisition Details</TableCell>
                       <TableCell className="tbl-cell">Accounting Entries</TableCell>
                       <TableCell className="tbl-cell">Chart of Accounts</TableCell>
@@ -763,6 +620,13 @@ const ViewApproveRequest = (props) => {
                               </TableCell>
 
                               <TableCell className="tbl-cell text-weight">{data.warehouse.warehouse_name}</TableCell>
+
+                              <TableCell className="tbl-cell text-weight">
+                                <Typography fontSize={12} fontWeight={600}>
+                                  {data.ship_to?.location}
+                                </Typography>
+                                <Typography fontSize={11}>{data.ship_to?.address}</Typography>
+                              </TableCell>
 
                               <TableCell className="tbl-cell">{data.acquisition_details}</TableCell>
 
@@ -873,33 +737,6 @@ const ViewApproveRequest = (props) => {
                               </TableCell>
 
                               <TableCell className="tbl-cell">
-                                {/* {data?.attachments?.letter_of_request && (
-                                  <Stack flexDirection="row" gap={1}>
-                                    <Typography fontSize={12} fontWeight={600}>
-                                      Letter of Request:
-                                    </Typography>
-                                    <Tooltip title="View Letter of Request" arrow>
-                                      <Typography
-                                        sx={attachmentSx}
-                                        // onClick={() =>
-                                        //   handleDownloadAttachment({ value: "letter_of_request", id: data?.id })
-                                        // }
-                                        onClick={() => {
-                                          data.attachments.letter_of_request.base64.includes("data:")
-                                            ? handleOpenDialog({
-                                                value: data.attachments.letter_of_request.base64,
-                                                data: data,
-                                                name: "letter_of_request",
-                                              })
-                                            : handleDownloadAttachment({ value: "letter_of_request", id: data?.id });
-                                        }}
-                                      >
-                                        {data?.attachments?.letter_of_request?.file_name}
-                                      </Typography>
-                                    </Tooltip>
-                                  </Stack>
-                                )} */}
-
                                 {data?.attachments?.letter_of_request && (
                                   <Stack flexDirection="row" gap={1}>
                                     <Typography fontSize={12} fontWeight={600}>
@@ -1161,115 +998,6 @@ const ViewApproveRequest = (props) => {
                 </Button>
               </DialogActions>
             </Stack>
-          </Dialog>
-
-          <Dialog
-            // open={dialog}
-            TransitionComponent={Grow}
-            // PaperProps={{ sx: { borderRadius: "10px" } }}
-            onClose={handleCloseDialog}
-            fullScreen
-          >
-            <Stack alignContent="center" justifyContent="center" height="93vh">
-              {image === true ? (
-                <img
-                  src={base64}
-                  style={{
-                    display: "flex",
-                    maxWidth: "100vw",
-                    maxHeight: "93vh",
-                    transform: `scale(${scale})`,
-                    transformOrigin: "center center",
-                    transition: "transform 0.3s ease",
-                    alignContent: "center",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: "0 auto",
-                    border: "0px solid black",
-                  }}
-                  title="View Attachment"
-                />
-              ) : (
-                <iframe
-                  src={base64}
-                  style={{
-                    display: "flex",
-                    width: "100%",
-                    height: "100%",
-                    alignContent: "center",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: "0 auto",
-                    border: "1px solid black",
-                  }}
-                  title="View Attachment"
-                />
-              )}
-            </Stack>
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1,
-                justifyContent: "space-between",
-                backgroundColor: "white",
-                zIndex: 1,
-                position: "fixed",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                padding: "5px 30px 5px 0",
-                borderTop: image === true ? "1px solid #000" : null,
-              }}
-            >
-              <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-start" }} />
-              {image && (
-                <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    size="medium"
-                    onClick={handleZoomOut}
-                    startIcon={<ZoomOut color="primary" />}
-                  >
-                    {!isSmallScreen ? "-" : "Zoom -"}
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    size="medium"
-                    onClick={handleZoomIn}
-                    startIcon={<ZoomIn color="primary" />}
-                  >
-                    {!isSmallScreen ? "+" : "Zoom +"}
-                  </Button>
-                </Box>
-              )}
-
-              <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
-                <DialogActions>
-                  <Button
-                    variant="outlined"
-                    // size="small"
-                    color="secondary"
-                    onClick={handleCloseDialog}
-                    sx={{ backgroundColor: "white" }}
-                  >
-                    Close
-                  </Button>
-
-                  <Button
-                    variant="contained"
-                    // size="small"
-                    color="secondary"
-                    startIcon={<Download color="primary" />}
-                    onClick={() => handleDownloadAttachment({ value: name, id: value?.id })}
-                  >
-                    Download
-                  </Button>
-                </DialogActions>
-              </Box>
-            </Box>
           </Dialog>
         </Box>
       )}
