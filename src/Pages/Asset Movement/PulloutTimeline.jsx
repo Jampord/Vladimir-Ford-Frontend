@@ -57,12 +57,17 @@ const PulloutTimeline = (props) => {
             ? ["Cancelled", ...transactionData?.steps]
             : transactionData?.status === "Returned"
             ? ["Returned", ...transactionData?.steps]
+            : transactionData?.status === "Rejected"
+            ? ["Rejected", ...transactionData?.steps]
             : transactionData?.steps
           )?.map((label, index) => (
             <Step key={index} last>
               <StepLabel
                 icon={
-                  (transactionData?.status === "Returned" || transactionData?.status === "Cancelled") && index === 0 ? (
+                  (transactionData?.status === "Returned" ||
+                    transactionData?.status === "Cancelled" ||
+                    transactionData?.status === "Rejected") &&
+                  index === 0 ? (
                     <Error />
                   ) : null
                 }
@@ -71,7 +76,10 @@ const PulloutTimeline = (props) => {
                   ".Mui-completed > p": { color: "text.light" },
                   ".Mui-active": {
                     color:
-                      (transactionData?.status === "Returned" || transactionData?.status === "Cancelled") && index === 0
+                      (transactionData?.status === "Returned" ||
+                        transactionData?.status === "Cancelled" ||
+                        transactionData?.status === "Rejected") &&
+                      index === 0
                         ? "error.main"
                         : "primary.main",
                   },
@@ -159,7 +167,10 @@ const PulloutTimeline = (props) => {
                     {/* <Box> */}
                     <StepLabel
                       icon={
-                        item?.action === "Declined" || item?.action === "Returned" || item?.action === "Cancelled" ? (
+                        item?.action === "Declined" ||
+                        item?.action === "Returned" ||
+                        item?.action === "Cancelled" ||
+                        item?.action === "Rejected" ? (
                           <Error sx={{ color: "error.light" }} />
                         ) : item?.action === "fully Received" || item?.action === "item Received" ? (
                           <HowToReg sx={{ color: "success.main" }} />
@@ -188,7 +199,10 @@ const PulloutTimeline = (props) => {
                         className="timelineSteps__box"
                         sx={{
                           backgroundColor:
-                            item?.action === "Declined" || item?.action === "Returned" || item?.action === "Cancelled"
+                            item?.action === "Declined" ||
+                            item?.action === "Returned" ||
+                            item?.action === "Cancelled" ||
+                            item?.action === "Rejected"
                               ? "#ff000017"
                               : item?.action === "Approved" ||
                                 item?.action === " FA Approved" ||
@@ -199,7 +213,10 @@ const PulloutTimeline = (props) => {
                               ? "#00800016"
                               : item?.action === "Removed PR Number"
                               ? "#ff000017"
-                              : item?.action === "Change of Care-of" || item?.action === "Change Care of"
+                              : item?.action === "Change of Care-of" ||
+                                item?.action === "Change Care of" ||
+                                item?.action === "Changed care of" ||
+                                item?.action === "Changed care of confirmed"
                               ? "#FFCF86"
                               : "#0088880f",
                         }}
@@ -209,7 +226,10 @@ const PulloutTimeline = (props) => {
                           orientation="vertical"
                           sx={{
                             backgroundColor:
-                              item?.action === "Declined" || item?.action === "Returned" || item?.action === "Cancelled"
+                              item?.action === "Declined" ||
+                              item?.action === "Returned" ||
+                              item?.action === "Cancelled" ||
+                              item?.action === "Rejected"
                                 ? "error.light"
                                 : item?.action === "Approved" ||
                                   item?.action === " FA Approved" ||
@@ -246,7 +266,7 @@ const PulloutTimeline = (props) => {
                             </Typography>
                           )}
 
-                          {item?.action === "Change Care of" && (
+                          {(item?.action === "Change Care of" || item?.action === "Change of Care-of") && (
                             <>
                               <Typography fontSize={12} fontWeight={600} color="text">
                                 Vladimir Tag Number: {item?.vladimir_tag_number}
