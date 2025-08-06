@@ -110,6 +110,7 @@ import DepreciationMonthlyReport from "./Pages/Reports/DepreciationMonthlyReport
 import OneRDFCharging from "./Pages/Masterlist/OneRDFCharging";
 import PulloutConfirmation from "./Pages/Asset Movement/Pullout Confirmation/PulloutConfirmation";
 import ReleasingOfAssetMonitoring from "./Pages/Asset Requisition/Releasing of Asset/ReleasingOfAssetMonitoring";
+import ShipTo from "./Pages/Masterlist/ShipTo";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -206,6 +207,11 @@ const router = createBrowserRouter([
                 path: "supplier",
                 element: <Supplier />,
                 handle: { permission: "supplier" },
+              },
+              {
+                path: "ship-to",
+                element: <ShipTo />,
+                handle: { permission: "ship-to" },
               },
               {
                 path: "unit-of-measurement",
