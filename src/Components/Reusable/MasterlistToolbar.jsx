@@ -57,6 +57,7 @@ import {
   CheckBox,
   Close,
   DateRange,
+  Delete,
   FileCopy,
   Filter,
   FilterAlt,
@@ -69,6 +70,8 @@ import {
   PrintOutlined,
   PrintRounded,
   QrCodeScannerRounded,
+  Refresh,
+  Search,
   Sync,
   SystemUpdateAltRounded,
   TransferWithinAStation,
@@ -129,6 +132,13 @@ const MasterlistToolbar = (props) => {
   const openRequestFilter = Boolean(anchorElRequestFilter);
   const [anchorElFaFilter, setAnchorElFaFilter] = useState(null);
   const openFaFilter = Boolean(anchorElFaFilter);
+  const [tempDateFrom, setTempDateFrom] = useState(null);
+  const [tempDateTo, setTempDateTo] = useState(null);
+
+  const handleDateSubmit = () => {
+    setDateFrom(tempDateFrom ? moment(tempDateFrom).format("YYYY-MM-DD") : "");
+    setDateTo(tempDateTo ? moment(tempDateTo).format("YYYY-MM-DD") : "");
+  };
 
   const handleClose = () => {
     setAnchorEl(null) ||
@@ -864,13 +874,13 @@ const MasterlistToolbar = (props) => {
                         name="from"
                         label="From"
                         disableFuture
-                        value={dateFrom ? new Date(dateFrom) : null}
+                        value={tempDateFrom}
                         onChange={(value) => {
                           if (value === null) {
-                            setDateFrom(null);
-                            setDateTo(null);
+                            setDateFrom("");
+                            setDateTo("");
                           } else {
-                            setDateFrom(moment(value).format("YYYY-MM-DD"));
+                            setTempDateFrom(value);
                           }
                         }}
                         maxDate={dateTo ? new Date(dateTo) : null}
@@ -886,13 +896,13 @@ const MasterlistToolbar = (props) => {
                       <DatePicker
                         name="to"
                         label="To"
-                        value={dateTo ? new Date(dateTo) : null}
+                        value={tempDateTo}
                         disableFuture
-                        minDate={dateFrom ? new Date(dateFrom) : null}
+                        minDate={tempDateFrom ? new Date(tempDateFrom) : null}
                         onChange={(value) => {
-                          setDateTo(moment(value).format("YYYY-MM-DD"));
+                          setTempDateTo(value);
                         }}
-                        disabled={!dateFrom}
+                        disabled={!tempDateFrom}
                         slotProps={{
                           textField: {
                             size: "small",
@@ -901,7 +911,29 @@ const MasterlistToolbar = (props) => {
                         }}
                         reduceAnimations
                       />
-                      {/* <Button>Search</Button> */}
+
+                      <Box gap={1} display="flex" justifyContent="flex-end">
+                        <Button
+                          variant="contained"
+                          size="small"
+                          color="secondary"
+                          startIcon={<Search color="primary" />}
+                          fullWidth
+                          onClick={handleDateSubmit}
+                        >
+                          <Typography color={"white"} variant="button">
+                            Search
+                          </Typography>
+                        </Button>
+                        <IconButton
+                          variant="contained"
+                          size="small"
+                          color="error"
+                          onClick={() => setDateFrom("") || setDateTo("") || setTempDateFrom("") || setTempDateTo("")}
+                        >
+                          <Refresh />
+                        </IconButton>
+                      </Box>
                     </Stack>
                   </MenuItem>
                 </Menu>
