@@ -325,122 +325,96 @@ const CoordinatorSettings = () => {
         open={dialog}
         TransitionComponent={Grow}
         onClose={() => dispatch(closeDialog())}
-        PaperProps={{ sx: { maxWidth: "1320px", borderRadius: "10px", p: 3 } }}
+        PaperProps={{ sx: { borderRadius: "10px", p: 3, maxHeight: "500px" } }}
+        maxWidth="md"
       >
-        <Stack gap={2}>
-          <Stack flexDirection="row" justifyContent="space-between">
-            <Typography fontSize={20} fontFamily="Anton" color="secondary">
-              Coordinator Information
-            </Typography>
+        <Stack flexDirection="row" justifyContent="space-between">
+          <Typography fontSize={20} fontFamily="Anton" color="secondary">
+            Coordinator Information
+          </Typography>
 
-            {!isSmallScreen && (
-              <IconButton sx={{ marginTop: "-10px" }} onClick={() => dispatch(closeDialog())}>
-                <Tooltip title="Close" placement="top" arrow>
-                  <Close />
-                </Tooltip>
-              </IconButton>
-            )}
-          </Stack>
-
-          <Stack
-            flexDirection="row"
-            flexWrap="wrap"
-            alignItems={isSmallScreen ? "flex-start" : "center"}
-            justifyContent="center"
-            gap={2}
-            maxHeight={isSmallScreen ? "400px" : "550px"}
-            p={1}
-            overflow="auto"
-            width={"1100px"}
-          >
-            {coordinatorHandlesData?.handles?.map((item, index) => (
-              <Card
-                key={index}
-                // sx={{ flex: "1 1 auto" }}
-              >
-                <CardContent
-                  sx={{
-                    display: "flex",
-                    flexDirection: isSmallScreen ? "column" : "row",
-                    // justifyContent: "center",
-                    gap: 2,
-                    width: "500px",
-                    maxWidth: "500px",
-                    height: "180px",
-                    px: 4,
-                  }}
-                >
-                  <Chip label={index + 1} sx={{ backgroundColor: "secondary.main", color: "white", maxWidth: 40 }} />
-
-                  <Stack sx={{ "&>div": { flexDirection: "row", gap: 1 } }}>
-                    <Stack>
-                      <Typography color="secondary" fontWeight="bold" fontSize={14}>
-                        One RDF Charging:
-                      </Typography>
-                      <Typography color="secondary.light" fontSize={14}>
-                        {item.one_charging.name}
-                      </Typography>
-                    </Stack>
-
-                    <Stack>
-                      <Typography color="secondary" fontWeight="bold" fontSize={14}>
-                        Company:
-                      </Typography>
-                      <Typography color="secondary.light" fontSize={14}>
-                        {item.company.name}
-                      </Typography>
-                    </Stack>
-
-                    <Stack>
-                      <Typography color="secondary" fontWeight="bold" fontSize={14}>
-                        Business Unit:
-                      </Typography>
-                      <Typography color="secondary.light" fontSize={14}>
-                        {item.business_unit.name}
-                      </Typography>
-                    </Stack>
-
-                    <Stack>
-                      <Typography color="secondary" fontWeight="bold" fontSize={14}>
-                        Department:
-                      </Typography>
-                      <Typography color="secondary.light" fontSize={14}>
-                        {item.department.name}
-                      </Typography>
-                    </Stack>
-
-                    <Stack>
-                      <Typography color="secondary" fontWeight="bold" fontSize={14}>
-                        Unit:
-                      </Typography>
-                      <Typography color="secondary.light" fontSize={14}>
-                        {item.unit.name}
-                      </Typography>
-                    </Stack>
-
-                    <Stack>
-                      <Typography color="secondary" fontWeight="bold" fontSize={14}>
-                        Subunit:
-                      </Typography>
-                      <Typography color="secondary.light" fontSize={14}>
-                        {item.subunit.name}
-                      </Typography>
-                    </Stack>
-
-                    <Stack>
-                      <Typography color="secondary" fontWeight="bold" fontSize={14}>
-                        Location:
-                      </Typography>
-                      <Typography color="secondary.light" fontSize={14}>
-                        {item.location.name}
-                      </Typography>
-                    </Stack>
-                  </Stack>
-                </CardContent>
-              </Card>
-            ))}
-          </Stack>
+          <IconButton sx={{ marginTop: "-10px" }} onClick={() => dispatch(closeDialog())}>
+            <Tooltip title="Close" placement="top" arrow>
+              <Close />
+            </Tooltip>
+          </IconButton>
         </Stack>
+
+        <TableContainer className="mcontainer__th-body">
+          <Table className="mcontainer__table" stickyHeader>
+            <TableHead>
+              <TableRow
+                sx={{
+                  "& > *": {
+                    fontWeight: "bold!important",
+                    whiteSpace: "nowrap",
+                  },
+                }}
+              >
+                <TableCell className="tbl-cell" align="center">
+                  One RDF Charging
+                </TableCell>
+                <TableCell className="tbl-cell" align="center">
+                  Company
+                </TableCell>
+                <TableCell className="tbl-cell" align="center">
+                  Business Unit
+                </TableCell>
+                <TableCell className="tbl-cell" align="center">
+                  Department
+                </TableCell>
+                <TableCell className="tbl-cell" align="center">
+                  Unit
+                </TableCell>
+                <TableCell className="tbl-cell" align="center">
+                  Subunit
+                </TableCell>
+                <TableCell className="tbl-cell" align="center">
+                  Location
+                </TableCell>
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {coordinatorHandlesData?.handles?.length === 0 ? (
+                <NoRecordsFound heightData="medium" />
+              ) : (
+                coordinatorHandlesData?.handles?.map((item, i) => (
+                  <TableRow key={i}>
+                    {console.log("item", item)}
+                    <TableCell className="tbl-cell " align="center">
+                      <Typography
+                        fontSize={"11px"}
+                        fontWeight={550}
+                        color={"primary.main"}
+                      >{`(${item.one_charging.code}) - ${item.one_charging.name}`}</Typography>
+                    </TableCell>
+                    <TableCell className="tbl-cell " align="center">
+                      <Typography fontSize={"11px"}> {`(${item.company.code}) - ${item.company.name}`}</Typography>
+                    </TableCell>
+                    <TableCell className="tbl-cell " align="center">
+                      <Typography fontSize={"11px"}>
+                        {`(${item.business_unit.code}) - ${item.business_unit.name}`}
+                      </Typography>
+                    </TableCell>
+                    <TableCell className="tbl-cell " align="center">
+                      <Typography fontSize={"11px"}>{`(${item.department.code}) - ${item.department.name}`}</Typography>
+                    </TableCell>
+                    <TableCell className="tbl-cell " align="center">
+                      <Typography fontSize={"11px"}> {`(${item.unit.code}) - ${item.unit.name}`}</Typography>
+                    </TableCell>
+                    <TableCell className="tbl-cell " align="center">
+                      <Typography fontSize={"11px"}> {`(${item.subunit.code}) - ${item.subunit.name}`}</Typography>
+                    </TableCell>
+                    <TableCell className="tbl-cell " align="center">
+                      <Typography fontSize={"11px"}>{`(${item.location.code}) - ${item.location.name}`}</Typography>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Dialog>
 
       <Dialog
