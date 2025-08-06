@@ -673,13 +673,13 @@ const Sidebar = () => {
           notification: notifData?.toTransferApproveCount + notifData?.toTransferFaApproval,
           setter: closeCollapse,
         },
-        {
-          label: "Pull-Out",
-          icon: HomeRepairService,
-          path: "/approving/pull-out",
-          permission: "approving-pull-out",
-          setter: closeCollapse,
-        },
+        // {
+        //   label: "Pull-Out",
+        //   icon: HomeRepairService,
+        //   path: "/approving/pull-out",
+        //   permission: "approving-pull-out",
+        //   setter: closeCollapse,
+        // },
         {
           label: "Disposal",
           icon: PlaylistRemove,
@@ -687,13 +687,13 @@ const Sidebar = () => {
           permission: "approving-disposal",
           setter: closeCollapse,
         },
-        {
-          label: "Evaluation",
-          icon: Troubleshoot,
-          path: "/approving/evaluation",
-          permission: "approving-evaluation",
-          setter: closeCollapse,
-        },
+        // {
+        //   label: "Evaluation",
+        //   icon: Troubleshoot,
+        //   path: "/approving/evaluation",
+        //   permission: "approving-evaluation",
+        //   setter: closeCollapse,
+        // },
       ],
       open: approvingCollapse,
       setter: () => {
