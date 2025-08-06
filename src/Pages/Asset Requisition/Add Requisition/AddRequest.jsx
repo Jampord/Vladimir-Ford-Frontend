@@ -29,6 +29,7 @@ import {
   Grow,
   IconButton,
   InputAdornment,
+  Link,
   Stack,
   Table,
   TableBody,
@@ -117,6 +118,8 @@ import {
 } from "../../../Redux/Query/FixedAsset/FixedAssets";
 import { useDownloadAttachment } from "../../../Hooks/useDownloadAttachment";
 import { useLazyGetOneRDFChargingAllApiQuery } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
+import { useLazyGetYmirShipToAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/YmirApi";
+import { useLazyGetShipToAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/ShipTo";
 // import { useLazyGetMajorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MajorCategory";
 
 const schema = yup.object().shape({
@@ -184,6 +187,7 @@ const schema = yup.object().shape({
   brand: yup.string().label("Brand"),
   quantity: yup.number().required().label("Quantity"),
   uom_id: yup.object().required().label("UOM").typeError("UOM is a required field"),
+  ship_to_id: yup.object().required().label("Ship To").typeError("Ship To is a required field"),
   cellphone_number: yup.string().nullable().label("Cellphone Number"),
   additional_info: yup.string().required().label("Capex Num / Unit Charging"),
   letter_of_request: yup
@@ -237,6 +241,7 @@ const AddRequisition = (props) => {
     cellphone_number: "",
     quantity: 1,
     uom_id: null,
+    ship_to_id: null,
     additional_info: "",
 
     letter_of_request: null,
@@ -263,7 +268,7 @@ const AddRequisition = (props) => {
   const [scale, setScale] = useState(1);
 
   const { state: transactionData } = useLocation();
-  // console.log("trans data: ", transactionData);
+  console.log("trans data: ", transactionData);
   const dialog = useSelector((state) => state.booleanState.dialog);
   const drawer = useSelector((state) => state.booleanState.drawer);
 
@@ -560,6 +565,17 @@ const AddRequisition = (props) => {
     },
   ] = useLazyGetUnitOfMeasurementAllApiQuery();
 
+  const [
+    shipToTrigger,
+    {
+      data: shipToData = [],
+      isLoading: isShipToLoading,
+      isSuccess: isShipToSuccess,
+      isError: isShipToError,
+      refetch: isShipToRefetch,
+    },
+  ] = useLazyGetShipToAllApiQuery();
+
   const {
     data: addRequestAllApi = [],
     isLoading: isRequestLoading,
@@ -641,6 +657,7 @@ const AddRequisition = (props) => {
       cellphone_number: "",
       quantity: 1,
       uom_id: null,
+      ship_to_id: null,
       additional_info: "",
 
       letter_of_request: null,
@@ -676,7 +693,7 @@ const AddRequisition = (props) => {
 
   useEffect(() => {
     if (updateRequest.id) {
-      // console.log("updaterequest", updateRequest);
+      console.log("updaterequest", updateRequest);
       const accountable = {
         general_info: {
           full_id_number: updateRequest.accountable.split(" ")[0],
@@ -720,6 +737,7 @@ const AddRequisition = (props) => {
       setValue("date_needed", dateNeededFormat);
       setValue("quantity", updateRequest?.quantity);
       setValue("uom_id", updateRequest?.unit_of_measure);
+      setValue("ship_to_id", updateRequest?.ship_to_id);
       setValue("brand", updateRequest?.brand);
       setValue("cellphone_number", cellphoneNumber);
       setValue("additional_info", updateRequest?.additional_info);
@@ -835,6 +853,7 @@ const AddRequisition = (props) => {
       brand: formData?.brand?.toString(),
       quantity: formData?.quantity?.toString(),
       uom_id: formData?.uom_id?.id?.toString(),
+      ship_to_id: formData?.ship_to_id?.id?.toString(),
       additional_info: formData?.additional_info?.toString(),
 
       letter_of_request: updateRequest && attachmentValidation("letter_of_request", formData),
@@ -973,6 +992,7 @@ const AddRequisition = (props) => {
                           cellphone_number: "",
                           quantity: 1,
                           uom_id: null,
+                          ship_to_id: null,
                           additional_info: "",
 
                           letter_of_request: null,
@@ -1071,6 +1091,7 @@ const AddRequisition = (props) => {
                     cellphone_number: "",
                     quantity: 1,
                     uom_id: null,
+                    ship_to_id: null,
                     additional_info: "",
 
                     letter_of_request: null,
@@ -1546,6 +1567,7 @@ const AddRequisition = (props) => {
       date_needed,
       quantity,
       unit_of_measure,
+      ship_to,
       brand,
       cellphone_number,
       additional_info,
@@ -1587,6 +1609,7 @@ const AddRequisition = (props) => {
       brand,
       quantity,
       unit_of_measure,
+      ship_to_id: ship_to,
       cellphone_number,
       additional_info,
 
@@ -1628,6 +1651,7 @@ const AddRequisition = (props) => {
       cellphone_number: "",
       quantity: 1,
       uom_id: null,
+      ship_to_id: null,
       additional_info: "",
 
       letter_of_request: null,
@@ -2193,7 +2217,7 @@ const AddRequisition = (props) => {
                       // fixedAssetSmallToolsApiSuccess
                       //   ? null
                       //   :
-                      fixedAssetSmallToolsTrigger({ sub_unit_id: watch("subunit_id")?.id })
+                      fixedAssetSmallToolsTrigger({ one_charging_id: watch("one_charging_id")?.id })
                     }
                     loading={fixedAssetSmallToolsApiLoading}
                     disabled={updateRequest && disable}
@@ -2414,6 +2438,28 @@ const AddRequisition = (props) => {
                     label="UOM"
                     error={!!errors?.uom_id}
                     helperText={errors?.uom_id?.message}
+                  />
+                )}
+              />
+              <CustomAutoComplete
+                control={control}
+                hasRequest={hasRequest && true}
+                name="ship_to_id"
+                options={shipToData || []}
+                onOpen={() => (isShipToSuccess ? null : shipToTrigger())}
+                loading={isShipToLoading}
+                disabled={updateRequest && disable}
+                getOptionLabel={(option) => {
+                  return `${option?.location} - ${option?.address}`;
+                }}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    color={hasRequest ? "primary" : "secondary"}
+                    label="Ship To"
+                    error={!!errors?.ship_to_id}
+                    helperText={errors?.ship_to_id?.message}
                   />
                 )}
               />
@@ -2683,6 +2729,8 @@ const AddRequisition = (props) => {
     );
   };
 
+  console.log("watch", watch("ship_to_id"));
+
   // for the timeline view/colors
   const transactionStatus = (data) => {
     let statusColor, hoverColor, textColor, variant;
@@ -2745,6 +2793,45 @@ const AddRequisition = (props) => {
 
   // console.log("pewqpwepeewpw", transactionData);
 
+  // Global cache to track opened windows and their blob URLs
+  const blobUrlCache = new Map();
+
+  const handleViewFile = async (id) => {
+    try {
+      const response = await fetch(`${process.env.VLADIMIR_BASE_URL}/file/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "x-api-key": process.env.GL_KEY },
+      });
+      const blob = await response.blob();
+      const fileURL = URL.createObjectURL(blob);
+
+      // Open new window and store reference
+      const newWindow = window.open(fileURL, "_blank");
+
+      if (newWindow) {
+        // Add to cache and setup cleanup listener
+        blobUrlCache.set(newWindow, fileURL);
+        newWindow.addEventListener("unload", () => {
+          URL.revokeObjectURL(fileURL);
+          blobUrlCache.delete(newWindow);
+        });
+      } else {
+        // Revoke immediately if window failed to open
+        URL.revokeObjectURL(fileURL);
+      }
+    } catch (err) {
+      console.error("Error handling file view:", err);
+    }
+  };
+
+  // Cleanup for main window close (optional safety net)
+  window.addEventListener("beforeunload", () => {
+    blobUrlCache.forEach((url, win) => {
+      URL.revokeObjectURL(url);
+      blobUrlCache.delete(win);
+    });
+  });
+
   return (
     <>
       {errorRequest && errorTransaction ? (
@@ -2805,6 +2892,7 @@ const AddRequisition = (props) => {
                       <TableCell className="tbl-cell">Acquisition Details</TableCell>
                       {/* <TableCell className="tbl-cell">Attachment Type</TableCell> */}
                       <TableCell className="tbl-cell">Warehouse</TableCell>
+                      <TableCell className="tbl-cell">Ship To</TableCell>
                       <TableCell className="tbl-cell">Accounting Entries</TableCell>
                       <TableCell className="tbl-cell">Chart of Accounts</TableCell>
                       <TableCell className="tbl-cell">Accountability</TableCell>
@@ -2904,6 +2992,11 @@ const AddRequisition = (props) => {
                               {data.warehouse?.warehouse_name}
                             </TableCell>
 
+                            <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
+                              <Typography fontSize={12}>{data.ship_to?.location}</Typography>
+                              <Typography fontSize={11}>{data.ship_to?.address}</Typography>
+                            </TableCell>
+
                             <TableCell className="tbl-cell-category capitalized">
                               <Typography fontSize={11} color="secondary.light" noWrap>
                                 Inital Debit : ({data.initial_debit?.account_title_code})-
@@ -2925,25 +3018,39 @@ const AddRequisition = (props) => {
 
                             <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
                               <Typography fontSize={10} color="gray">
-                                {`(${data.one_charging?.code}) - ${data.one_charging?.name}`}
+                                {`(${data.one_charging?.code || "-"}) - ${data.one_charging?.name || "-"}`}
                               </Typography>
                               <Typography fontSize={10} color="gray">
-                                {`(${data.one_charging?.company_code}) - ${data.one_charging?.company_name}`}
+                                {`(${data.one_charging?.company_code || data?.company?.company_code}) - ${
+                                  data.one_charging?.company_name || data?.company?.company_name
+                                }`}
                               </Typography>
                               <Typography fontSize={10} color="gray">
-                                {`(${data.one_charging?.business_unit_code}) - ${data.one_charging?.business_unit_name}`}
+                                {`(${
+                                  data.one_charging?.business_unit_code || data?.business_unit?.business_unit_code
+                                }) - ${
+                                  data.one_charging?.business_unit_name || data?.business_unit?.business_unit_name
+                                }`}
                               </Typography>
                               <Typography fontSize={10} color="gray">
-                                {`(${data.department?.department_code}) - ${data.one_charging?.department_name}`}
+                                {`(${data.one_charging?.department_code || data.department?.department_code}) - ${
+                                  data.one_charging?.department_name || data.department?.department_name
+                                }`}
                               </Typography>
                               <Typography fontSize={10} color="gray">
-                                {`(${data.one_charging?.unit_code}) - ${data.one_charging?.unit_name}`}
+                                {`(${data.one_charging?.unit_code || data.unit?.unit_code}) - ${
+                                  data.one_charging?.unit_name || data.unit?.unit_name
+                                }`}
                               </Typography>
                               <Typography fontSize={10} color="gray">
-                                {`(${data.one_charging?.subunit_code}) - ${data.one_charging?.subunit_name}`}
+                                {`(${data.one_charging?.subunit_code || data.subunit?.subunit_code}) - ${
+                                  data.one_charging?.subunit_name || data.subunit?.subunit_name
+                                }`}
                               </Typography>
                               <Typography fontSize={10} color="gray">
-                                {`(${data.one_charging?.location_code}) - ${data.one_charging?.location_name}`}
+                                {`(${data.one_charging?.location_code || data.location?.location_code}) - ${
+                                  data.one_charging?.location_name || data.location?.location_name
+                                }`}
                               </Typography>
                               {/* <Typography fontSize={10} color="gray">
                                 {`(${data.account_title?.account_title_code}) - ${data.account_title?.account_title_name}`}
@@ -3065,19 +3172,20 @@ const AddRequisition = (props) => {
                                   <Tooltip title={"View or Download Letter of Request"} arrow>
                                     <Typography
                                       sx={attachmentSx}
-                                      onClick={() => {
-                                        data.attachments.letter_of_request.file_name.includes("pdf") ||
-                                        data.attachments.letter_of_request.file_name.includes("jpg") ||
-                                        data.attachments.letter_of_request.file_name.includes("jpeg") ||
-                                        data.attachments.letter_of_request.file_name.includes("svg") ||
-                                        data.attachments.letter_of_request.file_name.includes("png")
-                                          ? handleOpenDrawer({
-                                              value: data.attachments.letter_of_request,
-                                              data: data,
-                                              name: "letter_of_request",
-                                            })
-                                          : handleDownloadAttachment({ value: "letter_of_request", id: data?.id });
-                                      }}
+                                      onClick={() => handleViewFile(data?.attachments?.letter_of_request?.id)}
+                                      // onClick={() => {
+                                      //   data.attachments.letter_of_request.file_name.includes("pdf") ||
+                                      //   data.attachments.letter_of_request.file_name.includes("jpg") ||
+                                      //   data.attachments.letter_of_request.file_name.includes("jpeg") ||
+                                      //   data.attachments.letter_of_request.file_name.includes("svg") ||
+                                      //   data.attachments.letter_of_request.file_name.includes("png")
+                                      //     ? handleOpenDrawer({
+                                      //         value: data.attachments.letter_of_request,
+                                      //         data: data,
+                                      //         name: "letter_of_request",
+                                      //       })
+                                      //     : handleDownloadAttachment({ value: "letter_of_request", id: data?.id });
+                                      // }}
                                     >
                                       {data?.attachments?.letter_of_request?.file_name}
                                     </Typography>
@@ -3093,19 +3201,20 @@ const AddRequisition = (props) => {
                                   <Tooltip title={"View or Download Quotation"} arrow>
                                     <Typography
                                       sx={attachmentSx}
-                                      onClick={() => {
-                                        data.attachments.quotation.file_name.includes("pdf") ||
-                                        data.attachments.quotation.file_name.includes("jpg") ||
-                                        data.attachments.quotation.file_name.includes("jpeg") ||
-                                        data.attachments.quotation.file_name.includes("svg") ||
-                                        data.attachments.quotation.file_name.includes("png")
-                                          ? handleOpenDrawer({
-                                              value: data.attachments.quotation,
-                                              data: data,
-                                              name: "quotation",
-                                            })
-                                          : handleDownloadAttachment({ value: "quotation", id: data?.id });
-                                      }}
+                                      onClick={() => handleViewFile(data?.attachments?.quotation?.id)}
+                                      // onClick={() => {
+                                      //   data.attachments.quotation.file_name.includes("pdf") ||
+                                      //   data.attachments.quotation.file_name.includes("jpg") ||
+                                      //   data.attachments.quotation.file_name.includes("jpeg") ||
+                                      //   data.attachments.quotation.file_name.includes("svg") ||
+                                      //   data.attachments.quotation.file_name.includes("png")
+                                      //     ? handleOpenDrawer({
+                                      //         value: data.attachments.quotation,
+                                      //         data: data,
+                                      //         name: "quotation",
+                                      //       })
+                                      //     : handleDownloadAttachment({ value: "quotation", id: data?.id });
+                                      // }}
                                     >
                                       {data?.attachments?.quotation?.file_name}
                                     </Typography>
@@ -3121,19 +3230,20 @@ const AddRequisition = (props) => {
                                   <Tooltip title={"View or Download Specification Form"} arrow>
                                     <Typography
                                       sx={attachmentSx}
-                                      onClick={() => {
-                                        data.attachments.specification_form.file_name.includes("pdf") ||
-                                        data.attachments.specification_form.file_name.includes("jpg") ||
-                                        data.attachments.specification_form.file_name.includes("jpeg") ||
-                                        data.attachments.specification_form.file_name.includes("svg") ||
-                                        data.attachments.specification_form.file_name.includes("png")
-                                          ? handleOpenDrawer({
-                                              value: data.attachments.specification_form,
-                                              data: data,
-                                              name: "specification_form",
-                                            })
-                                          : handleDownloadAttachment({ value: "specification_form", id: data?.id });
-                                      }}
+                                      onClick={() => handleViewFile(data?.attachments?.specification_form?.id)}
+                                      // onClick={() => {
+                                      //   data.attachments.specification_form.file_name.includes("pdf") ||
+                                      //   data.attachments.specification_form.file_name.includes("jpg") ||
+                                      //   data.attachments.specification_form.file_name.includes("jpeg") ||
+                                      //   data.attachments.specification_form.file_name.includes("svg") ||
+                                      //   data.attachments.specification_form.file_name.includes("png")
+                                      //     ? handleOpenDrawer({
+                                      //         value: data.attachments.specification_form,
+                                      //         data: data,
+                                      //         name: "specification_form",
+                                      //       })
+                                      //     : handleDownloadAttachment({ value: "specification_form", id: data?.id });
+                                      // }}
                                     >
                                       {data?.attachments?.specification_form?.file_name}
                                     </Typography>
@@ -3149,19 +3259,20 @@ const AddRequisition = (props) => {
                                   <Tooltip title={"View or Download Tool of Trade"} arrow>
                                     <Typography
                                       sx={attachmentSx}
-                                      onClick={() => {
-                                        data.attachments.tool_of_trade.file_name.includes("pdf") ||
-                                        data.attachments.tool_of_trade.file_name.includes("jpg") ||
-                                        data.attachments.tool_of_trade.file_name.includes("jpeg") ||
-                                        data.attachments.tool_of_trade.file_name.includes("svg") ||
-                                        data.attachments.tool_of_trade.file_name.includes("png")
-                                          ? handleOpenDrawer({
-                                              value: data.attachments.tool_of_trade,
-                                              data: data,
-                                              name: "tool_of_trade",
-                                            })
-                                          : handleDownloadAttachment({ value: "tool_of_trade", id: data?.id });
-                                      }}
+                                      onClick={() => handleViewFile(data?.attachments?.tool_of_trade?.id)}
+                                      // onClick={() => {
+                                      //   data.attachments.tool_of_trade.file_name.includes("pdf") ||
+                                      //   data.attachments.tool_of_trade.file_name.includes("jpg") ||
+                                      //   data.attachments.tool_of_trade.file_name.includes("jpeg") ||
+                                      //   data.attachments.tool_of_trade.file_name.includes("svg") ||
+                                      //   data.attachments.tool_of_trade.file_name.includes("png")
+                                      //     ? handleOpenDrawer({
+                                      //         value: data.attachments.tool_of_trade,
+                                      //         data: data,
+                                      //         name: "tool_of_trade",
+                                      //       })
+                                      //     : handleDownloadAttachment({ value: "tool_of_trade", id: data?.id });
+                                      // }}
                                     >
                                       {data?.attachments?.tool_of_trade?.file_name}
                                     </Typography>
@@ -3177,19 +3288,20 @@ const AddRequisition = (props) => {
                                   <Tooltip title={"View or Download Other Attachment"} arrow>
                                     <Typography
                                       sx={attachmentSx}
-                                      onClick={() => {
-                                        data.attachments.other_attachments.file_name.includes("pdf") ||
-                                        data.attachments.other_attachments.file_name.includes("jpg") ||
-                                        data.attachments.other_attachments.file_name.includes("jpeg") ||
-                                        data.attachments.other_attachments.file_name.includes("svg") ||
-                                        data.attachments.other_attachments.file_name.includes("png")
-                                          ? handleOpenDrawer({
-                                              value: data.attachments.other_attachments,
-                                              data: data,
-                                              name: "other_attachments",
-                                            })
-                                          : handleDownloadAttachment({ value: "other_attachments", id: data?.id });
-                                      }}
+                                      onClick={() => handleViewFile(data?.attachments?.other_attachments?.id)}
+                                      // onClick={() => {
+                                      //   data.attachments.other_attachments.file_name.includes("pdf") ||
+                                      //   data.attachments.other_attachments.file_name.includes("jpg") ||
+                                      //   data.attachments.other_attachments.file_name.includes("jpeg") ||
+                                      //   data.attachments.other_attachments.file_name.includes("svg") ||
+                                      //   data.attachments.other_attachments.file_name.includes("png")
+                                      //     ? handleOpenDrawer({
+                                      //         value: data.attachments.other_attachments,
+                                      //         data: data,
+                                      //         name: "other_attachments",
+                                      //       })
+                                      //     : handleDownloadAttachment({ value: "other_attachments", id: data?.id });
+                                      // }}
                                     >
                                       {data?.attachments?.other_attachments?.file_name}
                                     </Typography>
