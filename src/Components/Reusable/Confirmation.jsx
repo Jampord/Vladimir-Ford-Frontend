@@ -23,7 +23,7 @@ import {
   Typography,
 } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
-import { Close, GetApp } from "@mui/icons-material";
+import { Close, GetApp, Undo } from "@mui/icons-material";
 
 const schema = yup.object().shape({
   remarks: yup.string().nullable(),
@@ -251,16 +251,18 @@ const Confirmation = (props) => {
           Receive
         </LoadingButton>
 
-        <Button
+        <LoadingButton
           autoFocus
           variant="contained"
           color="warning"
           onClick={handleApprovalClose}
-          disabled={loading === true}
+          // disabled={loading === true}
+          loading={loading}
           size="small"
+          startIcon={<Undo color="action" />}
         >
           Reject
-        </Button>
+        </LoadingButton>
 
         {/* <Button
           autoFocus
