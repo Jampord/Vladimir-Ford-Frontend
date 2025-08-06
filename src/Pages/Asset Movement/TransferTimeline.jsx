@@ -19,7 +19,6 @@ import Moment from "moment";
 
 const TransferTimeline = (props) => {
   const { data: transactionData } = props;
-  console.log("transactionData", transactionData);
   const dispatch = useDispatch();
 
   return (
@@ -138,7 +137,6 @@ const TransferTimeline = (props) => {
                 direction="up"
                 sx={{ width: "100%" }}
               >
-                {console.log("item", item)}
                 <Step key={index} last>
                   <Stack position="relative" justifyContent="center" flexDirection="column">
                     {/* Date and Time */}
@@ -158,7 +156,7 @@ const TransferTimeline = (props) => {
                           <Error sx={{ color: "error.light" }} />
                         ) : item?.action === "fully Received" || item?.action === "item Received" ? (
                           <HowToReg sx={{ color: "success.main" }} />
-                        ) : item?.action === "Approved" ? (
+                        ) : item?.action === "Approved" || item?.action === " FA Approved" ? (
                           <FactCheck sx={{ color: "success.main" }} />
                         ) : item?.action === "Removed PR Number" ? (
                           <CancelOutlined sx={{ color: "error.main" }} />
@@ -181,7 +179,9 @@ const TransferTimeline = (props) => {
                             item?.action === "Cancelled Remaining Items" ||
                             item.action === "Cancelled Item To PO"
                               ? "#ff000017"
-                              : item?.action === "Approved" || item?.action === "fully Received"
+                              : item?.action === "Approved" ||
+                                item?.action === "fully Received" ||
+                                item?.action === " FA Approved"
                               ? "#00800016"
                               : item.action === "Rejected" || item?.action === "Removed PR Number"
                               ? "#ff000017"
@@ -199,7 +199,9 @@ const TransferTimeline = (props) => {
                               item?.action === "Cancelled Remaining Items" ||
                               item.action === "Cancelled Item To PO"
                                 ? "error.light"
-                                : item?.action === "Approved" || item?.action === "fully Received"
+                                : item?.action === "Approved" ||
+                                  item?.action === "fully Received" ||
+                                  item?.action === " FA Approved"
                                 ? "success.light"
                                 : item?.action === "Removed PR Number"
                                 ? "error.light"
