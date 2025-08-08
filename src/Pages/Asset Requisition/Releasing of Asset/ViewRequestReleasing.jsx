@@ -48,7 +48,8 @@ import AddReleasingInfo from "./AddReleasingInfo";
 // import noImageFound from "../../../Img/SVG/NoImageFound.svg";
 import NoImageFound from "../../../Img/SVG/NoImageFound.svg";
 
-const ViewRequestReleasing = (props) => {
+const ViewRequestReleasing = ({ view }) => {
+  console.log("view", view);
   const { state: data } = useLocation();
   const isSmallScreen = useMediaQuery("(max-width: 350px)");
   const [viewImage, setViewImage] = useState(null);
@@ -164,7 +165,7 @@ const ViewRequestReleasing = (props) => {
                 alignSelf: "flex-end",
               }}
             >
-              {releasingData?.is_released === 0 && (
+              {releasingData?.is_released === 0 && !view && (
                 <Button
                   variant="contained"
                   size="small"
@@ -840,7 +841,12 @@ const ViewRequestReleasing = (props) => {
                               Total Additional Cost :
                             </Typography>
                             <Typography color="secondary.light">
-                              ₱{releasingData?.total_adcost?.toLocaleString()}
+                              ₱
+                              {releasingData?.total_adcost?.toLocaleString() ||
+                                releasingData?.additional_cost
+                                  ?.map((item) => item.acquisition_cost)
+                                  .reduce((a, b) => a + b, 0)
+                                  .toLocaleString()}
                             </Typography>
                           </Stack>
                         </Stack>
@@ -862,7 +868,12 @@ const ViewRequestReleasing = (props) => {
                             TOTAL COST :
                           </Typography>
                           <Typography fontWeight="bold" color="secondary.main">
-                            ₱{releasingData?.total_cost?.toLocaleString()}
+                            ₱
+                            {releasingData?.total_cost?.toLocaleString() ||
+                              releasingData?.acquisition_cost +
+                                releasingData?.additional_cost
+                                  ?.map((item) => item.acquisition_cost)
+                                  .reduce((a, b) => a + b, 0)}
                           </Typography>
                         </Stack>
                       </TableContainer>
