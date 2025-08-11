@@ -24,6 +24,7 @@ import {
   StoreRounded,
   Warehouse,
   LooksOne,
+  LocalShipping,
 } from "@mui/icons-material";
 import Cards from "../../Components/Reusable/Cards";
 
@@ -90,6 +91,13 @@ const MasterlistList = [
     label: "Supplier",
     description: "Synching of Supplier from Ymir to Vladimir",
     path: "/masterlist/supplier",
+  },
+
+  {
+    icon: <LocalShipping />,
+    label: "Ship To",
+    description: "Synching of Ship To from Ymir to Vladimir",
+    path: "/masterlist/ship-to",
   },
 
   {
