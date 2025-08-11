@@ -7,6 +7,7 @@ import { useLocation } from "react-router-dom";
 
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import {
+  AddToQueue,
   AssignmentTurnedIn,
   Construction,
   OpenInBrowserOutlined,
@@ -62,6 +63,14 @@ const AssetRequisition = () => {
       path: "/asset-requisition/requisition-releasing",
       permission: "requisition-releasing",
       notification: notifData?.toRelease,
+    },
+    {
+      icon: <AddToQueue />,
+      label: "Releasing of Asset Monitoring",
+      description: "Viewing of to be Asset Releasing for FA",
+      path: "/asset-requisition/requisition-releasing-monitoring",
+      permission: "requisition-releasing-monitoring",
+      // notification: notifData?.toRelease,
     },
     // {
     //   icon: <Construction />,
