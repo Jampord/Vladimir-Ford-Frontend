@@ -39,7 +39,7 @@ import { useLazyGetBusinessUnitOneRDFAllApiQuery } from "../../Redux/Query/Maste
 const BusinessUnit = () => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("active");
-  const [perPage, setPerPage] = useState(5);
+  const [perPage, setPerPage] = useState(10);
   const [page, setPage] = useState(1);
 
   const dispatch = useDispatch();
