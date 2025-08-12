@@ -575,6 +575,7 @@ const Sidebar = () => {
       icon: MoveUpRounded,
       path: "/asset-movement",
       permission: "asset-movement",
+      notification: notifData?.toTransferReceiving,
       children: [
         {
           label: "Transfer",
@@ -789,6 +790,13 @@ const Sidebar = () => {
           icon: RequestQuote,
           path: "/reports/depreciation-monthly-report",
           permission: "depreciation-monthly-report",
+          setter: closeCollapse,
+        },
+        {
+          label: "FA Report",
+          icon: InventoryRounded,
+          path: "/reports/fixed-assets-report",
+          permission: "fixed-assets-report",
           setter: closeCollapse,
         },
         // {
