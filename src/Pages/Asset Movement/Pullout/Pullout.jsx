@@ -91,10 +91,17 @@ const Pullout = () => {
         variant = "filled";
         break;
 
-      case "Claimed":
+      case "Received":
         statusColor = "success.dark";
         hoverColor = "success.dark";
         variant = "filled";
+        break;
+
+      case "On Evaluation":
+        statusColor = "primary.main";
+        textColor = "primary.main";
+        hoverColor = "";
+        variant = "outlined";
         break;
 
       // case "Sent to ymir for PO":
@@ -309,7 +316,7 @@ const Pullout = () => {
                               },
                             }}
                           >
-                            <TableCell className="tbl-cell text-weight" align="center">
+                            <TableCell className="tbl-cell" align="center">
                               {item?.id}
                             </TableCell>
                             <TableCell className="tbl-cell " align="center">
@@ -328,7 +335,7 @@ const Pullout = () => {
                                 </IconButton>
                               </Tooltip>
                             </TableCell>
-                            <TableCell className="tbl-cel" align="center">
+                            <TableCell className="tbl-cell" align="center">
                               {transactionStatus(item)}
                             </TableCell>
                             <TableCell className="tbl-cell" align="center">
