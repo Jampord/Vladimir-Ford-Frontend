@@ -197,7 +197,7 @@ const ApprovedRequest = (props) => {
 
   return (
     <Stack className="category_height">
-      {approvalLoading && <MasterlistSkeleton category={true} onAdd={true} />}
+      {approvalLoading && <MasterlistSkeleton category={true} />}
       {approvalError && <ErrorFetching refetch={refetch} category={approvalData} error={errorData} />}
       {approvalData && !approvalError && (
         <Box className="mcontainer__wrapper">
