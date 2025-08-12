@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { closeDialog } from "../../../Redux/StateManagement/booleanStateSlice";
+import { closeDialog, closeDialog1 } from "../../../Redux/StateManagement/booleanStateSlice";
 import {
   Button,
   Stack,
@@ -35,6 +35,7 @@ import CustomAttachmentArray from "../../../Components/Reusable/CustomAttachment
 import { onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import axios from "axios";
+import StatusComponent from "../../../Components/Reusable/FaStatusComponent";
 
 const schema = yup.object().shape({
   attachments: yup.mixed().label("Attachment"),
@@ -53,7 +54,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
   console.log("attachmentRef", attachmentRef);
 
   const handleCloseDialog = () => {
-    dispatch(closeDialog());
+    dispatch(closeDialog1());
     setEvaluation("");
   };
 
@@ -95,7 +96,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
     evaluation === "Change Care of"
       ? submitFormData.append(
           "care_of",
-          newFormData?.care_of === "Hardware and Maintenance" ? "Machineries and Equipment" : "Hardware and Maintenance"
+          newFormData?.care_of === "Hardware and Maintenance" ? "Machinery & Equipment" : "Hardware and Maintenance"
         )
       : submitFormData.append("care_of", newFormData?.care_of);
     newFormData.pullout_ids.forEach((id) => {
@@ -258,16 +259,16 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
                   {item.map((data, index) => (
                     <TableRow key={data.id}>
                       <TableCell align="center">
-                        <Typography fontSize="14px" fontWeight={1000} color="black">
+                        <Typography fontSize="14px" color="black">
                           {data?.id}
                         </Typography>
                       </TableCell>
                       <TableCell align="center">{data?.description}</TableCell>
                       <TableCell align="center">
-                        <Typography fontSize="14px" fontWeight={1000} color="black">
+                        <Typography fontWeight={700} fontSize="14px" color="primary.main">
                           {data?.asset.vladimir_tag_number}
                         </Typography>
-                        <Typography fontSize="14px" color="secondary">
+                        <Typography fontWeight={600} fontSize="12px" color="secondary.main">
                           {data?.asset.asset_description}
                         </Typography>
                       </TableCell>
@@ -293,7 +294,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
 
                       <TableCell align="center">
                         <Typography fontSize="14px" fontWeight={500} color="black">
-                          <Chip
+                          {/* <Chip
                             label={evaluation === "Return" ? "Repaired" : evaluation}
                             color={
                               evaluation === "Return"
@@ -304,7 +305,8 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
                                   : "primary"
                                 : "primary"
                             }
-                          />
+                          /> */}
+                          <StatusComponent faStatus={evaluation === "Return" ? "Repaired" : evaluation} />
                         </Typography>
                       </TableCell>
                       {evaluation === "Change Care of" && (
@@ -316,7 +318,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
                             // sx={{ textDecoration: "underline" }}
                           >
                             {data?.care_of === "Hardware and Maintenance"
-                              ? "Machineries and Equipment"
+                              ? "Machinery & Equipment"
                               : "Hardware and Maintenance"}
                           </Typography>
                         </TableCell>
