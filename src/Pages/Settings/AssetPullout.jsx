@@ -50,6 +50,7 @@ const AssetPullout = () => {
   const [updateAssetPullout, setUpdateAssetPullout] = useState({
     status: false,
     id: null,
+    one_charging_id: null,
     requester_id: null,
     approver_id: [],
   });
@@ -237,10 +238,11 @@ const AssetPullout = () => {
   };
 
   const onUpdateHandler = (props) => {
-    const { id, unit, subunit, approvers } = props;
+    const { id, unit, subunit, approvers, one_charging } = props;
     setUpdateAssetPullout({
       status: true,
       action: "update",
+      one_charging,
       unit,
       subunit,
       approvers,
@@ -251,6 +253,7 @@ const AssetPullout = () => {
     setUpdateAssetPullout({
       status: false,
       // action: "view",
+      one_charging_id: null,
       unit_id: null,
       subunit_id: null,
       approvers: [],
@@ -258,10 +261,11 @@ const AssetPullout = () => {
   };
 
   const onViewHandler = (props) => {
-    const { unit, subunit, approvers } = props;
+    const { unit, subunit, approvers, one_charging } = props;
     setUpdateAssetPullout({
       status: true,
       action: "view",
+      one_charging,
       unit,
       subunit,
       approvers,
@@ -307,7 +311,7 @@ const AssetPullout = () => {
                       }}
                     >
                       <TableCell className="tbl-cell">Index</TableCell>
-                      <TableCell className="tbl-cell">Sub Unit</TableCell>
+                      <TableCell className="tbl-cell">One Charging</TableCell>
 
                       <TableCell align="center" className="tbl-cell">
                         Approvers
@@ -348,11 +352,8 @@ const AssetPullout = () => {
                             >
                               <TableCell className="tbl-cell capitalized">{index + 1}</TableCell>
                               <TableCell className="tbl-cell capitalized">
-                                <Typography fontSize={14} fontWeight={600} color="secondary">
-                                  {data?.subunit?.subunit_code} - {data?.subunit?.subunit_name}
-                                </Typography>
-                                <Typography fontSize={12} color="secondary.light">
-                                  {data?.unit?.unit_code} - {data?.unit?.unit_name}
+                                <Typography fontSize={12} fontWeight={570} color="secondary">
+                                  {`(${data?.one_charging?.code})`} - {data?.one_charging?.name}
                                 </Typography>
                               </TableCell>
                               <TableCell align="center" className="tbl-cell text-weight capitalized">
@@ -403,7 +404,7 @@ const AssetPullout = () => {
         open={drawer}
         TransitionComponent={Grow}
         PaperProps={{
-          sx: { borderRadius: "10px", maxWidth: "1200px" },
+          sx: { borderRadius: "10px", maxWidth: "1300px", width: "40%", minWidth: "300px", maxHeight: "90vh" },
         }}
       >
         <AddAssetPullout data={updateAssetPullout} onUpdateResetHandler={onUpdateResetHandler} />
