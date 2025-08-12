@@ -19,7 +19,7 @@ import {
 import MasterlistSkeleton from "../../Skeleton/MasterlistSkeleton";
 import ErrorFetching from "../../ErrorFetching";
 import MasterlistToolbar from "../../../Components/Reusable/MasterlistToolbar";
-import { IosShareRounded, ShoppingCartCheckout, Visibility } from "@mui/icons-material";
+import { Add, AddCircle, AddTask, IosShareRounded, ShoppingCartCheckout, Visibility } from "@mui/icons-material";
 import NoRecordsFound from "../../../Layout/NoRecordsFound";
 import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 import { useNavigate } from "react-router-dom";
@@ -125,6 +125,9 @@ const ToPickup = () => {
                       Remarks
                     </TableCell>
                     <TableCell className="tbl-cell-category" align="center">
+                      Status
+                    </TableCell>
+                    <TableCell className="tbl-cell-category" align="center">
                       Requestor
                     </TableCell>
                   </TableRow>
@@ -145,8 +148,10 @@ const ToPickup = () => {
                           }}
                           hover
                         >
-                          <TableCell className="tbl-cell text-weight" align="center">
-                            <Chip label={item?.id} color="primary" size="small" />
+                          <TableCell className="tbl-cell " align="center">
+                            {/* <Chip label=
+                             color="primary" size="medium" /> */}
+                            {item?.id}
                           </TableCell>
                           <TableCell className="tbl-cell">{item?.description}</TableCell>
                           <TableCell className="tbl-cell " align="center">
@@ -166,6 +171,21 @@ const ToPickup = () => {
                           </TableCell>
                           <TableCell className="tbl-cell" align="center">
                             {item?.remarks === null ? "-" : item.remarks}
+                          </TableCell>
+                          <TableCell className="tbl-cell" align="center">
+                            <Chip
+                              label="For Pickup"
+                              color="primary"
+                              size="small"
+                              variant="contained"
+                              icon={<AddTask color="#109790" />}
+                              sx={{
+                                backgroundColor: "#B7E9E6",
+                                color: "#109790",
+
+                                p: "0 5px",
+                              }}
+                            />
                           </TableCell>
                           <TableCell className="tbl-cell" align="center">
                             <Typography fontSize="12px" color="black" fontWeight="bold">
