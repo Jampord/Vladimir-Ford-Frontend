@@ -689,6 +689,12 @@ const FixedAssetDepreciationView = (props) => {
                         {dataApi?.data?.supplier?.supplier_code} - {dataApi?.data?.supplier?.supplier_name}
                       </Typography>
                     </Box>
+                    <Box className="tableCard__properties">
+                      Ship To:
+                      <Typography className="tableCard__info" fontSize="14px">
+                        {dataApi?.data?.ship_to?.location} - {dataApi?.data?.ship_to?.address}
+                      </Typography>
+                    </Box>
 
                     <Box className="tableCard__properties">
                       Quantity:
