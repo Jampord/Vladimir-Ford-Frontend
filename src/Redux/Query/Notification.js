@@ -25,4 +25,4 @@ export const notificationApi = createApi({
   }),
 });
 
-export const { useGetNotificationApiQuery } = notificationApi;
+export const { useGetNotificationApiQuery, useLazyGetNotificationApiQuery } = notificationApi;
