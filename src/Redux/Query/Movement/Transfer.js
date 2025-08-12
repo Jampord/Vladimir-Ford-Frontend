@@ -18,7 +18,8 @@ export const transferApi = createApi({
 
   endpoints: (builder) => ({
     getTransferApi: builder.query({
-      query: (params) => `transfer?per_page=${params.per_page}&page=${params.page}&search=${params.search}`,
+      query: (params) =>
+        `transfer?per_page=${params.per_page}&page=${params.page}&search=${params.search}&status=${params.status}`,
       providesTags: ["Transfer"],
     }),
 
@@ -54,7 +55,7 @@ export const transferApi = createApi({
     }),
 
     getFixedAssetTransferCoordinatorApi: builder.query({
-      query: (params) => `fixed-asset?pagination=none&movement=transfer&sub_unit_id=${params.subunit_id}`,
+      query: (params) => `fixed-asset?pagination=none&movement=transfer&one_charging_id=${params.one_charging_id}`,
       transformResponse: (response) => response.data,
       providesTags: ["Transfer"],
     }),
