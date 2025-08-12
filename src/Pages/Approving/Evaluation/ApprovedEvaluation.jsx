@@ -92,7 +92,7 @@ const ApprovedEvaluation = () => {
 
   return (
     <Stack className="category_height">
-      {approvalLoading && <MasterlistSkeleton category={true} onAdd={true} />}
+      {approvalLoading && <MasterlistSkeleton category={true} />}
       {approvalError && <ErrorFetching refetch={refetch} category={approvalData} error={errorData} />}
       {approvalData && !approvalError && (
         <Box className="mcontainer__wrapper">
@@ -145,7 +145,7 @@ const ApprovedEvaluation = () => {
                           handleRowClick(data);
                         }}
                       >
-                        <Typography fontSize={12} fontWeight={700} color="secondary.main">
+                        <Typography fontSize={12} color="secondary.main">
                           {data?.id}
                         </Typography>
                       </TableCell>
@@ -156,7 +156,7 @@ const ApprovedEvaluation = () => {
                           handleRowClick(data);
                         }}
                       >
-                        <Typography fontSize={12} fontWeight={700} color="secondary.main">
+                        <Typography fontSize={12} color="secondary.main">
                           {data?.description}
                         </Typography>
                       </TableCell>
@@ -167,13 +167,13 @@ const ApprovedEvaluation = () => {
                           handleRowClick(data);
                         }}
                       >
-                        <Typography fontSize={12} fontWeight={700} color="secondary.main">
+                        <Typography fontSize={12} fontWeight={750} color="secondary.main">
                           {data.requester.employee_id}
                         </Typography>
-                        <Typography fontSize={11} fontWeight={600} color="secondary.main">
+                        <Typography fontSize={11} color="secondary.main">
                           {data.requester.first_name}
                         </Typography>
-                        <Typography fontSize={11} fontWeight={600} color="secondary.main">
+                        <Typography fontSize={11} color="secondary.main">
                           {data.requester.last_name}
                         </Typography>
                       </TableCell>
@@ -183,10 +183,13 @@ const ApprovedEvaluation = () => {
                           handleRowClick(data);
                         }}
                       >
+                        <Typography fontWeight={700} fontSize="13px" color="primary">
+                          {data?.asset.vladimir_tag_number}
+                        </Typography>
                         <Typography fontSize={12} fontWeight={600} color="secondary.main">
                           {data.asset.asset_description}
                         </Typography>
-                        <Typography fontSize={11} fontWeight={500} color="secondary.main">
+                        <Typography fontSize={11} color="secondary.main">
                           {data.asset.asset_specification}
                         </Typography>
                       </TableCell>
@@ -242,7 +245,7 @@ const ApprovedEvaluation = () => {
                           handleRowClick(data);
                         }}
                       >
-                        <Typography fontSize={13} fontWeight={500} color="secondary.main">
+                        <Typography fontSize={13} color="secondary.main">
                           {moment(data?.created_at).format("MMM DD, YYYY")}
                         </Typography>
                       </TableCell>
