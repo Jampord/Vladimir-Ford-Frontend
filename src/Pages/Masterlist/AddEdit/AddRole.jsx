@@ -215,6 +215,7 @@ const AddRole = (props) => {
     "general-ledger-report",
     "purchase-request-recon",
     "depreciation-monthly-report",
+    "fixed-assets-report",
 
     // Setup settings
     "ip-setup",
@@ -261,6 +262,7 @@ const AddRole = (props) => {
     "general-ledger-report",
     "purchase-request-recon",
     "depreciation-monthly-report",
+    "fixed-assets-report",
   ];
   const setupSettings = ["ip-setup", "token-setup"];
 
@@ -690,6 +692,17 @@ const AddRole = (props) => {
               <Checkbox
                 {...register("access_permission")}
                 checked={watch("access_permission")?.includes("depreciation-monthly-report")}
+              />
+            }
+          />
+          <FormControlLabel
+            disabled={data.action === "view"}
+            label="Fixed Assets Report"
+            value="fixed-assets-report"
+            control={
+              <Checkbox
+                {...register("access_permission")}
+                checked={watch("access_permission")?.includes("fixed-assets-report")}
               />
             }
           />
@@ -1200,6 +1213,7 @@ const AddRole = (props) => {
                                     "general-ledger-report",
                                     "purchase-request-recon",
                                     "depreciation-monthly-report",
+                                    "fixed-assets-report",
                                   ]),
                                 ]);
                               } else {
