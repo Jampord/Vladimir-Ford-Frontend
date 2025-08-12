@@ -665,6 +665,16 @@ const router = createBrowserRouter([
                 element: <DepreciationMonthlyReport />,
                 handle: { permission: "depreciation-monthly-report" },
               },
+              {
+                path: "fixed-assets-report",
+                element: <FixedAsset view />,
+                handle: { permission: "depreciation-monthly-report" },
+              },
+              {
+                path: "fixed-assets-report/:tag_number",
+                element: <FixedAssetView view />,
+                handle: { permission: "fixed-asset" },
+              },
               // {
               //   path: "report3",
               //   // element: <Category />,
