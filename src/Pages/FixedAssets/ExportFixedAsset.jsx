@@ -124,6 +124,9 @@ const ExportFixedAsset = () => {
           "Major Category": item.major_category,
           "Minor Category": item.minor_category,
 
+          "One Charging Code": item.one_charging_code,
+          "One Charging": item.one_charging_name,
+
           "Company Code": item.company_code,
           Company: item.company_name,
 
@@ -156,11 +159,14 @@ const ExportFixedAsset = () => {
 
           "Asset Description": item.asset_description,
           "Asset Specification": item.asset_specification,
-          Accountability: item.accountability,
           "Acquisition Date": moment(item.acquisition_date).format("MMM DD, YYYY"),
+          Accountability: item.accountability,
           Accountable: item.accountable,
           Capitalized: item.capitalized,
           "Cellphone Number": item.cellphone_number,
+          "PR Number": item.ymir_pr_number,
+          "PO Number": item.po_number,
+          "RR Number": item.rr_number,
           Brand: item.brand,
           "Care Of": item.care_of,
           Voucher: item.voucher,
@@ -175,16 +181,16 @@ const ExportFixedAsset = () => {
           "Estimated Useful Life": item.est_useful_life,
           "Release Date": moment(item.release_date).format("MMM DD, YYYY"),
           "Depreciation Status": item.depreciation_status,
-          "Acquisition Cost": item.acquisition_cost,
+          "Acquisition Cost (₱)": item.acquisition_cost,
           "Months Depreciated": item.months_depreciated,
-          "Scrap Value": item.scrap_value,
+          "Scrap Value (₱)": item.scrap_value,
           "Depreciable Basis": item.depreciable_basis,
-          "Accumulated Cost": item.accumulated_cost,
+          "Accumulated Cost (₱)": item.accumulated_cost,
           "Start Depreciation": moment(item.start_depreciation).format("MMM DD, YYYY"),
           "End Depreciation": moment(item.end_depreciation).format("MMM DD, YYYY"),
-          "Depreciation Per Year": item.depreciation_per_year,
-          "Depreciation Per Month": item.depreciation_per_month,
-          "Remaining Book Value": item.remaining_book_value,
+          "Depreciation Per Year (₱)": item.depreciation_per_year,
+          "Depreciation Per Month (₱)": item.depreciation_per_month,
+          "Remaining Book Value (₱)": item.remaining_book_value,
         };
       });
       await excelExport(exportData, `Vladimir-FixedAssets.xlsx`);
