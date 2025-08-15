@@ -41,21 +41,21 @@ const PulloutConfirmation = () => {
               className={value === "1" ? "tab__background" : null}
             />
 
-            <Tab label="Change Care of" value="2" className={value === "2" ? "tab__background" : null} />
-            <Tab label="For Disposal" value="3" className={value === "3" ? "tab__background" : null} />
+            {/* <Tab label="Change Care of" value="2" className={value === "2" ? "tab__background" : null} /> */}
+            {/* <Tab label="For Disposal" value="3" className={value === "3" ? "tab__background" : null} /> */}
           </Tabs>
 
           <TabPanel sx={{ p: 0 }} value="1" index="1">
             <Repaired />
           </TabPanel>
 
-          <TabPanel sx={{ p: 0 }} value="2" index="2">
+          {/* <TabPanel sx={{ p: 0 }} value="2" index="2">
             <ChangeCareof />
-          </TabPanel>
+          </TabPanel> */}
 
-          <TabPanel sx={{ p: 0 }} value="3" index="3">
+          {/* <TabPanel sx={{ p: 0 }} value="3" index="3">
             <ForDisposal />
-          </TabPanel>
+          </TabPanel> */}
         </TabContext>
       </Box>
     </Box>
