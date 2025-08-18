@@ -11,6 +11,7 @@ import { closeConfirm, onLoading, openConfirm } from "../../Redux/StateManagemen
 import { Help } from "@mui/icons-material";
 import { openToast } from "../../Redux/StateManagement/toastSlice";
 import { useDispatch } from "react-redux";
+import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
 
 const ShipTo = () => {
   const [search, setSearch] = useState("");
@@ -237,6 +238,15 @@ const ShipTo = () => {
                 </TableBody>
               </Table>
             </TableContainer>
+
+            <CustomTablePagination
+              total={shipToApiData?.total}
+              success={shipToApiSuccess}
+              current_page={shipToApiData?.current_page}
+              per_page={shipToApiData?.per_page}
+              onPageChange={pageHandler}
+              onRowsPerPageChange={perPageHandler}
+            />
           </Box>
         </Box>
       )}
