@@ -37,7 +37,7 @@ const RequestApproving = () => {
       <Box>
         {permissions.includes("final-approving") ? (
           <TabContext value={value}>
-            <Tabs onChange={handleChange} value={value}>
+            <Tabs onChange={handleChange} value={value} variant="scrollable" scrollButtons="auto">
               <Tab
                 label={
                   <Badge color="error" badgeContent={notifData?.toApproveCount}>
