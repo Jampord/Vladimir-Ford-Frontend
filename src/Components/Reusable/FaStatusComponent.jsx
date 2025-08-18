@@ -6,6 +6,7 @@ import {
   DeleteForever,
   EditOff,
   FileCopy,
+  FindReplace,
   FolderDelete,
   Pending,
   RadioButtonUncheckedRounded,
@@ -161,6 +162,23 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
         variant="contained"
         icon={<SwapHorizontalCircle size="small" color="primary.dark" />}
         label="Change Care of"
+        sx={{
+          backgroundColor: "primary.light",
+          color: "primary",
+
+          ":hover": hover && { backgroundColor: "primary.main", cursor: "pointer" },
+
+          p: "0 5px",
+        }}
+      />
+    );
+  } else if (faStatus === "For Replacement") {
+    return (
+      <Chip
+        size="small"
+        variant="contained"
+        icon={<FindReplace size="small" color="primary.dark" />}
+        label={faStatus}
         sx={{
           backgroundColor: "primary.light",
           color: "primary",
