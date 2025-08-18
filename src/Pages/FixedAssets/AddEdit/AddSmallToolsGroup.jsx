@@ -11,24 +11,34 @@ import { closeDialog2 } from "../../../Redux/StateManagement/booleanStateSlice";
 import { LoadingButton } from "@mui/lab";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
-import { fixedAssetApi } from "../../../Redux/Query/FixedAsset/FixedAssets";
+import { fixedAssetApi, usePostGroupFixedAssetApiMutation } from "../../../Redux/Query/FixedAsset/FixedAssets";
 
 const schema = yup.object().shape({
   //   main_asset_id: yup.object().required().typeError("Main Asset is required").label("Main Asset"),
   child_asset_ids: yup.array().required().label("Child Asset"),
 });
-const AddSmallToolsGroup = ({ data, resetHandler, refetch }) => {
-  const [selectedApprovers, setSelectedApprovers] = useState([]);
+const AddSmallToolsGroup = ({ data, resetHandler, refetch, tabValue }) => {
   const [checked, setChecked] = useState(true);
 
   const dispatch = useDispatch();
 
-  // console.log("ST Data", data);
+  console.log("ST Data", data);
 
   const [
     postGroupSmallTools,
     { data: postData, isLoading: isPostLoading, isSuccess: isPostSuccess, isError: isPostError, error: postError },
   ] = usePostGroupSmallToolsApiMutation();
+
+  const [
+    postGroupFixedAsset,
+    {
+      data: postFixedAssetData,
+      isLoading: isPostFixedAssetLoading,
+      isSuccess: isPostFixedAssetSuccess,
+      isError: isPostFixedAssetError,
+      error: postFixedAssetError,
+    },
+  ] = usePostGroupFixedAssetApiMutation();
 
   const {
     handleSubmit,
@@ -46,8 +56,6 @@ const AddSmallToolsGroup = ({ data, resetHandler, refetch }) => {
     },
   });
 
-  // console.log("errors", errors);
-
   useEffect(() => {
     if (data) {
       setValue(
@@ -59,6 +67,7 @@ const AddSmallToolsGroup = ({ data, resetHandler, refetch }) => {
               id: item.id,
               asset_description: item.asset_description,
               asset_specification: item.asset_specification,
+              vladimir_tag_number: item.vladimir_tag_number,
             },
           };
         })
@@ -67,52 +76,38 @@ const AddSmallToolsGroup = ({ data, resetHandler, refetch }) => {
   }, [data]);
 
   useEffect(() => {
-    if (isPostSuccess) {
-      // reset();
+    if (isPostSuccess || isPostFixedAssetSuccess) {
       dispatch(closeDialog2());
       dispatch(
         openToast({
-          message: postData?.message,
+          message: postData?.message || postFixedAssetData?.message,
           duration: 5000,
         })
       );
     }
-  }, [isPostSuccess]);
+  }, [isPostSuccess, isPostFixedAssetSuccess]);
 
   useEffect(() => {
-    if (isPostError) {
-      //   reset();
-      //   dispatch(closeDialog2());
+    if (isPostError || isPostFixedAssetError) {
       dispatch(
         openToast({
-          message: postError?.errors?.detail || "Child asset is already selected as main asset",
+          message:
+            postError?.errors?.detail ||
+            postFixedAssetError?.errors?.detail ||
+            "Child asset is already selected as main asset",
           duration: 5000,
           variant: "error",
         })
       );
-      // reset();
     }
-  }, [isPostError]);
-
-  //   console.log(
-  //     "watch",
-  //     data?.map((item) => {
-  //       return {
-  //         id: item.id,
-  //         asset: {
-  //           id: item.id,
-  //           asset_description: item.asset_description,
-  //           asset_specification: item.asset_specification,
-  //         },
-  //       };
-  //     })
-  //   );
+  }, [isPostError, isPostFixedAssetError]);
 
   const onSubmitHandler = (formData) => {
     console.log("formdata", formData);
     const newFormData = {
       main_asset_id: formData.child_asset_ids[0].id,
       child_asset_ids: formData.child_asset_ids?.map((item) => item?.asset?.id).slice(1),
+      action: "group",
     };
     console.log("submit", newFormData);
 
@@ -134,15 +129,14 @@ const AddSmallToolsGroup = ({ data, resetHandler, refetch }) => {
               {watch("child_asset_ids")[0]?.asset?.asset_description}
             </Typography>{" "}
             as Main Asset?
-            {/* <Typography color="error" fontSize={"14px"}>
-              This action is irreversible.
-            </Typography> */}
           </Box>
         ),
         onConfirm: async () => {
           try {
             dispatch(onLoading());
-            await postGroupSmallTools(newFormData).unwrap();
+            tabValue === "1"
+              ? await postGroupFixedAsset(newFormData).unwrap()
+              : await postGroupSmallTools(newFormData).unwrap();
             dispatch(closeConfirm());
             dispatch(fixedAssetApi.util.invalidateTags(["FixedAsset"]));
             reset();
@@ -150,18 +144,11 @@ const AddSmallToolsGroup = ({ data, resetHandler, refetch }) => {
             refetch();
           } catch (err) {
             console.log(err);
-            // if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
-            //   // reset();
-            // } else if (err?.status !== 422) {
-            //   // reset();
-            // }
           }
         },
       })
     );
   };
-
-  //   console.log("watch", watch("child_asset_ids")[0]?.asset?.asset_description);
 
   const onSubmit = (event) => {
     event.preventDefault(); // Prevent default form submission
@@ -182,7 +169,7 @@ const AddSmallToolsGroup = ({ data, resetHandler, refetch }) => {
           alignSelf: "center",
         }}
       >
-        Group Small Tools
+        {tabValue === "1" ? "Group Fixed Assets" : "Group Small Tools"}
       </Typography>
 
       <Box component="form" onSubmit={onSubmit} className="add-masterlist__content" gap={1}>
@@ -227,6 +214,7 @@ const AddSmallToolsGroup = ({ data, resetHandler, refetch }) => {
                       cursor: data?.action === "view" ? "" : "pointer",
                     }}
                   >
+                    {console.log("data", data)}
                     <Slide
                       direction={data?.action === "view" ? "down" : "left"}
                       in={checked}
@@ -261,7 +249,7 @@ const AddSmallToolsGroup = ({ data, resetHandler, refetch }) => {
                           </Avatar>
                           <Stack>
                             <Typography fontSize={index === 0 ? "16px" : "15px"} fontWeight={index === 0 ? 550 : null}>
-                              {data.asset.asset_description}
+                              {`${data?.asset.vladimir_tag_number} - ${data.asset.asset_description}`}
                             </Typography>
                             <Typography
                               fontSize={index === 0 ? "14px" : "12px"}
@@ -290,8 +278,8 @@ const AddSmallToolsGroup = ({ data, resetHandler, refetch }) => {
             color="secondary"
             type="submit"
             onClick={(event) => event.stopPropagation()}
-            disabled={isPostLoading}
-            loading={isPostLoading}
+            disabled={isPostLoading || isPostFixedAssetLoading}
+            loading={isPostLoading || isPostFixedAssetLoading}
             size="small"
             startIcon={<HomeRepairService color="primary" />}
           >
