@@ -57,7 +57,7 @@ const ExportRequestMonitoring = () => {
   };
 
   const handleExport = async (formData) => {
-    console.log("formData", formData);
+    // console.log("formData", formData);
     try {
       const res = await trigger({
         from: formData?.from ? moment(formData?.from).format("YYYY-MM-DD") : null,
@@ -79,6 +79,9 @@ const ExportRequestMonitoring = () => {
           Quantity: item?.quantity,
           Delivered: item?.delivered,
           Cancelled: item?.cancelled,
+          "Receiving Warehouse": item?.receiving_warehouse,
+          "One Charging Code": item?.one_charging_code,
+          "One Charging": item?.one_charging_name,
           "Company Code": item?.company_code,
           Company: item?.company_name,
           "Business Unit Code": item?.business_unit_code,
@@ -105,7 +108,7 @@ const ExportRequestMonitoring = () => {
       );
       dispatch(closeExport());
     } catch (err) {
-      console.log("err", err);
+      // console.log("err", err);
 
       if (err?.status === 422) {
         dispatch(
