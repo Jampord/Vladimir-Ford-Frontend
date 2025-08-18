@@ -93,7 +93,7 @@ import AddInclusion from "../Asset Requisition/Received Asset/AddInclusion";
 import EditSmallTools from "./AddEdit/EditSmallTools";
 import EditAssetDescription from "./AddEdit/EditAssetDescription";
 
-const FixedAssetView = (props) => {
+const FixedAssetView = ({ view }) => {
   const [search, setSearch] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -546,7 +546,11 @@ const FixedAssetView = (props) => {
   });
 
   const onBackHandler = () => {
-    dataApi.data?.is_additional_cost === 0 ? navigate("/fixed-asset/fixed-asset") : navigate(-1);
+    view
+      ? navigate("/reports/fixed-assets-report")
+      : dataApi.data?.is_additional_cost === 0
+      ? navigate("/fixed-asset/fixed-asset")
+      : navigate(-1);
   };
 
   const handleOpenInclusion = () => {
@@ -648,7 +652,7 @@ const FixedAssetView = (props) => {
                   </span>
                 </Tooltip> */}
 
-                {
+                {!view && (
                   <Button
                     variant="contained"
                     size="small"
@@ -677,9 +681,10 @@ const FixedAssetView = (props) => {
                   >
                     {isSmallScreen ? <PriceChange color={"primary"} /> : "Depreciation"}
                   </Button>
-                }
+                )}
 
-                {permissions?.split(", ").includes("print-fa") &&
+                {!view &&
+                  permissions?.split(", ").includes("print-fa") &&
                   dataApi.data?.is_additional_cost === 0 &&
                   dataApi.data?.type_of_request?.type_of_request_name !== "Capex" &&
                   dataApi.data?.is_printable !== 0 && (
@@ -694,7 +699,7 @@ const FixedAssetView = (props) => {
                     </LoadingButton>
                   )}
 
-                {dataApi?.data?.can_update === 1 && (
+                {!view && dataApi?.data?.can_update === 1 && (
                   <ActionMenu
                     data={dataApi?.data}
                     setStatusChange={setStatusChange}
@@ -702,7 +707,7 @@ const FixedAssetView = (props) => {
                   />
                 )}
 
-                {dataApi?.data?.is_depreciated === 1 && dataApi?.data?.can_update !== 1 && (
+                {!view && dataApi?.data?.is_depreciated === 1 && dataApi?.data?.can_update !== 1 && (
                   <ActionMenu data={dataApi?.data} editAssetDescription hideEdit />
                 )}
               </Box>
@@ -925,7 +930,7 @@ const FixedAssetView = (props) => {
                     <Box className="tableCard__properties">
                       One RDF:
                       <Typography className="tableCard__info" fontSize="14px">
-                        {`${dataApi?.data?.one_charging?.code} - ${dataApi?.data?.one_charging?.name}`}
+                        {`${dataApi?.data?.one_charging?.code || "-"} - ${dataApi?.data?.one_charging?.name || "-"}`}
                       </Typography>
                     </Box>
 
@@ -1110,6 +1115,12 @@ const FixedAssetView = (props) => {
                         {dataApi?.data?.supplier?.supplier_code} - {dataApi?.data?.supplier?.supplier_name}
                       </Typography>
                     </Box>
+                    <Box className="tableCard__properties">
+                      Ship To:
+                      <Typography className="tableCard__info" fontSize="14px">
+                        {dataApi?.data?.ship_to?.location} - {dataApi?.data?.ship_to?.address}
+                      </Typography>
+                    </Box>
 
                     <Box className="tableCard__properties">
                       Quantity:
@@ -1277,15 +1288,17 @@ const FixedAssetView = (props) => {
                         </TableBody>
                       </Table>
                     </TableContainer>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      startIcon={<AddBoxRounded />}
-                      onClick={handleOpenInclusion}
-                      sx={{ mt: 2 }}
-                    >
-                      {inclusionData?.length === 0 ? "ADD ITEM" : "ADD/DELETE ITEM"}
-                    </Button>
+                    {!view && (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        startIcon={<AddBoxRounded />}
+                        onClick={handleOpenInclusion}
+                        sx={{ mt: 2 }}
+                      >
+                        {inclusionData?.length === 0 ? "ADD ITEM" : "ADD/DELETE ITEM"}
+                      </Button>
+                    )}
                   </AccordionDetails>
                 </Accordion>
                 {/* )} */}
