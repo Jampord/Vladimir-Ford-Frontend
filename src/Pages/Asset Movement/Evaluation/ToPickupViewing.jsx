@@ -23,6 +23,7 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
+import StatusChange from "../../../Components/Reusable/FaStatusComponent";
 
 const ToPickupViewing = () => {
   const dispatch = useDispatch();
@@ -50,8 +51,10 @@ const ToPickupViewing = () => {
   const { control, setValue } = useForm({
     defaultValues: {
       description: pickupData?.description || null,
-      care_of: pickupData?.description || null,
-      requestor: pickupData?.requester?.employee_id || null,
+      care_of: pickupData?.care_of || null,
+      requestor:
+        `${pickupData?.requester?.employee_id} - ${pickupData?.requester?.first_name} ${pickupData?.requester?.last_name}` ||
+        null,
     },
   });
 
@@ -276,36 +279,40 @@ const ToPickupViewing = () => {
                         {item.accountable}
                       </TableCell>
                       <TableCell className="tbl-cell" align="center">
-                        {item.evaluation}
+                        <StatusChange faStatus={item.evaluation} />
                       </TableCell>
                       <TableCell className="tbl-cell">
                         <Typography fontSize="10px" color="gray">
-                          {item?.company.company_code}
-                          {" - "} {item?.company.company_name}
+                          {item?.one_charging.code}
+                          {" - "} {item?.one_charging.name}
                         </Typography>
                         <Typography fontSize="10px" color="gray">
-                          {item?.business_unit?.business_unit_code}
+                          {item?.one_charging.company_code || item?.company.company_code}
+                          {" - "} {item?.one_charging.company_name || item?.company.company_name}
+                        </Typography>
+                        <Typography fontSize="10px" color="gray">
+                          {item?.one_charging.business_unit_code || item?.business_unit?.business_unit_code}
                           {" - "}
-                          {item?.business_unit?.business_unit_name}
+                          {item?.one_charging.business_unit_name || item?.business_unit?.business_unit_name}
                         </Typography>
                         <Typography fontSize="10px" color="gray">
-                          {item?.department.department_code}
+                          {item?.one_charging.department_code || item?.department.department_code}
                           {" - "}
-                          {item?.department.department_name}
+                          {item?.one_charging.department_name || item?.department.department_name}
                         </Typography>
                         <Typography fontSize="10px" color="gray">
-                          {item?.unit?.unit_code}
+                          {item?.one_charging.unit_code || item?.unit?.unit_code}
                           {" - "}
-                          {item?.unit?.unit_name}
+                          {item?.one_charging.unit_name || item?.unit?.unit_name}
                         </Typography>
                         <Typography fontSize="10px" color="gray">
-                          {item?.subunit?.subunit_code}
+                          {item?.one_charging.codsubunit_codee || item?.subunit?.subunit_code}
                           {" - "}
-                          {item?.subunit?.subunit_name}
+                          {item?.one_charging.subunit_name || item?.subunit?.subunit_name}
                         </Typography>
                         <Typography fontSize="10px" color="gray">
-                          {item?.location.location_code} {" - "}
-                          {item?.location.location_name}
+                          {item?.one_charging.location_code || item?.location.location_code} {" - "}
+                          {item?.one_charging.location_name || item?.location.location_name}
                         </Typography>
                       </TableCell>
                     </TableRow>
