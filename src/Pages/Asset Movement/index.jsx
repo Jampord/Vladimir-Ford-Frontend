@@ -6,6 +6,7 @@ import { useLocation } from "react-router-dom";
 
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import {
+  AssignmentTurnedIn,
   History,
   MoveDownOutlined,
   PlaylistRemoveRounded,
@@ -42,14 +43,6 @@ const MovementList = [
   // },
 
   {
-    icon: <PlaylistRemoveRounded />,
-    label: "Disposal",
-    description: "List of For Disposal Items",
-    path: "/asset-movement/disposal",
-    permission: "disposal",
-  },
-
-  {
     icon: <MoveDownOutlined />,
     label: "Receiving of Transfer",
     description: "List of For Receiving and Received Transfers",
@@ -63,6 +56,20 @@ const MovementList = [
     description: "List and Details of Asset Evaluation",
     path: "/asset-movement/evaluation",
     permission: "evaluation",
+  },
+  {
+    icon: <AssignmentTurnedIn />,
+    label: "Pullout Confirmation",
+    description: "List of For Confirmation Items",
+    path: "/asset-movement/pull-out-confirmation",
+    permission: "pull-out",
+  },
+  {
+    icon: <PlaylistRemoveRounded />,
+    label: "Disposal",
+    description: "List of For Disposal Items",
+    path: "/asset-movement/disposal",
+    permission: "disposal",
   },
 ];
 
