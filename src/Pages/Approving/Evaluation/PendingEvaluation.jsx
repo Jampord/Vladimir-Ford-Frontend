@@ -95,8 +95,44 @@ const PendingEvaluation = () => {
     setPage(page + 1);
   };
 
+  const handleViewFile = async (id) => {
+    try {
+      const response = await fetch(`${process.env.VLADIMIR_BASE_URL}/file/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "x-api-key": process.env.GL_KEY },
+      });
+      const blob = await response.blob();
+      const fileURL = URL.createObjectURL(blob);
+
+      // Open new window and store reference
+      const newWindow = window.open(fileURL, "_blank");
+
+      if (newWindow) {
+        // Add to cache and setup cleanup listener
+        blobUrlCache.set(newWindow, fileURL);
+        newWindow.addEventListener("unload", () => {
+          URL.revokeObjectURL(fileURL);
+          blobUrlCache.delete(newWindow);
+        });
+      } else {
+        // Revoke immediately if window failed to open
+        URL.revokeObjectURL(fileURL);
+      }
+    } catch (err) {
+      console.error("Error handling file view:", err);
+    }
+  };
+
+  // Cleanup for main window close (optional safety net)
+  window.addEventListener("beforeunload", () => {
+    blobUrlCache.forEach((url, win) => {
+      URL.revokeObjectURL(url);
+      blobUrlCache.delete(win);
+    });
+  });
+
   const DlAttachment = (id) => (
-    <Tooltip title="Download Attachment" placement="top" arrow>
+    <Tooltip title="View Attachment" placement="top" arrow>
       <Box
         sx={{
           textDecoration: "underline",
@@ -105,6 +141,7 @@ const PendingEvaluation = () => {
           fontSize: "12px",
         }}
         // onClick={() => handleDownloadAttachment({ value: "attachments", transfer_number: id })}
+        onClick={() => handleViewFile(id?.id[0]?.id)}
       >
         <Attachment />
       </Box>
@@ -164,7 +201,7 @@ const PendingEvaluation = () => {
               action: "approve",
               item_id: id,
             }).unwrap();
-
+            reset();
             dispatch(
               openToast({
                 message: result.message,
@@ -222,7 +259,7 @@ const PendingEvaluation = () => {
               item_id: id,
               remarks: data,
             }).unwrap();
-
+            reset();
             dispatch(
               openToast({
                 message: result.message || "Request returned successfully!",
@@ -262,7 +299,7 @@ const PendingEvaluation = () => {
   console.log("watch evaluation_id:", evaluation_ids);
   return (
     <Stack className="category_height">
-      {approvalLoading && <MasterlistSkeleton category={true} onAdd={true} />}
+      {approvalLoading && <MasterlistSkeleton category={true} />}
       {approvalError && <ErrorFetching refetch={refetch} category={approvalData} error={errorData} />}
       {approvalData && !approvalError && (
         <Box className="mcontainer__wrapper">
@@ -314,9 +351,7 @@ const PendingEvaluation = () => {
                       Requestor
                     </TableCell>
                     <TableCell className="tbl-cell-category">Asset</TableCell>
-                    <TableCell className="tbl-cell-category" align="center">
-                      Chart of Accounts
-                    </TableCell>
+                    <TableCell className="tbl-cell-category">Chart of Accounts</TableCell>
                     <TableCell className="tbl-cell-category" align="center">
                       Attachments
                     </TableCell>
@@ -349,7 +384,7 @@ const PendingEvaluation = () => {
                           handleRowClick(data);
                         }}
                       >
-                        <Typography fontSize={12} fontWeight={700} color="secondary.main">
+                        <Typography fontSize={12} color="secondary.main">
                           {data?.id}
                         </Typography>
                       </TableCell>
@@ -360,7 +395,7 @@ const PendingEvaluation = () => {
                           handleRowClick(data);
                         }}
                       >
-                        <Typography fontSize={12} fontWeight={700} color="secondary.main">
+                        <Typography fontSize={12} color="secondary.main">
                           {data?.description}
                         </Typography>
                       </TableCell>
@@ -374,10 +409,10 @@ const PendingEvaluation = () => {
                         <Typography fontSize={12} fontWeight={700} color="secondary.main">
                           {data.requester.employee_id}
                         </Typography>
-                        <Typography fontSize={11} fontWeight={600} color="secondary.main">
+                        <Typography fontSize={11} fontWeight={500} color="secondary.main">
                           {data.requester.first_name}
                         </Typography>
-                        <Typography fontSize={11} fontWeight={600} color="secondary.main">
+                        <Typography fontSize={11} fontWeight={500} color="secondary.main">
                           {data.requester.last_name}
                         </Typography>
                       </TableCell>
@@ -387,6 +422,9 @@ const PendingEvaluation = () => {
                           handleRowClick(data);
                         }}
                       >
+                        <Typography fontWeight={700} fontSize="13px" color="primary">
+                          {data?.asset.vladimir_tag_number}
+                        </Typography>
                         <Typography fontWeight={600} fontSize="14px" color="secondary.main">
                           {data?.asset.asset_description}
                         </Typography>
@@ -446,7 +484,7 @@ const PendingEvaluation = () => {
                         </Typography>
                       </TableCell>
                       <TableCell className="tbl-cell-category" align="center">
-                        <DlAttachment id={data.id} />
+                        <DlAttachment id={data?.evaluation_attachments} />
                       </TableCell>
                       <TableCell
                         className="tbl-cell-category"
@@ -455,7 +493,7 @@ const PendingEvaluation = () => {
                           handleRowClick(data);
                         }}
                       >
-                        <Typography fontSize={13} fontWeight={500} color="secondary.main">
+                        <Typography fontSize={13} color="secondary.main">
                           {moment(data?.created_at).format("MMM DD, YYYY")}
                         </Typography>
                       </TableCell>
