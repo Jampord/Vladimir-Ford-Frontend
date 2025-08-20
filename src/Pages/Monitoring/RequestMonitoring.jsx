@@ -46,7 +46,7 @@ import {
 import { AddBox, AddCircleSharp, IosShareRounded, LibraryAdd, Visibility } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { closeDialog, closeExport, openDialog, openExport } from "../../Redux/StateManagement/booleanStateSlice";
-import RequestTimeline from "./RequestTimeline";
+import RequestTimeline from "../Asset Requisition/RequestTimeline";
 import useExcel from "../../Hooks/Xlsx";
 import moment from "moment";
 import ExportRequestMonitoring from "./ExportRequestMonitoring";
@@ -497,7 +497,7 @@ const RequestMonitoring = () => {
                                     color="secondary.main"
                                   >
                                     <Tooltip
-                                      title={<>{data.acquisition_details}</>}
+                                      title={data.acquisition_details}
                                       placement="top-start"
                                       arrow
                                       // slots={{
