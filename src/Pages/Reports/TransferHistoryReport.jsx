@@ -31,6 +31,8 @@ const TransferHistoryReport = () => {
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
   const [transfer, setTransfer] = useState([]);
+  const [dateTo, setDateTo] = useState(null);
+  const [dateFrom, setDateFrom] = useState(null);
 
   const showExport = useSelector((state) => state.booleanState.exportFile);
   const dispatch = useDispatch();
@@ -85,6 +87,8 @@ const TransferHistoryReport = () => {
       page: page,
       per_page: perPage,
       search: search,
+      to: dateTo,
+      from: dateFrom,
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -168,7 +172,16 @@ const TransferHistoryReport = () => {
         {istransferHistoryError && <ErrorFetching refetch={refetch} error={errorData} />}
         {transferHistoryData && !istransferHistoryError && (
           <Box className="mcontainer__wrapper">
-            <MasterlistToolbar onSearchChange={setSearch} onSetPage={setPage} hideArchive></MasterlistToolbar>
+            <MasterlistToolbar
+              onSearchChange={setSearch}
+              onSetPage={setPage}
+              hideArchive
+              showDateFilter
+              dateFrom={dateFrom}
+              setDateFrom={setDateFrom}
+              dateTo={dateTo}
+              setDateTo={setDateTo}
+            ></MasterlistToolbar>
 
             <Box>
               <TableContainer className="mcontainer__th-body">
@@ -194,7 +207,7 @@ const TransferHistoryReport = () => {
 
                   <TableBody>
                     {transferHistoryData?.data?.length === 0 ? (
-                      <NoRecordsFound />
+                      <NoRecordsFound heightData="medium" />
                     ) : (
                       <>
                         {istransferHistorySuccess &&
@@ -214,13 +227,11 @@ const TransferHistoryReport = () => {
                                 }}
                               >
                                 <TableCell className="tbl-cell">
-                                  <Typography fontWeight={600} fontSize="14px">
-                                    {data.id}
-                                  </Typography>
+                                  <Typography fontSize="13px">{data.id}</Typography>
                                 </TableCell>
 
                                 <TableCell className="tbl-cell">
-                                  <Typography fontWeight={500} fontSize="14px">
+                                  <Typography fontWeight={500} fontSize="13px">
                                     {data.vladimir_tag_number}
                                   </Typography>
                                 </TableCell>
