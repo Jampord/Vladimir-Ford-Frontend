@@ -51,7 +51,7 @@ import Requisition from "./Pages/Asset Requisition/Requisition";
 import AddRequisition from "./Pages/Asset Requisition/Add Requisition/AddRequest";
 import PurchaseRequest from "./Pages/Asset Requisition/Purchase Request/PurchaseRequest";
 // import ViewRequest from "./Pages/Asset Requisition/ViewRequest";
-import RequestMonitoring from "./Pages/Asset Requisition/RequestMonitoring";
+import RequestMonitoring from "./Pages/Monitoring/RequestMonitoring";
 
 import AssetRequisition from "./Pages/Asset Requisition";
 
@@ -105,12 +105,14 @@ import FixedAssetIndex from "./Pages/FixedAssets";
 import DepreciationPage from "./Pages/FixedAssets/Depreciation/DepreciationPage";
 import FixedAssetDepreciationView from "./Pages/FixedAssets/Depreciation/FixedAssetDepreciationView";
 import PurchaseRequestRecon from "./Pages/Reports/PurchaseRequestRecon";
-import WarehouseMonitoring from "./Pages/Asset Requisition/WarehouseMonitoring";
 import DepreciationMonthlyReport from "./Pages/Reports/DepreciationMonthlyReport";
 import OneRDFCharging from "./Pages/Masterlist/OneRDFCharging";
 import PulloutConfirmation from "./Pages/Asset Movement/Pullout Confirmation/PulloutConfirmation";
 import ReleasingOfAssetMonitoring from "./Pages/Asset Requisition/Releasing of Asset/ReleasingOfAssetMonitoring";
 import ShipTo from "./Pages/Masterlist/ShipTo";
+import Monitoring from "./Pages/Monitoring";
+import WarehouseMonitoring from "./Pages/Monitoring/WarehouseMonitoring";
+import TransferReceivingMonitoring from "./Pages/Monitoring/TransferReceivingMonitoring";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -594,30 +596,6 @@ const router = createBrowserRouter([
           },
 
           {
-            path: "request-monitoring",
-            element: <RequestMonitoring />,
-            handle: { permission: "request-monitoring" },
-          },
-
-          {
-            path: "request-monitoring/:transaction_number",
-            element: <AddRequisition />,
-            handle: { permission: "request-monitoring" },
-          },
-
-          {
-            path: "warehouse-monitoring",
-            element: <WarehouseMonitoring />,
-            handle: { permission: "warehouse-monitoring" },
-          },
-
-          {
-            path: "warehouse-monitoring/:transaction_number",
-            element: <AddRequisition />,
-            handle: { permission: "warehouse-monitoring" },
-          },
-
-          {
             path: "asset-for-tagging",
             // element: <AssetForTagging />,
             handle: { permission: "asset-for-tagging" },
@@ -633,6 +611,39 @@ const router = createBrowserRouter([
             path: "on-hand-in-process",
             // element: <OnHandInProcess />,
             handle: { permission: "on-hand-in-process" },
+          },
+
+          {
+            path: "monitoring",
+            element: <Monitoring />,
+            handle: { permission: "monitoring" },
+            children: [
+              {
+                path: "request-monitoring",
+                element: <RequestMonitoring />,
+                handle: { permission: "request-monitoring" },
+              },
+              {
+                path: "request-monitoring/:transaction_number",
+                element: <AddRequisition />,
+                handle: { permission: "request-monitoring" },
+              },
+              {
+                path: "warehouse-monitoring",
+                element: <WarehouseMonitoring />,
+                handle: { permission: "warehouse-monitoring" },
+              },
+              {
+                path: "warehouse-monitoring/:transaction_number",
+                element: <AddRequisition />,
+                handle: { permission: "warehouse-monitoring" },
+              },
+              {
+                path: "transfer-receiving-monitoring",
+                element: <TransferReceivingMonitoring />,
+                handle: { permission: "transfer-receiving-monitoring" },
+              },
+            ],
           },
 
           {
