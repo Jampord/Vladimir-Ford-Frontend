@@ -47,7 +47,7 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
         }}
       />
     );
-  } else if (faStatus === "For Releasing" || faStatus === "Not yet evaluated") {
+  } else if (faStatus === "For Releasing" || faStatus === "Not yet evaluated" || faStatus === "Not yet pick-up") {
     return (
       <Chip
         size="small"
@@ -64,7 +64,7 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
         }}
       />
     );
-  } else if (faStatus === "For Disposal") {
+  } else if (faStatus === "For Disposal" || faStatus === "Disposal") {
     return (
       <Chip
         size="small"
@@ -91,6 +91,8 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
         sx={{
           backgroundColor: "#b88ffa41",
           color: "#5102d1",
+
+          ":hover": hover && { backgroundColor: "#CDCCF0", cursor: "pointer" },
 
           p: "0 5px",
         }}
