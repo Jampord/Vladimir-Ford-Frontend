@@ -172,10 +172,13 @@ const ReleasingTable = (props) => {
   );
 
   const selectedItem = handleSelectedItems ? handleSelectedItems[0] : null;
+  const hasPhone = releasingData?.data?.some((item) => item.minor_category?.minor_category_name === "Phone");
+
+  console.log("hasPhone", hasPhone);
 
   // console.log("handleSelectedItems", allEqual(handleSelectedItems));
-  // console.log("handleSelectedItems", handleSelectedItems);
-  // console.log("selectedItem", selectedItem);
+  console.log("handleSelectedItems", handleSelectedItems);
+  console.log("selectedItem", selectedItem);
 
   //**Validation for Department of Selected Items
   const commonData = [...new Set(handleSelectedItems?.map((item) => item.location.id))].length === 1;
@@ -297,6 +300,12 @@ const ReleasingTable = (props) => {
                                   warehouseNumberAllHandler(e.target.checked);
                                   // console.log(e.target.checked);
                                 }}
+                                disabled={
+                                  (selectedItem &&
+                                    hasPhone &&
+                                    selectedItem?.minor_category?.minor_category_name !== "Phone") ||
+                                  hasPhone
+                                }
                               />
                             }
                           />
@@ -392,7 +401,14 @@ const ReleasingTable = (props) => {
                                   <FormControlLabel
                                     value={data.warehouse_number?.warehouse_number}
                                     sx={{ margin: "auto" }}
-                                    disabled={data.action === "view"}
+                                    disabled={
+                                      data.action === "view" ||
+                                      (data?.id !== selectedItem?.id &&
+                                        selectedItem?.minor_category?.minor_category_name === "Phone") ||
+                                      (selectedItem &&
+                                        selectedItem?.minor_category?.minor_category_name !== "Phone" &&
+                                        data?.minor_category?.minor_category_name === "Phone")
+                                    }
                                     control={
                                       <Checkbox
                                         size="small"
@@ -452,6 +468,12 @@ const ReleasingTable = (props) => {
                                 <Typography fontSize={12} fontWeight={600} color="primary.main">
                                   {data.type_of_request?.type_of_request_name.toUpperCase()}
                                 </Typography>
+
+                                {data?.minor_category?.minor_category_name === "Phone" && (
+                                  <Typography fontSize={12} fontWeight={600} color="info.main">
+                                    Phone Request
+                                  </Typography>
+                                )}
                               </TableCell>
 
                               <TableCell onClick={() => handleViewData(data)} className="tbl-cell">
@@ -489,9 +511,6 @@ const ReleasingTable = (props) => {
                                 <Typography fontSize={10} color="gray">
                                   ({data.location?.location_code}) - {data.location?.location_name}
                                 </Typography>
-                                {/* <Typography fontSize={10} color="gray">
-                                  ({data.account_title?.account_title_code}) - {data.account_title?.account_title_name}
-                                </Typography> */}
                               </TableCell>
 
                               <TableCell onClick={() => handleViewData(data)} className="tbl-cell ">
@@ -593,6 +612,7 @@ const ReleasingTable = (props) => {
           commonData={commonData}
           // personalData={personalData}
           selectedItems={selectedItem}
+          selectedItemsReset={reset}
         />
       </Dialog>
 
