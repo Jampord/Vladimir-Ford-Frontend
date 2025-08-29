@@ -19,13 +19,19 @@ export const fixedAssetApi = createApi({
 
   endpoints: (builder) => ({
     getFixedAssetApi: builder.query({
-      query: (params) =>
-        `fixed-asset-search?search=${params.search}&page=${params.page}&per_page=${params.per_page}&status=${params.status}&filter=${params.filter}`,
+      query: (params) => ({ url: `fixed-asset-search`, params }),
+
       providesTags: ["FixedAsset"],
     }),
 
     getFixedAssetAllApi: builder.query({
       query: () => `fixed-asset?pagination=none`,
+      transformResponse: (response) => response.data,
+      providesTags: ["FixedAsset"],
+    }),
+
+    getFixedAssetAllParamsApi: builder.query({
+      query: (params) => ({ url: `fixed-asset?pagination=none`, params }),
       transformResponse: (response) => response.data,
       providesTags: ["FixedAsset"],
     }),
@@ -179,7 +185,9 @@ export const fixedAssetApi = createApi({
     //       };
     //     } else {
     //       return {
-    //         url: `http://127.0.0.1:80/VladimirPrinting/public/index.php/api/fixed-asset/barcode`,
+    //         url: `http://210.5.110.212:30230/VladimirPrinting/public/index.php/api/fixed-asset/barcode`,
+    //         // url: `http://stalwart:8069/VladimirPrinting/public/index.php/api/fixed-asset/barcode`,
+    //         // url: `http://127.0.0.1:80/VladimirPrinting/public/index.php/api/fixed-asset/barcode`,
     //         // url: `http://10.10.2.30:8069/VladimirPrinting/public/index.php/api/fixed-asset/barcode`,
     //         method: "POST",
     //         body: params,
@@ -194,7 +202,6 @@ export const fixedAssetApi = createApi({
       query: (params) => {
         return {
           url: `/fixed-asset/barcode`,
-          // url: `https://pretestalpha.rdfmis.ph/server/api/fixed-asset/barcode`,
           method: "POST",
           body: params,
         };
@@ -318,12 +325,24 @@ export const fixedAssetApi = createApi({
       },
       providesTags: ["Depreciation"],
     }),
+
+    postGroupFixedAssetApi: builder.mutation({
+      query: (params) => {
+        return {
+          url: `manage-asset-group`,
+          method: "POST",
+          body: params,
+        };
+      },
+      invalidatesTags: ["FixedAsset"],
+    }),
   }),
 });
 
 export const {
   useGetFixedAssetApiQuery,
   useLazyGetFixedAssetAllApiQuery,
+  useLazyGetFixedAssetAllParamsApiQuery,
   useLazyGetFixedAssetAddCostAllApiQuery,
   useGetFixedAssetAddCostAllApiQuery,
   useGetFixedAssetSubunitAllApiQuery,
@@ -361,4 +380,6 @@ export const {
 
   useGetDepreciationMonthlyReportApiQuery,
   useLazyGetDepreciationMonthlyReportApiQuery,
+
+  usePostGroupFixedAssetApiMutation,
 } = fixedAssetApi;
