@@ -74,6 +74,7 @@ const ExportPrintFixedAsset = ({ tabValue }) => {
           "Reference Number": item.reference_number,
           "Asset Description": item.asset_description,
           "Asset Specification": item.asset_specification,
+          Requestor: `${item.requestor.employee_id} - ${item.requestor.first_name} ${item.requestor.last_name}`,
           "Warehouse Number": item.warehouse_number.warehouse_number,
           Warehouse: item.warehouse.warehouse_name,
           "PR Number": item.pr_number,
