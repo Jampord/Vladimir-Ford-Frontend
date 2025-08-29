@@ -122,11 +122,6 @@ const schema = yup.object().shape({
   unit_id: yup.object().required().label("Unit").typeError("Unit is a required field"),
   subunit_id: yup.object().required().label("Subunit").typeError("Subunit is a required field"),
   location_id: yup.object().required().label("Location").typeError("Location is a required field"),
-  depreciation_debit_id: yup
-    .object()
-    .required()
-    .label("Depreciation Debit")
-    .typeError("Depreciation Debit is a required field"),
   // account_title_id: yup.object().required().label("Account Title").typeError("Account Title is a required field"),
 
   remarks: yup.string().label("Remarks"),
@@ -135,6 +130,11 @@ const schema = yup.object().shape({
     yup.object().shape({
       asset_id: yup.string(),
       fixed_asset_id: yup.object().required("Fixed Asset is a Required Field"),
+      depreciation_debit_id: yup
+        .object()
+        .required()
+        .label("Depreciation Debit")
+        .typeError("Depreciation Debit is a required field"),
       asset_accountable: yup.string(),
       created_at: yup.date(),
       company_id: yup.string(),
@@ -426,7 +426,7 @@ const ViewTransfer = (props) => {
       setValue("location_id", transferNumberData?.location);
       // setValue("account_title_id", transferNumberData?.account_title);
       setValue("remarks", transferNumberData?.remarks);
-      setValue("depreciation_debit_id", transferNumberData?.depreciation_debit);
+      // setValue("depreciation_debit_id", transferNumberData?.depreciation_debit);
       setValue("attachments", attachmentFormat);
       setValue(
         "assets",
@@ -440,6 +440,7 @@ const ViewTransfer = (props) => {
           fixed_asset_id: asset,
           asset_accountable: asset.accountable === "-" ? "Common" : asset.accountable,
           created_at: asset.created_at || asset.acquisition_date,
+          depreciation_debit_id: asset?.selected_depreciation_debit,
           remaining_book_value: asset.remaining_book_value,
           one_charging_id: asset.one_charging?.name,
           company_id: asset.one_charging?.company_name || asset.company?.company_name,
@@ -561,8 +562,6 @@ const ViewTransfer = (props) => {
               movement_id: transfer_number,
             }).unwrap();
 
-            isTransferRefetch();
-
             dispatch(
               openToast({
                 message: result.message,
@@ -671,10 +670,31 @@ const ViewTransfer = (props) => {
     );
   };
 
-  const changedDepreciation = transferData[0]?.depreciation_debit?.id !== watch("depreciation_debit_id")?.id;
+  // const changedDepreciation = transferData[0]?.depreciation_debit?.id !== watch("depreciation_debit_id")?.id;
+  const changedDepreciation = transferData[0]?.assets
+    .map((asset, index) => asset.selected_depreciation_debit?.id === watch(`assets.${index}.depreciation_debit_id`)?.id)
+    .includes(false)
+    ? true
+    : false;
 
   const onApprovalChangeHandler = (transfer_number) => {
-    const formData = { id: transfer_number, depreciation_debit_id: watch("depreciation_debit_id").sync_id };
+    console.log("transfer_number:", {
+      transfers: fields.map((item, index) => {
+        return {
+          id: transferData[0].id[index],
+          depreciation_debit_id: watch(`assets.${index}.depreciation_debit_id`)?.sync_id,
+        };
+      }),
+    });
+
+    const formData = {
+      transfers: fields.map((item, index) => {
+        return {
+          id: transferData[0].id[index],
+          depreciation_debit_id: watch(`assets.${index}.depreciation_debit_id`)?.sync_id,
+        };
+      }),
+    };
 
     dispatch(
       openConfirm({
@@ -728,7 +748,7 @@ const ViewTransfer = (props) => {
 
           try {
             dispatch(onLoading());
-            const result = await changeTransfer({ ...formData }).unwrap();
+            const result = await changeTransfer(formData).unwrap();
 
             isTransferRefetch();
 
@@ -1149,7 +1169,7 @@ const ViewTransfer = (props) => {
                       )}
                     />
 
-                    <Stack gap={2}>
+                    {/* <Stack gap={2}>
                       <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
                         ACCOUNTING ENTRIES
                       </Typography>
@@ -1177,7 +1197,7 @@ const ViewTransfer = (props) => {
                           />
                         )}
                       />
-                    </Stack>
+                    </Stack> */}
 
                     {/* <CustomAutoComplete
                     name="receiver_id"
@@ -1248,6 +1268,7 @@ const ViewTransfer = (props) => {
                     <TableCell className="tbl-cell">Index</TableCell>
                     <TableCell className="tbl-cell">Asset</TableCell>
                     <TableCell className="tbl-cell">Transfer To</TableCell>
+                    <TableCell className="tbl-cell">Accounting Entries</TableCell>
                     <TableCell className="tbl-cell">Accountability</TableCell>
                     <TableCell className="tbl-cell">Remaining Book Value</TableCell>
                     <TableCell className="tbl-cell">Chart Of Accounts</TableCell>
@@ -1561,6 +1582,55 @@ const ViewTransfer = (props) => {
                               )}
                             />
                           </Stack>
+                        </TableCell>
+
+                        <TableCell className="tbl-cell">
+                          <CustomAutoComplete
+                            autoComplete
+                            disableClearable
+                            name={`assets.${index}.depreciation_debit_id`}
+                            optionalSolid={transferData[0]?.is_user_fa !== 1}
+                            control={control}
+                            freeSolo={transferData[0]?.is_user_fa !== 1 || transactionData?.approved === true}
+                            disabled={transferData[0]?.is_user_fa !== 1 || transactionData?.approved === true}
+                            options={transferData[0]?.assets[index]?.depreciation_debit_options || []}
+                            // loading={isAccountTitleLoading}
+                            // onOpen={() => (isAccountTitleSuccess ? null : accountTitleTrigger())}
+                            size="small"
+                            getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
+                            renderInput={(params) => (
+                              <TextField
+                                color="secondary"
+                                {...params}
+                                label="Depreciation Debit"
+                                error={!!errors?.depreciation_debit_id}
+                                helperText={errors?.depreciation_debit_id?.message}
+                                multiline
+                                maxRows={2}
+                                sx={{
+                                  "& .MuiInputBase-inputMultiline": {
+                                    minHeight: "10px",
+                                  },
+                                  ".MuiInputBase-root": {
+                                    borderRadius: "10px",
+                                    minHeight: "63px",
+                                  },
+                                  "& .MuiFormLabel-root": {
+                                    lineHeight: "43px", // Adjust based on the height of the input
+                                  },
+                                  "& .Mui-focused": {
+                                    top: "-10%", // Center vertically
+                                  },
+                                  "& .MuiFormLabel-filled": {
+                                    top: "-10%", // Center vertically
+                                  },
+                                  // ml: "8px",
+                                  minWidth: "220px",
+                                  maxWidth: "550px",
+                                }}
+                              />
+                            )}
+                          />
                         </TableCell>
 
                         <TableCell className="tbl-cell">
@@ -1915,7 +1985,7 @@ const ViewTransfer = (props) => {
                           variant="contained"
                           size="small"
                           color="primary"
-                          disabled={isTransferLoading || isTransferFetching || !watch("depreciation_debit_id")}
+                          disabled={isTransferLoading || isTransferFetching}
                           onClick={() =>
                             onApprovalChangeHandler(
                               transactionData?.id ? transactionData?.id : transactionData?.transfer_number
@@ -1931,9 +2001,11 @@ const ViewTransfer = (props) => {
                           size="small"
                           disabled={isTransferLoading || isTransferFetching}
                           onClick={() =>
-                            setValue(
-                              "depreciation_debit_id",
-                              transferData[0]?.depreciation_debit || transactionData?.depreciation_debit_id
+                            fields.forEach((item, index) =>
+                              setValue(
+                                `assets.${index}.depreciation_debit_id`,
+                                transferData[0]?.assets[index]?.selected_depreciation_debit
+                              )
                             )
                           }
                           // startIcon={<Undo sx={{ color: "#5f3030" }} />}
