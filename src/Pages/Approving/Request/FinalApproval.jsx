@@ -43,6 +43,7 @@ import { useNavigate } from "react-router-dom";
 import { notificationApi } from "../../../Redux/Query/Notification";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
 import RequestTimeline from "../../Asset Requisition/RequestTimeline";
+import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 
 const FinalApproval = ({ final }) => {
   const [search, setSearch] = useState("");
@@ -107,6 +108,7 @@ const FinalApproval = ({ final }) => {
   const {
     data: approvalData,
     isLoading: approvalLoading,
+    isFetching: approvalFetching,
     isSuccess: approvalSuccess,
     isError: approvalError,
     error: errorData,
@@ -365,7 +367,9 @@ const FinalApproval = ({ final }) => {
                 </TableHead>
 
                 <TableBody>
-                  {approvalData?.data?.length === 0 ? (
+                  {approvalFetching ? (
+                    <LoadingData />
+                  ) : approvalData?.data?.length === 0 ? (
                     <NoRecordsFound approvalData={approvalData} heightData="small" />
                   ) : (
                     <>
