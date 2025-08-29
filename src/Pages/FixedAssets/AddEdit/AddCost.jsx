@@ -869,7 +869,7 @@ const AddCost = (props) => {
             {data?.status ? "Edit Additional Cost" : "Additional Cost"}
           </Typography>
         </Stack>
-        {voucher && (
+        {/* {voucher && (
           <Tooltip title="Sync Voucher" arrow>
             <>
               <Button
@@ -889,7 +889,7 @@ const AddCost = (props) => {
               </Button>
             </>
           </Tooltip>
-        )}
+        )} */}
       </Box>
 
       <Divider />
