@@ -51,6 +51,14 @@ export const evaluationApi = createApi({
       query: (params) => ({ url: `pullout-for-replacement`, params }),
       providesTags: ["Evaluation"],
     }),
+    postEvaluateForReplacementAssetApi: builder.mutation({
+      query: (body) => ({
+        url: `/handle-for-replacement`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Evaluation"],
+    }),
   }),
 });
 
@@ -61,4 +69,5 @@ export const {
   usePatchPickupAssetApiMutation,
   usePostEvaluateAssetApiMutation,
   useGetAssetsForReplacementEvaluateApiQuery,
+  usePostEvaluateForReplacementAssetApiMutation,
 } = evaluationApi;
