@@ -193,6 +193,9 @@ const AddRole = (props) => {
     "disposal",
     "transfer-receiving",
     "evaluation",
+    "mis-warehouse",
+    "fixed-asset-warehouse",
+    "engineering-warehouse",
 
     // Approving
     "pending-request",
@@ -207,6 +210,7 @@ const AddRole = (props) => {
     // Monitoring
     "request-monitoring",
     "warehouse-monitoring",
+    "transfer-receiving-monitoring",
 
     // Reports
     "reports",
@@ -256,6 +260,8 @@ const AddRole = (props) => {
     "approving-disposal",
     // "approving-evaluation",
   ];
+  const monitoring = ["request-monitoring", "warehouse-monitoring", "transfer-receiving-monitoring"];
+
   const reports = [
     "pr-report",
     "transfer-report",
@@ -353,8 +359,7 @@ const AddRole = (props) => {
       { label: "Fixed asset", value: "fixed-asset" },
       { label: "Printing of Tag", value: "print-fa" },
       { label: "Settings", value: "settings" },
-      { label: "Request Monitoring", value: "request-monitoring" },
-      { label: "Warehouse Monitoring", value: "warehouse-monitoring" },
+      { label: "Monitoring", value: "monitoring" },
       // { label: "sample", value: "sample" },
     ];
 
@@ -496,7 +501,6 @@ const AddRole = (props) => {
       { label: "Received Asset", value: "requisition-received-asset" },
       { label: "RR Summary", value: "requisition-rr-summary" },
       { label: "Releasing", value: "requisition-releasing" },
-      { label: "Releasing Monitoring", value: "requisition-releasing-monitoring" },
     ];
 
     const assetRequisition2 = [
@@ -523,11 +527,17 @@ const AddRole = (props) => {
       { label: "Asset Evaluation", value: "evaluation" },
       { label: "Asset Disposal", value: "disposal" },
     ];
+    const assetMovement3 = [
+      { label: "MIS - Warehouse", value: "mis-warehouse" },
+      { label: "Fixed Asset - Warehouse", value: "fixed-asset-warehouse" },
+      { label: "Engineering - Warehouse", value: "engineering-warehouse" },
+    ];
 
     return (
       <Stack flexDirection="row" flexWrap="wrap" justifyContent="space-evenly" gap={1}>
         <CheckboxGroup items={assetMovement1} />
         <CheckboxGroup items={assetMovement2} />
+        <CheckboxGroup title="Warehouse Permission" items={assetMovement3} />
       </Stack>
     );
   };
@@ -621,6 +631,56 @@ const AddRole = (props) => {
               />
             }
           /> */}
+        </FormGroup>
+      </Stack>
+    );
+  };
+
+  const Monitoring = () => {
+    return (
+      <Stack flexDirection="row" flexWrap="wrap" justifyContent="space-evenly" gap={1}>
+        <FormGroup
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            ml: 3,
+          }}
+        >
+          <FormControlLabel
+            disabled={data.action === "view"}
+            label="Request Monitoring"
+            value="request-monitoring"
+            control={
+              <Checkbox
+                {...register("access_permission")}
+                checked={watch("access_permission")?.includes("request-monitoring")}
+              />
+            }
+          />
+
+          <FormControlLabel
+            disabled={data.action === "view"}
+            label="Warehouse Monitoring"
+            value="warehouse-monitoring"
+            control={
+              <Checkbox
+                {...register("access_permission")}
+                checked={watch("access_permission")?.includes("warehouse-monitoring")}
+              />
+            }
+          />
+
+          <FormControlLabel
+            disabled={data.action === "view"}
+            label="Transfer Receiving Monitoring"
+            value="transfer-receiving-monitoring"
+            control={
+              <Checkbox
+                {...register("access_permission")}
+                checked={watch("access_permission")?.includes("transfer-receiving-monitoring")}
+              />
+            }
+          />
         </FormGroup>
       </Stack>
     );
@@ -1094,6 +1154,9 @@ const AddRole = (props) => {
                                     "disposal",
                                     "transfer-receiving",
                                     "evaluation",
+                                    "mis-warehouse",
+                                    "fixed-asset-warehouse",
+                                    "engineering-warehouse",
                                   ]),
                                 ]);
                               } else {
@@ -1173,6 +1236,62 @@ const AddRole = (props) => {
                 </Box>
               )}
 
+              {watch("access_permission").includes("monitoring") && (
+                <Box>
+                  <Divider sx={{ mx: "30px" }} />
+                  <FormControl
+                    fullWidth
+                    component="fieldset"
+                    sx={{
+                      border: "1px solid #a6a6a6af ",
+                      borderRadius: "10px",
+                      px: "10px",
+                      mt: "10px",
+                      mb: "15px",
+                    }}
+                  >
+                    <FormLabel component="legend" sx={{ ml: "1px", pl: "5px" }}>
+                      <FormControlLabel
+                        label="Monitoring"
+                        value="monitoring"
+                        sx={{ color: "text.main", fontWeight: "bold" }}
+                        disabled={data.action === "view"}
+                        control={
+                          <Checkbox
+                            checked={watch("access_permission").includes("monitoring")}
+                            // checked={masterlistValue.every((perm) =>
+                            //   watch("access_permission").includes(perm)
+                            // )}
+                            indeterminate={
+                              monitoring.some((perm) => watch("access_permission").includes(perm)) &&
+                              !monitoring.every((perm) => watch("access_permission").includes(perm))
+                            }
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setValue("access_permission", [
+                                  ...new Set([
+                                    ...watch("access_permission"),
+                                    "request-monitoring",
+                                    "warehouse-monitoring",
+                                    "transfer-receiving-monitoring",
+                                  ]),
+                                ]);
+                              } else {
+                                const reportsEmptyValue = watch("access_permission").filter(
+                                  (perm) => ![...monitoring, "monitoring"].includes(perm)
+                                );
+
+                                setValue("access_permission", reportsEmptyValue);
+                              }
+                            }}
+                          />
+                        }
+                      />
+                    </FormLabel>
+                    <Monitoring />
+                  </FormControl>
+                </Box>
+              )}
               {watch("access_permission").includes("reports") && (
                 <Box>
                   <Divider sx={{ mx: "30px" }} />
