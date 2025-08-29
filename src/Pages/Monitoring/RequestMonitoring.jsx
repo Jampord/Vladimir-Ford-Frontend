@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Moment from "moment";
 import MasterlistToolbar from "../../Components/Reusable/MasterlistToolbar";
 import ErrorFetching from "../ErrorFetching";
@@ -47,21 +47,23 @@ import { AddBox, AddCircleSharp, IosShareRounded, LibraryAdd, Visibility } from 
 import { useNavigate } from "react-router-dom";
 import { closeDialog, closeExport, openDialog, openExport } from "../../Redux/StateManagement/booleanStateSlice";
 import RequestTimeline from "../Asset Requisition/RequestTimeline";
-import useExcel from "../../Hooks/Xlsx";
 import moment from "moment";
 import ExportRequestMonitoring from "./ExportRequestMonitoring";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 import { TabContext } from "@mui/lab";
 import { setRequestMonitoringTabValue } from "../../Redux/StateManagement/tabSlice";
+import { useQueryParams } from "../../Hooks/useQueryParams";
 
 const RequestMonitoring = () => {
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("active");
-  const [perPage, setPerPage] = useState(5);
-  const [page, setPage] = useState(1);
+  const { getParam, getNumericParam, setMultipleParams } = useQueryParams();
+
+  const [search, setSearch] = useState(getParam("search") || "");
+  const [status, setStatus] = useState(getParam("status") || "active");
+  const [perPage, setPerPage] = useState(getNumericParam("per_page", 25));
+  const [page, setPage] = useState(getNumericParam("page", 1));
   const [requestFilter, setRequestFilter] = useState([]);
   const [transactionIdData, setTransactionIdData] = useState();
-  // const [filterValue, setFilterValue] = useState("2");
+
   const viewData = true;
   const requestMonitoring = true;
 
@@ -73,7 +75,22 @@ const RequestMonitoring = () => {
   const dialog = useSelector((state) => state.booleanState.dialog);
   const showExport = useSelector((state) => state.booleanState.exportFile);
 
-  const { excelExport } = useExcel();
+  // Update URL when state changes
+  // Memoize the update function
+  const updateUrlParams = useCallback(() => {
+    setMultipleParams({
+      page: page,
+      per_page: perPage,
+      search: search,
+      status: status,
+      tab: filterValue,
+    });
+  }, [page, perPage, search, status, filterValue, setMultipleParams]);
+
+  // Update URL when state changes - but only when values actually change
+  useEffect(() => {
+    updateUrlParams();
+  }, [updateUrlParams]); // Now this only runs when the dependencies of updateUrlParams change
 
   const handleChange = (event, newValue) => {
     // setFilterValue(newValue);
@@ -115,12 +132,8 @@ const RequestMonitoring = () => {
   };
 
   const pageHandler = (_, page) => {
-    // console.log(page + 1);
     setPage(page + 1);
   };
-
-  const [requestDataTrigger] = useLazyGetRequisitionMonitoringApiQuery();
-  // const [requestDataTrigger] = useLazyGetRequisitionAllApiQuery();
 
   const {
     data: requisitionData,
@@ -153,109 +166,24 @@ const RequestMonitoring = () => {
           : filterValue === "8"
           ? "Claimed"
           : null,
-    },
-    { refetchOnMountOrArgChange: true }
+    }
+    // { refetchOnMountOrArgChange: true }
   );
-
-  const onVoidHandler = async (id) => {
-    dispatch(
-      openConfirm({
-        icon: Report,
-        iconColor: "warning",
-        message: (
-          <Box>
-            <Typography> Are you sure you want to</Typography>
-            <Typography
-              sx={{
-                display: "inline-block",
-                color: "secondary.main",
-                fontWeight: "bold",
-              }}
-            >
-              VOID
-            </Typography>{" "}
-            this Data?
-          </Box>
-        ),
-
-        onConfirm: async () => {
-          try {
-            dispatch(onLoading());
-            let result = await voidRequisitionApi({
-              id: id,
-              transaction_number: id,
-            }).unwrap();
-            // console.log(result);
-            dispatch(
-              openToast({
-                message: result.message,
-                duration: 5000,
-              })
-            );
-
-            dispatch(closeConfirm());
-          } catch (err) {
-            // console.log(err);
-            if (err?.status === 422) {
-              dispatch(
-                openToast({
-                  message: err.data.message,
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
-            } else if (err?.status !== 422) {
-              dispatch(
-                openToast({
-                  message: "Something went wrong. Please try again.",
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
-            }
-          }
-        },
-      })
-    );
-  };
-
-  const onSetPage = () => {
-    setPage(1);
-  };
 
   const handleViewTimeline = (data) => {
     dispatch(openDialog());
     setTransactionIdData(data);
   };
 
-  const handleCloseTimeline = () => {
-    dispatch(closeDialog);
-  };
-
-  // * Add Button Settings
-  const [anchorElAdd, setAnchorElAdd] = useState(null);
-  const openAdd = Boolean(anchorElAdd);
-
-  const handleOpenAdd = (event) => {
-    deleteAllRequest();
-    setAnchorElAdd(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorElAdd(null);
-  };
-
   const handleEditRequisition = (data) => {
     data?.is_addcost === 1
-      ? navigate(`/request-monitoring/${data.transaction_number}`, {
+      ? navigate(`/monitoring/request-monitoring/${data.transaction_number}`, {
           state: { ...data, viewData, requestMonitoring },
         })
-      : navigate(`/request-monitoring/${data.transaction_number}`, {
+      : navigate(`/monitoring/request-monitoring/${data.transaction_number}`, {
           state: { ...data, viewData, requestMonitoring },
         });
   };
-
-  const isAdditionalCost = requisitionData?.data.map((item) => item.is_addcost);
 
   const transactionStatus = (data) => {
     let statusColor, hoverColor, textColor, variant;
@@ -326,11 +254,8 @@ const RequestMonitoring = () => {
     );
   };
 
-  const isCancelled = requisitionData?.data?.map((item) => item.status).includes("Cancelled");
-
   const openExportDialog = () => {
     dispatch(openExport());
-    // setPrItems(data);
   };
 
   return (
@@ -378,16 +303,6 @@ const RequestMonitoring = () => {
                           },
                         }}
                       >
-                        {/* <TableCell className="tbl-cell text-center">
-                        <TableSortLabel
-                          active={orderBy === `id`}
-                          direction={orderBy === `id` ? order : `asc`}
-                          onClick={() => onSort(`id`)}
-                        >
-                          ID No.
-                        </TableSortLabel>
-                      </TableCell> */}
-
                         <TableCell className="tbl-cell">
                           <TableSortLabel
                             active={orderBy === `transaction_number`}
@@ -472,9 +387,6 @@ const RequestMonitoring = () => {
                                   },
                                 }}
                               >
-                                {/* <TableCell className="tbl-cell tr-cen-pad45">
-                                  {data.id}
-                                </TableCell> */}
                                 <TableCell className="tbl-cell text-weight">{data.transaction_number}</TableCell>
                                 <TableCell className="tbl-cell">
                                   <Typography fontSize={12} fontWeight={700} color="secondary.main">
@@ -496,23 +408,13 @@ const RequestMonitoring = () => {
                                     textOverflow="ellipsis"
                                     color="secondary.main"
                                   >
-                                    <Tooltip
-                                      title={data.acquisition_details}
-                                      placement="top-start"
-                                      arrow
-                                      // slots={{
-                                      //   transition: Zoom,
-                                      // }}
-                                    >
+                                    <Tooltip title={data.acquisition_details} placement="top-start" arrow>
                                       {data.acquisition_details}
                                     </Tooltip>
                                   </Typography>
                                   <Typography fontSize={12} color="secondary.light">
                                     ({data.warehouse?.id}) - {data.warehouse?.warehouse_name}
                                   </Typography>
-                                  {/* <Typography fontSize={12} color="primary.main" fontWeight={400}>
-                                  {data.is_addcost === 1 && "Additional Cost"}
-                                </Typography> */}
                                 </TableCell>
 
                                 <TableCell className="tbl-cell">
@@ -589,7 +491,6 @@ const RequestMonitoring = () => {
       <Dialog
         open={showExport}
         TransitionComponent={Grow}
-        // onClose={() => dispatch(closeExport())}
         PaperProps={{ sx: { maxWidth: "1320px", borderRadius: "10px", p: 3 } }}
       >
         <ExportRequestMonitoring />
