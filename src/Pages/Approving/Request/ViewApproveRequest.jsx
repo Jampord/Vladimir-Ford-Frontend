@@ -96,6 +96,7 @@ const ViewApproveRequest = (props) => {
   const {
     data: approveRequestData = [],
     isLoading: isApproveLoading,
+    isFetching: isApproveFetching,
     isSuccess: isApproveSuccess,
     isError: isError,
     error: errorData,
@@ -570,7 +571,7 @@ const ViewApproveRequest = (props) => {
                       <TableCell className="tbl-cell">Ref. No.</TableCell>
                       <TableCell className="tbl-cell">Type of Request</TableCell>
                       <TableCell className="tbl-cell">Warehouse</TableCell>
-                      <TableCell className="tbl-cell">Ship To</TableCell>
+                      {/* <TableCell className="tbl-cell">Ship To</TableCell> */}
                       <TableCell className="tbl-cell">Acquisition Details</TableCell>
                       <TableCell className="tbl-cell">Accounting Entries</TableCell>
                       <TableCell className="tbl-cell">Chart of Accounts</TableCell>
@@ -588,7 +589,9 @@ const ViewApproveRequest = (props) => {
                   </TableHead>
 
                   <TableBody>
-                    {(isNextRequestLoading || isNextRequestFetching || isApproveLoading) && <LoadingData />}
+                    {(isNextRequestLoading || isNextRequestFetching || isApproveLoading || isApproveFetching) && (
+                      <LoadingData />
+                    )}
                     {approveRequestData?.data?.length === 0 ? (
                       <NoRecordsFound />
                     ) : (
@@ -596,6 +599,7 @@ const ViewApproveRequest = (props) => {
                         {!isNextRequestLoading &&
                           !isNextRequestFetching &&
                           !isApproveLoading &&
+                          !isApproveFetching &&
                           approveRequestData?.data?.map((data, index) => (
                             <TableRow
                               key={index}
@@ -621,12 +625,12 @@ const ViewApproveRequest = (props) => {
 
                               <TableCell className="tbl-cell text-weight">{data.warehouse.warehouse_name}</TableCell>
 
-                              <TableCell className="tbl-cell text-weight">
+                              {/* <TableCell className="tbl-cell text-weight">
                                 <Typography fontSize={12} fontWeight={600}>
                                   {data.ship_to?.location}
                                 </Typography>
                                 <Typography fontSize={11}>{data.ship_to?.address}</Typography>
-                              </TableCell>
+                              </TableCell> */}
 
                               <TableCell className="tbl-cell">{data.acquisition_details}</TableCell>
 
