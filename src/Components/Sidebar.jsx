@@ -103,6 +103,8 @@ import {
   LooksOne,
   AddToQueue,
   LocalShipping,
+  Monitor,
+  QueuePlayNext,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -116,6 +118,7 @@ const Sidebar = () => {
   const [assetRequisitionCollapse, setAssetRequisitionCollapse] = useState(false);
   const [assetMovementCollapse, setAssetMovementCollapse] = useState(false);
   const [approvingCollapse, setApprovingCollapse] = useState(false);
+  const [monitoringCollapse, setMonitoringCollapse] = useState(false);
   const [reportCollapse, setReportCollapse] = useState(false);
   const collapseArray = [
     masterListCollapse,
@@ -123,6 +126,7 @@ const Sidebar = () => {
     settingsCollapse,
     assetRequisitionCollapse,
     assetMovementCollapse,
+    monitoringCollapse,
     reportCollapse,
   ];
 
@@ -148,6 +152,7 @@ const Sidebar = () => {
     setAssetRequisitionCollapse(false);
     setAssetMovementCollapse(false);
     setApprovingCollapse(false);
+    setMonitoringCollapse(false);
     setReportCollapse(false);
     setFixedAssetCollapse(false);
   };
@@ -179,6 +184,7 @@ const Sidebar = () => {
       "asset-movement": setAssetMovementCollapse,
       approving: setApprovingCollapse,
       reports: setReportCollapse,
+      monitoring: setMonitoringCollapse,
     };
 
     const match = Object.keys(routeStateMap).find((route) => pathname.includes(route));
@@ -364,6 +370,8 @@ const Sidebar = () => {
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
+        setApprovingCollapse(false);
+        setMonitoringCollapse(false);
         setReportCollapse(false);
         closeCollapse;
         dispatch(openSidebar());
@@ -398,6 +406,7 @@ const Sidebar = () => {
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
         setApprovingCollapse(false);
+        setMonitoringCollapse(false);
         setReportCollapse(false);
         setFixedAssetCollapse(false);
         closeCollapse;
@@ -437,6 +446,7 @@ const Sidebar = () => {
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
         setApprovingCollapse(false);
+        setMonitoringCollapse(false);
         setReportCollapse(false);
         closeCollapse;
         dispatch(openSidebar());
@@ -487,6 +497,7 @@ const Sidebar = () => {
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
         setApprovingCollapse(false);
+        setMonitoringCollapse(false);
         setReportCollapse(false);
         closeCollapse;
         dispatch(openSidebar());
@@ -564,6 +575,7 @@ const Sidebar = () => {
         setSettingsCollapse(false);
         setAssetMovementCollapse(false);
         setApprovingCollapse(false);
+        setMonitoringCollapse(false);
         setReportCollapse(false);
         closeCollapse;
         dispatch(openSidebar());
@@ -638,6 +650,7 @@ const Sidebar = () => {
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setApprovingCollapse(false);
+        setMonitoringCollapse(false);
         setReportCollapse(false);
         closeCollapse;
         dispatch(openSidebar());
@@ -705,26 +718,11 @@ const Sidebar = () => {
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
+        setMonitoringCollapse(false);
         setReportCollapse(false);
         closeCollapse;
         dispatch(openSidebar());
       },
-    },
-
-    {
-      label: "Request Monitoring",
-      icon: PostAdd,
-      path: "/request-monitoring",
-      permission: "request-monitoring",
-      setter: closeCollapse,
-    },
-
-    {
-      label: "Warehouse Monitoring",
-      icon: Warehouse,
-      path: "/warehouse-monitoring",
-      permission: "warehouse-monitoring",
-      setter: closeCollapse,
     },
 
     // {
@@ -750,6 +748,49 @@ const Sidebar = () => {
     //   permission: "on-hand-in-process",
     //   setter: closeCollapse,
     // },
+
+    {
+      label: "Monitoring",
+      icon: Monitor,
+      path: "/monitoring",
+      permission: "monitoring",
+      children: [
+        {
+          label: "Request Monitoring",
+          icon: PostAdd,
+          path: "/monitoring/request-monitoring",
+          permission: "request-monitoring",
+          setter: closeCollapse,
+        },
+        {
+          label: "Warehouse Monitoring",
+          icon: Warehouse,
+          path: "/monitoring/warehouse-monitoring",
+          permission: "warehouse-monitoring",
+          setter: closeCollapse,
+        },
+        {
+          label: "Transfer Monitoring",
+          icon: QueuePlayNext,
+          path: "/monitoring/transfer-receiving-monitoring",
+          permission: "transfer-receiving-monitoring",
+          setter: closeCollapse,
+        },
+      ],
+      open: monitoringCollapse,
+      setter: () => {
+        setMonitoringCollapse(!monitoringCollapse);
+        setApprovingCollapse(false);
+        setMasterListCollapse(false);
+        setUserManagementCollapse(false);
+        setFixedAssetCollapse(false);
+        setSettingsCollapse(false);
+        setAssetRequisitionCollapse(false);
+        setAssetMovementCollapse(false);
+        closeCollapse;
+        dispatch(openSidebar());
+      },
+    },
 
     {
       label: "Reports",
@@ -799,12 +840,6 @@ const Sidebar = () => {
           permission: "fixed-assets-report",
           setter: closeCollapse,
         },
-        // {
-        //   label: "Report 3",
-        //   icon: SummarizeRounded,
-        //   path: "/reports/report3",
-        //   permission: [],
-        // },
       ],
       open: reportCollapse,
       setter: () => {
