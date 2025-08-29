@@ -63,6 +63,9 @@ import Webcam from "react-webcam";
 import WebCamSVG from "../../../Img/SVG/WebCam.svg";
 import uploadSVG from "../../../Img/SVG/upload.svg";
 import { useLazyGetOneRDFChargingAllApiQuery } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
+import CustomTextField from "../../../Components/Reusable/CustomTextField";
+import CustomNumberField from "../../../Components/Reusable/CustomNumberField";
+import { useLazyGetCreditAllQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Credit";
 
 const schema = yup.object().shape({
   one_charging_id: yup.object().required().label("One Charging").typeError("One Charging is a required field"),
@@ -113,11 +116,14 @@ const schemaSave = yup.object().shape({
 });
 
 const AddReleasingInfo = (props) => {
-  const { data, refetch, warehouseNumber, hideWN, commonData, personalData, selectedItems } = props;
+  const { data, refetch, warehouseNumber, hideWN, commonData, personalData, selectedItems, selectedItemsReset } = props;
   // console.log("data", data);
-  console.log("selectedItems", selectedItems);
-  const userData = JSON.parse(localStorage.getItem("user"));
-  // console.log("userData", userData);
+  // console.log("selectedItems", selectedItems);
+
+  const isPhone = selectedItems?.minor_category?.minor_category_name?.toLowerCase().includes("phone");
+
+  console.log("isPhone", isPhone);
+
   const [signature, setSignature] = useState();
   const [trimmedDataURL, setTrimmedDataURL] = useState(null);
   const [viewImage, setViewImage] = useState(null);
@@ -268,6 +274,17 @@ const AddReleasingInfo = (props) => {
     },
   ] = useLazyGetAccountTitleAllApiQuery();
 
+  const [
+    creditTrigger,
+    {
+      data: creditData = [],
+      isLoading: isCreditLoading,
+      isSuccess: isCreditSuccess,
+      isError: isCreditError,
+      refetch: isCreditRefetch,
+    },
+  ] = useLazyGetCreditAllQuery();
+
   const dispatch = useDispatch();
 
   const {
@@ -368,7 +385,7 @@ const AddReleasingInfo = (props) => {
     flexDirection: "column",
     gap: "15px",
     // width: "100%",
-    pb: "10px",
+    // pb: "10px",
   };
 
   const sxSubtitle = {
@@ -435,9 +452,12 @@ const AddReleasingInfo = (props) => {
       receiver_img: receiverImgBase64,
       assignment_memo_img: assignmentMemoImgBase64,
       authorization_memo_img: authorizationLetterImgBase64,
+      atoe_debit_id: formData?.atoe_debit_id?.sync_id?.toString() || null,
+      atoe_credit_id: formData?.atoe_credit_id?.sync_id?.toString() || null,
     };
 
     console.log("newFormData", newFormData);
+    console.log("watch(atoe_credit_id", watch("atoe_credit_id"));
 
     dispatch(
       openConfirm({
@@ -487,6 +507,8 @@ const AddReleasingInfo = (props) => {
                 duration: 5000,
               })
             );
+
+            selectedItemsReset();
 
             // dispatch(notificationApi.util.resetApiState());
             dispatch(notificationApi.util.invalidateTags(["Notif"]));
@@ -899,7 +921,7 @@ const AddReleasingInfo = (props) => {
               <Button onClick={() => dispatch(openDialog1())}>{signature ? "Change Sign" : "Add Signature"}</Button> */}
           </Box>
 
-          <Box sx={BoxStyle} pt={0.5}>
+          <Box sx={BoxStyle}>
             <Typography sx={sxSubtitle}>Attachments</Typography>
             <Stack flexDirection="row" gap={1} alignItems="center">
               {
@@ -1051,6 +1073,70 @@ const AddReleasingInfo = (props) => {
               )}
             </Stack>
           </Box>
+
+          {isPhone && (
+            <Box sx={BoxStyle}>
+              <Typography sx={sxSubtitle}>Phone Accounting Entries</Typography>
+
+              <CustomNumberField
+                control={control}
+                name="atoe_amount"
+                label="Advances to Employees (ATOE)"
+                color="secondary"
+                size="small"
+                type="number"
+                // error={!!errors?.new_password}
+                // helperText={errors?.new_password?.message}
+                InputProps={{
+                  startAdornment: <InputAdornment position="start">₱</InputAdornment>,
+                }}
+                isAllowed={(values) => {
+                  const { floatValue } = values;
+                  return floatValue >= 1;
+                }}
+              />
+
+              <CustomAutoComplete
+                name="atoe_debit_id"
+                control={control}
+                // disabled={transactionData ? transactionData?.length !== 0 : addRequestAllApi?.data?.length !== 0}
+                options={accountTitleData || []}
+                onOpen={() => (isAccountTitleSuccess ? null : accountTitleTrigger())}
+                loading={isAccountTitleLoading}
+                getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
+                isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    color="secondary"
+                    label="ATOE Debit"
+                    // error={!!errors?.account_title_id}
+                    // helperText={errors?.account_title_id?.message}
+                  />
+                )}
+              />
+
+              <CustomAutoComplete
+                name="atoe_credit_id"
+                control={control}
+                // disabled={transactionData ? transactionData?.length !== 0 : addRequestAllApi?.data?.length !== 0}
+                options={creditData || []}
+                onOpen={() => (isCreditSuccess ? null : creditTrigger())}
+                loading={isCreditLoading}
+                getOptionLabel={(option) => option.credit_code + " - " + option.credit_name}
+                isOptionEqualToValue={(option, value) => option.credit_code === value.credit_code}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    color="secondary"
+                    label="ATOE Credit"
+                    // error={!!errors?.account_title_id}
+                    // helperText={errors?.account_title_id?.message}
+                  />
+                )}
+              />
+            </Box>
+          )}
         </Stack>
 
         <Stack sx={BoxStyle} width="250px">
@@ -1259,26 +1345,6 @@ const AddReleasingInfo = (props) => {
               />
             )}
           />
-
-          {/* <CustomAutoComplete
-            name="account_title_id"
-            control={control}
-            // disabled={transactionData ? transactionData?.length !== 0 : addRequestAllApi?.data?.length !== 0}
-            options={accountTitleData}
-            onOpen={() => (isAccountTitleSuccess ? null : accountTitleTrigger())}
-            loading={isAccountTitleLoading}
-            getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
-            isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                color="secondary"
-                label="Account Title  "
-                error={!!errors?.account_title_id}
-                helperText={errors?.account_title_id?.message}
-              />
-            )}
-          /> */}
         </Stack>
       </Stack>
 
@@ -1295,7 +1361,12 @@ const AddReleasingInfo = (props) => {
           size="small"
           type="submit"
           // sx={{ color: handleSaveValidation() && "white" }}
-          disabled={!isValid || !watch("receiver_img") || (result === false && !watch("authorization_memo_img"))}
+          disabled={
+            !isValid ||
+            !watch("receiver_img") ||
+            (result === false && !watch("authorization_memo_img")) ||
+            (isPhone && (!watch("atoe_amount") || !watch("atoe_debit_id") || !watch("atoe_credit_id")))
+          }
         >
           {
             // handleSaveValidation() ? "Save" :
