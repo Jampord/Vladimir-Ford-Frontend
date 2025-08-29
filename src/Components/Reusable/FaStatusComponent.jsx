@@ -81,7 +81,7 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
         }}
       />
     );
-  } else if (faStatus === "Spare") {
+  } else if (faStatus === "Spare" || faStatus === "spare") {
     return (
       <Chip
         size="small"
@@ -179,11 +179,11 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
       <Chip
         size="small"
         variant="contained"
-        icon={<FindReplace size="small" color="primary.dark" />}
+        icon={<FindReplace size="small" color="text.dark" />}
         label={faStatus}
         sx={{
           backgroundColor: "primary.light",
-          color: "primary",
+          color: "text.dark",
 
           ":hover": hover && { backgroundColor: "primary.main", cursor: "pointer" },
 
