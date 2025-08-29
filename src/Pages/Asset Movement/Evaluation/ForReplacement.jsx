@@ -2,8 +2,15 @@ import { useState } from "react";
 import { useGetAssetsForReplacementEvaluateApiQuery } from "../../../Redux/Query/Movement/Evaluation";
 import {
   Box,
+  Button,
   Checkbox,
+  Dialog,
   FormControlLabel,
+  Grow,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Stack,
   Table,
   TableBody,
@@ -13,6 +20,7 @@ import {
   TableRow,
   Tooltip,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import MasterlistSkeleton from "../../Skeleton/MasterlistSkeleton";
 import ErrorFetching from "../../ErrorFetching";
@@ -24,16 +32,30 @@ import CustomTablePagination from "../../../Components/Reusable/CustomTablePagin
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { Delete, FileCopy, Handyman, More } from "@mui/icons-material";
+import { useDispatch, useSelector } from "react-redux";
+import { closeDialog, closeDialog1, openDialog, openDialog1 } from "../../../Redux/StateManagement/booleanStateSlice";
+import ForReplacementDialog from "./ForReplacementDialog";
+import PulloutTimeline from "../PulloutTimeline";
 
 const schema = yup.object().shape({
   item_id: yup.array(),
 });
 
-const ForReplacement = () => {
+const ForReplacement = ({ tab }) => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(5);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("For Replacement");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [action, setAction] = useState("");
+  const [status, setStatus] = useState("");
+  const [transactionData, setTransactionData] = useState();
+
+  const open = Boolean(anchorEl);
+  const isSmallScreen = useMediaQuery("(max-width: 500px)");
+  const dispatch = useDispatch();
+  const dialog1 = useSelector((state) => state.booleanState.dialog);
+  const dialog2 = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
 
   const {
     data: evaluationData,
@@ -47,7 +69,7 @@ const ForReplacement = () => {
     {
       page: page,
       per_page: perPage,
-      status: status,
+      status: tab === "5" ? "For Replacement" : tab === "6" ? "Spare" : "Disposal",
       search: search,
     },
     { refetchOnMountOrArgChange: true }
@@ -80,6 +102,37 @@ const ForReplacement = () => {
     setPage(page + 1);
   };
 
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleOpenSpareDialog = () => {
+    dispatch(openDialog1());
+    setAnchorEl(null);
+    setAction("spare");
+  };
+
+  const handleOpenDisposalDialog = () => {
+    dispatch(openDialog1());
+    setAnchorEl(null);
+    setAction("disposal");
+  };
+
+  const handleViewTimeline = (data) => {
+    dispatch(openDialog());
+    setTransactionData(data);
+  };
+
+  console.log("watch", watch("item_id"));
+
+  const selectedItems = evaluationData?.data?.filter((item) => watch("item_id").includes(item?.id?.toString()));
+
+  console.log("selectedItems", selectedItems);
+
   return (
     <Stack className="category_height">
       {isEvaluationLoading && <MasterlistSkeleton onAdd={true} category />}
@@ -87,6 +140,38 @@ const ForReplacement = () => {
       {evaluationData && !isEvaluationError && !isEvaluationLoading && (
         <Box className="mcontainer__wrapper">
           <MasterlistToolbar onStatusChange={setStatus} onSearchChange={setSearch} onSetPage={setPage} hideArchive />
+
+          {(!isEvaluationLoading || !isEvaluationFetching) && tab === "5" && (
+            <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }} mr="10px">
+              <Button
+                onClick={handleClick}
+                variant="contained"
+                startIcon={isSmallScreen ? null : <More />}
+                size="small"
+                disabled={watch("item_id").length === 0}
+                sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+              >
+                {isSmallScreen ? <More color="black" sx={{ fontSize: "20px" }} /> : "Action"}
+              </Button>
+
+              <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                <MenuItem dense onClick={handleOpenSpareDialog}>
+                  <ListItemIcon>
+                    <FileCopy fontSize="small" sx={{ color: "#5102d1" }} />
+                  </ListItemIcon>
+                  <ListItemText>Spare</ListItemText>
+                </MenuItem>
+                <MenuItem dense onClick={handleOpenDisposalDialog}>
+                  <ListItemIcon>
+                    <Delete fontSize="small" color="warning" />
+                  </ListItemIcon>
+                  <ListItemText>For Disposal</ListItemText>
+                </MenuItem>
+                {/* <MenuItem onClick={handleOpenEvaluateChangeDialog}>Change Care of</MenuItem> */}
+                {/* <MenuItem onClick={handleOpenEvaluateDisposalDialog}>For Disposal</MenuItem> */}
+              </Menu>
+            </Box>
+          )}
 
           <Box>
             <TableContainer className="mcontainer__th-body-category">
@@ -100,32 +185,32 @@ const ForReplacement = () => {
                       },
                     }}
                   >
-                    <TableCell align="center" className="tbl-cell">
-                      <FormControlLabel
-                        sx={{ margin: "auto", align: "center" }}
-                        control={
-                          <Checkbox
-                            value=""
-                            size="small"
-                            checked={
-                              !!evaluationData?.data
-                                ?.map((mapItem) => mapItem?.id?.toString())
-                                ?.every((item) => watch("item_id").includes(item?.toString()))
-                            }
-                            onChange={(e) => {
-                              handleAllHandler(e.target.checked);
-                              // console.log(e.target.checked);
-                            }}
-                          />
-                        }
-                      />
-                    </TableCell>
+                    {tab === "5" && (
+                      <TableCell align="center" className="tbl-cell">
+                        <FormControlLabel
+                          sx={{ margin: "auto", align: "center" }}
+                          control={
+                            <Checkbox
+                              value=""
+                              size="small"
+                              checked={
+                                !!evaluationData?.data
+                                  ?.map((mapItem) => mapItem?.id?.toString())
+                                  ?.every((item) => watch("item_id").includes(item?.toString()))
+                              }
+                              onChange={(e) => {
+                                handleAllHandler(e.target.checked);
+                                // console.log(e.target.checked);
+                              }}
+                            />
+                          }
+                        />
+                      </TableCell>
+                    )}
                     <TableCell className="tbl-cell">Request #</TableCell>
                     <TableCell className="tbl-cell">Description</TableCell>
                     <TableCell className="tbl-cell">Asset</TableCell>
                     <TableCell className="tbl-cell">Chart of Account</TableCell>
-                    <TableCell className="tbl-cell">Care of</TableCell>
-                    <TableCell className="tbl-cell">Warehouse</TableCell>
                     <TableCell className="tbl-cell" align="center">
                       Evaluation
                     </TableCell>
@@ -149,19 +234,21 @@ const ForReplacement = () => {
                           }}
                           hover
                         >
-                          <TableCell className="tbl-cell" size="small" align="center">
-                            <FormControlLabel
-                              value={item?.id}
-                              sx={{ margin: "auto" }}
-                              control={
-                                <Checkbox
-                                  size="small"
-                                  {...register("item_id")}
-                                  checked={watch("item_id").includes(item?.id?.toString())}
-                                />
-                              }
-                            />
-                          </TableCell>
+                          {tab === "5" && (
+                            <TableCell className="tbl-cell" size="small" align="center">
+                              <FormControlLabel
+                                value={item?.id}
+                                sx={{ margin: "auto" }}
+                                control={
+                                  <Checkbox
+                                    size="small"
+                                    {...register("item_id")}
+                                    checked={watch("item_id").includes(item?.id?.toString())}
+                                  />
+                                }
+                              />
+                            </TableCell>
+                          )}
                           <TableCell className="tbl-cell">{item?.id}</TableCell>
                           <TableCell className="tbl-cell">{item?.description}</TableCell>
                           <TableCell className="tbl-cell ">
@@ -224,10 +311,13 @@ const ForReplacement = () => {
                               }`}
                             </Typography>
                           </TableCell>
-                          <TableCell className="tbl-cell">{item?.care_of}</TableCell>
-                          <TableCell className="tbl-cell">{item?.warehouse}</TableCell>
+
                           <TableCell className="tbl-cell" align="center">
-                            {<StatusComponent faStatus={item?.evaluation} />}
+                            {
+                              <Box onClick={() => handleViewTimeline(item)}>
+                                <StatusComponent faStatus={item?.evaluation} hover />
+                              </Box>
+                            }
                           </TableCell>
                           <TableCell className="tbl-cell">
                             <Typography fontSize={12} fontWeight={700} color="primary.main">
@@ -260,6 +350,31 @@ const ForReplacement = () => {
           </Box>
         </Box>
       )}
+
+      <Dialog
+        open={dialog2}
+        maxWidth={"xs"}
+        fullWidth
+        TransitionComponent={Grow}
+        PaperProps={{ sx: { borderRadius: "15px" } }}
+      >
+        <ForReplacementDialog
+          item={watch("item_id")}
+          action={action}
+          setAction={setAction}
+          reset={reset}
+          selectedItems={selectedItems}
+        />
+      </Dialog>
+
+      <Dialog
+        open={dialog1}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog())}
+        PaperProps={{ sx: { borderRadius: "10px", maxWidth: "700px" } }}
+      >
+        <PulloutTimeline data={transactionData} />
+      </Dialog>
     </Stack>
   );
 };
