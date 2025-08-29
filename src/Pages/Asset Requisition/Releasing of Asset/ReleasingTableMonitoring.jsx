@@ -2,7 +2,10 @@ import { useState } from "react";
 import { useGetAssetReleasingQuery } from "../../../Redux/Query/Request/AssetReleasing";
 import {
   Box,
+  Button,
   Chip,
+  Dialog,
+  Grow,
   Stack,
   Table,
   TableBody,
@@ -20,6 +23,10 @@ import NoRecordsFound from "../../../Layout/NoRecordsFound";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
+import { closeExport, openExport } from "../../../Redux/StateManagement/booleanStateSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { IosShareRounded } from "@mui/icons-material";
+import ExportReleasingOfAsset from "./ExportReleasingOfAsset";
 
 const ReleasingTableMonitoring = () => {
   const [search, setSearch] = useState("");
@@ -28,6 +35,8 @@ const ReleasingTableMonitoring = () => {
   const [page, setPage] = useState(1);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const showExport = useSelector((state) => state.booleanState.exportFile);
 
   const {
     data: releasingData,
@@ -61,6 +70,11 @@ const ReleasingTableMonitoring = () => {
 
   const pageHandler = (_, page) => {
     setPage(page + 1);
+  };
+
+  const openExportDialog = () => {
+    dispatch(openExport());
+    // setPrItems(data);
   };
 
   return (
@@ -223,18 +237,45 @@ const ReleasingTableMonitoring = () => {
                 </Table>
               </TableContainer>
 
-              <CustomTablePagination
-                total={releasingData?.total}
-                success={releasingSuccess}
-                current_page={releasingData?.current_page}
-                per_page={releasingData?.per_page}
-                onPageChange={pageHandler}
-                onRowsPerPageChange={perPageHandler}
-              />
+              <Box className="mcontainer__pagination-export">
+                <Button
+                  className="mcontainer__export"
+                  variant="outlined"
+                  size="small"
+                  color="text"
+                  startIcon={<IosShareRounded color="primary" />}
+                  onClick={openExportDialog}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "10px 20px",
+                  }}
+                >
+                  EXPORT
+                </Button>
+                <CustomTablePagination
+                  total={releasingData?.total}
+                  success={releasingSuccess}
+                  current_page={releasingData?.current_page}
+                  per_page={releasingData?.per_page}
+                  onPageChange={pageHandler}
+                  onRowsPerPageChange={perPageHandler}
+                />
+              </Box>
             </Box>
           </Box>
         </>
       )}
+
+      <Dialog
+        open={showExport}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeExport())}
+        PaperProps={{ sx: { maxWidth: "1320px", borderRadius: "10px", p: 3 } }}
+      >
+        <ExportReleasingOfAsset released={false} />
+      </Dialog>
     </Stack>
   );
 };
