@@ -73,7 +73,7 @@ import AddFA from "./AddEdit/AddFA";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 import ImportNewCOA from "./ImportNewCOA";
 
-const FixedAsset = (props) => {
+const FixedAsset = ({ view }) => {
   const navigate = useNavigate();
   const { excelExport } = useExcel();
   const [search, setSearch] = useState("");
@@ -271,9 +271,13 @@ const FixedAsset = (props) => {
   };
 
   const handleTableData = (data) => {
-    navigate(`/fixed-asset/fixed-asset/${data.vladimir_tag_number}`, {
-      state: { ...data, status },
-    });
+    view
+      ? navigate(`/reports/fixed-assets-report/${data.vladimir_tag_number}`, {
+          state: { ...data, status },
+        })
+      : navigate(`/fixed-asset/fixed-asset/${data.vladimir_tag_number}`, {
+          state: { ...data, status },
+        });
   };
 
   useScanDetection({
@@ -298,35 +302,56 @@ const FixedAsset = (props) => {
   return (
     <Box className="mcontainer">
       <Typography className="mcontainer__title" sx={{ fontFamily: "Anton", fontSize: "2rem" }}>
-        Fixed Asset
+        {view ? "Fixed Assets Report" : "Fixed Asset"}
       </Typography>
       {fixedAssetLoading && <MasterlistSkeleton onAdd={true} onImport={true} onPrint={true} />}
       {fixedAssetError && <ErrorFetching refetch={fixedAssetRefetch} error={errorData} />}
       {fixedAssetData && !fixedAssetError && (
         <Box className="mcontainer__wrapper">
-          <MasterlistToolbar
-            path="#"
-            // onFaStatusChange={setFaStatus}
-            onStatusChange={setStatus}
-            onSearchChange={setSearch}
-            onSetPage={setPage}
-            onAdd={() => {}}
-            onImport={() => {}}
-            onPrint
-            faStatus
-            faFilter={faFilter}
-            setFaFilter={setFaFilter}
-            // scanAsset
-            openScan
-            hideArchive
-            isRequest
-            setIsRequest={setIsRequest}
-            showDateFilter
-            dateFrom={dateFrom}
-            setDateFrom={setDateFrom}
-            dateTo={dateTo}
-            setDateTo={setDateTo}
-          />
+          {view ? (
+            <MasterlistToolbar
+              path="#"
+              // onFaStatusChange={setFaStatus}
+              onStatusChange={setStatus}
+              onSearchChange={setSearch}
+              onSetPage={setPage}
+              faStatus
+              faFilter={faFilter}
+              setFaFilter={setFaFilter}
+              hideArchive
+              isRequest
+              setIsRequest={setIsRequest}
+              showDateFilter
+              dateFrom={dateFrom}
+              setDateFrom={setDateFrom}
+              dateTo={dateTo}
+              setDateTo={setDateTo}
+            />
+          ) : (
+            <MasterlistToolbar
+              path="#"
+              // onFaStatusChange={setFaStatus}
+              onStatusChange={setStatus}
+              onSearchChange={setSearch}
+              onSetPage={setPage}
+              onAdd={() => {}}
+              onImport={() => {}}
+              onPrint
+              faStatus
+              faFilter={faFilter}
+              setFaFilter={setFaFilter}
+              // scanAsset
+              openScan
+              hideArchive
+              isRequest
+              setIsRequest={setIsRequest}
+              showDateFilter
+              dateFrom={dateFrom}
+              setDateFrom={setDateFrom}
+              dateTo={dateTo}
+              setDateTo={setDateTo}
+            />
+          )}
 
           <Box>
             <TableContainer className="mcontainer__th-body">
