@@ -44,7 +44,7 @@ export const transferApprovalApi = createApi({
 
     patchUpdateTransferDepreciationApprovalApi: builder.mutation({
       query: (body) => ({
-        url: `/update-depreciation/${body.id}`,
+        url: `/update-depreciation`,
         method: "PATCH",
         body,
       }),
