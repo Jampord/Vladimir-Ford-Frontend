@@ -804,7 +804,7 @@ const Depreciation = (props) => {
                     </Box>
 
                     <Box className="tableCard__propertiesCapex">
-                      Scrap Value:
+                      ATOE Deduction:
                       <Typography className="tableCard__infoCapex" fontSize="14px">
                         ₱{formatCost(data?.scrap_value)}
                       </Typography>
@@ -994,6 +994,36 @@ const Depreciation = (props) => {
                     Credit:
                     <Typography className="tableCard__info" fontSize="14px">
                       {data?.initial_credit?.account_title_code} - {data?.initial_credit?.account_title_name}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Card>
+              <Card
+                className="tableCard__card"
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  flexDirection: "column",
+                  mt: "10px",
+                  mx: "5px",
+                }}
+              >
+                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "rem" }}>
+                  Advances to Employees (ATOE)
+                </Typography>
+
+                <Box>
+                  <Box className="tableCard__properties">
+                    Debit:
+                    <Typography className="tableCard__info" fontSize="14px">
+                      {data?.atoe_debit?.account_title_code} - {data?.atoe_debit?.account_title_name}
+                    </Typography>
+                  </Box>
+
+                  <Box className="tableCard__properties">
+                    Credit:
+                    <Typography className="tableCard__info" fontSize="14px">
+                      {data?.atoe_credit?.account_title_code} - {data?.atoe_credit?.account_title_name}
                     </Typography>
                   </Box>
                 </Box>
