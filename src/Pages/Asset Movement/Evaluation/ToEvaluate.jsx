@@ -19,7 +19,15 @@ import {
   IconButton,
 } from "@mui/material";
 import "../../../Style/AssetMovement/toEvaluate.scss";
-import { Delete, Info, KeyboardReturn, Remove, ScreenSearchDesktop, SwapHorizontalCircle } from "@mui/icons-material";
+import {
+  Delete,
+  FindReplace,
+  Info,
+  KeyboardReturn,
+  Remove,
+  ScreenSearchDesktop,
+  SwapHorizontalCircle,
+} from "@mui/icons-material";
 import {
   evaluationApi,
   useGetAssetsToEvaluateApiQuery,
@@ -36,9 +44,11 @@ import { onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSl
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import axios from "axios";
 import StatusComponent from "../../../Components/Reusable/FaStatusComponent";
+import CustomAutoComplete from "../../../Components/Reusable/CustomAutoComplete";
 
 const schema = yup.object().shape({
   attachments: yup.mixed().label("Attachment"),
+  warehouse: yup.mixed().label("Warehouse"),
 });
 
 const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
@@ -74,6 +84,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
     resolver: yupResolver(schema),
     defaultValues: {
       attachments: item.map(() => null), // Initialize attachment for each items
+      warehouse: item.map(() => null), // Initialize attachment for each items
     },
   });
 
@@ -84,6 +95,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
 
     const newFormData = {
       ...formData,
+      warehouse: formData.warehouse.map((item) => item?.value), // Extract value from selected option
       evaluation: evaluation === "Return" ? "Repaired" : evaluation,
       care_of: item[0]?.care_of,
       pullout_ids: item.map((data) => data.id),
@@ -101,6 +113,9 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
       : submitFormData.append("care_of", newFormData?.care_of);
     newFormData.pullout_ids.forEach((id) => {
       submitFormData.append("pullout_ids[]", id);
+    });
+    newFormData.warehouse.forEach((id) => {
+      submitFormData.append("warehouse[]", id);
     });
 
     console.log("newFormData", newFormData);
@@ -171,6 +186,11 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
     "watch",
     watch("attachments").every((file) => file !== null)
   );
+  console.log(
+    "watch",
+    watch("warehouse")
+    // .every((file) => file !== null)
+  );
 
   const RemoveFile = ({ itemId }) => {
     return (
@@ -201,6 +221,21 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
     );
   };
 
+  const options = [
+    {
+      value: "mis-warehouse",
+      label: "MIS - Warehouse",
+    },
+    {
+      value: "fixed-asset-warehouse",
+      label: "Fixed Asset - Warehouse",
+    },
+    {
+      value: "engineering-warehouse",
+      label: "Engineering - Warehouse",
+    },
+  ];
+
   return (
     <>
       <Box component={"form"} onSubmit={handleSubmit(onSubmitHandler)}>
@@ -213,6 +248,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
             {evaluation === "Return" && <KeyboardReturn color="primary" fontSize="medium" />}
             {evaluation === "Change Care of" && <SwapHorizontalCircle color="primary" fontSize="medium" />}
             {evaluation === "For Disposal" && <Delete color="primary" fontSize="medium" />}
+            {evaluation === "For Replacement" && <FindReplace color="primary" fontSize="medium" />}
             {evaluation}
           </Typography>
 
@@ -252,6 +288,11 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
                         Change Care of to
                       </TableCell>
                     )}
+                    {evaluation === "For Replacement" && (
+                      <TableCell sx={{ color: "white" }} align="center">
+                        Warehouse
+                      </TableCell>
+                    )}
                   </TableRow>
                 </TableHead>
 
@@ -284,7 +325,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
                           <CustomAttachmentArray
                             control={control}
                             name={`attachments.${index}`}
-                            label=""
+                            label="Evaluation Form"
                             inputRef={attachmentRefs.current[index]}
                             // inputProps={{ id: `attachment-${index}` }}
                           />
@@ -323,6 +364,29 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
                           </Typography>
                         </TableCell>
                       )}
+                      {evaluation === "For Replacement" && (
+                        <TableCell align="center" sx={{ width: "200px" }}>
+                          <CustomAutoComplete
+                            control={control}
+                            name={`warehouse.${index}`}
+                            options={options}
+                            disableClearable
+                            getOptionLabel={(option) => {
+                              return option.label;
+                            }}
+                            isOptionEqualToValue={(option, value) => option === value}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                color={"primary"}
+                                label="Warehouse"
+                                error={!!errors?.warehouse}
+                                helperText={errors?.warehouse?.message}
+                              />
+                            )}
+                          />
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -339,7 +403,11 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
             color="primary"
             size="small"
             type="submit"
-            disabled={!item.length || watch("attachments").every((file) => file !== null) === false}
+            disabled={
+              !item.length ||
+              watch("attachments").every((file) => file !== null) === false ||
+              (evaluation === "For Replacement" && watch("warehouse").every((file) => file !== null) === false)
+            }
           >
             Submit
           </Button>
