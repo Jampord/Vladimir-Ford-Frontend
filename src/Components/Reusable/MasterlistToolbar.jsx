@@ -931,7 +931,9 @@ const MasterlistToolbar = (props) => {
                           color="error"
                           onClick={() => setDateFrom("") || setDateTo("") || setTempDateFrom("") || setTempDateTo("")}
                         >
-                          <Refresh />
+                          <Tooltip title="Reset" placement="bottom" arrow>
+                            <Refresh />
+                          </Tooltip>
                         </IconButton>
                       </Box>
                     </Stack>
