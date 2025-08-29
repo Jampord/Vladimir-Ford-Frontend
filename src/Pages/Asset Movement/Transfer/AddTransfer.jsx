@@ -100,6 +100,11 @@ import {
 } from "../../../Redux/Query/UserManagement/UserAccountsApi";
 import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 import { useLazyGetReceiverSettingsAllApiQuery } from "../../../Redux/Query/Settings/ReceiverSettings";
+import {
+  useGetOneRDFChargingAllApiQuery,
+  useLazyGetOneRDFChargingAllApiQuery,
+} from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
+import AddTransferSkeleton from "./Skeleton/AddTransferSkeleton";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -114,8 +119,8 @@ const schema = yup.object().shape({
   //   }),
 
   //Transfer From
+  one_charging_id_coordinator: yup.object().nullable().label("One RDF Charging From"),
   department_id_coordinator: yup.object().nullable().label("Department From"),
-
   company_id_coordinator: yup.object().nullable().label("Company From"),
   business_unit_id_coordinator: yup.object().nullable().label("Business Unit From"),
   unit_id_coordinator: yup.object().nullable().label("Unit From"),
@@ -131,15 +136,8 @@ const schema = yup.object().shape({
   location_id: yup.object().required().label("Location").typeError("Location is a required field"),
   // account_title_id: yup.object().required().label("Account Title").typeError("Account Title is a required field"),
 
-  // Accounting Entries
-  depreciation_debit_id: yup
-    .object()
-    .required()
-    .label("Depreciation Debit")
-    .typeError("Depreciation Debit is a required field"),
-
   remarks: yup.string().label("Remarks"),
-  attachments: yup.mixed().required().label("Attachments"),
+  attachments: yup.mixed().nullable().label("Attachments"),
   assets: yup.array().of(
     yup.object().shape({
       asset_id: yup.string().nullable(),
@@ -152,6 +150,9 @@ const schema = yup.object().shape({
       unit_id: yup.string().nullable(),
       sub_unit_id: yup.string().nullable(),
       location_id: yup.string().nullable(),
+
+      depreciation_debit_id: yup.mixed().nullable().label("Depreciation Debit"),
+
       // remaining_book_value: yup.number().nullable(),
       accountability: yup.string().typeError("Accountability is a required field").required().label("Accountability"),
       accountable: yup
@@ -170,9 +171,9 @@ const AddTransfer = (props) => {
   const [edit, setEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const user = JSON.parse(localStorage.getItem("user"));
   const AttachmentRef = useRef(null);
   const { state: transactionData } = useLocation();
-  // console.log("transactionData: ", transactionData);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -233,6 +234,24 @@ const AddTransfer = (props) => {
 
   const data = transferData?.at(0);
   // console.log("transferData: ", data);
+
+  const [
+    oneChargingTrigger,
+    {
+      data: oneChargingData = [],
+      isLoading: isOneChargingLoading,
+      isSuccess: isOneChargingSuccess,
+      isError: isOneChargingError,
+      refetch: isOneChargingRefetch,
+    },
+  ] = useLazyGetOneRDFChargingAllApiQuery();
+  const {
+    data: oneChargingData1 = [],
+    isLoading: isOneChargingLoading1,
+    isSuccess: isOneChargingSuccess1,
+    isError: isOneChargingError1,
+    refetch: isOneChargingRefetch1,
+  } = useGetOneRDFChargingAllApiQuery({ pagination: "none", user_id: user?.id });
 
   const [
     companyTrigger,
@@ -374,7 +393,6 @@ const AddTransfer = (props) => {
       isFetching: isVTagNumberCoordinatorFetching,
     },
   ] = useLazyGetFixedAssetTransferCoordinatorApiQuery({}, { refetchOnMountOrArgChange: true });
-  // console.log("vtagNumberData", vTagNumberData);
 
   const [
     userAccountTrigger,
@@ -386,7 +404,6 @@ const AddTransfer = (props) => {
     receiverAccountTrigger,
     { data: receiverData = [], isLoading: isReceiverLoading, isSuccess: isReceiverSuccess, isError: isReceiverError },
   ] = useLazyGetReceiverSettingsAllApiQuery();
-  console.log("receiverData", receiverData);
 
   //* useForm --------------------------------------------------------------------
   const {
@@ -409,6 +426,7 @@ const AddTransfer = (props) => {
       // accountability: null,
       // accountable: null,
 
+      one_charging_id_coordinator: null,
       department_id_coordinator: null,
       company_id_coordinator: null,
       business_unit_id_coordinator: null,
@@ -416,6 +434,7 @@ const AddTransfer = (props) => {
       subunit_id_coordinator: null,
       location_id_coordinator: null,
 
+      one_charging_id: null,
       department_id: null,
       company_id: null,
       business_unit_id: null,
@@ -434,6 +453,7 @@ const AddTransfer = (props) => {
           fixed_asset_id: null,
           asset_accountable: "",
           created_at: null,
+          depreciation_debit_id: null,
           company_id: null,
           business_unit_id: null,
           department_id: null,
@@ -449,12 +469,6 @@ const AddTransfer = (props) => {
     },
   });
 
-  console.log("errors", errors);
-  console.log("isdirty: ", isDirty);
-  console.log("💣: ", isValid);
-
-  // console.log("👀", watch("assets"));
-
   //* Append Table ---------------------------------------------------------------
   const { fields, append, remove } = useFieldArray({
     control,
@@ -467,6 +481,7 @@ const AddTransfer = (props) => {
       fixed_asset_id: null,
       asset_accountable: "",
       created_at: null,
+      depreciation_debit_id: null,
       company_id: null,
       business_unit_id: null,
       department_id: null,
@@ -505,7 +520,6 @@ const AddTransfer = (props) => {
   }, [isPostError]);
 
   useEffect(() => {
-    // console.log("data", data);
     if (data) {
       // fixedAssetTrigger();
       reset({
@@ -516,19 +530,16 @@ const AddTransfer = (props) => {
         department_id_coordinator: data?.department_from,
         company_id_coordinator: data?.company_from,
         business_unit_id_coordinator: data?.business_unit_from,
-        unit_id_coordinator: data?.unit_from,
-        subunit_id_coordinator: data?.subunit_from,
         location_id_coordinator: data?.location_from,
 
-        department_id: data?.department,
-        company_id: data?.company,
-        business_unit_id: data?.business_unit,
-        unit_id: data?.unit,
-        subunit_id: data?.subunit,
-        location_id: data?.location,
+        one_charging_id: data?.one_charging,
+        department_id: data?.one_charging,
+        company_id: data?.one_charging,
+        business_unit_id: data?.one_charging,
+        unit_id: data?.one_charging,
+        subunit_id: data?.one_charging,
+        location_id: data?.one_charging,
         // account_title_id: null,
-
-        depreciation_debit_id: data?.depreciation_debit,
 
         remarks: data?.remarks || "",
         attachments: data?.attachments,
@@ -538,63 +549,22 @@ const AddTransfer = (props) => {
           fixed_asset_id: asset,
           asset_accountable: asset.accountable === "-" ? "Common" : asset.accountable,
           created_at: asset.created_at || asset.acquisition_date,
-          company_id: asset.company?.company_name,
-          business_unit_id: asset.business_unit?.business_unit_name,
-          department_id: asset.department?.department_name,
-          unit_id: asset.unit?.unit_name,
-          sub_unit_id: asset.subunit?.subunit_name,
-          location_id: asset.location?.location_name,
+          depreciation_debit_id: asset?.selected_depreciation_debit,
+          one_charging_id: asset.one_charging?.name,
+          company_id: asset.one_charging?.company_name,
+          business_unit_id: asset.one_charging?.business_unit_name,
+          department_id: asset.one_charging?.department_name,
+          unit_id: asset.one_charging?.unit_name,
+          sub_unit_id: asset.one_charging?.subunit_name,
+          location_id: asset.one_charging?.location_name,
           accountability: asset?.new_accountability,
           accountable: asset?.new_accountable,
           receiver_id: asset?.receiver,
           remaining_book_value: asset?.remaining_book_value,
         })),
       });
-
-      // const attachmentFormat = data?.attachments === null ? "" : data?.attachments;
-
-      // setValue("description", data?.description);
-      // setValue("accountability", data?.accountability);
-      // setValue("accountable", data?.accountable);
-      // setValue("receiver_id", data?.receiver);
-      // setValue("department_id", data?.department);
-      // setValue("company_id", data?.company);
-      // setValue("business_unit_id", data?.business_unit);
-      // setValue("unit_id", data?.unit);
-      // setValue("subunit_id", data?.subunit);
-      // setValue("location_id", data?.location);
-      // // setValue("account_title_id", data?.account_title);
-      // setValue("remarks", data?.remarks || "");
-      // setValue("attachments", attachmentFormat);
-      // setValue(
-      //   "assets",
-      //   data?.assets.map((asset) => ({
-      //     id: asset.id,
-      //     // fixed_asset_id: {
-      //     //   id: asset?.vladimir_tag_number.id,
-      //     //   vladimir_tag_number: asset?.vladimir_tag_number?.vladimir_tag_number,
-      //     //   asset_description: asset?.vladimir_tag_number?.asset_description,
-      //     // },
-      //     fixed_asset_id: asset,
-      //     asset_accountable: asset.accountable === "-" ? "Common" : asset.accountable,
-      //     created_at: asset.created_at || asset.acquisition_date,
-      //     company_id: asset.company?.company_name,
-      //     business_unit_id: asset.business_unit?.business_unit_name,
-      //     department_id: asset.department?.department_name,
-      //     unit_id: asset.unit?.unit_name,
-      //     sub_unit_id: asset.subunit?.subunit_name,
-      //     location_id: asset.location?.location_name,
-      //   }))
-      // );
     }
   }, [data, edit]);
-
-  // useEffect(() => {
-  //   trigger();
-  // }, [trigger]);
-
-  // console.log("asset", watch("asset"));
-  // console.log("asset", data?.asset);
 
   //* Form functions ----------------------------------------------------------------
   const addTransferHandler = (formData) => {
@@ -608,21 +578,20 @@ const AddTransfer = (props) => {
       formData?.accountable === null ? "" : formData?.accountable?.full_id_number_full_name?.toString();
 
     const data = {
-      ...formData,
-      department_id: formData?.department_id.id?.toString(),
-      company_id: updatingCoa("company_id", "company"),
-      business_unit_id: updatingCoa("business_unit_id", "business_unit"),
-      unit_id: formData.unit_id.id?.toString(),
-      subunit_id: formData.subunit_id.id?.toString(),
-      location_id: formData?.location_id.id?.toString(),
-      // account_title_id: formData?.account_title_id.id?.toString(),
-      // accountability: formData?.accountability?.toString(),
-      // accountable: accountableFormat,
+      // ...formData,
+      description: formData?.description,
+      one_charging_id: formData?.one_charging_id.id?.toString(),
+      department_id: formData?.department_id.department_id?.toString(),
+      company_id: formData?.company_id.company_id?.toString(),
+      business_unit_id: formData?.business_unit_id.business_unit_id?.toString(),
+      unit_id: formData.unit_id.unit_id?.toString(),
+      subunit_id: formData.subunit_id.subunit_id?.toString(),
+      location_id: formData?.location_id.location_id?.toString(),
+
       attachments: formData?.attachments,
 
-      depreciation_debit_id: formData?.depreciation_debit_id.sync_id?.toString(),
-
       assets: formData?.assets?.map((item) => ({
+        depreciation_debit_id: item?.depreciation_debit_id?.sync_id?.toString(),
         fixed_asset_id: item.fixed_asset_id.id,
         accountability: item?.accountability?.toString(),
         accountable: item?.accountable?.full_id_number_full_name?.toString() || "",
@@ -646,44 +615,6 @@ const AddTransfer = (props) => {
           },
         }
       );
-      // .then((result) => {
-      //   console.log("result", result);
-      //   dispatch(
-      //     openToast({
-      //       message: result?.data?.message || result?.data?.message,
-      //       duration: 5000,
-      //     })
-      //   );
-      //   setIsLoading(false);
-      //   transactionData && reset();
-      // })
-      // .then(() => {
-      //   // isTransferRefetch();
-      //   navigate("/asset-movement/transfer");
-
-      //   dispatch(transferApi.util.invalidateTags(["Transfer"]));
-      // })
-      // .catch((err) => {
-      //   console.log("Error submitting form!", err);
-      //   if (err?.status === 422) {
-      //     dispatch(
-      //       openToast({
-      //         message: "The given data was invalid.",
-      //         duration: 5000,
-      //         variant: "error",
-      //       })
-      //     );
-      //   } else if (err?.status !== 422) {
-      //     console.error(err);
-      //     dispatch(
-      //       openToast({
-      //         message: "Something went wrong. Please try again.",
-      //         duration: 5000,
-      //         variant: "error",
-      //       })
-      //     );
-      //   }
-      // });
     };
 
     dispatch(
@@ -728,11 +659,11 @@ const AddTransfer = (props) => {
             navigate("/asset-movement/transfer");
             dispatch(transferApi.util.invalidateTags(["Transfer"]));
           } catch (err) {
-            // console.log(err);
+            console.log({ err });
             if (err?.status === 422) {
               dispatch(
                 openToast({
-                  message: err?.data?.errors?.detail || err?.message,
+                  message: err?.response?.data?.message || err?.message,
                   duration: 5000,
                   variant: "error",
                 })
@@ -753,61 +684,41 @@ const AddTransfer = (props) => {
     );
   };
 
-  const onSubmitHandler = () => {
-    dispatch(
-      openConfirm({
-        icon: Info,
-        iconColor: "info",
-        message: (
-          <Box>
-            <Typography> Are you sure you want to</Typography>
-            <Typography
-              sx={{
-                display: "inline-block",
-                color: "secondary.main",
-                fontWeight: "bold",
-              }}
-            >
-              {!edit ? "CREATE" : "UPDATE"}
-            </Typography>{" "}
-            this Data?
-          </Box>
-        ),
-        onConfirm: () => {
-          try {
-            dispatch(onLoading());
-            submitData();
-            dispatch(
-              openToast({
-                message: "Transfer Request Successfully Added",
-                duration: 5000,
-              })
-            );
-          } catch (err) {
-            // console.log(err);
-            if (err?.status === 422) {
-              dispatch(
-                openToast({
-                  message: err?.data?.errors?.detail || err?.message,
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
-            } else if (err?.status !== 422) {
-              console.error(err);
-              dispatch(
-                openToast({
-                  message: "Something went wrong. Please try again.",
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
-            }
-          }
-        },
-      })
-    );
+  const handleViewFile = async (id) => {
+    try {
+      const response = await fetch(`${process.env.VLADIMIR_BASE_URL}/file/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "x-api-key": process.env.GL_KEY },
+      });
+      const blob = await response.blob();
+      const fileURL = URL.createObjectURL(blob);
+
+      // Open new window and store reference
+      const newWindow = window.open(fileURL, "_blank");
+
+      if (newWindow) {
+        // Add to cache and setup cleanup listener
+        blobUrlCache.set(newWindow, fileURL);
+        newWindow.addEventListener("unload", () => {
+          URL.revokeObjectURL(fileURL);
+          blobUrlCache.delete(newWindow);
+        });
+      } else {
+        // Revoke immediately if window failed to open
+        URL.revokeObjectURL(fileURL);
+      }
+    } catch (err) {
+      console.error("Error handling file view:", err);
+    }
   };
+
+  // Cleanup for main window close (optional safety net)
+  window.addEventListener("beforeunload", () => {
+    blobUrlCache.forEach((url, win) => {
+      URL.revokeObjectURL(url);
+      blobUrlCache.delete(win);
+    });
+  });
 
   const RemoveFile = ({ title, value }) => {
     return (
@@ -940,14 +851,12 @@ const AddTransfer = (props) => {
     matchFrom: "any",
   });
 
-  const user = JSON.parse(localStorage.getItem("user"));
   // console.log("user", user);
   const isCoordinator = user?.has_handle === 1;
   const user_id = user.id;
-  const subunit_id = watch("subunit_id_coordinator")?.id || null;
-  // console.log("user", user);
-  console.log("isCoordinator", isCoordinator);
-  // console.log("subunit_id", subunit_id);
+  const one_charging_id = watch("one_charging_id_coordinator")?.id || null;
+
+  console.log("one_charging_id", one_charging_id);
 
   return (
     <>
@@ -987,77 +896,397 @@ const AddTransfer = (props) => {
         </Stack>
 
         <Box className="request request__wrapper" p={2} component="form" onSubmit={handleSubmit(addTransferHandler)}>
-          <Stack>
-            <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
-              {`${
-                transactionData?.view
-                  ? edit
-                    ? "EDIT INFORMATION"
-                    : "VIEW INFORMATION"
-                  : transactionData?.edit
-                  ? "EDIT INFORMATION "
-                  : "ADD TRANSFER REQUEST"
-              } `}
-            </Typography>
+          {isTransferLoading || isTransferFetching ? (
+            <AddTransferSkeleton />
+          ) : (
+            <Stack>
+              <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
+                {`${
+                  transactionData?.view
+                    ? edit
+                      ? "EDIT INFORMATION"
+                      : "VIEW INFORMATION"
+                    : transactionData?.edit
+                    ? "EDIT INFORMATION "
+                    : "ADD TRANSFER REQUEST"
+                } `}
+              </Typography>
 
-            <Stack id="requestForm" className="request__form" gap={2} pb={1}>
-              <Stack gap={2}>
-                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
-                  REQUEST DETAILS
-                </Typography>
-
-                <CustomTextField
-                  control={control}
-                  name="description"
-                  disabled={
-                    edit ? false : transactionData?.view
-                    // || watch("assets[0].fixed_asset_id") === null
-                  }
-                  label="Description"
-                  type="text"
-                  error={!!errors?.description}
-                  helperText={errors?.description?.message}
-                  fullWidth
-                  multiline
-                />
-
-                <CustomTextField
-                  control={control}
-                  name="remarks"
-                  disabled={
-                    edit ? false : transactionData?.view
-                    // || watch("assets[0].fixed_asset_id") === null
-                  }
-                  label="Remarks (Optional)"
-                  optional
-                  type="text"
-                  error={!!errors?.remarks}
-                  helperText={errors?.remarks?.message}
-                  fullWidth
-                  multiline
-                />
-              </Stack>
-
-              {isCoordinator && (
+              <Stack id="requestForm" className="request__form" gap={2} pb={1}>
                 <Stack gap={2}>
                   <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
-                    TRANSFER FROM
+                    REQUEST DETAILS
+                  </Typography>
+
+                  <CustomTextField
+                    control={control}
+                    name="description"
+                    disabled={
+                      edit ? false : transactionData?.view
+                      // || watch("assets[0].fixed_asset_id") === null
+                    }
+                    label="Description"
+                    type="text"
+                    error={!!errors?.description}
+                    helperText={errors?.description?.message}
+                    fullWidth
+                    multiline
+                  />
+
+                  <CustomTextField
+                    control={control}
+                    name="remarks"
+                    disabled={
+                      edit ? false : transactionData?.view
+                      // || watch("assets[0].fixed_asset_id") === null
+                    }
+                    label="Remarks (Optional)"
+                    optional
+                    type="text"
+                    error={!!errors?.remarks}
+                    helperText={errors?.remarks?.message}
+                    fullWidth
+                    multiline
+                  />
+                </Stack>
+
+                {isCoordinator && (
+                  <Stack gap={2}>
+                    <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
+                      TRANSFER FROM
+                    </Typography>
+
+                    <CustomAutoComplete
+                      autoComplete
+                      control={control}
+                      disabled={edit ? false : transactionData?.view}
+                      name="one_charging_id_coordinator"
+                      options={oneChargingData1 || []}
+                      // onOpen={() => oneChargingTrigger({ pagination: "none", user_id: user.id })}
+                      loading={isOneChargingLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.code + " - " + option.name}
+                      isOptionEqualToValue={(option, value) => option.id === value.id}
+                      renderInput={(params) => (
+                        <TextField
+                          color="secondary"
+                          {...params}
+                          label="One RDF Charging"
+                          error={!!errors?.one_charging_id}
+                          helperText={errors?.one_charging_id?.message}
+                        />
+                      )}
+                      onChange={(_, value) => {
+                        console.log("value", value);
+
+                        if (value) {
+                          setValue("department_id_coordinator", value);
+                          setValue("company_id_coordinator", value);
+                          setValue("business_unit_id_coordinator", value);
+                          setValue("unit_id_coordinator", value);
+                          setValue("subunit_id_coordinator", value);
+                          setValue("location_id_coordinator", value);
+                        } else {
+                          setValue("department_id_coordinator", null);
+                          setValue("company_id_coordinator", null);
+                          setValue("business_unit_id_coordinator", null);
+                          setValue("unit_id_coordinator", null);
+                          setValue("subunit_id_coordinator", null);
+                          setValue("location_id_coordinator", null);
+                        }
+
+                        fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
+                        fields.forEach((item, index) => setValue(`assets.${index}.receiver_id`, null));
+                        fields.forEach((item, index) => setValue(`assets.${index}.accountable`, null));
+                        fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
+                        fields.forEach((item, index) => setValue(`assets.${index}.one_charging_id`, null));
+                        fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
+                        fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
+                        fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
+                        fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
+                        fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
+                        fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
+                        fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
+                        fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
+
+                        return value;
+                      }}
+                    />
+
+                    <CustomAutoComplete
+                      autoComplete
+                      control={control}
+                      name="department_id_coordinator"
+                      // disabled={edit ? false : transactionData?.view}
+                      disabled
+                      options={departmentCoordinatorData}
+                      onOpen={() =>
+                        isDepartmentCoordinatorSuccess
+                          ? null
+                          : (departmentCoordinatorTrigger({ user_id: user_id }),
+                            companyTrigger(),
+                            businessUnitTrigger())
+                      }
+                      loading={isDepartmentCoordinatorLoading}
+                      size="small"
+                      // clearIcon={null}
+                      getOptionLabel={(option) => option.department_code + " - " + option.department_name}
+                      isOptionEqualToValue={(option, value) => option.id === value.id}
+                      renderInput={(params) => (
+                        <TextField
+                          color="secondary"
+                          {...params}
+                          label="Department"
+                          error={!!errors?.department_id_coordinator}
+                          helperText={errors?.department_id_coordinator?.message}
+                        />
+                      )}
+                      // onChange={(_, value) => {
+                      //   // console.log("value: ", value);
+                      //   if (value) {
+                      //     const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
+                      //     const businessUnitID = businessUnitData?.find(
+                      //       (item) => item.sync_id === value.business_unit.business_unit_sync_id
+                      //     );
+
+                      //     setValue("company_id_coordinator", companyID);
+                      //     setValue("business_unit_id_coordinator", businessUnitID);
+                      //   } else if (value === null) {
+                      //     setValue("company_id_coordinator", null);
+                      //     setValue("business_unit_id_coordinator", null);
+                      //   }
+                      //   // fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
+                      //   // fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
+                      //   // fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
+                      //   // fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
+                      //   // fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
+                      //   // fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
+                      //   // fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
+                      //   // fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
+                      //   // fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
+                      //   // fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
+
+                      //   setValue("unit_id_coordinator", null);
+                      //   setValue("subunit_id_coordinator", null);
+                      //   setValue("location_id_coordinator", null);
+                      //   return value;
+                      // }}
+                    />
+
+                    <CustomAutoComplete
+                      name="company_id_coordinator"
+                      control={control}
+                      options={companyData}
+                      loading={isCompanyLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.company_code + " - " + option.company_name}
+                      isOptionEqualToValue={(option, value) => option.company_id === value.company_id}
+                      renderInput={(params) => (
+                        <TextField
+                          color="secondary"
+                          {...params}
+                          label="Company"
+                          // error={!!errors?.company_id}
+                          // helperText={errors?.company_id?.message}
+                        />
+                      )}
+                      disabled
+                    />
+
+                    <CustomAutoComplete
+                      autoComplete
+                      name="business_unit_id_coordinator"
+                      control={control}
+                      options={businessUnitData}
+                      // loading={isBusinessUnitLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.business_unit_code + " - " + option.business_unit_name}
+                      isOptionEqualToValue={(option, value) => option.business_unit_id === value.business_unit_id}
+                      renderInput={(params) => (
+                        <TextField
+                          color="secondary"
+                          {...params}
+                          label="Business Unit"
+                          // error={!!errors?.business_unit_id}
+                          // helperText={errors?.business_unit_id?.message}
+                        />
+                      )}
+                      disabled
+                    />
+
+                    <CustomAutoComplete
+                      autoComplete
+                      name="unit_id_coordinator"
+                      // disabled={edit ? false : transactionData?.view}
+                      disabled
+                      control={control}
+                      options={
+                        departmentCoordinatorData?.filter(
+                          (obj) => obj?.id === watch("department_id_coordinator")?.department_id
+                        )[0]?.unit || []
+                      }
+                      onOpen={() =>
+                        isUnitCoordinatorSuccess
+                          ? null
+                          : (unitCoordinatorTrigger({ user_id: user_id }),
+                            subunitCoordinatorTrigger({ user_id: user_id }),
+                            locationTrigger())
+                      }
+                      // onChange={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
+                      loading={isUnitCoordinatorLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
+                      isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                      renderInput={(params) => (
+                        <TextField
+                          color="secondary"
+                          {...params}
+                          label="Unit"
+                          error={!!errors?.unit_id_coordinator}
+                          helperText={errors?.unit_id_coordinator?.message}
+                        />
+                      )}
+                      // onChange={(_, value) => {
+                      //   fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
+                      //   fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
+                      //   fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
+                      //   fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
+                      //   fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
+                      //   fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
+                      //   fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
+                      //   fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
+                      //   fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
+                      //   fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
+
+                      //   setValue("subunit_id_coordinator", null);
+                      //   setValue("location_id_coordinator", null);
+
+                      //   return value;
+                      // }}
+                    />
+
+                    <CustomAutoComplete
+                      autoComplete
+                      name="subunit_id_coordinator"
+                      // disabled={edit ? false : transactionData?.view}
+                      disabled
+                      control={control}
+                      options={
+                        unitCoordinatorData?.filter((obj) => obj?.id === watch("unit_id_coordinator")?.id)[0]
+                          ?.subunit || []
+                      }
+                      loading={isSubUnitCoordinatorLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.subunit_code + " - " + option.subunit_name}
+                      isOptionEqualToValue={(option, value) => option.id === value.id}
+                      renderInput={(params) => (
+                        <TextField
+                          color="secondary"
+                          {...params}
+                          label="Sub Unit"
+                          error={!!errors?.subunit_id_coordinator}
+                          helperText={errors?.subunit_id_coordinator?.message}
+                        />
+                      )}
+                    />
+
+                    <CustomAutoComplete
+                      autoComplete
+                      name="location_id_coordinator"
+                      // disabled={edit ? false : transactionData?.view}
+                      disabled
+                      control={control}
+                      options={locationData?.filter((item) => {
+                        return item.subunit.some((subunit) => {
+                          return subunit?.sync_id === watch("subunit_id_coordinator")?.sync_id;
+                        });
+                      })}
+                      loading={isLocationLoading}
+                      size="small"
+                      getOptionLabel={(option) => option.location_code + " - " + option.location_name}
+                      isOptionEqualToValue={(option, value) => option.location_id === value.location_id}
+                      renderInput={(params) => (
+                        <TextField
+                          color="secondary"
+                          {...params}
+                          label="Location"
+                          error={!!errors?.location_id_coordinator}
+                          helperText={errors?.location_id_coordinator?.message}
+                        />
+                      )}
+                    />
+                  </Stack>
+                )}
+
+                <Stack gap={2}>
+                  <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
+                    TRANSFER TO
                   </Typography>
 
                   <CustomAutoComplete
                     autoComplete
                     control={control}
-                    name="department_id_coordinator"
                     disabled={edit ? false : transactionData?.view}
-                    options={departmentCoordinatorData}
-                    onOpen={() =>
-                      isDepartmentCoordinatorSuccess
-                        ? null
-                        : (departmentCoordinatorTrigger({ user_id: user_id }), companyTrigger(), businessUnitTrigger())
-                    }
-                    loading={isDepartmentCoordinatorLoading}
+                    name="one_charging_id"
+                    options={oneChargingData || []}
+                    onOpen={() => oneChargingTrigger({ pagination: "none" })}
+                    loading={isOneChargingLoading}
                     size="small"
-                    // clearIcon={null}
+                    getOptionLabel={(option) => option.code + " - " + option.name}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    renderInput={(params) => (
+                      <TextField
+                        color="secondary"
+                        {...params}
+                        label="One RDF Charging"
+                        error={!!errors?.one_charging_id}
+                        helperText={errors?.one_charging_id?.message}
+                      />
+                    )}
+                    onChange={(_, value) => {
+                      if (value) {
+                        setValue("department_id", value);
+                        setValue("company_id", value);
+                        setValue("business_unit_id", value);
+                        setValue("unit_id", value);
+                        setValue("subunit_id", value);
+                        setValue("location_id", value);
+                      } else {
+                        setValue("department_id", null);
+                        setValue("company_id", null);
+                        setValue("business_unit_id", null);
+                        setValue("unit_id", null);
+                        setValue("subunit_id", null);
+                        setValue("location_id", null);
+                      }
+
+                      // fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
+                      // fields.forEach((item, index) => setValue(`assets.${index}.receiver_id`, null));
+                      // fields.forEach((item, index) => setValue(`assets.${index}.accountable`, null));
+                      // fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
+                      // fields.forEach((item, index) => setValue(`assets.${index}.one_charging_id`, null));
+                      // fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
+                      // fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
+                      // fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
+                      // fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
+                      // fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
+                      // fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
+                      // fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
+                      // fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
+
+                      return value;
+                    }}
+                  />
+
+                  {/* OLD Departments */}
+                  <CustomAutoComplete
+                    autoComplete
+                    name="department_id"
+                    control={control}
+                    disabled
+                    options={oneChargingData || []}
+                    loading={isOneChargingLoading}
+                    size="small"
                     getOptionLabel={(option) => option.department_code + " - " + option.department_name}
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                     renderInput={(params) => (
@@ -1065,47 +1294,36 @@ const AddTransfer = (props) => {
                         color="secondary"
                         {...params}
                         label="Department"
-                        error={!!errors?.department_id_coordinator}
-                        helperText={errors?.department_id_coordinator?.message}
+                        error={!!errors?.department_id}
+                        helperText={errors?.department_id?.message}
                       />
                     )}
-                    onChange={(_, value) => {
-                      // console.log("value: ", value);
-                      if (value) {
-                        const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
-                        const businessUnitID = businessUnitData?.find(
-                          (item) => item.sync_id === value.business_unit.business_unit_sync_id
-                        );
+                    // onChange={(_, value) => {
+                    //   const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
+                    //   const businessUnitID = businessUnitData?.find(
+                    //     (item) => item.sync_id === value.business_unit.business_unit_sync_id
+                    //   );
 
-                        setValue("company_id_coordinator", companyID);
-                        setValue("business_unit_id_coordinator", businessUnitID);
-                      } else if (value === null) {
-                        setValue("company_id_coordinator", null);
-                        setValue("business_unit_id_coordinator", null);
-                      }
-                      fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
-
-                      setValue("unit_id_coordinator", null);
-                      setValue("subunit_id_coordinator", null);
-                      setValue("location_id_coordinator", null);
-                      return value;
-                    }}
+                    //   if (value) {
+                    //     setValue("company_id", companyID);
+                    //     setValue("business_unit_id", businessUnitID);
+                    //   } else {
+                    //     setValue("company_id", null);
+                    //     setValue("business_unit_id", null);
+                    //   }
+                    //   setValue("unit_id", null);
+                    //   setValue("subunit_id", null);
+                    //   setValue("location_id", null);
+                    //   return value;
+                    // }}
                   />
 
                   <CustomAutoComplete
-                    name="company_id_coordinator"
+                    autoComplete
+                    name="company_id"
                     control={control}
-                    options={companyData}
-                    loading={isCompanyLoading}
+                    options={oneChargingData || []}
+                    loading={isOneChargingLoading}
                     size="small"
                     getOptionLabel={(option) => option.company_code + " - " + option.company_name}
                     isOptionEqualToValue={(option, value) => option.company_id === value.company_id}
@@ -1114,8 +1332,8 @@ const AddTransfer = (props) => {
                         color="secondary"
                         {...params}
                         label="Company"
-                        // error={!!errors?.company_id}
-                        // helperText={errors?.company_id?.message}
+                        error={!!errors?.company_id}
+                        helperText={errors?.company_id?.message}
                       />
                     )}
                     disabled
@@ -1123,10 +1341,10 @@ const AddTransfer = (props) => {
 
                   <CustomAutoComplete
                     autoComplete
-                    name="business_unit_id_coordinator"
+                    name="business_unit_id"
                     control={control}
-                    options={businessUnitData}
-                    // loading={isBusinessUnitLoading}
+                    options={oneChargingData || []}
+                    loading={isOneChargingLoading}
                     size="small"
                     getOptionLabel={(option) => option.business_unit_code + " - " + option.business_unit_name}
                     isOptionEqualToValue={(option, value) => option.business_unit_id === value.business_unit_id}
@@ -1135,8 +1353,8 @@ const AddTransfer = (props) => {
                         color="secondary"
                         {...params}
                         label="Business Unit"
-                        // error={!!errors?.business_unit_id}
-                        // helperText={errors?.business_unit_id?.message}
+                        error={!!errors?.business_unit_id}
+                        helperText={errors?.business_unit_id?.message}
                       />
                     )}
                     disabled
@@ -1144,63 +1362,37 @@ const AddTransfer = (props) => {
 
                   <CustomAutoComplete
                     autoComplete
-                    name="unit_id_coordinator"
-                    disabled={edit ? false : transactionData?.view}
+                    name="unit_id"
                     control={control}
-                    options={
-                      departmentCoordinatorData?.filter((obj) => obj?.id === watch("department_id_coordinator")?.id)[0]
-                        ?.unit || []
-                    }
-                    onOpen={() =>
-                      isUnitCoordinatorSuccess
-                        ? null
-                        : (unitCoordinatorTrigger({ user_id: user_id }),
-                          subunitCoordinatorTrigger({ user_id: user_id }),
-                          locationTrigger())
-                    }
-                    // onChange={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
-                    loading={isUnitCoordinatorLoading}
+                    disabled
+                    options={oneChargingData || []}
+                    loading={isOneChargingLoading}
                     size="small"
                     getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
-                    isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
                     renderInput={(params) => (
                       <TextField
                         color="secondary"
                         {...params}
                         label="Unit"
-                        error={!!errors?.unit_id_coordinator}
-                        helperText={errors?.unit_id_coordinator?.message}
+                        error={!!errors?.unit_id}
+                        helperText={errors?.unit_id?.message}
                       />
                     )}
-                    onChange={(_, value) => {
-                      fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
-
-                      setValue("subunit_id_coordinator", null);
-                      setValue("location_id_coordinator", null);
-
-                      return value;
-                    }}
+                    // onChange={(_, value) => {
+                    //   setValue("subunit_id", null);
+                    //   setValue("location_id", null);
+                    //   return value;
+                    // }}
                   />
 
                   <CustomAutoComplete
                     autoComplete
-                    name="subunit_id_coordinator"
-                    disabled={edit ? false : transactionData?.view}
+                    name="subunit_id"
                     control={control}
-                    options={
-                      unitCoordinatorData?.filter((obj) => obj?.id === watch("unit_id_coordinator")?.id)[0]?.subunit ||
-                      []
-                    }
-                    loading={isSubUnitCoordinatorLoading}
+                    disabled
+                    options={oneChargingData || []}
+                    loading={isOneChargingLoading}
                     size="small"
                     getOptionLabel={(option) => option.subunit_code + " - " + option.subunit_name}
                     isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -1209,421 +1401,84 @@ const AddTransfer = (props) => {
                         color="secondary"
                         {...params}
                         label="Sub Unit"
-                        error={!!errors?.subunit_id_coordinator}
-                        helperText={errors?.subunit_id_coordinator?.message}
+                        error={!!errors?.subunit_id}
+                        helperText={errors?.subunit_id?.message}
                       />
                     )}
                   />
 
                   <CustomAutoComplete
                     autoComplete
-                    name="location_id_coordinator"
-                    disabled={edit ? false : transactionData?.view}
+                    name="location_id"
                     control={control}
-                    options={locationData?.filter((item) => {
-                      return item.subunit.some((subunit) => {
-                        return subunit?.sync_id === watch("subunit_id_coordinator")?.sync_id;
-                      });
-                    })}
-                    loading={isLocationLoading}
+                    disabled
+                    options={oneChargingData || []}
+                    loading={isOneChargingLoading}
                     size="small"
                     getOptionLabel={(option) => option.location_code + " - " + option.location_name}
-                    isOptionEqualToValue={(option, value) => option.location_id === value.location_id}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
                     renderInput={(params) => (
                       <TextField
                         color="secondary"
                         {...params}
                         label="Location"
-                        error={!!errors?.location_id_coordinator}
-                        helperText={errors?.location_id_coordinator?.message}
+                        error={!!errors?.location_id}
+                        helperText={errors?.location_id?.message}
                       />
                     )}
                   />
                 </Stack>
-              )}
 
-              <Stack gap={2}>
-                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
-                  TRANSFER TO
-                </Typography>
-
-                <CustomAutoComplete
-                  autoComplete
-                  control={control}
-                  name="department_id"
-                  disabled={edit ? false : transactionData?.view}
-                  options={departmentData}
-                  onOpen={() =>
-                    isDepartmentSuccess ? null : (departmentTrigger(), companyTrigger(), businessUnitTrigger())
-                  }
-                  loading={isDepartmentLoading}
-                  size="small"
-                  // clearIcon={null}
-                  getOptionLabel={(option) => option.department_code + " - " + option.department_name}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  renderInput={(params) => (
-                    <TextField
-                      color="secondary"
-                      {...params}
-                      label="Department"
-                      error={!!errors?.department_id}
-                      helperText={errors?.department_id?.message}
-                    />
-                  )}
-                  onChange={(_, value) => {
-                    console.log("value: ", value);
-                    if (value) {
-                      const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
-                      const businessUnitID = businessUnitData?.find(
-                        (item) => item.sync_id === value.business_unit.business_unit_sync_id
-                      );
-
-                      setValue("company_id", companyID);
-                      setValue("business_unit_id", businessUnitID);
-                    } else if (value === null) {
-                      setValue("company_id", null);
-                      setValue("business_unit_id", null);
-                    }
-                    fields.forEach((item, index) => setValue(`assets.${index}.receiver_id`, null));
-                    fields.forEach((item, index) => setValue(`assets.${index}.accountable`, null));
-                    fields.forEach((item, index) => setValue(`assets.${index}.accountability`, null));
-                    setValue("unit_id", null);
-                    setValue("subunit_id", null);
-                    setValue("location_id", null);
-                    setValue("receiver_id", null);
-                    return value;
-                  }}
-                />
-
-                <CustomAutoComplete
-                  name="company_id"
-                  control={control}
-                  options={companyData}
-                  onOpen={() => (isCompanySuccess ? null : company())}
-                  loading={isCompanyLoading}
-                  size="small"
-                  getOptionLabel={(option) => option.company_code + " - " + option.company_name}
-                  isOptionEqualToValue={(option, value) => option.company_id === value.company_id}
-                  renderInput={(params) => (
-                    <TextField
-                      color="secondary"
-                      {...params}
-                      label="Company"
-                      // error={!!errors?.company_id}
-                      // helperText={errors?.company_id?.message}
-                    />
-                  )}
-                  disabled
-                />
-
-                <CustomAutoComplete
-                  autoComplete
-                  name="business_unit_id"
-                  control={control}
-                  options={businessUnitData}
-                  loading={isBusinessUnitLoading}
-                  size="small"
-                  getOptionLabel={(option) => option.business_unit_code + " - " + option.business_unit_name}
-                  isOptionEqualToValue={(option, value) => option.business_unit_id === value.business_unit_id}
-                  renderInput={(params) => (
-                    <TextField
-                      color="secondary"
-                      {...params}
-                      label="Business Unit"
-                      // error={!!errors?.business_unit_id}
-                      // helperText={errors?.business_unit_id?.message}
-                    />
-                  )}
-                  disabled
-                />
-
-                <CustomAutoComplete
-                  autoComplete
-                  name="unit_id"
-                  disabled={edit ? false : transactionData?.view}
-                  control={control}
-                  options={departmentData?.filter((obj) => obj?.id === watch("department_id")?.id)[0]?.unit || []}
-                  onOpen={() => (isUnitSuccess ? null : (unitTrigger(), subunitTrigger(), locationTrigger()))}
-                  // onChange={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
-                  loading={isUnitLoading}
-                  size="small"
-                  getOptionLabel={(option) => option.unit_code + " - " + option.unit_name}
-                  isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                  renderInput={(params) => (
-                    <TextField
-                      color="secondary"
-                      {...params}
-                      label="Unit"
-                      error={!!errors?.unit_id}
-                      helperText={errors?.unit_id?.message}
-                    />
-                  )}
-                  onChange={(_, value) => {
-                    fields.forEach((item, index) => setValue(`assets.${index}.receiver_id`, null));
-                    fields.forEach((item, index) => setValue(`assets.${index}.accountable`, null));
-                    fields.forEach((item, index) => setValue(`assets.${index}.accountability`, null));
-                    setValue("subunit_id", null);
-                    setValue("location_id", null);
-                    setValue("receiver_id", null);
-
-                    return value;
-                  }}
-                />
-
-                <CustomAutoComplete
-                  autoComplete
-                  name="subunit_id"
-                  disabled={edit ? false : transactionData?.view}
-                  control={control}
-                  options={unitData?.filter((obj) => obj?.id === watch("unit_id")?.id)[0]?.subunit || []}
-                  loading={isSubUnitLoading}
-                  size="small"
-                  getOptionLabel={(option) => option.subunit_code + " - " + option.subunit_name}
-                  isOptionEqualToValue={(option, value) => option.id === value.id}
-                  renderInput={(params) => (
-                    <TextField
-                      color="secondary"
-                      {...params}
-                      label="Sub Unit"
-                      error={!!errors?.subunit_id}
-                      helperText={errors?.subunit_id?.message}
-                    />
-                  )}
-                />
-
-                <CustomAutoComplete
-                  autoComplete
-                  name="location_id"
-                  disabled={edit ? false : transactionData?.view}
-                  control={control}
-                  options={locationData?.filter((item) => {
-                    return item.subunit.some((subunit) => {
-                      return subunit?.sync_id === watch("subunit_id")?.sync_id;
-                    });
-                  })}
-                  loading={isLocationLoading}
-                  size="small"
-                  getOptionLabel={(option) => option.location_code + " - " + option.location_name}
-                  isOptionEqualToValue={(option, value) => option.location_id === value.location_id}
-                  renderInput={(params) => (
-                    <TextField
-                      color="secondary"
-                      {...params}
-                      label="Location"
-                      error={!!errors?.location_id}
-                      helperText={errors?.location_id?.message}
-                    />
-                  )}
-                />
-
-                {/* <CustomAutoComplete
-                      name="account_title_id"
-                      disabled={edit ? false : transactionData?.view}
-                      control={control}
-                      options={accountTitleData}
-                      onOpen={() => (isAccountTitleSuccess ? null : accountTitleTrigger())}
-                      loading={isAccountTitleLoading}
-                      getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
-                      isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          color="secondary"
-                          label="Account Title  "
-                          error={!!errors?.account_title_id}
-                          helperText={errors?.account_title_id?.message}
-                        />
-                      )}
-                    /> */}
-              </Stack>
-
-              {/* <Stack gap={2}>
                 <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px" }}>
-                  TRANSFER TO DETAILS
-                </Typography> */}
-
-              {/* <CustomAutoComplete
-                  control={control}
-                  name="accountability"
-                  disabled={
-                    edit ? false : transactionData?.view
-                    // || watch("assets[0].fixed_asset_id") === null
-                  }
-                  options={["Personal Issued", "Common"]}
-                  isOptionEqualToValue={(option, value) => option === value}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      color="secondary"
-                      label="Accountability  "
-                      error={!!errors?.accountability}
-                      helperText={errors?.accountability?.message}
-                    />
-                  )}
-                  onChange={(_, value) => {
-                    setValue("accountable", null);
-                    setValue("receiver_id", null);
-                    return value;
-                  }}
-                />
-
-                {watch("accountability") === "Personal Issued" && (
-                  <CustomAutoComplete
-                    name="accountable"
-                    disabled={edit ? false : transactionData?.view}
-                    control={control}
-                    includeInputInList
-                    disablePortal
-                    filterOptions={filterOptions}
-                    options={userData}
-                    onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
-                    loading={isUserLoading}
-                    getOptionLabel={(option) => option?.full_id_number_full_name}
-                    isOptionEqualToValue={(option, value) =>
-                      option?.full_id_number_full_name === value?.full_id_number_full_name
-                    }
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        color="secondary"
-                        label="New Custodian"
-                        error={!!errors?.accountable?.message}
-                        helperText={errors?.accountable?.message}
-                      />
-                    )}
-                    onChange={(_, newValue) => {
-                      // console.log("New Custodian newValue: ", newValue);
-
-                      if (newValue) {
-                        setValue("receiver_id", newValue);
-                        // setValue("department_id", newValue.department);
-                        // setValue("company_id", newValue.company);
-                        // setValue("business_unit_id", newValue.business_unit);
-                        // setValue("unit_id", newValue.unit);
-                        // setValue("subunit_id", newValue.subunit);
-                        // setValue("location_id", newValue.location);
-                        // setValue("accountable", newValue);
-                      } else if (value === null) {
-                        setValue("receiver_id", null);
-                        // setValue("accountable", null);
-                      }
-                      return newValue;
-                    }}
-                  />
-                )}
-
-                <CustomAutoComplete
-                  name="receiver_id"
-                  disabled={
-                    edit ? false : transactionData?.view || watch("accountability") === "Personal Issued"
-                    //  ||
-                    // watch("assets[0].fixed_asset_id") === null
-                  }
-                  control={control}
-                  includeInputInList
-                  disablePortal
-                  filterOptions={filterOptions}
-                  options={userData}
-                  onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
-                  loading={isUserLoading}
-                  getOptionLabel={(option) => option?.full_id_number_full_name}
-                  isOptionEqualToValue={(option, value) =>
-                    option?.full_id_number_full_name === value?.full_id_number_full_name
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      color="secondary"
-                      label="Receiver"
-                      error={!!errors?.accountable?.message}
-                      helperText={errors?.accountable?.message}
-                    />
-                  )}
-                  // onChange={(_, newValue) => {
-                  //   // console.log("Receiver newValue: ", newValue);
-                  //   if (newValue) {
-                  //     setValue("receiver_id", newValue);
-                  //     setValue("department_id", newValue.department);
-                  //     setValue("company_id", newValue.company);
-                  //     setValue("business_unit_id", newValue.business_unit);
-                  //     setValue("unit_id", newValue.unit);
-                  //     setValue("subunit_id", newValue.subunit);
-                  //     setValue("location_id", newValue.location);
-                  //     // setValue("accountable", newValue);
-                  //   }
-                  //   return newValue;
-                  // }}
-                /> */}
-              {/* </Stack> */}
-
-              {/* {console.log(watch("receiver_id"))} */}
-
-              <Stack gap={2}>
-                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
-                  ACCOUNTING ENTRIES
+                  ATTACHMENTS
                 </Typography>
 
-                <CustomAutoComplete
-                  autoComplete
-                  name="depreciation_debit_id"
-                  disabled={edit ? false : transactionData?.view}
-                  control={control}
-                  options={accountTitleData}
-                  loading={isAccountTitleLoading}
-                  onOpen={() => (isAccountTitleSuccess ? null : accountTitleTrigger())}
-                  size="small"
-                  getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
-                  isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
-                  renderInput={(params) => (
-                    <TextField
-                      color="secondary"
-                      {...params}
-                      label="Depreciation Debit"
-                      error={!!errors?.depreciation_debit_id}
-                      helperText={errors?.depreciation_debit_id?.message}
+                <Stack flexDirection="row" gap={1} alignItems="center">
+                  {watch("attachments") !== null ? (
+                    <UpdateField label={"Evaluation Form"} value={watch("attachments")?.length} />
+                  ) : (
+                    <CustomMultipleAttachment
+                      control={control}
+                      name="attachments"
+                      disabled={
+                        edit ? false : transactionData?.view
+                        // || watch("assets[0].fixed_asset_id") === null
+                      }
+                      label="Evaluation Form (Optional)"
+                      inputRef={AttachmentRef}
+                      error={!!errors?.attachments?.message}
+                      helperText={errors?.attachments?.message}
+                      // requiredField
                     />
                   )}
-                />
+
+                  {watch("attachments") !== null && (!transactionData?.view || edit) && (
+                    <RemoveFile title="Evaluation Form" value="attachments" />
+                  )}
+                </Stack>
+                <Box mt="-13px" ml="10px">
+                  {watch("attachments")
+                    ? watch("attachments").map((item, index) => (
+                        <Typography
+                          fontSize="12px"
+                          fontWeight="bold"
+                          key={index}
+                          onClick={() => transactionData?.view && handleViewFile(item?.id)}
+                          sx={{
+                            cursor: transactionData?.view && "pointer",
+                            textDecoration: transactionData?.view && "underline",
+                            mb: 1,
+                          }}
+                          maxWidth={"265px"}
+                        >
+                          • {item.name}
+                        </Typography>
+                      ))
+                    : null}
+                </Box>
               </Stack>
-
-              <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px" }}>
-                ATTACHMENTS
-              </Typography>
-
-              <Stack flexDirection="row" gap={1} alignItems="center">
-                {watch("attachments") !== null ? (
-                  <UpdateField label={"Evaluation Form"} value={watch("attachments")?.length} requiredField />
-                ) : (
-                  <CustomMultipleAttachment
-                    control={control}
-                    name="attachments"
-                    disabled={
-                      edit ? false : transactionData?.view
-                      // || watch("assets[0].fixed_asset_id") === null
-                    }
-                    label="Evaluation Form"
-                    inputRef={AttachmentRef}
-                    error={!!errors?.attachments?.message}
-                    helperText={errors?.attachments?.message}
-                    requiredField
-                  />
-                )}
-
-                {watch("attachments") !== null && (!transactionData?.view || edit) && (
-                  <RemoveFile title="Evaluation Form" value="attachments" />
-                )}
-              </Stack>
-              <Box mt="-13px" ml="10px">
-                {watch("attachments")
-                  ? watch("attachments").map((item, index) => (
-                      <Typography fontSize="12px" fontWeight="bold" key={index}>
-                        {item.name}
-                      </Typography>
-                    ))
-                  : null}
-              </Box>
             </Stack>
-          </Stack>
+          )}
 
           {/* TABLE */}
           <Box className="request__table">
@@ -1641,6 +1496,7 @@ const AddTransfer = (props) => {
                     <TableCell className="tbl-cell">Index</TableCell>
                     <TableCell className="tbl-cell">Asset</TableCell>
                     <TableCell className="tbl-cell">Transfer To Details</TableCell>
+                    <TableCell className="tbl-cell">Accounting Entries</TableCell>
                     <TableCell className="tbl-cell">Accountability</TableCell>
                     <TableCell className="tbl-cell">Chart Of Accounts</TableCell>
                     <TableCell className="tbl-cell">Remaining Book Value</TableCell>
@@ -1682,7 +1538,7 @@ const AddTransfer = (props) => {
                                       ? []
                                       : vTagNumberCoordinatorData
                                   }
-                                  onOpen={() => fixedAssetCoordinatorTrigger({ subunit_id: subunit_id })}
+                                  onOpen={() => fixedAssetCoordinatorTrigger({ one_charging_id: one_charging_id })}
                                   loading={isVTagNumberCoordinatorLoading || isVTagNumberCoordinatorFetching}
                                   disabled={
                                     edit ? false : transactionData?.view || watch("location_id_coordinator") === null
@@ -1709,10 +1565,8 @@ const AddTransfer = (props) => {
                                       }}
                                     />
                                   )}
-                                  getOptionDisabled={
-                                    (option) => !!fields.find((item) => item?.fixed_asset_id?.id === option.id)
-                                    // ||
-                                    // option.transfer === 1
+                                  getOptionDisabled={(option) =>
+                                    !!fields.find((item) => item?.fixed_asset_id?.id === option.id)
                                   }
                                   onChange={(_, newValue) => {
                                     if (newValue) {
@@ -1725,15 +1579,16 @@ const AddTransfer = (props) => {
                                       );
                                       setValue(`assets.${index}.id`, newValue.id);
                                       setValue(`assets.${index}.created_at`, newValue.created_at);
-                                      setValue(`assets.${index}.company_id`, newValue.company?.company_name);
+                                      setValue(`assets.${index}.one_charging_id`, newValue.one_charging?.name);
+                                      setValue(`assets.${index}.company_id`, newValue.one_charging?.company_name);
                                       setValue(
                                         `assets.${index}.business_unit_id`,
-                                        newValue.business_unit?.business_unit_name
+                                        newValue.one_charging?.business_unit_name
                                       );
-                                      setValue(`assets.${index}.department_id`, newValue.department?.department_name);
-                                      setValue(`assets.${index}.unit_id`, newValue.unit?.unit_name);
-                                      setValue(`assets.${index}.sub_unit_id`, newValue.subunit?.subunit_name);
-                                      setValue(`assets.${index}.location_id`, newValue.location?.location_name);
+                                      setValue(`assets.${index}.department_id`, newValue.one_charging?.department_name);
+                                      setValue(`assets.${index}.unit_id`, newValue.one_charging?.unit_name);
+                                      setValue(`assets.${index}.sub_unit_id`, newValue.one_charging?.subunit_name);
+                                      setValue(`assets.${index}.location_id`, newValue.one_charging?.location_name);
                                       setValue(`assets.${index}.remaining_book_value`, newValue.remaining_book_value);
                                     } else {
                                       onChange(null);
@@ -1785,6 +1640,7 @@ const AddTransfer = (props) => {
                                   disabled={edit ? false : transactionData?.view}
                                   size="small"
                                   value={value}
+                                  // disableClearable
                                   filterOptions={filterOptions}
                                   getOptionLabel={(option) =>
                                     `(${option.vladimir_tag_number}) - ${option.asset_description}`
@@ -1797,7 +1653,7 @@ const AddTransfer = (props) => {
                                       {...params}
                                       label="Tag Number"
                                       multiline
-                                      maxRows={3}
+                                      maxRows={2}
                                       sx={{
                                         "& .MuiInputBase-inputMultiline": {
                                           minHeight: "10px",
@@ -1805,14 +1661,11 @@ const AddTransfer = (props) => {
                                       }}
                                     />
                                   )}
-                                  getOptionDisabled={
-                                    (option) => !!fields.find((item) => item?.fixed_asset_id?.id === option.id)
-                                    // ||
-                                    // option.transfer === 1
+                                  getOptionDisabled={(option) =>
+                                    !!fields.find((item) => item?.fixed_asset_id?.id === option.id)
                                   }
                                   onChange={(_, newValue) => {
                                     if (newValue) {
-                                      // onChange(newValue);
                                       // console.log("newValue: ", newValue);
                                       onChange(newValue);
                                       setValue(
@@ -1821,21 +1674,25 @@ const AddTransfer = (props) => {
                                       );
                                       setValue(`assets.${index}.id`, newValue.id);
                                       setValue(`assets.${index}.created_at`, newValue.created_at);
-                                      setValue(`assets.${index}.company_id`, newValue.company?.company_name);
+                                      setValue(`assets.${index}.depreciation_debit_id`, newValue.depreciation_debit);
+                                      setValue(`assets.${index}.one_charging_id`, newValue.one_charging?.name);
+                                      setValue(`assets.${index}.company_id`, newValue.one_charging?.company_name);
                                       setValue(
                                         `assets.${index}.business_unit_id`,
-                                        newValue.business_unit?.business_unit_name
+                                        newValue.one_charging?.business_unit_name
                                       );
-                                      setValue(`assets.${index}.department_id`, newValue.department?.department_name);
-                                      setValue(`assets.${index}.unit_id`, newValue.unit?.unit_name);
-                                      setValue(`assets.${index}.sub_unit_id`, newValue.subunit?.subunit_name);
-                                      setValue(`assets.${index}.location_id`, newValue.location?.location_name);
+                                      setValue(`assets.${index}.department_id`, newValue.one_charging?.department_name);
+                                      setValue(`assets.${index}.unit_id`, newValue.one_charging?.unit_name);
+                                      setValue(`assets.${index}.sub_unit_id`, newValue.one_charging?.subunit_name);
+                                      setValue(`assets.${index}.location_id`, newValue.one_charging?.location_name);
                                       setValue(`assets.${index}.remaining_book_value`, newValue.remaining_book_value);
                                     } else {
                                       onChange(null);
                                       setValue(`assets.${index}.asset_accountable`, "");
                                       setValue(`assets.${index}.remaining_book_value`, "");
                                       setValue(`assets.${index}.created_at`, null);
+                                      setValue(`assets.${index}.depreciation_debit_id`, null);
+                                      setValue(`assets.${index}.one_charging_id`, "");
                                       setValue(`assets.${index}.company_id`, "");
                                       setValue(`assets.${index}.business_unit_id`, "");
                                       setValue(`assets.${index}.department_id`, "");
@@ -1970,9 +1827,9 @@ const AddTransfer = (props) => {
                                   label="Accountability"
                                   error={!!errors?.accountability}
                                   helperText={errors?.accountability?.message}
-                                />
-                              )}
-                              onChange={(_, value) => {
+                                  />
+                                  )}
+                                  onChange={(_, value) => {
                                 setValue("accountable", null);
                                 setValue("receiver_id", null);
                                 return value;
@@ -1995,7 +1852,7 @@ const AddTransfer = (props) => {
                                           // watch(`assets.${index}.fixed_asset_id`) === null ||
                                           watch("location_id") === null
                                     }
-                                    onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
+                                    onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.unit_id })}
                                     loading={isUserLoading}
                                     filterOptions={filterOptions}
                                     getOptionLabel={(option) => option?.full_id_number_full_name}
@@ -2068,8 +1925,6 @@ const AddTransfer = (props) => {
                               />
                             )}
 
-                            {console.log("receiver_iddddd", watch(`assets.${index}.receiver_id`))}
-
                             {watch(`assets.${index}.accountability`) === "Common" ? (
                               <Controller
                                 control={control}
@@ -2088,7 +1943,9 @@ const AddTransfer = (props) => {
                                           watch("location_id") === null ||
                                           transactionData?.view
                                     }
-                                    onOpen={() => receiverAccountTrigger({ department: watch("department_id")?.id })}
+                                    onOpen={() =>
+                                      receiverAccountTrigger({ department: watch("department_id")?.department_id })
+                                    }
                                     loading={isReceiverLoading}
                                     filterOptions={filterOptions}
                                     getOptionLabel={(option) => option?.full_id_number_full_name}
@@ -2175,7 +2032,7 @@ const AddTransfer = (props) => {
                                           watch("location_id") === null ||
                                           transactionData?.view
                                     }
-                                    onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
+                                    onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.unit_id })}
                                     loading={isUserLoading}
                                     filterOptions={filterOptions}
                                     getOptionLabel={(option) => option?.full_id_number_full_name}
@@ -2262,7 +2119,7 @@ const AddTransfer = (props) => {
                               getOptionLabel={(option) => option?.full_id_number_full_name}
                               isOptionEqualToValue={(option, value) =>
                                 option?.full_id_number_full_name === value?.full_id_number_full_name
-                              }
+                                }
                               renderInput={(params) => (
                                 <TextField
                                   {...params}
@@ -2270,12 +2127,12 @@ const AddTransfer = (props) => {
                                   label="Receiver"
                                   error={!!errors?.accountable?.message}
                                   helperText={errors?.accountable?.message}
-                                />
-                              )}
+                                  />
+                                  )}
                               // onChange={(_, newValue) => {
                               //   // console.log("Receiver newValue: ", newValue);
                               //   if (newValue) {
-                              //     setValue("receiver_id", newValue);
+                                //     setValue("receiver_id", newValue);
                               //     setValue("department_id", newValue.department);
                               //     setValue("company_id", newValue.company);
                               //     setValue("business_unit_id", newValue.business_unit);
@@ -2288,6 +2145,63 @@ const AddTransfer = (props) => {
                               // }}
                             /> */}
                           </Stack>
+                        </TableCell>
+
+                        <TableCell className="tbl-cell">
+                          {console.log(`👀👀👀👀👀${index}`, watch(`assets.${index}.depreciation_debit_id`))}
+                          <CustomAutoComplete
+                            autoComplete
+                            name={`assets.${index}.depreciation_debit_id`}
+                            // disabled={edit ? false : transactionData?.view}
+                            optionalSolid
+                            control={control}
+                            freeSolo
+                            disabled
+                            options={accountTitleData || []}
+                            inputValue={
+                              watch(`assets.${index}.depreciation_debit_id`)
+                                ? `${watch(`assets.${index}.depreciation_debit_id`)?.account_title_code} - ${
+                                    watch(`assets.${index}.depreciation_debit_id`)?.account_title_name
+                                  }`
+                                : ""
+                            }
+                            // loading={isAccountTitleLoading}
+                            // onOpen={() => (isAccountTitleSuccess ? null : accountTitleTrigger())}
+                            size="small"
+                            getOptionLabel={(option) => `${option?.account_title_code} - ${option?.account_title_name}`}
+                            renderInput={(params) => (
+                              <TextField
+                                color="secondary"
+                                {...params}
+                                label="Depreciation Debit"
+                                error={!!errors?.depreciation_debit_id}
+                                helperText={errors?.depreciation_debit_id?.message}
+                                multiline
+                                maxRows={2}
+                                sx={{
+                                  "& .MuiInputBase-inputMultiline": {
+                                    minHeight: "10px",
+                                  },
+                                  ".MuiInputBase-root": {
+                                    borderRadius: "10px",
+                                    minHeight: "63px",
+                                  },
+                                  "& .MuiFormLabel-root": {
+                                    lineHeight: "43px", // Adjust based on the height of the input
+                                  },
+                                  "& .Mui-focused": {
+                                    top: "-10%", // Center vertically
+                                  },
+                                  "& .MuiFormLabel-filled": {
+                                    top: "-10%", // Center vertically
+                                  },
+                                  // ml: "8px",
+                                  minWidth: "220px",
+                                  maxWidth: "550px",
+                                }}
+                              />
+                            )}
+                          />
                         </TableCell>
 
                         <TableCell className="tbl-cell">
@@ -2329,6 +2243,35 @@ const AddTransfer = (props) => {
 
                         <TableCell className="tbl-cell">
                           <Stack width="250px" rowGap={0}>
+                            <TextField
+                              {...register(`assets.${index}.one_charging_id`)}
+                              variant="outlined"
+                              disabled
+                              type="text"
+                              size="small"
+                              sx={{
+                                backgroundColor: "transparent",
+                                border: "none",
+
+                                ml: "-10px",
+                                "& .MuiOutlinedInput-root": {
+                                  "& fieldset": {
+                                    border: "none",
+                                  },
+                                },
+                                "& .MuiInputBase-input": {
+                                  backgroundColor: "transparent",
+                                  fontWeight: "bold",
+                                  fontSize: "11px",
+                                  textOverflow: "ellipsis",
+                                },
+                                "& .Mui-disabled": {
+                                  color: "red",
+                                },
+                                marginTop: "-15px",
+                              }}
+                            />
+
                             <TextField
                               {...register(`assets.${index}.company_id`)}
                               variant="outlined"
