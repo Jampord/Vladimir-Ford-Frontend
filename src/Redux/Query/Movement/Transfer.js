@@ -127,6 +127,14 @@ export const transferApi = createApi({
       }),
       invalidatesTags: ["Transfer"],
     }),
+
+    getTransferReceivingMonitoringApi: builder.query({
+      query: (params) => ({
+        url: `transfer-receiver`,
+        params,
+      }),
+      providesTags: ["Transfer"],
+    }),
   }),
 });
 
@@ -150,4 +158,5 @@ export const {
   usePatchTransferReceivingApiMutation,
   usePatchVoidTransferApiMutation,
   usePatchRejectReceivingTransferApiMutation,
+  useGetTransferReceivingMonitoringApiQuery,
 } = transferApi;
