@@ -316,6 +316,29 @@ const ViewRequestReleasing = ({ view }) => {
                   </Box>
                 </Box>
               </Card>
+
+              <Card className="tableCard__cardCapex" sx={{ bgcolor: "white", py: "10.5px" }}>
+                <Box color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1rem" }}>
+                  ATOE Accounting Entries
+                </Box>
+                <Box>
+                  <Box className="tableCard__properties">
+                    Debit:
+                    <Typography className="tableCard__info" fontSize="14px">
+                      {`${releasingData?.atoe_debit?.account_title_code} - ${releasingData?.atoe_debit?.account_title_name}` ||
+                        "-"}
+                    </Typography>
+                  </Box>
+
+                  <Box className="tableCard__properties">
+                    Credit:
+                    <Typography className="tableCard__info" fontSize="14px">
+                      {`${releasingData?.atoe_credit?.account_title_code} - ${releasingData?.atoe_credit?.account_title_name}` ||
+                        "-"}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Card>
             </Box>
 
             <Box className="tableCard__wrapper" sx={{ pb: "2px" }}>
