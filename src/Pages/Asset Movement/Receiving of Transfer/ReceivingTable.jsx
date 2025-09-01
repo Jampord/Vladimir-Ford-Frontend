@@ -40,6 +40,8 @@ import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManage
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
 import RejectTransfer from "./component/RejectTransfer";
+import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
+import { useLazyGetNotificationApiQuery } from "../../../Redux/Query/Notification";
 
 const schema = yup.object().shape({
   transfer_ids: yup.array(),
@@ -54,6 +56,18 @@ const ReceivingTable = ({ received }) => {
   const dispatch = useDispatch();
 
   const dialog = useSelector((state) => state.booleanState.dialog);
+
+  const perPageHandler = (e) => {
+    setPage(1);
+    setPerPage(parseInt(e.target.value));
+  };
+
+  const pageHandler = (_, page) => {
+    // console.log(page + 1);
+    setPage(page + 1);
+  };
+
+  const [trigger, { refetch: notifRefetch }] = useLazyGetNotificationApiQuery();
 
   const {
     data: receivingData,
@@ -139,7 +153,6 @@ const ReceivingTable = ({ received }) => {
             <Autocomplete
               multiple
               freeSolo
-              id="assets-readOnly"
               options={receivingData?.data
                 ?.filter((item) => watch("transfer_ids").includes(item.id.toString()))
                 .map((option) => option.vladimir_tag_number + " - " + option.description)}
@@ -150,10 +163,11 @@ const ReceivingTable = ({ received }) => {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label={`To be Received ${watch("transfer_ids").length >= 1 ? " Asset" : " Assets"}`}
+                  sx={{ height: "100px", mt: "5px" }}
+                  label={`To be Received ${watch("transfer_ids").length <= 1 ? " Asset" : " Assets"}`}
                 />
               )}
-              sx={{ mt: "15px" }}
+              sx={{ mt: "15px", maxHeight: "160px", overflowY: "auto" }}
             />
           </Box>
         ),
@@ -162,7 +176,7 @@ const ReceivingTable = ({ received }) => {
           try {
             dispatch(onLoading());
             const result = await receiveTransferApi({ transfer_ids: watch("transfer_ids").map(Number) }).unwrap();
-
+            trigger();
             dispatch(
               openToast({
                 message: result.message,
@@ -263,7 +277,7 @@ const ReceivingTable = ({ received }) => {
                       <TableCell className="tbl-cell">Custodian</TableCell>
                       <TableCell className="tbl-cell">Chart Of Account </TableCell>
                       <TableCell className="tbl-cell">Asset Status</TableCell>
-                      <TableCell className="tbl-cell">Date Requested</TableCell>
+                      <TableCell className="tbl-cell">Date Created</TableCell>
                       {/* <TableCell className="tbl-cell">Action</TableCell> */}
                     </TableRow>
                   </TableHead>
@@ -333,22 +347,35 @@ const ReceivingTable = ({ received }) => {
                               </TableCell>
                               <TableCell>
                                 <Typography fontSize={10} color="gray">
-                                  ({data.company_code}) - {data.company}
+                                  ({data?.one_charging?.code}) - {data?.one_charging?.name}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data.business_unit_code}) - ${data.business_unit}`}
+                                  ({data?.one_charging?.company_code || data.company_code}) -{" "}
+                                  {data?.one_charging?.company_name || data.company}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data?.department_code}) - ${data?.department}`}
+                                  {`(${data?.one_charging?.business_unit_code || data.business_unit_code}) - ${
+                                    data?.one_charging?.business_unit_name || data.business_unit
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data?.unit_code}) - ${data?.unit}`}
+                                  {`(${data?.one_charging?.department_code || data?.department_code}) - ${
+                                    data?.one_charging?.department_name || data?.department
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  {`(${data?.sub_unit_code}) - ${data?.sub_unit}`}
+                                  {`(${data?.one_charging?.unit_code || data?.unit_code}) - ${
+                                    data?.one_charging?.unit_name || data?.unit
+                                  }`}
                                 </Typography>
                                 <Typography fontSize={10} color="gray">
-                                  ({data?.location_code}) - {data?.location}
+                                  {`(${data?.one_charging?.sub_unit_code || data?.sub_unit_code}) - ${
+                                    data?.one_charging?.sub_unit_name || data?.sub_unit
+                                  }`}
+                                </Typography>
+                                <Typography fontSize={10} color="gray">
+                                  ({data?.one_charging?.location_code || data?.location_code}) -{" "}
+                                  {data?.one_charging?.location_name || data?.location}
                                 </Typography>
                               </TableCell>
                               <TableCell>
@@ -362,6 +389,15 @@ const ReceivingTable = ({ received }) => {
                   </TableBody>
                 </Table>
               </TableContainer>
+
+              <CustomTablePagination
+                total={receivingData?.total}
+                success={receivingSuccess}
+                current_page={receivingData?.current_page}
+                per_page={receivingData?.per_page}
+                onPageChange={pageHandler}
+                onRowsPerPageChange={perPageHandler}
+              />
             </Box>
           </Box>
         </>
