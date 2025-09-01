@@ -114,6 +114,7 @@ import {
 } from "../../../Redux/Query/Masterlist/YmirCoa/SmallTools";
 import {
   useGetFixedAssetSmallToolsAllApiQuery,
+  useLazyGetFixedAssetAllParamsApiQuery,
   useLazyGetFixedAssetSmallToolsAllApiQuery,
 } from "../../../Redux/Query/FixedAsset/FixedAssets";
 import { useDownloadAttachment } from "../../../Hooks/useDownloadAttachment";
@@ -187,7 +188,7 @@ const schema = yup.object().shape({
   brand: yup.string().label("Brand"),
   quantity: yup.number().required().label("Quantity"),
   uom_id: yup.object().required().label("UOM").typeError("UOM is a required field"),
-  ship_to_id: yup.object().required().label("Ship To").typeError("Ship To is a required field"),
+  // ship_to_id: yup.object().required().label("Ship To").typeError("Ship To is a required field"),
   cellphone_number: yup.string().nullable().label("Cellphone Number"),
   additional_info: yup.string().required().label("Capex Num / Unit Charging"),
   letter_of_request: yup
@@ -241,7 +242,7 @@ const AddRequisition = (props) => {
     cellphone_number: "",
     quantity: 1,
     uom_id: null,
-    ship_to_id: null,
+    // ship_to: null,
     additional_info: "",
 
     letter_of_request: null,
@@ -546,6 +547,18 @@ const AddRequisition = (props) => {
       refetch: fixedAssetSmallToolsApiRefetch,
     },
   ] = useLazyGetFixedAssetSmallToolsAllApiQuery();
+  const [
+    fixedAssetReplacementTrigger,
+    {
+      data: fixedAssetReplacementApiData = [],
+      isLoading: fixedAssetReplacementApiLoading,
+      isSuccess: fixedAssetReplacementApiSuccess,
+      isFetching: fixedAssetReplacementApiFetching,
+      isError: fixedAssetReplacementApiError,
+      error: fixedAssetReplacementErrorData,
+      refetch: fixedAssetReplacementApiRefetch,
+    },
+  ] = useLazyGetFixedAssetAllParamsApiQuery();
 
   // console.log("fixedAssetSmallToolsApiData", fixedAssetSmallToolsApiData);
 
@@ -657,7 +670,7 @@ const AddRequisition = (props) => {
       cellphone_number: "",
       quantity: 1,
       uom_id: null,
-      ship_to_id: null,
+      // ship_to_id: null,
       additional_info: "",
 
       letter_of_request: null,
@@ -675,8 +688,6 @@ const AddRequisition = (props) => {
     !transactionData && setDisable(false);
     // deleteAllRequest();
   }, []);
-
-  console.log("userCoa", userCoa);
 
   useEffect(() => {
     if (!transactionData) {
@@ -737,7 +748,7 @@ const AddRequisition = (props) => {
       setValue("date_needed", dateNeededFormat);
       setValue("quantity", updateRequest?.quantity);
       setValue("uom_id", updateRequest?.unit_of_measure);
-      setValue("ship_to_id", updateRequest?.ship_to_id);
+      // setValue("ship_to_id", updateRequest?.ship_to);
       setValue("brand", updateRequest?.brand);
       setValue("cellphone_number", cellphoneNumber);
       setValue("additional_info", updateRequest?.additional_info);
@@ -853,7 +864,7 @@ const AddRequisition = (props) => {
       brand: formData?.brand?.toString(),
       quantity: formData?.quantity?.toString(),
       uom_id: formData?.uom_id?.id?.toString(),
-      ship_to_id: formData?.ship_to_id?.id?.toString(),
+      // ship_to_id: formData?.ship_to_id?.id?.toString(),
       additional_info: formData?.additional_info?.toString(),
 
       letter_of_request: updateRequest && attachmentValidation("letter_of_request", formData),
@@ -876,7 +887,17 @@ const AddRequisition = (props) => {
     // validation if the requestor changes the COA while the item in the container is different
     // from the item in the input field
     const validation = () => {
+      console.log(
+        "validation",
+        transactionData,
+        addRequestAllApi,
+        watch("department_id"),
+        watch("unit_id"),
+        watch("subunit_id"),
+        watch("location_id")
+      );
       const coaValidation = (name, value) => {
+        console.log("coaValidation", name, value);
         transactionData && transactionDataApi?.every((item) => item?.[name]?.id !== watch(value)?.id);
       };
 
@@ -890,16 +911,28 @@ const AddRequisition = (props) => {
           false
         );
       } else {
-        if (addRequestAllApi.every((item) => item?.department?.id !== watch("department_id")?.id)) {
+        if (
+          addRequestAllApi.every(
+            (item) => item?.department?.id !== (watch("department_id")?.department_id || watch("department_id")?.id)
+          )
+        ) {
           return true;
         }
-        if (addRequestAllApi.every((item) => item?.unit?.id !== watch("unit_id")?.id)) {
+        if (addRequestAllApi.every((item) => item?.unit?.id !== (watch("unit_id")?.unit_id || watch("unit_id")?.id))) {
           return true;
         }
-        if (addRequestAllApi.every((item) => item?.subunit?.id !== watch("subunit_id")?.id)) {
+        if (
+          addRequestAllApi.every(
+            (item) => item?.subunit?.id !== (watch("subunit_id")?.subunit_id || watch("subunit_id")?.id)
+          )
+        ) {
           return true;
         }
-        if (addRequestAllApi.every((item) => item?.location?.id !== watch("location_id")?.id)) {
+        if (
+          addRequestAllApi.every(
+            (item) => item?.location?.id !== (watch("location_id")?.location_id || watch("location_id")?.id)
+          )
+        ) {
           return true;
         }
         return false;
@@ -992,7 +1025,7 @@ const AddRequisition = (props) => {
                           cellphone_number: "",
                           quantity: 1,
                           uom_id: null,
-                          ship_to_id: null,
+                          // ship_to_id: null,
                           additional_info: "",
 
                           letter_of_request: null,
@@ -1091,7 +1124,7 @@ const AddRequisition = (props) => {
                     cellphone_number: "",
                     quantity: 1,
                     uom_id: null,
-                    ship_to_id: null,
+                    // ship_to_id: null,
                     additional_info: "",
 
                     letter_of_request: null,
@@ -1567,7 +1600,7 @@ const AddRequisition = (props) => {
       date_needed,
       quantity,
       unit_of_measure,
-      ship_to,
+      // ship_to,
       brand,
       cellphone_number,
       additional_info,
@@ -1609,7 +1642,7 @@ const AddRequisition = (props) => {
       brand,
       quantity,
       unit_of_measure,
-      ship_to_id: ship_to,
+      // ship_to,
       cellphone_number,
       additional_info,
 
@@ -1651,7 +1684,7 @@ const AddRequisition = (props) => {
       cellphone_number: "",
       quantity: 1,
       uom_id: null,
-      ship_to_id: null,
+      // ship_to: null,
       additional_info: "",
 
       letter_of_request: null,
@@ -2261,6 +2294,66 @@ const AddRequisition = (props) => {
                     }}
                   />
                 )}
+
+              {watch("item_status") === "Replacement" &&
+                watch("type_of_request_id")?.type_of_request_name === "Asset" && (
+                  <CustomAutoComplete
+                    name="fixed_asset_id"
+                    hasRequest={hasRequest && true}
+                    control={control}
+                    options={fixedAssetReplacementApiData || []}
+                    onOpen={() =>
+                      // fixedAssetReplacementApiSuccess
+                      //   ? null
+                      //   :
+                      fixedAssetReplacementTrigger({
+                        one_charging_id: watch("one_charging_id")?.id,
+                        for_replacement: 1,
+                      })
+                    }
+                    loading={fixedAssetReplacementApiLoading}
+                    disabled={updateRequest && disable}
+                    size="small"
+                    getOptionLabel={(option) =>
+                      `${option?.is_printable === 0 ? "No Vladimir Tag" : option?.vladimir_tag_number} - ${
+                        option?.asset_description
+                      }`
+                    }
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    renderInput={(params) => (
+                      <TextField
+                        color="secondary"
+                        {...params}
+                        label="Fixed Asset"
+                        error={!!errors?.fixed_asset_id}
+                        helperText={errors?.fixed_asset_id?.message}
+                        multiline
+                        maxRows={3}
+                      />
+                    )}
+                    onChange={(_, value) => {
+                      console.log("value", value);
+                      if (value) {
+                        setValue("small_tool_id", value?.small_tools);
+                        setValue("asset_description", value?.asset_description);
+                        setValue(
+                          "asset_specification",
+                          value.small_tools.length === 0
+                            ? value?.small_tools[0]?.description || value?.asset_specification
+                            : value.small_tools.map((items) => ` ${items.description}-${items.specification}`).join()
+                        );
+                      } else {
+                        setValue("small_tool_id", null);
+                        setValue("small_tool_item", null);
+
+                        setValue("asset_description", "");
+                        setValue("asset_specification", "");
+                      }
+                      return value;
+                    }}
+                  />
+                )}
+
               {/* {watch("type_of_request_id")?.type_of_request_name === "Small Tools" && (
                 <CustomAutoComplete
                   name="small_tool_id"
@@ -2308,8 +2401,8 @@ const AddRequisition = (props) => {
                 type="text"
                 disabled={
                   (updateRequest && disable) ||
-                  (watch("type_of_request_id")?.type_of_request_name === "Small Tools" &&
-                    watch("item_status") === "Replacement")
+                  // watch("type_of_request_id")?.type_of_request_name === "Small Tools" &&
+                  watch("item_status") === "Replacement"
                 }
                 allowSpecialCharacters
                 error={!!errors?.asset_description}
@@ -2326,8 +2419,8 @@ const AddRequisition = (props) => {
                 type="text"
                 disabled={
                   (updateRequest && disable) ||
-                  (watch("type_of_request_id")?.type_of_request_name === "Small Tools" &&
-                    watch("item_status") === "Replacement")
+                  // watch("type_of_request_id")?.type_of_request_name === "Small Tools" &&
+                  watch("item_status") === "Replacement"
                 }
                 allowSpecialCharacters
                 error={!!errors?.asset_specification}
@@ -2441,12 +2534,13 @@ const AddRequisition = (props) => {
                   />
                 )}
               />
-              <CustomAutoComplete
+              {/* <CustomAutoComplete
                 control={control}
                 hasRequest={hasRequest && true}
                 name="ship_to_id"
                 options={shipToData || []}
                 onOpen={() => (isShipToSuccess ? null : shipToTrigger())}
+                onBlur={() => handleInputValidation("ship_to_id", "ship_to.id", "ship_to")}
                 loading={isShipToLoading}
                 disabled={updateRequest && disable}
                 getOptionLabel={(option) => {
@@ -2462,7 +2556,7 @@ const AddRequisition = (props) => {
                     helperText={errors?.ship_to_id?.message}
                   />
                 )}
-              />
+              /> */}
               <CustomPatternField
                 control={control}
                 name="cellphone_number"
@@ -2645,18 +2739,26 @@ const AddRequisition = (props) => {
 
   // validation for the acquisition details and warehouse
   const handleInputValidation = (watchItem, data, name) => {
+    const isTransactionData = Boolean(transactionData);
+
+    const isNested = data.includes(".");
+    const keys = data.split(".");
+    let value = isTransactionData ? updateRequest : addRequestAllApi[0];
+
+    for (const key of keys) {
+      value = value?.[key]; // optional chaining for safety
+    }
     const watchData = watch(`${watchItem}`);
     const isWatchDataEmpty = watchItem === "";
-    const isTransactionData = Boolean(transactionData);
     const isDataAvailable = isTransactionData ? transactionDataApi.length > 0 : addRequestAllApi.length > 0;
-    const currentData = isTransactionData ? updateRequest?.[data] : addRequestAllApi[0]?.[data];
+    const currentData = isTransactionData ? updateRequest?.[data] || value : addRequestAllApi[0]?.[data] || value;
     const newData = isTransactionData ? updateRequest?.[name] : addRequestAllApi[0]?.[name];
 
     if (isWatchDataEmpty || !isDataAvailable) {
       return null;
     }
 
-    if (currentData !== (watchData || watchData?.id)) {
+    if (currentData !== (isNested ? watchData?.id : watchData)) {
       return dispatch(
         openConfirm({
           icon: Warning,
@@ -2728,8 +2830,6 @@ const AddRequisition = (props) => {
       </>
     );
   };
-
-  console.log("watch", watch("ship_to_id"));
 
   // for the timeline view/colors
   const transactionStatus = (data) => {
@@ -2845,9 +2945,9 @@ const AddRequisition = (props) => {
             startIcon={<ArrowBackIosRounded color="secondary" />}
             onClick={() => {
               transactionData?.requestMonitoring
-                ? navigate("/request-monitoring")
+                ? navigate("/monitoring/request-monitoring")
                 : transactionData?.warehouseMonitoring
-                ? navigate("/warehouse-monitoring")
+                ? navigate("/monitoring/warehouse-monitoring")
                 : navigate("/asset-requisition/requisition");
               // navigate(-1);
               // deleteAllRequest();
@@ -2890,9 +2990,8 @@ const AddRequisition = (props) => {
                       <TableCell className="tbl-cell">{transactionData ? "Ref No." : "Index"}</TableCell>
                       <TableCell className="tbl-cell">Type of Request</TableCell>
                       <TableCell className="tbl-cell">Acquisition Details</TableCell>
-                      {/* <TableCell className="tbl-cell">Attachment Type</TableCell> */}
                       <TableCell className="tbl-cell">Warehouse</TableCell>
-                      <TableCell className="tbl-cell">Ship To</TableCell>
+                      {/* <TableCell className="tbl-cell">Ship To</TableCell> */}
                       <TableCell className="tbl-cell">Accounting Entries</TableCell>
                       <TableCell className="tbl-cell">Chart of Accounts</TableCell>
                       <TableCell className="tbl-cell">Accountability</TableCell>
@@ -2985,31 +3084,20 @@ const AddRequisition = (props) => {
                             <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
                               {data.acquisition_details}
                             </TableCell>
-                            {/* <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
-                              {data.attachment_type}
-                            </TableCell> */}
                             <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
                               {data.warehouse?.warehouse_name}
                             </TableCell>
 
-                            <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
+                            {/* <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
                               <Typography fontSize={12}>{data.ship_to?.location}</Typography>
                               <Typography fontSize={11}>{data.ship_to?.address}</Typography>
-                            </TableCell>
+                            </TableCell> */}
 
                             <TableCell className="tbl-cell-category capitalized">
                               <Typography fontSize={11} color="secondary.light" noWrap>
                                 Inital Debit : ({data.initial_debit?.account_title_code})-
                                 {data.initial_debit?.account_title_name}
                               </Typography>
-                              {/* <Typography fontSize={11} color="secondary.light" noWrap>
-                                Inital Credit : ({data.initial_credit?.account_title_code})-{" "}
-                                {data.initial_credit?.account_title_name}
-                              </Typography>
-                              <Typography fontSize={11} color="secondary.light" noWrap>
-                                Depreciation Debit : ({data.depreciation_debit?.account_title_code})-
-                                {data.depreciation_debit?.account_title_name}
-                              </Typography> */}
                               <Typography fontSize={11} color="secondary.light" noWrap>
                                 Depreciation Credit : ({data.depreciation_credit?.account_title_code})-{" "}
                                 {data.depreciation_credit?.account_title_name}
@@ -3052,9 +3140,6 @@ const AddRequisition = (props) => {
                                   data.one_charging?.location_name || data.location?.location_name
                                 }`}
                               </Typography>
-                              {/* <Typography fontSize={10} color="gray">
-                                {`(${data.account_title?.account_title_code}) - ${data.account_title?.account_title_name}`}
-                              </Typography> */}
                             </TableCell>
 
                             <TableCell onClick={() => handleShowItems(data)} className="tbl-cell">
@@ -3150,14 +3235,7 @@ const AddRequisition = (props) => {
                                 textOverflow="ellipsis"
                                 color="secondary.main"
                               >
-                                <Tooltip
-                                  title={data.additional_info}
-                                  placement="top-start"
-                                  arrow
-                                  // slots={{
-                                  //   transition: Zoom,
-                                  // }}
-                                >
+                                <Tooltip title={data.additional_info} placement="top-start" arrow>
                                   {data.additional_info}
                                 </Tooltip>
                               </Typography>
@@ -3173,19 +3251,6 @@ const AddRequisition = (props) => {
                                     <Typography
                                       sx={attachmentSx}
                                       onClick={() => handleViewFile(data?.attachments?.letter_of_request?.id)}
-                                      // onClick={() => {
-                                      //   data.attachments.letter_of_request.file_name.includes("pdf") ||
-                                      //   data.attachments.letter_of_request.file_name.includes("jpg") ||
-                                      //   data.attachments.letter_of_request.file_name.includes("jpeg") ||
-                                      //   data.attachments.letter_of_request.file_name.includes("svg") ||
-                                      //   data.attachments.letter_of_request.file_name.includes("png")
-                                      //     ? handleOpenDrawer({
-                                      //         value: data.attachments.letter_of_request,
-                                      //         data: data,
-                                      //         name: "letter_of_request",
-                                      //       })
-                                      //     : handleDownloadAttachment({ value: "letter_of_request", id: data?.id });
-                                      // }}
                                     >
                                       {data?.attachments?.letter_of_request?.file_name}
                                     </Typography>
@@ -3202,19 +3267,6 @@ const AddRequisition = (props) => {
                                     <Typography
                                       sx={attachmentSx}
                                       onClick={() => handleViewFile(data?.attachments?.quotation?.id)}
-                                      // onClick={() => {
-                                      //   data.attachments.quotation.file_name.includes("pdf") ||
-                                      //   data.attachments.quotation.file_name.includes("jpg") ||
-                                      //   data.attachments.quotation.file_name.includes("jpeg") ||
-                                      //   data.attachments.quotation.file_name.includes("svg") ||
-                                      //   data.attachments.quotation.file_name.includes("png")
-                                      //     ? handleOpenDrawer({
-                                      //         value: data.attachments.quotation,
-                                      //         data: data,
-                                      //         name: "quotation",
-                                      //       })
-                                      //     : handleDownloadAttachment({ value: "quotation", id: data?.id });
-                                      // }}
                                     >
                                       {data?.attachments?.quotation?.file_name}
                                     </Typography>
@@ -3231,19 +3283,6 @@ const AddRequisition = (props) => {
                                     <Typography
                                       sx={attachmentSx}
                                       onClick={() => handleViewFile(data?.attachments?.specification_form?.id)}
-                                      // onClick={() => {
-                                      //   data.attachments.specification_form.file_name.includes("pdf") ||
-                                      //   data.attachments.specification_form.file_name.includes("jpg") ||
-                                      //   data.attachments.specification_form.file_name.includes("jpeg") ||
-                                      //   data.attachments.specification_form.file_name.includes("svg") ||
-                                      //   data.attachments.specification_form.file_name.includes("png")
-                                      //     ? handleOpenDrawer({
-                                      //         value: data.attachments.specification_form,
-                                      //         data: data,
-                                      //         name: "specification_form",
-                                      //       })
-                                      //     : handleDownloadAttachment({ value: "specification_form", id: data?.id });
-                                      // }}
                                     >
                                       {data?.attachments?.specification_form?.file_name}
                                     </Typography>
@@ -3260,19 +3299,6 @@ const AddRequisition = (props) => {
                                     <Typography
                                       sx={attachmentSx}
                                       onClick={() => handleViewFile(data?.attachments?.tool_of_trade?.id)}
-                                      // onClick={() => {
-                                      //   data.attachments.tool_of_trade.file_name.includes("pdf") ||
-                                      //   data.attachments.tool_of_trade.file_name.includes("jpg") ||
-                                      //   data.attachments.tool_of_trade.file_name.includes("jpeg") ||
-                                      //   data.attachments.tool_of_trade.file_name.includes("svg") ||
-                                      //   data.attachments.tool_of_trade.file_name.includes("png")
-                                      //     ? handleOpenDrawer({
-                                      //         value: data.attachments.tool_of_trade,
-                                      //         data: data,
-                                      //         name: "tool_of_trade",
-                                      //       })
-                                      //     : handleDownloadAttachment({ value: "tool_of_trade", id: data?.id });
-                                      // }}
                                     >
                                       {data?.attachments?.tool_of_trade?.file_name}
                                     </Typography>
@@ -3289,19 +3315,6 @@ const AddRequisition = (props) => {
                                     <Typography
                                       sx={attachmentSx}
                                       onClick={() => handleViewFile(data?.attachments?.other_attachments?.id)}
-                                      // onClick={() => {
-                                      //   data.attachments.other_attachments.file_name.includes("pdf") ||
-                                      //   data.attachments.other_attachments.file_name.includes("jpg") ||
-                                      //   data.attachments.other_attachments.file_name.includes("jpeg") ||
-                                      //   data.attachments.other_attachments.file_name.includes("svg") ||
-                                      //   data.attachments.other_attachments.file_name.includes("png")
-                                      //     ? handleOpenDrawer({
-                                      //         value: data.attachments.other_attachments,
-                                      //         data: data,
-                                      //         name: "other_attachments",
-                                      //       })
-                                      //     : handleDownloadAttachment({ value: "other_attachments", id: data?.id });
-                                      // }}
                                     >
                                       {data?.attachments?.other_attachments?.file_name}
                                     </Typography>
@@ -3454,116 +3467,6 @@ const AddRequisition = (props) => {
         }}
       >
         <ViewItemRequest data={itemData} />
-      </Dialog>
-
-      <Dialog
-        open={drawer}
-        TransitionComponent={Grow}
-        PaperProps={{ sx: { borderRadius: "10px" } }}
-        onClose={handleCloseDrawer}
-        fullScreen
-      >
-        <Stack alignContent="center" justifyContent="center" height="93vh">
-          {image === true ? (
-            <img
-              src={base64}
-              style={{
-                display: "flex",
-                maxWidth: "100vw",
-                maxHeight: "93vh",
-                transform: `scale(${scale})`,
-                transformOrigin: "center center",
-                transition: "transform 0.3s ease",
-                alignContent: "center",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto",
-                border: "0px solid black",
-              }}
-              title="View Attachment"
-            />
-          ) : (
-            <iframe
-              src={base64}
-              style={{
-                display: "flex",
-                width: "100%",
-                height: "100%",
-                alignContent: "center",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "0 auto",
-                // border: "1px solid black",
-              }}
-              title="View Attachment"
-            />
-          )}
-        </Stack>
-
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            justifyContent: "space-between",
-            backgroundColor: "white",
-            zIndex: 1,
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            padding: "5px 30px 5px 0",
-            borderTop: image === true ? "1px solid #000" : null,
-          }}
-        >
-          <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-start" }} />
-          {image && (
-            <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
-              <Button
-                variant="contained"
-                color="secondary"
-                size="medium"
-                onClick={handleZoomOut}
-                startIcon={<ZoomOut color="primary" />}
-              >
-                {!isSmallScreen ? "-" : "Zoom Out"}
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                size="medium"
-                onClick={handleZoomIn}
-                startIcon={<ZoomIn color="primary" />}
-              >
-                {!isSmallScreen ? "+" : "Zoom In"}
-              </Button>
-            </Box>
-          )}
-
-          <Box sx={{ flex: 1, display: "flex", justifyContent: "flex-end" }}>
-            <DialogActions>
-              <Button
-                variant="outlined"
-                // size="small"
-                color="secondary"
-                onClick={handleCloseDrawer}
-                sx={{ backgroundColor: "white" }}
-              >
-                Close
-              </Button>
-
-              <Button
-                variant="contained"
-                // size="small"
-                color="secondary"
-                startIcon={<Download color="primary" />}
-                onClick={() => handleDownloadAttachment({ value: name, id: DValue?.id })}
-              >
-                Download
-              </Button>
-            </DialogActions>
-          </Box>
-        </Box>
       </Dialog>
     </>
   );
