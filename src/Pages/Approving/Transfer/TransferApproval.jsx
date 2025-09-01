@@ -24,9 +24,10 @@ const TransferApproving = () => {
   }, [notifData]);
 
   const handleChange = (event, newValue) => {
-    permissions.includes("final-approving")
-      ? dispatch(setTransferApprovalTabValue(newValue))
-      : dispatch(setTransferSingleApprovalTabValue(newValue));
+    // permissions.includes("final-approving")
+    //   ? dispatch(setTransferApprovalTabValue(newValue))
+    //   :
+    dispatch(setTransferSingleApprovalTabValue(newValue));
   };
 
   return (
@@ -36,46 +37,47 @@ const TransferApproving = () => {
       </Typography>
 
       <Box>
-        {permissions.includes("final-approving") ? (
-          <TabContext value={value}>
-            <Tabs onChange={handleChange} value={value}>
-              <Tab
-                label={
-                  <Badge color="error" badgeContent={notifData?.toTransferApproveCount}>
-                    First Approving
-                  </Badge>
-                }
-                value="1"
-                className={value === "1" ? "tab__background" : null}
-              />
-              <Tab
-                label={
-                  <Badge color="error" badgeContent={notifData?.toTransferFaApproval}>
-                    Second Approving
-                  </Badge>
-                }
-                value="2"
-                className={value === "2" ? "tab__background" : null}
-              />
+        {
+          // permissions.includes("final-approving") ? (
+          //   <TabContext value={value}>
+          //     <Tabs onChange={handleChange} value={value}>
+          //       <Tab
+          //         label={
+          //           <Badge color="error" badgeContent={notifData?.toTransferApproveCount}>
+          //             First Approving
+          //           </Badge>
+          //         }
+          //         value="1"
+          //         className={value === "1" ? "tab__background" : null}
+          //       />
+          //       <Tab
+          //         label={
+          //           <Badge color="error" badgeContent={notifData?.toTransferFaApproval}>
+          //             Second Approving
+          //           </Badge>
+          //         }
+          //         value="2"
+          //         className={value === "2" ? "tab__background" : null}
+          //       />
 
-              <Tab label="Approved Transfer" value="3" className={value === "3" ? "tab__background" : null} />
-            </Tabs>
+          //       <Tab label="Approved Transfer" value="3" className={value === "3" ? "tab__background" : null} />
+          //     </Tabs>
 
-            <TabPanel sx={{ p: 0 }} value="1" index="1">
-              <FinalApprovalTransfer />
-            </TabPanel>
+          //     <TabPanel sx={{ p: 0 }} value="1" index="1">
+          //       <FinalApprovalTransfer />
+          //     </TabPanel>
 
-            <TabPanel sx={{ p: 0 }} value="2" index="2">
-              <FinalApprovalTransfer final />
-            </TabPanel>
+          //     <TabPanel sx={{ p: 0 }} value="2" index="2">
+          //       <FinalApprovalTransfer final />
+          //     </TabPanel>
 
-            <TabPanel sx={{ p: 0 }} value="3" index="3">
-              <ApprovedTransfer />
-            </TabPanel>
-          </TabContext>
-        ) : (
+          //     <TabPanel sx={{ p: 0 }} value="3" index="3">
+          //       <ApprovedTransfer />
+          //     </TabPanel>
+          //   </TabContext>
+          // ) :
           <TabContext value={tabValue}>
-            <Tabs onChange={handleChange} value={tabValue}>
+            <Tabs onChange={handleChange} value={tabValue} variant="scrollable" scrollButtons="auto">
               <Tab
                 label={
                   <Badge color="error" badgeContent={notifData?.toTransferApproveCount}>
@@ -97,7 +99,7 @@ const TransferApproving = () => {
               <ApprovedTransfer />
             </TabPanel>
           </TabContext>
-        )}
+        }
       </Box>
     </Box>
   );
