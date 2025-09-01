@@ -246,6 +246,14 @@ const FullyDepreciated = () => {
                                   Depreciation Credit : ({data.depreciation_credit?.account_title_code})-{" "}
                                   {data.depreciation_credit?.account_title_name}
                                 </Typography>
+                                <Typography fontSize={11} color="secondary.light" noWrap>
+                                  ATOE Debit : ({data?.atoe_debit?.account_title_code})-
+                                  {data?.atoe_debit?.account_title_name}
+                                </Typography>
+                                <Typography fontSize={11} color="secondary.light" noWrap>
+                                  ATOE Credit : ({data?.atoe_credit?.account_title_code})-{" "}
+                                  {data?.atoe_credit?.account_title_name}
+                                </Typography>
                               </TableCell>
 
                               <TableCell className="tbl-cell-fa tr-cen-pad45">
