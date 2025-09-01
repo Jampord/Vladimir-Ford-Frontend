@@ -59,7 +59,7 @@ const Transfer = () => {
   const [status, setStatus] = useState("active");
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
-  const [filter, setFilter] = useState([]);
+
   const [onTransfer, setOnTransfer] = useState(true);
   const [transactionIdData, setTransactionIdData] = useState("");
 
@@ -123,7 +123,6 @@ const Transfer = () => {
       per_page: perPage,
       status: status,
       search: search,
-      filter: filter,
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -267,7 +266,6 @@ const Transfer = () => {
         per_page: perPage,
         status: status,
         search: search,
-        filter: filter,
       };
 
       const res = await transferDataTrigger(apiParams).unwrap();
@@ -422,9 +420,8 @@ const Transfer = () => {
               onSearchChange={setSearch}
               onSetPage={setPage}
               onTransfer={onTransfer}
-              setFilter={setFilter}
-              filter={filter}
-              hideArchive
+
+              // hideArchive
             />
             {/* Asset Movement */}
             <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }}>
