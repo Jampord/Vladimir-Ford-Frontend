@@ -72,7 +72,7 @@ const ToPickup = () => {
 
   return (
     <Stack className="category_height">
-      {isEvaluationLoading && <MasterlistSkeleton onAdd={false} />}
+      {isEvaluationLoading && <MasterlistSkeleton onAdd={false} category />}
       {isEvaluationError && <ErrorFetching refetch={refetch} error={errorData} />}
       {evaluationData && !isEvaluationError && !isEvaluationLoading && (
         <Box className="mcontainer__wrapper">
