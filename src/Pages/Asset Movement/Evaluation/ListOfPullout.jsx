@@ -1,6 +1,14 @@
 import {
   Box,
   Button,
+  Checkbox,
+  Dialog,
+  FormControlLabel,
+  Grow,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
   Stack,
   Table,
   TableBody,
@@ -18,18 +26,81 @@ import MasterlistSkeleton from "../../Skeleton/MasterlistSkeleton";
 import { useGetAssetsToEvaluateApiQuery } from "../../../Redux/Query/Movement/Evaluation";
 import { useState } from "react";
 import NoRecordsFound from "../../../Layout/NoRecordsFound";
-import { Attachment, IosShareRounded, ScreenSearchDesktop } from "@mui/icons-material";
+import { Attachment, Construction, FindReplace, IosShareRounded, ScreenSearchDesktop } from "@mui/icons-material";
 import { useDownloadTransferAttachment } from "../../../Hooks/useDownloadAttachment";
 import ErrorFetching from "../../ErrorFetching";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
+import ToEvaluate from "./ToEvaluate";
+import { useDispatch, useSelector } from "react-redux";
+import { closeDialog, closeDialog1, openDialog, openDialog1 } from "../../../Redux/StateManagement/booleanStateSlice";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import FaStatusChange from "../../../Components/Reusable/FaStatusComponent";
+import PulloutTimeline from "../PulloutTimeline";
 
+const schema = yup.object().shape({
+  pullout_ids: yup.array(),
+});
 const ListOfPullout = () => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(5);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("active");
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [evaluation, setEvaluation] = useState("");
+  const [transactionData, setTransactionData] = useState();
 
+  console.log("evaluationzz", evaluation);
+
+  const open = Boolean(anchorEl);
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
+  const dispatch = useDispatch();
+
+  const dialog = useSelector((state) => state.booleanState.dialog);
+  const dialog1 = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
+
+  const { watch, reset, register, setValue } = useForm({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      pullout_ids: [],
+    },
+  });
+
+  const handleOpenEvaluateReturnDialog = () => {
+    dispatch(openDialog1());
+    setAnchorEl(null);
+    setEvaluation("Return");
+  };
+
+  const handleOpenEvaluateReplacementDialog = () => {
+    dispatch(openDialog1());
+    setAnchorEl(null);
+    setEvaluation("For Replacement");
+  };
+
+  const handleOpenEvaluateChangeDialog = () => {
+    dispatch(openDialog1());
+    setAnchorEl(null);
+    setEvaluation("Change Care of");
+  };
+
+  const handleOpenEvaluateDisposalDialog = () => {
+    dispatch(openDialog1());
+    setAnchorEl(null);
+    setEvaluation("For Disposal");
+  };
+
+  const handleAllHandler = (checked) => {
+    if (checked) {
+      setValue(
+        "pullout_ids",
+        evaluationData?.data?.map((item) => item.id?.toString())
+      );
+    } else {
+      reset({ pullout_ids: [] });
+    }
+  };
 
   // Table Properties --------------------------------
   const perPageHandler = (e) => {
@@ -54,11 +125,10 @@ const ListOfPullout = () => {
     {
       page: page,
       per_page: perPage,
+      status: "For Evaluation",
     },
     { refetchOnMountOrArgChange: true }
   );
-
-  console.log(evaluationData?.data);
 
   const DlAttachment = (transfer_number) => (
     <Tooltip title="Download Attachment" placement="top" arrow>
@@ -82,9 +152,28 @@ const ListOfPullout = () => {
       transfer_number: value?.asset?.attachments?.id,
     });
 
+  const selectedItems = evaluationData?.data?.filter((item) => watch("pullout_ids").includes(item?.id?.toString()));
+
+  // console.log("🧨🧨", watch("pullout_ids"));
+  // console.log("👀", selectedItems);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleViewTimeline = (data) => {
+    // console.log(data);
+    dispatch(openDialog());
+    setTransactionData(data);
+  };
+
   return (
     <Stack className="category_height">
-      {isEvaluationLoading && <MasterlistSkeleton onAdd={true} />}
+      {isEvaluationLoading && <MasterlistSkeleton onAdd={true} category />}
       {isEvaluationError && <ErrorFetching refetch={refetch} error={errorData} />}
 
       {evaluationData && !isEvaluationError && !isEvaluationLoading && (
@@ -100,15 +189,32 @@ const ListOfPullout = () => {
           {(!isEvaluationLoading || !isEvaluationFetching) && (
             <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }} mr="10px">
               <Button
-                // onClick={}
+                onClick={handleClick}
                 variant="contained"
                 startIcon={isSmallScreen ? null : <ScreenSearchDesktop />}
                 size="small"
-                disabled
+                disabled={watch("pullout_ids").length === 0}
                 sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
               >
                 {isSmallScreen ? <ScreenSearchDesktop color="black" sx={{ fontSize: "20px" }} /> : "Evaluate"}
               </Button>
+
+              <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                <MenuItem dense onClick={handleOpenEvaluateReturnDialog}>
+                  <ListItemIcon>
+                    <Construction fontSize="small" color="success" />
+                  </ListItemIcon>
+                  <ListItemText>Repaired</ListItemText>
+                </MenuItem>
+                <MenuItem dense onClick={handleOpenEvaluateReplacementDialog}>
+                  <ListItemIcon>
+                    <FindReplace fontSize="small" color="primary" />
+                  </ListItemIcon>
+                  <ListItemText>For Replacement</ListItemText>
+                </MenuItem>
+                {/* <MenuItem onClick={handleOpenEvaluateChangeDialog}>Change Care of</MenuItem> */}
+                {/* <MenuItem onClick={handleOpenEvaluateDisposalDialog}>For Disposal</MenuItem> */}
+              </Menu>
             </Box>
           )}
 
@@ -124,15 +230,32 @@ const ListOfPullout = () => {
                       },
                     }}
                   >
-                    <TableCell className="tbl-cell-category" align="center">
-                      Request #
+                    <TableCell align="center" className="tbl-cell">
+                      <FormControlLabel
+                        sx={{ margin: "auto", align: "center" }}
+                        control={
+                          <Checkbox
+                            value=""
+                            size="small"
+                            checked={
+                              !!evaluationData?.data
+                                ?.map((mapItem) => mapItem?.id?.toString())
+                                ?.every((item) => watch("pullout_ids").includes(item?.toString()))
+                            }
+                            onChange={(e) => {
+                              handleAllHandler(e.target.checked);
+                              // console.log(e.target.checked);
+                            }}
+                          />
+                        }
+                      />
                     </TableCell>
-                    <TableCell className="tbl-cell-category" align="center">
+                    <TableCell className="tbl-cell-category">Request #</TableCell>
+                    {/* <TableCell className="tbl-cell-category" align="center">
                       Vladimir Tag Number
-                    </TableCell>
-                    <TableCell className="tbl-cell-category" align="center">
-                      Asset Specification
-                    </TableCell>
+                    </TableCell> */}
+                    <TableCell className="tbl-cell-category">Asset</TableCell>
+                    <TableCell className="tbl-cell-category">Chart of Accounts</TableCell>
                     {/* <TableCell className="tbl-cell-category" align="center">
                       Description
                     </TableCell> */}
@@ -164,37 +287,102 @@ const ListOfPullout = () => {
                               borderBottom: 0,
                             },
                           }}
+                          hover
                         >
-                          <TableCell className="tbl-cell text-weight" align="center">
-                            {item?.id}
+                          <TableCell className="tbl-cell" size="small" align="center">
+                            <FormControlLabel
+                              value={item?.id}
+                              sx={{ margin: "auto" }}
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  {...register("pullout_ids")}
+                                  checked={watch("pullout_ids").includes(item?.id?.toString())}
+                                />
+                              }
+                            />
                           </TableCell>
-                          <TableCell className="tbl-cell text-weight" align="center">
-                            <Typography fontSize="12px" color="black" fontWeight="bold">
-                              {item?.asset?.vladimir_tag_number}
+                          <TableCell className="tbl-cell">{item?.id}</TableCell>
+                          <TableCell className="tbl-cell ">
+                            <Typography fontWeight={700} fontSize="13px" color="primary">
+                              {item?.asset.vladimir_tag_number}
                             </Typography>
-                            <Typography fontSize="12px" color="gray" fontWeight="500">
-                              {item?.asset?.asset_description}
+                            <Typography fontWeight={600} fontSize="13px" color="secondary.main">
+                              {item?.asset.asset_description}
                             </Typography>
-                          </TableCell>
-                          <TableCell className="tbl-cell " align="center">
-                            {item?.asset?.asset_specification}
+                            <Tooltip title={item?.asset.asset_specification} placement="bottom" arrow>
+                              <Typography
+                                fontSize="12px"
+                                color="text.light"
+                                textOverflow="ellipsis"
+                                width="300px"
+                                overflow="hidden"
+                              >
+                                {item?.asset.asset_specification}
+                              </Typography>
+                            </Tooltip>
                           </TableCell>
                           {/* <TableCell className="tbl-cell " align="center">
                               {item?.description}
                             </TableCell> */}
+                          <TableCell className="tbl-cell ">
+                            <Typography fontSize={10} color="gray">
+                              {`(${item?.asset.one_charging?.code || "-"}) - ${item?.asset.one_charging?.name || "-"}`}
+                            </Typography>
+                            <Typography fontSize={10} color="gray">
+                              {`(${item?.asset.one_charging?.company_code || item?.asset?.company?.company_code}) - ${
+                                item?.asset.one_charging?.company_name || item?.asset?.company?.company_name
+                              }`}
+                            </Typography>
+                            <Typography fontSize={10} color="gray">
+                              {`(${
+                                item?.asset.one_charging?.business_unit_code ||
+                                item?.asset?.business_unit?.business_unit_code
+                              }) - ${
+                                item?.asset.one_charging?.business_unit_name ||
+                                item?.asset?.business_unit?.business_unit_name
+                              }`}
+                            </Typography>
+                            <Typography fontSize={10} color="gray">
+                              {`(${
+                                item?.asset.one_charging?.department_code || item?.asset.department?.department_code
+                              }) - ${
+                                item?.asset.one_charging?.department_name || item?.asset.department?.department_name
+                              }`}
+                            </Typography>
+                            <Typography fontSize={10} color="gray">
+                              {`(${item?.asset.one_charging?.unit_code || item?.asset.unit?.unit_code}) - ${
+                                item?.asset.one_charging?.unit_name || item?.asset.unit?.unit_name
+                              }`}
+                            </Typography>
+                            <Typography fontSize={10} color="gray">
+                              {`(${item?.asset.one_charging?.subunit_code || item?.asset.subunit?.subunit_code}) - ${
+                                item?.asset.one_charging?.subunit_name || item?.asset.subunit?.subunit_name
+                              }`}
+                            </Typography>
+                            <Typography fontSize={10} color="gray">
+                              {`(${item?.asset.one_charging?.location_code || item?.asset.location?.location_code}) - ${
+                                item?.asset.one_charging?.location_name || item?.asset.location?.location_name
+                              }`}
+                            </Typography>
+                          </TableCell>
                           <TableCell className="tbl-cell " align="center">
                             <Typography fontSize="12px" color="black" fontWeight="500">
                               {item?.care_of}
                             </Typography>
                           </TableCell>
                           <TableCell className="tbl-cell " align="center">
-                            {item?.evaluation}
+                            {
+                              <Box onClick={() => handleViewTimeline(item)}>
+                                <FaStatusChange faStatus={item?.evaluation} hover />
+                              </Box>
+                            }
                           </TableCell>
                           <TableCell className="tbl-cell " align="center">
                             <DlAttachment transfer_number={item?.id} />
                           </TableCell>
                           <TableCell className="tbl-cell " align="center">
-                            {item?.remarks === null ? "none" : item?.remarks}
+                            {item?.remarks === null ? "-" : item?.remarks}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -234,6 +422,29 @@ const ListOfPullout = () => {
           </Box>
         </Box>
       )}
+
+      <Dialog
+        open={dialog1}
+        // onClose={() => {
+        //   closeDialog();
+        //   setEvaluation("");
+        // }}
+        maxWidth={"xl"}
+        fullWidth
+        TransitionComponent={Grow}
+        PaperProps={{ sx: { borderRadius: "15px" } }}
+      >
+        <ToEvaluate item={selectedItems} evaluation={evaluation} setEvaluation={setEvaluation} />
+      </Dialog>
+
+      <Dialog
+        open={dialog}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog())}
+        PaperProps={{ sx: { borderRadius: "10px", maxWidth: "700px" } }}
+      >
+        <PulloutTimeline data={transactionData} />
+      </Dialog>
     </Stack>
   );
 };
