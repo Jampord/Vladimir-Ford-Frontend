@@ -7,6 +7,7 @@ import {
 import {
   Box,
   Button,
+  Skeleton,
   Stack,
   Table,
   TableBody,
@@ -24,6 +25,7 @@ import { useDispatch } from "react-redux";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import StatusChange from "../../../Components/Reusable/FaStatusComponent";
+import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 
 const ToPickupViewing = () => {
   const dispatch = useDispatch();
@@ -162,22 +164,26 @@ const ToPickupViewing = () => {
           >
             Back
           </Button>
-          <Box sx={{}}>
-            <Button
-              onClick={() => onPickupHandler(evaluationData?.id)}
-              variant="contained"
-              startIcon={isSmallScreen ? null : <ShoppingCartCheckout color="primary" />}
-              size="small"
-              color="secondary"
-              sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
-            >
-              {isSmallScreen ? (
-                <ShoppingCartCheckout color="primary" sx={{ color: "primary.main", fontSize: "20px" }} />
-              ) : (
-                "Pickup"
-              )}
-            </Button>
-          </Box>
+          {isEvaluationLoading || isEvaluationFetching ? (
+            <Skeleton variant="rounded" width={80} height={30} />
+          ) : (
+            <Box>
+              <Button
+                onClick={() => onPickupHandler(evaluationData?.id)}
+                variant="contained"
+                startIcon={isSmallScreen ? null : <ShoppingCartCheckout color="primary" />}
+                size="small"
+                color="secondary"
+                sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+              >
+                {isSmallScreen ? (
+                  <ShoppingCartCheckout color="primary" sx={{ color: "primary.main", fontSize: "20px" }} />
+                ) : (
+                  "Pickup"
+                )}
+              </Button>
+            </Box>
+          )}
         </Stack>
 
         <Box className="request mcontainer__wrapper" p={2}>
@@ -259,64 +265,68 @@ const ToPickupViewing = () => {
                 </TableHead>
 
                 <TableBody>
-                  {evaluationData?.assets?.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="tbl-cell text-weight" align="center">
-                        {item.id}
-                      </TableCell>
-                      <TableCell className="tbl-cell" align="center">
-                        <Typography fontSize="12px" color="black" fontWeight="bold">
-                          {item?.vladimir_tag_number}
-                        </Typography>
-                        <Typography fontSize="12px" color="gray" fontWeight="500">
-                          {item?.asset_description}
-                        </Typography>
-                      </TableCell>
-                      <TableCell className="tbl-cell" align="center">
-                        {item.accountability}
-                      </TableCell>
-                      <TableCell className="tbl-cell" align="center">
-                        {item.accountable}
-                      </TableCell>
-                      <TableCell className="tbl-cell" align="center">
-                        <StatusChange faStatus={item.evaluation} />
-                      </TableCell>
-                      <TableCell className="tbl-cell">
-                        <Typography fontSize="10px" color="gray">
-                          {item?.one_charging.code}
-                          {" - "} {item?.one_charging.name}
-                        </Typography>
-                        <Typography fontSize="10px" color="gray">
-                          {item?.one_charging.company_code || item?.company.company_code}
-                          {" - "} {item?.one_charging.company_name || item?.company.company_name}
-                        </Typography>
-                        <Typography fontSize="10px" color="gray">
-                          {item?.one_charging.business_unit_code || item?.business_unit?.business_unit_code}
-                          {" - "}
-                          {item?.one_charging.business_unit_name || item?.business_unit?.business_unit_name}
-                        </Typography>
-                        <Typography fontSize="10px" color="gray">
-                          {item?.one_charging.department_code || item?.department.department_code}
-                          {" - "}
-                          {item?.one_charging.department_name || item?.department.department_name}
-                        </Typography>
-                        <Typography fontSize="10px" color="gray">
-                          {item?.one_charging.unit_code || item?.unit?.unit_code}
-                          {" - "}
-                          {item?.one_charging.unit_name || item?.unit?.unit_name}
-                        </Typography>
-                        <Typography fontSize="10px" color="gray">
-                          {item?.one_charging.codsubunit_codee || item?.subunit?.subunit_code}
-                          {" - "}
-                          {item?.one_charging.subunit_name || item?.subunit?.subunit_name}
-                        </Typography>
-                        <Typography fontSize="10px" color="gray">
-                          {item?.one_charging.location_code || item?.location.location_code} {" - "}
-                          {item?.one_charging.location_name || item?.location.location_name}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {isEvaluationLoading ? (
+                    <LoadingData />
+                  ) : (
+                    evaluationData?.assets?.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell className="tbl-cell text-weight" align="center">
+                          {item.id}
+                        </TableCell>
+                        <TableCell className="tbl-cell" align="center">
+                          <Typography fontSize="12px" color="black" fontWeight="bold">
+                            {item?.vladimir_tag_number}
+                          </Typography>
+                          <Typography fontSize="12px" color="gray" fontWeight="500">
+                            {item?.asset_description}
+                          </Typography>
+                        </TableCell>
+                        <TableCell className="tbl-cell" align="center">
+                          {item.accountability}
+                        </TableCell>
+                        <TableCell className="tbl-cell" align="center">
+                          {item.accountable}
+                        </TableCell>
+                        <TableCell className="tbl-cell" align="center">
+                          <StatusChange faStatus={item.evaluation} />
+                        </TableCell>
+                        <TableCell className="tbl-cell">
+                          <Typography fontSize="10px" color="gray">
+                            {item?.one_charging.code}
+                            {" - "} {item?.one_charging.name}
+                          </Typography>
+                          <Typography fontSize="10px" color="gray">
+                            {item?.one_charging.company_code || item?.company.company_code}
+                            {" - "} {item?.one_charging.company_name || item?.company.company_name}
+                          </Typography>
+                          <Typography fontSize="10px" color="gray">
+                            {item?.one_charging.business_unit_code || item?.business_unit?.business_unit_code}
+                            {" - "}
+                            {item?.one_charging.business_unit_name || item?.business_unit?.business_unit_name}
+                          </Typography>
+                          <Typography fontSize="10px" color="gray">
+                            {item?.one_charging.department_code || item?.department.department_code}
+                            {" - "}
+                            {item?.one_charging.department_name || item?.department.department_name}
+                          </Typography>
+                          <Typography fontSize="10px" color="gray">
+                            {item?.one_charging.unit_code || item?.unit?.unit_code}
+                            {" - "}
+                            {item?.one_charging.unit_name || item?.unit?.unit_name}
+                          </Typography>
+                          <Typography fontSize="10px" color="gray">
+                            {item?.one_charging.codsubunit_codee || item?.subunit?.subunit_code}
+                            {" - "}
+                            {item?.one_charging.subunit_name || item?.subunit?.subunit_name}
+                          </Typography>
+                          <Typography fontSize="10px" color="gray">
+                            {item?.one_charging.location_code || item?.location.location_code} {" - "}
+                            {item?.one_charging.location_name || item?.location.location_name}
+                          </Typography>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </TableContainer>
