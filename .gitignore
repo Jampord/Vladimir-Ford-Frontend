@@ -24,3 +24,19 @@ dist-ssr
 *.sw?
 .env
 /node_modules
+dist (for pretest) w credit 01-28-2025.zip
+dist (for pretest) w credit 01-31-2025.zip
+dist (ymir-prod) 01-28-2025.zip
+dist-01-09-2024.zip
+dist-01-28-2025(for pretest - not modified).zip
+dist (For PRETEST - adjusted ship to -pullout-evaluation) 08-13-2025.zip
+dist (For PRETEST - Attachment FIXED) 07-01-2025.zip
+dist (For PRETEST - ip config) 08-14-2025.zip
+dist (For PRETEST - latest-no ship to) 08-13-2025.zip
+dist (For PROD - attachment query) 07-03-2025.zip
+dist (For PROD - ONE CHARGING) 06-30-2025.zip
+dist (For PROD - requestor) 07-02-2025.zip
+dist (For PROD - requestor) 07-03-2025.zip
+dist(For PROD - Asset Sync) 05-29-2025.zip
+dist(For PROD) 05-27-2025.zip
+stats.html
