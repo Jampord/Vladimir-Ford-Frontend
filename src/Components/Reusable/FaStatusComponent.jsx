@@ -9,6 +9,7 @@ import {
   FindReplace,
   FolderDelete,
   Pending,
+  Print,
   RadioButtonUncheckedRounded,
   Sell,
   SwapHorizontalCircle,
@@ -184,6 +185,23 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
         sx={{
           backgroundColor: "primary.light",
           color: "text.dark",
+
+          ":hover": hover && { backgroundColor: "primary.main", cursor: "pointer" },
+
+          p: "0 5px",
+        }}
+      />
+    );
+  } else if (faStatus === "For Tagging") {
+    return (
+      <Chip
+        size="small"
+        variant="contained"
+        icon={<Print size="small" color="#344955" />}
+        label={faStatus}
+        sx={{
+          backgroundColor: "#678CA2",
+          color: "text",
 
           ":hover": hover && { backgroundColor: "primary.main", cursor: "pointer" },
 
