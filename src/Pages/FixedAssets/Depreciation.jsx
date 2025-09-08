@@ -208,6 +208,7 @@ const Depreciation = (props) => {
   //   getAccountTitle,
   //   { data: accountTitleData, isLoading: isAccountTitleLoading, isSuccess: isAccountTitleSuccess },
   // ] = useLazyGetAccountTitleAllApiQuery();
+
   const {
     data: accountTitleData = [],
     isLoading: isAccountTitleLoading,
@@ -342,21 +343,6 @@ const Depreciation = (props) => {
     !isHistorySuccess && getDepreciationHistory({ vladimir_tag_number: vladimirTag });
   };
 
-  // const joinDepreciationByYear = (items = []) => {
-  //   return items.reduce((acc, history) => {
-  //     const year = Object.keys(history)[0];
-  //     const yearData = history[year];
-
-  //     if (year && yearData) {
-  //       acc[year] = acc[year] ? [...acc[year], ...yearData] : yearData;
-  //     }
-
-  //     return acc;
-  //   }, {});
-  // };
-
-  // const combinedHistoryData = joinDepreciationByYear(historyData?.depreciation_history);
-
   useEffect(() => {
     console.log("data🧨", data);
     if (data) {
@@ -420,11 +406,6 @@ const Depreciation = (props) => {
     minorCategorySmallToolsData,
     data,
   ]);
-
-  // console.log("1", watch("initial_debit_id"));
-  // console.log("2", watch("initial_credit_id"));
-  // console.log("3", watch("depreciation_debit_id"));
-  // console.log("4", watch("depreciation_credit_id"));
 
   const HistoryTable = () => {
     return (
@@ -616,7 +597,6 @@ const Depreciation = (props) => {
 
             if (nextRequest) {
               const next = await getNextDepreciationRequest().unwrap();
-              // console.log("next", next);
               setViewDepre(false);
               navigate(`/fixed-asset/depreciation/${next?.vladimir_tag_number}`, { state: next, replace: true });
             }
@@ -635,7 +615,7 @@ const Depreciation = (props) => {
 
             dispatch(
               openToast({
-                message: result.message,
+                message: result.message || "Fixed Asset will now be depreciating.",
                 duration: 5000,
               })
             );
@@ -653,7 +633,6 @@ const Depreciation = (props) => {
             } else if (err?.status === 422) {
               dispatch(
                 openToast({
-                  // message: err.data.message,
                   message: err?.data?.errors?.detail,
                   duration: 5000,
                   variant: "error",
@@ -904,42 +883,6 @@ const Depreciation = (props) => {
                     />
                   )}
                 </Card>
-
-                {/* <Card className="tableCard__card">
-              <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "rem" }}>
-                Date Setup
-              </Typography>
-
-              <Box className="tableCard__properties">
-                Start Date:
-                <Typography className="tableCard__info" fontSize="14px">
-                  {data.start_depreciation}
-                </Typography>
-              </Box>
-
-              <Box className="tableCard__properties">
-                End Depreciation:
-                <Typography className="tableCard__info" fontSize="14px">
-                  {data.end_depreciation}
-                </Typography>
-              </Box>
-
-              <Box className="tableCard__properties" sx={{ flexDirection: "column" }}>
-                <Typography fontSize="14px" sx={{ mb: "10px" }}>
-                  End Date Value:
-                </Typography>
-
-                <CustomDatePicker
-                  control={control}
-                  name="endDate"
-                  label="End Date"
-                  size="small"
-                  views={["month", "year"]}
-                  error={!!errors?.endDate?.message}
-                  helperText={errors?.endDate?.message}
-                />
-              </Box>
-            </Card> */}
               </Box>
             </Box>
 
@@ -1158,14 +1101,11 @@ const Depreciation = (props) => {
                     p: "20px",
                   }}
                 >
-                  {" "}
                   <Box
                     sx={{
                       display: "flex",
                       flexDirection: "column",
                       gap: 1,
-                      // justifyContent: "space-between",
-                      // alignItems: "center",
                     }}
                   >
                     <FormControl>
@@ -1302,65 +1242,19 @@ const Depreciation = (props) => {
                       }}
                     />
 
-                    {/* {console.log("watch", watch("second_depreciation_credit_id"))} */}
-
                     <Typography fontFamily="Anton" color="secondary">
                       Depreciate Asset
                     </Typography>
-                    {/* <CustomAutoComplete
-                      name="initial_debit_id"
-                      // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
-                      control={control}
-                      disabled
-                      options={accountTitleData}
-                      loading={isAccountTitleLoading}
-                      size="small"
-                      getOptionLabel={(option) => option?.account_title_code + " - " + option?.account_title_name}
-                      isOptionEqualToValue={(option, value) => option?.account_title_code === value?.account_title_code}
-                      renderInput={(params) => (
-                        <TextField
-                          color="secondary"
-                          {...params}
-                          label="Initial Debit"
-                          error={!!errors?.initial_debit_id}
-                          helperText={errors?.initial_debit_id?.message}
-                        />
-                      )}
-                    />
-
-                    <CustomAutoComplete
-                      autoComplete
-                      name="initial_credit_id"
-                      disabled
-                      // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
-                      control={control}
-                      options={accountTitleData}
-                      loading={isAccountTitleLoading}
-                      size="small"
-                      getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
-                      isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
-                      renderInput={(params) => (
-                        <TextField
-                          color="secondary"
-                          {...params}
-                          label="Initial Credit"
-                          error={!!errors?.initial_credit_id}
-                          helperText={errors?.initial_credit_id?.message}
-                        />
-                      )}
-                    /> */}
 
                     <CustomAutoComplete
                       autoComplete
                       name="depreciation_debit_id"
-                      // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
                       control={control}
                       options={
                         (watch("major_category_id")?.major_category_name !== data?.major_category?.major_category_name
                           ? minorCategoryDepreciationDebit
                           : depreciationDebit) || []
                       }
-                      // loading={isAccountTitleLoading}
                       size="small"
                       getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
                       isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
@@ -1378,7 +1272,6 @@ const Depreciation = (props) => {
                     <CustomAutoComplete
                       autoComplete
                       name="depreciation_credit_id"
-                      // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
                       control={control}
                       disabled
                       options={accountTitleData}
@@ -1407,10 +1300,8 @@ const Depreciation = (props) => {
                           autoComplete
                           name="second_depreciation_debit_id"
                           disabled
-                          // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
                           control={control}
                           options={watch("second_depreciation_credit_id")?.depreciation_debit || []}
-                          // loading={isAccountTitleLoading}
                           size="small"
                           getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
                           isOptionEqualToValue={(option, value) =>
@@ -1429,7 +1320,6 @@ const Depreciation = (props) => {
                         <CustomAutoComplete
                           autoComplete
                           name="second_depreciation_credit_id"
-                          // onOpen={() => (isAccountTitleSuccess ? null : getAccountTitle())}
                           control={control}
                           disabled
                           options={accountTitleData}
@@ -1506,7 +1396,6 @@ const Depreciation = (props) => {
                         isDepartmentSuccess ? null : (departmentTrigger(), companyTrigger(), businessUnitTrigger())
                       }
                       loading={isDepartmentLoading}
-                      // disabled={handleSaveValidation()}
                       disabled
                       disableClearable
                       size="small"
@@ -1521,24 +1410,6 @@ const Depreciation = (props) => {
                           helperText={errors?.department_id?.message}
                         />
                       )}
-                      // onChange={(_, value) => {
-                      //   const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
-                      //   const businessUnitID = businessUnitData?.find(
-                      //     (item) => item.sync_id === value.business_unit.business_unit_sync_id
-                      //   );
-
-                      //   if (value) {
-                      //     setValue("company_id", companyID);
-                      //     setValue("business_unit_id", businessUnitID);
-                      //   } else {
-                      //     setValue("company_id", null);
-                      //     setValue("business_unit_id", null);
-                      //   }
-                      //   setValue("unit_id", null);
-                      //   setValue("subunit_id", null);
-                      //   setValue("location_id", null);
-                      //   return value;
-                      // }}
                     />
 
                     <CustomAutoComplete
@@ -1591,7 +1462,6 @@ const Depreciation = (props) => {
                       options={departmentData?.filter((obj) => obj?.id === watch("department_id")?.id)[0]?.unit || []}
                       onOpen={() => (isUnitSuccess ? null : (unitTrigger(), subunitTrigger(), locationTrigger()))}
                       loading={isUnitLoading}
-                      // disabled={handleSaveValidation()}
                       disabled
                       disableClearable
                       size="small"
@@ -1606,11 +1476,6 @@ const Depreciation = (props) => {
                           helperText={errors?.unit_id?.message}
                         />
                       )}
-                      // onChange={(_, value) => {
-                      //   setValue("subunit_id", null);
-                      //   setValue("location_id", null);
-                      //   return value;
-                      // }}
                     />
 
                     <CustomAutoComplete
@@ -1619,7 +1484,6 @@ const Depreciation = (props) => {
                       control={control}
                       options={unitData?.filter((obj) => obj?.id === watch("unit_id")?.id)[0]?.subunit || []}
                       loading={isSubUnitLoading}
-                      // disabled={handleSaveValidation()}
                       disabled
                       disableClearable
                       size="small"
@@ -1646,7 +1510,6 @@ const Depreciation = (props) => {
                         });
                       })}
                       loading={isLocationLoading}
-                      // disabled={handleSaveValidation()}
                       disabled
                       disableClearable
                       size="small"
