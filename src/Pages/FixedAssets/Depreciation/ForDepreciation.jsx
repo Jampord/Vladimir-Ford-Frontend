@@ -84,7 +84,6 @@ const ForDepreciation = () => {
             onStatusChange={setStatus}
             onSearchChange={setSearch}
             onSetPage={setPage}
-            // onAdd={() => {}}
             hideArchive
           />
 
@@ -105,6 +104,7 @@ const ForDepreciation = () => {
                     <TableCell className="tbl-cell-category ">Chart of Account</TableCell>
                     <TableCell className="tbl-cell-category ">Accounting Entries</TableCell>
                     <TableCell className="tbl-cell-category text-center">Status</TableCell>
+                    <TableCell className="tbl-cell-category text-center">Date Released</TableCell>
                     <TableCell className="tbl-cell-category text-center">Date Created</TableCell>
                   </TableRow>
                 </TableHead>
@@ -131,10 +131,6 @@ const ForDepreciation = () => {
                                 cursor: "pointer",
                               }}
                             >
-                              {/* <TableCell sx={{ display: "none" }}>
-                                  {data.id}
-                                </TableCell> */}
-
                               <TableCell className="tbl-cell-fa">
                                 <Typography
                                   variant="h6"
@@ -163,11 +159,6 @@ const ForDepreciation = () => {
                                   fontWeight={data.is_additional_cost ? null : "bold"}
                                   color={data.is_additional_cost === 0 ? "quaternary.main" : "quaternary.light"}
                                 >
-                                  {/* {data.is_printable === 1
-                                    ? data.is_additional_cost === 0
-                                      ? `MAIN ASSET - ${data.additional_cost_count}`
-                                      : `(ADDITIONAL COST)`
-                                      : null} */}
                                   {data.is_additional_cost === 0
                                     ? `MAIN ASSET - ${data.additional_cost_count}`
                                     : `(ADDITIONAL COST)`}
@@ -222,11 +213,6 @@ const ForDepreciation = () => {
                                   {data.location.location_code} {" - "}
                                   {data.location.location_name}
                                 </Typography>
-                                {/* <Typography fontSize="10px" color="gray">
-                                  {data.account_title.account_title_code}
-                                  {" - "}
-                                  {data.account_title.account_title_name}
-                                </Typography> */}
                               </TableCell>
 
                               <TableCell className="tbl-cell-category capitalized">
@@ -263,6 +249,9 @@ const ForDepreciation = () => {
                                 />
                               </TableCell>
 
+                              <TableCell className="tbl-cell-fa tr-cen-pad45">
+                                {moment(data?.release_date).format("MMM DD, YYYY")}
+                              </TableCell>
                               <TableCell className="tbl-cell-fa tr-cen-pad45">
                                 {moment(data.created_at).format("MMM DD, YYYY")}
                               </TableCell>
