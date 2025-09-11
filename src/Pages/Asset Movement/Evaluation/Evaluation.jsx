@@ -6,12 +6,18 @@ import ToPickup from "./ToPickup";
 import ListOfPullout from "./ListOfPullout";
 import ForApprovalEvaluation from "./ForApprovalEvaluation";
 import ForReplacement from "./ForReplacement";
+import { useDispatch, useSelector } from "react-redux";
+import { setEvaluationTabValue } from "../../../Redux/StateManagement/tabSlice";
 
 const Evaluation = () => {
-  const [value, setValue] = useState("1");
+  // const [value, setValue] = useState("1");
+
+  const dispatch = useDispatch();
+  const value = useSelector((state) => state.tab.evaluationTabValue);
 
   const handleChange = (_, newValue) => {
-    setValue(newValue);
+    // setValue(newValue);
+    dispatch(setEvaluationTabValue(newValue));
   };
 
   const user = JSON.parse(localStorage.getItem("user")) || {};
