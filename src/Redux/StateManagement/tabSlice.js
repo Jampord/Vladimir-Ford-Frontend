@@ -17,6 +17,8 @@ const tabSlice = createSlice({
 
     requestMonitoringTabValue: "1",
     warehouseMonitoringTabValue: "1",
+
+    evaluationTabValue: "1",
   },
   reducers: {
     setRequestApprovalTabValue: (state, action) => {
@@ -47,6 +49,9 @@ const tabSlice = createSlice({
     setWarehouseMonitoringTabValue: (state, action) => {
       state.warehouseMonitoringTabValue = action.payload;
     },
+    setEvaluationTabValue: (state, action) => {
+      state.evaluationTabValue = action.payload;
+    },
   },
 });
 
@@ -60,5 +65,6 @@ export const {
   setDepreciationPageTabValue,
   setRequestMonitoringTabValue,
   setWarehouseMonitoringTabValue,
+  setEvaluationTabValue,
 } = tabSlice.actions;
 export default tabSlice.reducer;
