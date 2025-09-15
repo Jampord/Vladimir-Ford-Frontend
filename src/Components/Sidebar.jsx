@@ -105,6 +105,7 @@ import {
   LocalShipping,
   Monitor,
   QueuePlayNext,
+  MoveUpOutlined,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -605,6 +606,13 @@ const Sidebar = () => {
           setter: closeCollapse,
         },
         {
+          label: "Pull Out Receiving",
+          icon: CallReceived,
+          path: "/asset-movement/transfer-pullout-receiving",
+          permission: "transfer-pullout-receiving",
+          setter: closeCollapse,
+        },
+        {
           label: "Pull Out",
           icon: RemoveFromQueue,
           path: "/asset-movement/pull-out",
@@ -901,6 +909,7 @@ const Sidebar = () => {
       <Box className="sidebar__menus" ref={sidebarRef}>
         <List>
           {MENU_LIST?.map((item) => {
+            console.log("item", item);
             return (
               permissions.split(", ").includes(item.permission) && (
                 <ListItem
@@ -960,17 +969,24 @@ const Sidebar = () => {
                                     <Divider sx={{ mt: 1, mx: "15px", fontSize: "11px", color: "text.secondary" }}>
                                       For Asset Transfer
                                     </Divider>
-                                    {/* <Divider sx={{ mx: "15px" }} />
-                                    <Typography
-                                      sx={{
-                                        color: "text.secondary",
-                                        fontSize: "12px",
-                                        ml: 3,
-                                        mt: 1,
-                                      }}
-                                    >
-                                      For Asset Transfer
-                                    </Typography> */}
+                                  </>
+                                ) : item?.label === "Asset Movement" && childItem.label === "Transfer" ? (
+                                  <>
+                                    <Divider sx={{ mt: 1, mx: "15px", fontSize: "11px", color: "text.secondary" }}>
+                                      Asset Transfer
+                                    </Divider>
+                                  </>
+                                ) : item?.label === "Asset Movement" && childItem.label === "Pull Out" ? (
+                                  <>
+                                    <Divider sx={{ mt: 1, mx: "15px", fontSize: "11px", color: "text.secondary" }}>
+                                      Asset Pullout
+                                    </Divider>
+                                  </>
+                                ) : item?.label === "Asset Movement" && childItem.label === "Disposal" ? (
+                                  <>
+                                    <Divider sx={{ mt: 1, mx: "15px", fontSize: "11px", color: "text.secondary" }}>
+                                      Asset Disposal
+                                    </Divider>
                                   </>
                                 ) : null}
                                 <ListItemButton
