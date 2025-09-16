@@ -113,6 +113,7 @@ import ShipTo from "./Pages/Masterlist/ShipTo";
 import Monitoring from "./Pages/Monitoring";
 import WarehouseMonitoring from "./Pages/Monitoring/WarehouseMonitoring";
 import TransferReceivingMonitoring from "./Pages/Monitoring/TransferReceivingMonitoring";
+import PulloutReleasing from "./Pages/Asset Movement/Receiving of Tranfer (For Pullout)/PulloutReleasing";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -518,6 +519,16 @@ const router = createBrowserRouter([
                 path: "transfer-receiving/:movement_id",
                 element: <AssetTransferView />,
                 handle: { permission: "transfer-receiving" },
+              },
+              {
+                path: "transfer-pullout-releasing",
+                element: <PulloutReleasing />,
+                handle: { permission: "transfer-pullout-releasing" },
+              },
+              {
+                path: "transfer-pullout-releasing/:movement_id",
+                element: <AssetTransferView />,
+                handle: { permission: "transfer-pullout-releasing" },
               },
               {
                 path: "evaluation",
