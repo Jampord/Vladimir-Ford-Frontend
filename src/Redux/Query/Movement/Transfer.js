@@ -49,13 +49,14 @@ export const transferApi = createApi({
     }),
 
     getFixedAssetTransferAllApi: builder.query({
-      query: () => `fixed-asset?pagination=none&movement=transfer`,
+      query: (params) => `fixed-asset?pagination=none&movement=transfer&is_spare=${params.is_spare}`,
       transformResponse: (response) => response.data,
       providesTags: ["Transfer"],
     }),
 
     getFixedAssetTransferCoordinatorApi: builder.query({
-      query: (params) => `fixed-asset?pagination=none&movement=transfer&one_charging_id=${params.one_charging_id}`,
+      query: (params) =>
+        `fixed-asset?pagination=none&movement=transfer&one_charging_id=${params.one_charging_id}&is_spare=${params.is_spare}`,
       transformResponse: (response) => response.data,
       providesTags: ["Transfer"],
     }),
