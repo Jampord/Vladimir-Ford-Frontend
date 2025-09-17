@@ -606,10 +606,10 @@ const Sidebar = () => {
           setter: closeCollapse,
         },
         {
-          label: "Pull Out Receiving",
+          label: "Transfer Releasing",
           icon: CallReceived,
-          path: "/asset-movement/transfer-pullout-receiving",
-          permission: "transfer-pullout-receiving",
+          path: "/asset-movement/transfer-pullout-releasing",
+          permission: "transfer-pullout-releasing",
           setter: closeCollapse,
         },
         {
@@ -909,7 +909,6 @@ const Sidebar = () => {
       <Box className="sidebar__menus" ref={sidebarRef}>
         <List>
           {MENU_LIST?.map((item) => {
-            console.log("item", item);
             return (
               permissions.split(", ").includes(item.permission) && (
                 <ListItem
