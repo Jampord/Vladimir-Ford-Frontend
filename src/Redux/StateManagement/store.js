@@ -113,6 +113,7 @@ import { oneRDFApi } from "../Query/Masterlist/OneRDF/OneRDFCharging";
 import { oneRDFCoaApi } from "../Query/Masterlist/OneRDF/OneRDFCoa";
 import { assetEvaluationApi } from "../Query/Settings/AssetEvaluation";
 import { shipToApi } from "../Query/Masterlist/YmirCoa/ShipTo";
+import { assetTransferPulloutApi } from "../Query/Settings/AssetTransferPullout";
 
 export const store = configureStore({
   reducer: {
@@ -199,6 +200,7 @@ export const store = configureStore({
     [approverSettingsApi.reducerPath]: approverSettingsApi.reducer,
     [unitApproversApi.reducerPath]: unitApproversApi.reducer,
     [assetTransferApi.reducerPath]: assetTransferApi.reducer,
+    [assetTransferPulloutApi.reducerPath]: assetTransferPulloutApi.reducer,
     [assetPulloutApi.reducerPath]: assetPulloutApi.reducer,
     [assetEvaluationApi.reducerPath]: assetEvaluationApi.reducer,
     [assetDisposalApi.reducerPath]: assetDisposalApi.reducer,
@@ -300,6 +302,7 @@ export const store = configureStore({
       approverSettingsApi.middleware,
       unitApproversApi.middleware,
       assetTransferApi.middleware,
+      assetTransferPulloutApi.middleware,
       assetPulloutApi.middleware,
       assetEvaluationApi.middleware,
       assetDisposalApi.middleware,
