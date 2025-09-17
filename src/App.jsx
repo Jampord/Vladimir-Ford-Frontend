@@ -114,6 +114,8 @@ import Monitoring from "./Pages/Monitoring";
 import WarehouseMonitoring from "./Pages/Monitoring/WarehouseMonitoring";
 import TransferReceivingMonitoring from "./Pages/Monitoring/TransferReceivingMonitoring";
 import PulloutReleasing from "./Pages/Asset Movement/Receiving of Tranfer (For Pullout)/PulloutReleasing";
+import Disposal from "./Pages/Asset Movement/Disposal/Disposal";
+import AddDisposal from "./Pages/Asset Movement/Disposal/AddDisposal";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -507,7 +509,12 @@ const router = createBrowserRouter([
               },
               {
                 path: "disposal",
-                // element: <Category />,
+                element: <Disposal />,
+                handle: { permission: "disposal" },
+              },
+              {
+                path: "disposal/add-disposal",
+                element: <AddDisposal />,
                 handle: { permission: "disposal" },
               },
               {
