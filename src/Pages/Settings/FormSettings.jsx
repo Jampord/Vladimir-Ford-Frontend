@@ -5,6 +5,7 @@ import AssetTransfer from "./AssetTransfer";
 import AssetPullout from "./AssetPullout";
 import AssetDisposal from "./AssetDisposal";
 import AssetEvaluation from "./AssetEvaluation";
+import AssetTransferPullout from "./AssetTransferPullout";
 
 const FormSettings = () => {
   const [value, setValue] = useState("option1");
@@ -16,9 +17,10 @@ const FormSettings = () => {
   const views = {
     option1: <UnitApprovers />,
     option2: <AssetTransfer />,
-    option3: <AssetPullout />,
-    option4: <AssetEvaluation />,
-    option5: <AssetDisposal />,
+    option3: <AssetTransferPullout />,
+    option4: <AssetPullout />,
+    option5: <AssetEvaluation />,
+    option6: <AssetDisposal />,
   };
 
   return (
@@ -45,9 +47,10 @@ const FormSettings = () => {
         >
           <MenuItem value="option1">Asset Requisition</MenuItem>
           <MenuItem value="option2">Asset Transfer</MenuItem>
-          <MenuItem value="option3">Asset Pullout</MenuItem>
-          <MenuItem value="option4">Asset Evaluation</MenuItem>
-          <MenuItem value="option5">Asset Disposal</MenuItem>
+          <MenuItem value="option3">Asset Transfer (For Pullout)</MenuItem>
+          <MenuItem value="option4">Asset Pullout</MenuItem>
+          <MenuItem value="option5">Asset Evaluation</MenuItem>
+          <MenuItem value="option6">Asset Disposal</MenuItem>
         </Select>
         {views[value]}
       </Stack>
