@@ -114,6 +114,7 @@ import { oneRDFCoaApi } from "../Query/Masterlist/OneRDF/OneRDFCoa";
 import { assetEvaluationApi } from "../Query/Settings/AssetEvaluation";
 import { shipToApi } from "../Query/Masterlist/YmirCoa/ShipTo";
 import { assetTransferPulloutApi } from "../Query/Settings/AssetTransferPullout";
+import { disposalApi } from "../Query/Movement/Disposal";
 
 export const store = configureStore({
   reducer: {
@@ -216,6 +217,7 @@ export const store = configureStore({
     [transferApi.reducerPath]: transferApi.reducer,
     [pulloutApi.reducerPath]: pulloutApi.reducer,
     [evaluationApi.reducerPath]: evaluationApi.reducer,
+    [disposalApi.reducerPath]: disposalApi.reducer,
 
     // Approval
     [approvalApi.reducerPath]: approvalApi.reducer,
@@ -319,6 +321,7 @@ export const store = configureStore({
       transferApi.middleware,
       pulloutApi.middleware,
       evaluationApi.middleware,
+      disposalApi.middleware,
 
       // Approval
       approvalApi.middleware,
