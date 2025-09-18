@@ -518,6 +518,11 @@ const router = createBrowserRouter([
                 handle: { permission: "disposal" },
               },
               {
+                path: "disposal/add-disposal/:disposal_number",
+                element: <AddDisposal />,
+                handle: { permission: "disposal" },
+              },
+              {
                 path: "transfer-receiving",
                 element: <ReceivingOfTransfer />,
                 handle: { permission: "transfer-receiving" },
