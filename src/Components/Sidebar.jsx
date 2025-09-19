@@ -106,6 +106,7 @@ import {
   Monitor,
   QueuePlayNext,
   MoveUpOutlined,
+  HighlightAlt,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -646,6 +647,14 @@ const Sidebar = () => {
           icon: PlaylistRemoveRounded,
           path: "/asset-movement/disposal",
           permission: "disposal",
+          setter: closeCollapse,
+        },
+        {
+          label: "Receiving of Disposal",
+          icon: HighlightAlt,
+          path: "/asset-movement/disposal-receiving",
+          permission: "disposal-receiving",
+          // notification: notifData?.toTransferReceiving,
           setter: closeCollapse,
         },
       ],
