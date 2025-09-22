@@ -625,7 +625,12 @@ const Sidebar = () => {
           icon: ScreenSearchDesktop,
           path: "/asset-movement/evaluation",
           permission: "evaluation",
-          // notification: notifData?.toTransferReceiving,
+          notification:
+            notifData?.toPickUpCount +
+            notifData?.toEvaluateCount +
+            notifData?.toReplaceCount +
+            notifData?.spareCount +
+            notifData?.disposalCount,
           setter: closeCollapse,
         },
         {
@@ -716,6 +721,7 @@ const Sidebar = () => {
           icon: PlaylistRemove,
           path: "/approving/disposal",
           permission: "approving-disposal",
+          notification: notifData?.disposalApprovalCount,
           setter: closeCollapse,
         },
         // {
