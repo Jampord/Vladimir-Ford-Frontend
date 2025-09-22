@@ -254,6 +254,8 @@ const ListOfPullout = () => {
                     {/* <TableCell className="tbl-cell-category" align="center">
                       Vladimir Tag Number
                     </TableCell> */}
+                    <TableCell className="tbl-cell-category">Description</TableCell>
+                    <TableCell className="tbl-cell-category">Helpdesk #</TableCell>
                     <TableCell className="tbl-cell-category">Asset</TableCell>
                     <TableCell className="tbl-cell-category">Chart of Accounts</TableCell>
                     {/* <TableCell className="tbl-cell-category" align="center">
@@ -303,6 +305,12 @@ const ListOfPullout = () => {
                             />
                           </TableCell>
                           <TableCell className="tbl-cell">{item?.id}</TableCell>
+                          <TableCell className="tbl-cell " align="center">
+                            {item?.description}
+                          </TableCell>
+                          <TableCell className="tbl-cell " align="center">
+                            {item?.helpdesk_number}
+                          </TableCell>
                           <TableCell className="tbl-cell ">
                             <Typography fontWeight={700} fontSize="13px" color="primary">
                               {item?.asset.vladimir_tag_number}
@@ -310,7 +318,7 @@ const ListOfPullout = () => {
                             <Typography fontWeight={600} fontSize="13px" color="secondary.main">
                               {item?.asset.asset_description}
                             </Typography>
-                            <Tooltip title={item?.asset.asset_specification} placement="bottom" arrow>
+                            <Tooltip title={item?.asset.asset_specification} placement="bottom">
                               <Typography
                                 fontSize="12px"
                                 color="text.light"
@@ -322,9 +330,7 @@ const ListOfPullout = () => {
                               </Typography>
                             </Tooltip>
                           </TableCell>
-                          {/* <TableCell className="tbl-cell " align="center">
-                              {item?.description}
-                            </TableCell> */}
+
                           <TableCell className="tbl-cell ">
                             <Typography fontSize={10} color="gray">
                               {`(${item?.asset.one_charging?.code || "-"}) - ${item?.asset.one_charging?.name || "-"}`}
