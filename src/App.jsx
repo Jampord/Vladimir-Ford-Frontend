@@ -116,6 +116,8 @@ import TransferReceivingMonitoring from "./Pages/Monitoring/TransferReceivingMon
 import PulloutReleasing from "./Pages/Asset Movement/Receiving of Tranfer (For Pullout)/PulloutReleasing";
 import Disposal from "./Pages/Asset Movement/Disposal/Disposal";
 import AddDisposal from "./Pages/Asset Movement/Disposal/AddDisposal";
+import ViewDisposal from "./Pages/Approving/Disposal/ViewDisposal";
+import ReceivingOfDisposal from "./Pages/Asset Movement/Receiving of Disposal/ReceivingOfDisposal";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -533,6 +535,11 @@ const router = createBrowserRouter([
                 handle: { permission: "transfer-receiving" },
               },
               {
+                path: "disposal-receiving",
+                element: <ReceivingOfDisposal />,
+                handle: { permission: "disposal-receiving" },
+              },
+              {
                 path: "transfer-pullout-releasing",
                 element: <PulloutReleasing />,
                 handle: { permission: "transfer-pullout-releasing" },
@@ -602,7 +609,7 @@ const router = createBrowserRouter([
               },
               {
                 path: "disposal/:transaction_number",
-                element: <ViewApproveRequest />,
+                element: <ViewDisposal />,
                 handle: { permission: "approving" },
               },
               {
