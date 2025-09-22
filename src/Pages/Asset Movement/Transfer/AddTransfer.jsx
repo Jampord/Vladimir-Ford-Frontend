@@ -49,7 +49,7 @@ import {
 import { LoadingButton } from "@mui/lab";
 
 // RTK
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useLazyGetCompanyAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Company";
 import { useLazyGetBusinessUnitAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/BusinessUnit";
 import {
@@ -105,6 +105,7 @@ import {
   useLazyGetOneRDFChargingAllApiQuery,
 } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
 import AddTransferSkeleton from "./Skeleton/AddTransferSkeleton";
+import { resetGetData } from "../../../Redux/StateManagement/actionMenuSlice";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -171,11 +172,14 @@ const AddTransfer = (props) => {
   const [edit, setEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const isSmallScreen = useMediaQuery("(min-width: 700px)");
+
   const user = JSON.parse(localStorage.getItem("user"));
   const AttachmentRef = useRef(null);
   const { state: transactionData } = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const actionMenuData = useSelector((state) => state?.actionMenu?.actionData);
 
   const [updateRequest, setUpdateRequest] = useState({
     id: "",
@@ -566,6 +570,42 @@ const AddTransfer = (props) => {
     }
   }, [data, edit]);
 
+  useEffect(() => {
+    if (actionMenuData) {
+      // fixedAssetTrigger();
+      reset({
+        description: "",
+        one_charging_id: null,
+        department_id: null,
+        company_id: null,
+        business_unit_id: null,
+        unit_id: null,
+        subunit_id: null,
+        location_id: null,
+        attachments: null,
+
+        assets: actionMenuData?.map((asset) => ({
+          id: asset.id,
+          fixed_asset_id: asset?.asset,
+          asset_accountable: asset?.asset?.accountable === "-" ? "Common" : asset?.asset?.accountable,
+          created_at: asset.created_at || asset.acquisition_date,
+          depreciation_debit_id: asset?.asset?.depreciation_debit,
+          one_charging_id: asset?.asset.one_charging?.name,
+          company_id: asset?.asset.one_charging?.company_name,
+          business_unit_id: asset?.asset.one_charging?.business_unit_name,
+          department_id: asset?.asset.one_charging?.department_name,
+          unit_id: asset?.asset.one_charging?.unit_name,
+          sub_unit_id: asset?.asset.one_charging?.subunit_name,
+          location_id: asset?.asset.one_charging?.location_name,
+          accountability: null,
+          accountable: null,
+          receiver_id: null,
+          remaining_book_value: asset?.asset?.remaining_book_value,
+        })),
+      });
+    }
+  }, [actionMenuData]);
+
   //* Form functions ----------------------------------------------------------------
   const addTransferHandler = (formData) => {
     console.log("formData", formData);
@@ -597,6 +637,8 @@ const AddTransfer = (props) => {
         accountable: item?.accountable?.full_id_number_full_name?.toString() || "",
         receiver_id: item?.receiver_id?.user?.id || item?.receiver_id?.id,
       })),
+
+      is_spare: actionMenuData !== null ? 1 : 0,
     };
 
     console.log("data", data);
@@ -652,6 +694,7 @@ const AddTransfer = (props) => {
                 duration: 5000,
               })
             );
+            dispatch(resetGetData());
 
             setIsLoading(false);
             transactionData && reset();
@@ -856,8 +899,6 @@ const AddTransfer = (props) => {
   const user_id = user.id;
   const one_charging_id = watch("one_charging_id_coordinator")?.id || null;
 
-  console.log("one_charging_id", one_charging_id);
-
   return (
     <>
       <Box className="mcontainer">
@@ -869,6 +910,7 @@ const AddTransfer = (props) => {
             startIcon={<ArrowBackIosRounded color="secondary" />}
             onClick={() => {
               navigate(-1);
+              dispatch(resetGetData());
             }}
             disableRipple
             sx={{ mt: "-5px", "&:hover": { backgroundColor: "transparent" } }}
@@ -895,7 +937,12 @@ const AddTransfer = (props) => {
             : !transactionData?.approved && <></>} */}
         </Stack>
 
-        <Box className="request request__wrapper" p={2} component="form" onSubmit={handleSubmit(addTransferHandler)}>
+        <Box
+          className={isSmallScreen ? "request request__wrapper" : "request__wrapper"}
+          p={2}
+          component="form"
+          onSubmit={handleSubmit(addTransferHandler)}
+        >
           {isTransferLoading || isTransferFetching ? (
             <AddTransferSkeleton />
           ) : (
@@ -1244,6 +1291,7 @@ const AddTransfer = (props) => {
                       />
                     )}
                     onChange={(_, value) => {
+                      console.log("value", value);
                       if (value) {
                         setValue("department_id", value);
                         setValue("company_id", value);
@@ -1260,20 +1308,8 @@ const AddTransfer = (props) => {
                         setValue("location_id", null);
                       }
 
-                      // fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
-                      // fields.forEach((item, index) => setValue(`assets.${index}.receiver_id`, null));
-                      // fields.forEach((item, index) => setValue(`assets.${index}.accountable`, null));
-                      // fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
-                      // fields.forEach((item, index) => setValue(`assets.${index}.one_charging_id`, null));
-                      // fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
-                      // fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
-                      // fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
-                      // fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
-                      // fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
-                      // fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
-                      // fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
-                      // fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
-
+                      fields.forEach((item, index) => setValue(`assets.${index}.receiver_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.accountable`, null));
                       return value;
                     }}
                   />
@@ -1298,24 +1334,6 @@ const AddTransfer = (props) => {
                         helperText={errors?.department_id?.message}
                       />
                     )}
-                    // onChange={(_, value) => {
-                    //   const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
-                    //   const businessUnitID = businessUnitData?.find(
-                    //     (item) => item.sync_id === value.business_unit.business_unit_sync_id
-                    //   );
-
-                    //   if (value) {
-                    //     setValue("company_id", companyID);
-                    //     setValue("business_unit_id", businessUnitID);
-                    //   } else {
-                    //     setValue("company_id", null);
-                    //     setValue("business_unit_id", null);
-                    //   }
-                    //   setValue("unit_id", null);
-                    //   setValue("subunit_id", null);
-                    //   setValue("location_id", null);
-                    //   return value;
-                    // }}
                   />
 
                   <CustomAutoComplete
@@ -1379,11 +1397,6 @@ const AddTransfer = (props) => {
                         helperText={errors?.unit_id?.message}
                       />
                     )}
-                    // onChange={(_, value) => {
-                    //   setValue("subunit_id", null);
-                    //   setValue("location_id", null);
-                    //   return value;
-                    // }}
                   />
 
                   <CustomAutoComplete
@@ -1456,6 +1469,7 @@ const AddTransfer = (props) => {
                     <RemoveFile title="Evaluation Form" value="attachments" />
                   )}
                 </Stack>
+
                 <Box mt="-13px" ml="10px">
                   {watch("attachments")
                     ? watch("attachments").map((item, index) => (
@@ -1480,8 +1494,18 @@ const AddTransfer = (props) => {
             </Stack>
           )}
 
+          {!!!isSmallScreen && (
+            <Box my={2}>
+              <Divider />
+            </Box>
+          )}
+
           {/* TABLE */}
           <Box className="request__table">
+            <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
+              {`${transactionData ? `TRANSACTION NO. ${transactionData?.id}` : "FIXED ASSET"}`}
+            </Typography>
+
             <TableContainer className="request__th-body  request__wrapper" sx={{ height: "calc(100vh - 280px)" }}>
               <Table className="request__table " stickyHeader>
                 <TableHead>
@@ -1501,9 +1525,11 @@ const AddTransfer = (props) => {
                     <TableCell className="tbl-cell">Chart Of Accounts</TableCell>
                     <TableCell className="tbl-cell">Remaining Book Value</TableCell>
                     <TableCell className="tbl-cell">Acquisition Date</TableCell>
-                    <TableCell className="tbl-cell" align="center">
-                      Action
-                    </TableCell>
+                    {actionMenuData === null && (
+                      <TableCell className="tbl-cell" align="center">
+                        Action
+                      </TableCell>
+                    )}
                   </TableRow>
                 </TableHead>
 
@@ -1538,7 +1564,9 @@ const AddTransfer = (props) => {
                                       ? []
                                       : vTagNumberCoordinatorData
                                   }
-                                  onOpen={() => fixedAssetCoordinatorTrigger({ one_charging_id: one_charging_id })}
+                                  onOpen={() =>
+                                    fixedAssetCoordinatorTrigger({ one_charging_id: one_charging_id, is_spare: 0 })
+                                  }
                                   loading={isVTagNumberCoordinatorLoading || isVTagNumberCoordinatorFetching}
                                   disabled={
                                     edit ? false : transactionData?.view || watch("location_id_coordinator") === null
@@ -1570,7 +1598,6 @@ const AddTransfer = (props) => {
                                   }
                                   onChange={(_, newValue) => {
                                     if (newValue) {
-                                      // onChange(newValue);
                                       console.log("newValue: ", newValue);
                                       onChange(newValue);
                                       setValue(
@@ -1579,6 +1606,7 @@ const AddTransfer = (props) => {
                                       );
                                       setValue(`assets.${index}.id`, newValue.id);
                                       setValue(`assets.${index}.created_at`, newValue.created_at);
+                                      setValue(`assets.${index}.depreciation_debit_id`, newValue.depreciation_debit);
                                       setValue(`assets.${index}.one_charging_id`, newValue.one_charging?.name);
                                       setValue(`assets.${index}.company_id`, newValue.one_charging?.company_name);
                                       setValue(
@@ -1593,7 +1621,16 @@ const AddTransfer = (props) => {
                                     } else {
                                       onChange(null);
                                       setValue(`assets.${index}.asset_accountable`, "");
+                                      setValue(`assets.${index}.remaining_book_value`, "");
                                       setValue(`assets.${index}.created_at`, null);
+                                      setValue(`assets.${index}.depreciation_debit_id`, null);
+                                      setValue(`assets.${index}.one_charging_id`, "");
+                                      setValue(`assets.${index}.company_id`, "");
+                                      setValue(`assets.${index}.business_unit_id`, "");
+                                      setValue(`assets.${index}.department_id`, "");
+                                      setValue(`assets.${index}.unit_id`, "");
+                                      setValue(`assets.${index}.sub_unit_id`, "");
+                                      setValue(`assets.${index}.location_id`, "");
                                     }
 
                                     return newValue;
@@ -1635,9 +1672,9 @@ const AddTransfer = (props) => {
                               render={({ field: { ref, value, onChange } }) => (
                                 <Autocomplete
                                   options={vTagNumberData}
-                                  onOpen={() => (isVTagNumberSuccess ? null : fixedAssetTrigger())}
+                                  onOpen={() => (isVTagNumberSuccess ? null : fixedAssetTrigger({ is_spare: 0 }))}
                                   loading={isVTagNumberLoading}
-                                  disabled={edit ? false : transactionData?.view}
+                                  disabled={edit ? false : transactionData?.view || actionMenuData !== null}
                                   size="small"
                                   value={value}
                                   // disableClearable
@@ -1749,7 +1786,7 @@ const AddTransfer = (props) => {
                                       ? false
                                       : transactionData?.view ||
                                         // watch(`assets.${index}.fixed_asset_id`) === null ||
-                                        watch("location_id") === null
+                                        watch("one_charging_id") === null
                                   }
                                   size="small"
                                   value={value}
@@ -2148,7 +2185,6 @@ const AddTransfer = (props) => {
                         </TableCell>
 
                         <TableCell className="tbl-cell">
-                          {console.log(`👀👀👀👀👀${index}`, watch(`assets.${index}.depreciation_debit_id`))}
                           <CustomAutoComplete
                             autoComplete
                             name={`assets.${index}.depreciation_debit_id`}
@@ -2225,7 +2261,7 @@ const AddTransfer = (props) => {
                               "& .MuiInputBase-input": {
                                 backgroundColor: "transparent",
                                 textOverflow: "ellipsis",
-                                fontWeight: "500",
+                                // fontWeight: "500",
                               },
                               "& .MuiInputBase-inputMultiline": {
                                 display: "flex",
@@ -2237,7 +2273,6 @@ const AddTransfer = (props) => {
                               ml: "-15px",
                               minWidth: "150px",
                             }}
-                            inputProps={{ color: "red" }}
                           />
                         </TableCell>
 
@@ -2501,20 +2536,26 @@ const AddTransfer = (props) => {
                           />
                         </TableCell>
 
-                        <TableCell align="center" className="tbl-cell">
-                          <IconButton
-                            onClick={() => remove(index)}
-                            disabled={edit ? false : fields.length === 1 || transactionData?.view}
-                          >
-                            <Tooltip title="Delete Row" placement="top" arrow>
-                              <RemoveCircle
-                                color={
-                                  fields.length === 1 || transactionData?.view ? (edit ? "warning" : "gray") : "warning"
-                                }
-                              />
-                            </Tooltip>
-                          </IconButton>
-                        </TableCell>
+                        {actionMenuData === null && (
+                          <TableCell align="center" className="tbl-cell">
+                            <IconButton
+                              onClick={() => remove(index)}
+                              disabled={edit ? false : fields.length === 1 || transactionData?.view}
+                            >
+                              <Tooltip title="Delete Row" placement="top" arrow>
+                                <RemoveCircle
+                                  color={
+                                    fields.length === 1 || transactionData?.view
+                                      ? edit
+                                        ? "warning"
+                                        : "gray"
+                                      : "warning"
+                                  }
+                                />
+                              </Tooltip>
+                            </IconButton>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))
                   )}
@@ -2529,11 +2570,11 @@ const AddTransfer = (props) => {
                             startIcon={<Add />}
                             onClick={() => handleAppendItem()}
                             disabled={
-                              watch(`assets`).some((item) => item?.fixed_asset_id === null)
+                              (watch(`assets`).some((item) => item?.fixed_asset_id === null)
                                 ? true
                                 : edit
                                 ? false
-                                : transactionData?.view
+                                : transactionData?.view) || actionMenuData !== null
                             }
                           >
                             Add Row
@@ -2576,7 +2617,6 @@ const AddTransfer = (props) => {
                       </Button>
                     )}
                     <LoadingButton
-                      // onClick={onSubmitHandler}
                       type="submit"
                       variant="contained"
                       size="small"
