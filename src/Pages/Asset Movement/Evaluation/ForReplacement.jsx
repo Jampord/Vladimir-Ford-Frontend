@@ -32,11 +32,13 @@ import CustomTablePagination from "../../../Components/Reusable/CustomTablePagin
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { Delete, FileCopy, Handyman, More } from "@mui/icons-material";
+import { Delete, FileCopy, Handyman, More, RemoveCircle, TransferWithinAStation } from "@mui/icons-material";
 import { useDispatch, useSelector } from "react-redux";
 import { closeDialog, closeDialog1, openDialog, openDialog1 } from "../../../Redux/StateManagement/booleanStateSlice";
 import ForReplacementDialog from "./ForReplacementDialog";
 import PulloutTimeline from "../PulloutTimeline";
+import { getData } from "../../../Redux/StateManagement/actionMenuSlice";
+import { useNavigate } from "react-router-dom";
 
 const schema = yup.object().shape({
   item_id: yup.array(),
@@ -56,6 +58,7 @@ const ForReplacement = ({ tab }) => {
   const dispatch = useDispatch();
   const dialog1 = useSelector((state) => state.booleanState.dialog);
   const dialog2 = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
+  const navigate = useNavigate();
 
   const {
     data: evaluationData,
@@ -121,15 +124,45 @@ const ForReplacement = ({ tab }) => {
     setAnchorEl(null);
     setAction("disposal");
   };
+  const handleSpareClick = () => {
+    setAnchorEl(null);
+    dispatch(getData(selectedItems));
+    navigate("/asset-movement/transfer/add-transfer", {
+      // replace: true,
+    });
+  };
+  const handleDisposalClick = () => {
+    setAnchorEl(null);
+    dispatch(getData(selectedItems));
+    navigate("/asset-movement/disposal/add-disposal", {
+      // replace: true,
+    });
+  };
 
   const handleViewTimeline = (data) => {
     dispatch(openDialog());
     setTransactionData(data);
   };
 
-  console.log("watch", watch("item_id"));
+  const areAllCOASame = (assets) => {
+    if (assets) {
+      if (assets?.length === 0) return true; // No assets to compare
+
+      const oneCharging = assets[0]?.asset?.one_charging?.id;
+
+      for (let i = 1; i < assets.length; i++) {
+        if (assets[i]?.asset?.one_charging?.id !== oneCharging) {
+          return false; // Found a different one charging
+        }
+      }
+      return true; // All COA are the same
+    }
+  };
+
+  // console.log("watch", watch("item_id"));
 
   const selectedItems = evaluationData?.data?.filter((item) => watch("item_id").includes(item?.id?.toString()));
+  const result = areAllCOASame(selectedItems);
 
   console.log("selectedItems", selectedItems);
 
@@ -173,6 +206,54 @@ const ForReplacement = ({ tab }) => {
             </Box>
           )}
 
+          {(!isEvaluationLoading || !isEvaluationFetching) && tab === "6" && (
+            <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }} mr="10px">
+              <Button
+                onClick={handleClick}
+                variant="contained"
+                startIcon={isSmallScreen ? null : <More />}
+                size="small"
+                disabled={watch("item_id").length === 0 || result === false}
+                sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+              >
+                {isSmallScreen ? <More color="black" sx={{ fontSize: "20px" }} /> : "Action"}
+              </Button>
+
+              <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                <MenuItem dense onClick={handleSpareClick}>
+                  <ListItemIcon>
+                    <TransferWithinAStation fontSize="small" sx={{ color: "primary" }} />
+                  </ListItemIcon>
+                  <ListItemText>Transfer</ListItemText>
+                </MenuItem>
+              </Menu>
+            </Box>
+          )}
+
+          {(!isEvaluationLoading || !isEvaluationFetching) && tab === "7" && (
+            <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }} mr="10px">
+              <Button
+                onClick={handleClick}
+                variant="contained"
+                startIcon={isSmallScreen ? null : <More />}
+                size="small"
+                disabled={watch("item_id").length === 0 || result === false}
+                sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+              >
+                {isSmallScreen ? <More color="black" sx={{ fontSize: "20px" }} /> : "Action"}
+              </Button>
+
+              <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                <MenuItem dense onClick={handleDisposalClick}>
+                  <ListItemIcon>
+                    <RemoveCircle fontSize="small" sx={{ color: "#a32424" }} />
+                  </ListItemIcon>
+                  <ListItemText>Dispose</ListItemText>
+                </MenuItem>
+              </Menu>
+            </Box>
+          )}
+
           <Box>
             <TableContainer className="mcontainer__th-body-category">
               <Table className="mcontainer__table" stickyHeader>
@@ -185,7 +266,7 @@ const ForReplacement = ({ tab }) => {
                       },
                     }}
                   >
-                    {tab === "5" && (
+                    {(tab === "5" || tab === "6" || tab === "7") && (
                       <TableCell align="center" className="tbl-cell">
                         <FormControlLabel
                           sx={{ margin: "auto", align: "center" }}
@@ -209,6 +290,7 @@ const ForReplacement = ({ tab }) => {
                     )}
                     <TableCell className="tbl-cell">Request #</TableCell>
                     <TableCell className="tbl-cell">Description</TableCell>
+                    <TableCell className="tbl-cell">Helpdesk #</TableCell>
                     <TableCell className="tbl-cell">Asset</TableCell>
                     <TableCell className="tbl-cell">Chart of Account</TableCell>
                     <TableCell className="tbl-cell" align="center">
@@ -234,7 +316,7 @@ const ForReplacement = ({ tab }) => {
                           }}
                           hover
                         >
-                          {tab === "5" && (
+                          {(tab === "5" || tab === "6" || tab === "7") && (
                             <TableCell className="tbl-cell" size="small" align="center">
                               <FormControlLabel
                                 value={item?.id}
@@ -251,6 +333,7 @@ const ForReplacement = ({ tab }) => {
                           )}
                           <TableCell className="tbl-cell">{item?.id}</TableCell>
                           <TableCell className="tbl-cell">{item?.description}</TableCell>
+                          <TableCell className="tbl-cell">{item?.helpdesk_number}</TableCell>
                           <TableCell className="tbl-cell ">
                             <Typography fontWeight={700} fontSize="13px" color="primary">
                               {item?.asset.vladimir_tag_number}
@@ -339,14 +422,22 @@ const ForReplacement = ({ tab }) => {
               </Table>
             </TableContainer>
 
-            <CustomTablePagination
-              total={evaluationData?.total}
-              success={isEvaluationSuccess}
-              current_page={evaluationData?.current_page}
-              per_page={evaluationData?.per_page}
-              onPageChange={pageHandler}
-              onRowsPerPageChange={perPageHandler}
-            />
+            <Box className="mcontainer__pagination-export">
+              <Box />
+              {result === false && tab !== "5" && (
+                <Typography noWrap fontSize="13px" color="error">
+                  Selected items does not have the same COA.
+                </Typography>
+              )}
+              <CustomTablePagination
+                total={evaluationData?.total}
+                success={isEvaluationSuccess}
+                current_page={evaluationData?.current_page}
+                per_page={evaluationData?.per_page}
+                onPageChange={pageHandler}
+                onRowsPerPageChange={perPageHandler}
+              />
+            </Box>
           </Box>
         </Box>
       )}
