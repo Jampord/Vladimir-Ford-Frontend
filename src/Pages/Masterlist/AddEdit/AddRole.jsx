@@ -192,6 +192,8 @@ const AddRole = (props) => {
     "pull-out",
     "disposal",
     "transfer-receiving",
+    "disposal-receiving",
+    "transfer-pullout-releasing",
     "evaluation",
     "mis-warehouse",
     "fixed-asset-warehouse",
@@ -251,7 +253,15 @@ const AddRole = (props) => {
     "requisition-releasing",
     "requisition-releasing-monitoring",
   ];
-  const assetMovement = ["transfer", "pull-out", "disposal", "transfer-receiving", "evaluation"];
+  const assetMovement = [
+    "transfer",
+    "pull-out",
+    "disposal",
+    "transfer-receiving",
+    "disposal-receiving",
+    "transfer-pullout-releasing",
+    "evaluation",
+  ];
   const approving = [
     "approving-request",
     "approving-transfer",
@@ -521,11 +531,13 @@ const AddRole = (props) => {
       { label: "Asset Transfer", value: "transfer" },
       { label: "Asset Pullout", value: "pull-out" },
       { label: "Receiving of Transfer", value: "transfer-receiving" },
+      { label: "Transfer Releasing (Pullout)", value: "transfer-pullout-releasing" },
     ];
 
     const assetMovement2 = [
       { label: "Asset Evaluation", value: "evaluation" },
       { label: "Asset Disposal", value: "disposal" },
+      { label: "Receiving of Disposal", value: "disposal-receiving" },
     ];
     const assetMovement3 = [
       { label: "MIS - Warehouse", value: "mis-warehouse" },
@@ -535,9 +547,11 @@ const AddRole = (props) => {
 
     return (
       <Stack flexDirection="row" flexWrap="wrap" justifyContent="space-evenly" gap={1}>
-        <CheckboxGroup items={assetMovement1} />
-        <CheckboxGroup items={assetMovement2} />
-        <CheckboxGroup title="Warehouse Permission" items={assetMovement3} />
+        <Box>
+          <CheckboxGroup items={assetMovement1} />
+          <CheckboxGroup items={assetMovement2} />
+        </Box>
+        <CheckboxGroup title="Warehouse Permission (Pullout)" items={assetMovement3} />
       </Stack>
     );
   };
@@ -1153,6 +1167,8 @@ const AddRole = (props) => {
                                     "pull-out",
                                     "disposal",
                                     "transfer-receiving",
+                                    "disposal-receiving",
+                                    "transfer-pullout-releasing",
                                     "evaluation",
                                     "mis-warehouse",
                                     "fixed-asset-warehouse",
