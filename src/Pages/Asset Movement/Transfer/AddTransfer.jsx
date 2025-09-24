@@ -106,6 +106,7 @@ import {
 } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
 import AddTransferSkeleton from "./Skeleton/AddTransferSkeleton";
 import { resetGetData } from "../../../Redux/StateManagement/actionMenuSlice";
+import { useLazyGetWarehouseAllApiQuery } from "../../../Redux/Query/Masterlist/Warehouse";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -237,7 +238,7 @@ const AddTransfer = (props) => {
   } = useGetTransferNumberApiQuery({ transfer_number: transactionData?.id }, { refetchOnMountOrArgChange: true });
 
   const data = transferData?.at(0);
-  // console.log("transferData: ", data);
+  const spareData = data?.is_spare;
 
   const [
     oneChargingTrigger,
@@ -409,6 +410,16 @@ const AddTransfer = (props) => {
     { data: receiverData = [], isLoading: isReceiverLoading, isSuccess: isReceiverSuccess, isError: isReceiverError },
   ] = useLazyGetReceiverSettingsAllApiQuery();
 
+  const [
+    warehouseTrigger,
+    {
+      data: warehouseData = [],
+      isLoading: isWarehouseLoading,
+      isSuccess: isWarehouseSuccess,
+      isError: isWarehouseError,
+      refetch: isWarehouseRefetch,
+    },
+  ] = useLazyGetWarehouseAllApiQuery();
   //* useForm --------------------------------------------------------------------
   const {
     handleSubmit,
@@ -543,6 +554,7 @@ const AddTransfer = (props) => {
         unit_id: data?.one_charging,
         subunit_id: data?.one_charging,
         location_id: data?.one_charging,
+        releasing_warehouse_id: data?.releasing_warehouse,
         // account_title_id: null,
 
         remarks: data?.remarks || "",
@@ -627,6 +639,7 @@ const AddTransfer = (props) => {
       unit_id: formData.unit_id.unit_id?.toString(),
       subunit_id: formData.subunit_id.subunit_id?.toString(),
       location_id: formData?.location_id.location_id?.toString(),
+      releasing_warehouse_id: formData?.releasing_warehouse_id?.sync_id?.toString() || "",
 
       attachments: formData?.attachments,
 
@@ -638,7 +651,7 @@ const AddTransfer = (props) => {
         receiver_id: item?.receiver_id?.user?.id || item?.receiver_id?.id,
       })),
 
-      is_spare: actionMenuData !== null ? 1 : 0,
+      is_spare: actionMenuData !== null || spareData === 1 ? 1 : 0,
     };
 
     console.log("data", data);
@@ -898,6 +911,8 @@ const AddTransfer = (props) => {
   const isCoordinator = user?.has_handle === 1;
   const user_id = user.id;
   const one_charging_id = watch("one_charging_id_coordinator")?.id || null;
+
+  console.log("watch warehouse", watch("releasing_warehouse_id"));
 
   return (
     <>
@@ -1441,6 +1456,35 @@ const AddTransfer = (props) => {
                     )}
                   />
                 </Stack>
+
+                {(actionMenuData !== null || data?.is_spare === 1) && (
+                  <Stack gap={2}>
+                    <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
+                      Warehouse
+                    </Typography>
+
+                    <CustomAutoComplete
+                      control={control}
+                      name="releasing_warehouse_id"
+                      options={warehouseData}
+                      onOpen={() => (isWarehouseSuccess ? null : warehouseTrigger(0))}
+                      loading={isWarehouseLoading}
+                      disabled={transactionData?.view}
+                      getOptionLabel={(option) => option.warehouse_name}
+                      getOptionKey={(option) => option.warehouse_code}
+                      isOptionEqualToValue={(option, value) => option.id === value.id}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          color="secondary"
+                          label="Releasing Warehouse"
+                          error={!!errors?.releasing_warehouse_id}
+                          helperText={errors?.releasing_warehouse_id?.message}
+                        />
+                      )}
+                    />
+                  </Stack>
+                )}
 
                 <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px" }}>
                   ATTACHMENTS
@@ -2623,7 +2667,7 @@ const AddTransfer = (props) => {
                       color="secondary"
                       startIcon={<Create color={"primary"} />}
                       loading={isPostLoading || isUpdateLoading}
-                      disabled={!isValid || !isDirty}
+                      disabled={!isValid || !isDirty || (actionMenuData !== null && !watch("releasing_warehouse_id"))}
                       sx={{ mt: "10px" }}
                     >
                       {transactionData?.status === "Returned"
