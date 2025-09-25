@@ -611,6 +611,7 @@ const Sidebar = () => {
           icon: CallReceived,
           path: "/asset-movement/transfer-pullout-releasing",
           permission: "transfer-pullout-releasing",
+          notification: notifData?.pulloutTransferReleasingCount,
           setter: closeCollapse,
         },
         {
@@ -659,7 +660,7 @@ const Sidebar = () => {
           icon: HighlightAlt,
           path: "/asset-movement/disposal-receiving",
           permission: "disposal-receiving",
-          // notification: notifData?.toTransferReceiving,
+          notification: notifData?.disposalReceivingCount,
           setter: closeCollapse,
         },
       ],
