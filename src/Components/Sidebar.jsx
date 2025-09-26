@@ -639,6 +639,7 @@ const Sidebar = () => {
           icon: AssignmentTurnedIn,
           path: "/asset-movement/pull-out-confirmation",
           permission: "pull-out",
+          notification: notifData?.repairedCount,
           setter: closeCollapse,
         },
         // {
