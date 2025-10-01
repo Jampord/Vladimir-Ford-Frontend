@@ -421,7 +421,7 @@ const Sidebar = () => {
       icon: InventoryRounded,
       path: "/fixed-asset",
       permission: "fixed-asset",
-      notification: notifData?.toTagCount,
+      notification: notifData?.toTagCount || notifData?.toSmallToolTagging,
       children: [
         {
           label: "Fixed Asset",
@@ -589,7 +589,16 @@ const Sidebar = () => {
       icon: MoveUpRounded,
       path: "/asset-movement",
       permission: "asset-movement",
-      notification: notifData?.toTransferReceiving,
+      notification:
+        notifData?.toTransferReceiving ||
+        notifData?.pulloutTransferReleasingCount ||
+        notifData?.toPickUpCount ||
+        notifData?.toEvaluateCount ||
+        notifData?.toReplaceCount ||
+        notifData?.spareCount ||
+        notifData?.disposalCount ||
+        notifData?.repairedCount ||
+        notifData?.disposalReceivingCount,
       children: [
         {
           label: "Transfer",
@@ -687,11 +696,12 @@ const Sidebar = () => {
       path: "/approving",
       permission: "approving",
       notification: permissions.includes("final-approving")
-        ? notifData?.toApproveCount +
-          notifData?.toAcquisitionFaApproval +
-          notifData?.toTransferApproveCount +
-          notifData?.toTransferFaApproval
-        : notifData?.toApproveCount || notifData?.toTransferApproveCount,
+        ? notifData?.toApproveCount ||
+          notifData?.toAcquisitionFaApproval ||
+          notifData?.toTransferApproveCount ||
+          notifData?.toTransferFaApproval ||
+          notifData?.disposalApprovalCount
+        : notifData?.toApproveCount || notifData?.toTransferApproveCount || notifData?.disposalApprovalCount,
       children: [
         {
           label: "Request",
