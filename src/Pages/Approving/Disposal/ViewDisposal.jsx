@@ -39,6 +39,8 @@ import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { useFileView } from "../../../Hooks/useFileView";
+import MasterlistSkeleton from "../../Skeleton/MasterlistSkeleton";
+import ErrorFetching from "../../ErrorFetching";
 
 const schema = yup.object().shape({
   description: yup.string().required().label("Description"),
@@ -145,7 +147,7 @@ const ViewDisposal = () => {
         assets: disposalData[0]?.assets.map((asset) => ({
           id: asset.id,
           fixed_asset_id: asset,
-          asset_accountable: asset?.accountable === "-" ? "Common" : asset?.accountable,
+          asset_accountable: asset?.accountable === "-" || asset?.accountable === " " ? "Common" : asset?.accountable,
           created_at:
             moment(asset.created_at).format("MMM. DD, YYYY") || moment(asset.acquisition_date).format("MMM. DD, YYYY"),
           one_charging_id: asset?.one_charging?.name,
@@ -244,13 +246,13 @@ const ViewDisposal = () => {
             } else if (err?.status === 422) {
               navigate(`/approving/disposal`);
             } else if (err?.status !== 422) {
-              dispatch(
-                openToast({
-                  message: "Something went wrong. Please try again.",
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
+              // dispatch(
+              //   openToast({
+              //     message: "Something went wrong. Please try again.",
+              //     duration: 5000,
+              //     variant: "error",
+              //   })
+              // );
               navigate(`/approving/disposal`);
             }
           };
@@ -320,13 +322,13 @@ const ViewDisposal = () => {
             } else if (err?.status === 422) {
               navigate(`/approving/disposal`);
             } else if (err?.status !== 422) {
-              dispatch(
-                openToast({
-                  message: "Something went wrong. Please try again.",
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
+              // dispatch(
+              //   openToast({
+              //     message: "Something went wrong. Please try again.",
+              //     duration: 5000,
+              //     variant: "error",
+              //   })
+              // );
               navigate(`/approving/disposal`);
             }
           };
@@ -382,267 +384,236 @@ const ViewDisposal = () => {
         </Button>
       </Stack>
 
-      <Box
-        className={isSmallScreen ? "request request__wrapper" : "request__wrapper"}
-        p={2}
-        component="form"
-        // onSubmit={handleSubmit(addDisposalHandler)}
-      >
-        <Stack>
-          <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
-            {`DISPOSAL No. ${transactionData?.id} `}
-          </Typography>
-          <Stack id="requestForm" className="request__form" gap={2} pb={1}>
-            <Stack gap={2}>
-              <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
-                DISPOSAL DETAILS
-              </Typography>
+      {isDisposalLoading && <MasterlistSkeleton />}
+      {disposalError && <ErrorFetching refetch={refetch} error={errorData} />}
+      {disposalData && !disposalError && !isDisposalLoading && (
+        <Box
+          className={isSmallScreen ? "request request__wrapper" : "request__wrapper"}
+          p={2}
+          component="form"
+          // onSubmit={handleSubmit(addDisposalHandler)}
+        >
+          <Stack>
+            <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
+              {`DISPOSAL No. ${transactionData?.id} `}
+            </Typography>
 
-              <CustomTextField
-                control={control}
-                name="description"
-                label="Description"
-                type="text"
-                error={!!errors?.description}
-                helperText={errors?.description?.message}
-                fullWidth
-                multiline
-                disabled
-              />
+            <Stack id="requestForm" className="request__form" gap={2} pb={1}>
+              <Stack gap={2}>
+                <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px", mb: "-10px" }}>
+                  DISPOSAL DETAILS
+                </Typography>
 
-              <CustomTextField
-                control={control}
-                name="remarks"
-                label="Remarks (Optional)"
-                optional
-                type="text"
-                error={!!errors?.remarks}
-                helperText={errors?.remarks?.message}
-                fullWidth
-                multiline
-                disabled
-              />
-
-              <CustomAutoComplete
-                control={control}
-                name="receiving_warehouse_id"
-                options={[]}
-                disabled
-                freeSolo
-                getOptionLabel={(option) => option.warehouse_name}
-                getOptionKey={(option) => option.warehouse_code}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    color="secondary"
-                    label="Receiving Warehouse"
-                    error={!!errors?.receiving_warehouse_id}
-                    helperText={errors?.receiving_warehouse_id?.message}
-                  />
-                )}
-              />
-
-              {watch("attachments") !== null ? (
-                <UpdateField label={"Attachments"} value={watch("attachments")?.length} />
-              ) : (
-                <CustomMultipleAttachment
+                <CustomTextField
                   control={control}
-                  name="attachments"
-                  label="Attachments"
-                  inputRef={AttachmentRef}
-                  error={!!errors?.attachments?.message}
-                  helperText={errors?.attachments?.message}
-                  requiredField
+                  name="description"
+                  label="Description"
+                  type="text"
+                  error={!!errors?.description}
+                  helperText={errors?.description?.message}
+                  fullWidth
+                  multiline
                   disabled
                 />
-              )}
 
-              <Box mt="-13px" ml="10px">
-                {watch("attachments")
-                  ? watch("attachments").map((item, index) => (
-                      <Typography
-                        fontSize="12px"
-                        fontWeight="bold"
-                        key={index}
-                        onClick={() => transactionData?.approving && handleFileView(item?.id)}
-                        sx={{
-                          cursor: transactionData?.approving && "pointer",
-                          textDecoration: transactionData?.approving && "underline",
-                          mb: 1,
-                        }}
-                        maxWidth={"265px"}
-                      >
-                        • {item?.name}
-                      </Typography>
-                    ))
-                  : null}
-              </Box>
-            </Stack>
+                <CustomTextField
+                  control={control}
+                  name="remarks"
+                  label="Remarks (Optional)"
+                  optional
+                  type="text"
+                  error={!!errors?.remarks}
+                  helperText={errors?.remarks?.message}
+                  fullWidth
+                  multiline
+                  disabled
+                />
 
-            {!!!isSmallScreen && (
-              <Box my={2}>
-                <Divider />
-              </Box>
-            )}
-          </Stack>
-        </Stack>
+                <CustomAutoComplete
+                  control={control}
+                  name="receiving_warehouse_id"
+                  options={[]}
+                  disabled
+                  freeSolo
+                  getOptionLabel={(option) => option.warehouse_name}
+                  getOptionKey={(option) => option.warehouse_code}
+                  isOptionEqualToValue={(option, value) => option.id === value.id}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      color="secondary"
+                      label="Receiving Warehouse"
+                      error={!!errors?.receiving_warehouse_id}
+                      helperText={errors?.receiving_warehouse_id?.message}
+                    />
+                  )}
+                />
 
-        <Box className="request__table">
-          <Box textAlign={"center"}>
-            <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
-              ASSET DETAILS
-            </Typography>
-          </Box>
-
-          <TableContainer className="request__th-body  request__wrapper" sx={{ height: "calc(100vh - 280px)" }}>
-            <Table className="request__table " stickyHeader>
-              <TableHead>
-                <TableRow
-                  sx={{
-                    "& > *": {
-                      fontWeight: "bold",
-                      whiteSpace: "nowrap",
-                    },
-                  }}
-                >
-                  <TableCell className="tbl-cell">Index</TableCell>
-                  <TableCell className="tbl-cell">Asset</TableCell>
-                  <TableCell className="tbl-cell">Accountability</TableCell>
-                  <TableCell className="tbl-cell">Chart of Account</TableCell>
-                  <TableCell className="tbl-cell">Date Created</TableCell>
-                  <TableCell className="tbl-cell">Pullout Attachment</TableCell>
-                  <TableCell className="tbl-cell">Evaluation Attachment</TableCell>
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {isDisposalFetching ? (
-                  <LoadingData />
+                {watch("attachments") !== null ? (
+                  <UpdateField label={"Attachments"} value={watch("attachments")?.length} />
                 ) : (
-                  fields.map((item, index) => (
-                    <TableRow>
-                      <TableCell className="tbl-cell">
-                        <Avatar
+                  <CustomMultipleAttachment
+                    control={control}
+                    name="attachments"
+                    label="Attachments"
+                    inputRef={AttachmentRef}
+                    error={!!errors?.attachments?.message}
+                    helperText={errors?.attachments?.message}
+                    requiredField
+                    disabled
+                  />
+                )}
+
+                <Box mt="-13px" ml="10px">
+                  {watch("attachments")
+                    ? watch("attachments").map((item, index) => (
+                        <Typography
+                          fontSize="12px"
+                          fontWeight="bold"
+                          key={index}
+                          onClick={() => transactionData?.approving && handleFileView(item?.id)}
                           sx={{
-                            width: 24,
-                            height: 24,
-                            backgroundColor: "primary.main",
-                            fontSize: "14px",
+                            cursor: transactionData?.approving && "pointer",
+                            textDecoration: transactionData?.approving && "underline",
+                            mb: 1,
                           }}
+                          maxWidth={"265px"}
                         >
-                          {index + 1}
-                        </Avatar>
-                      </TableCell>
-                      <TableCell className="tbl-cell">
-                        <Controller
-                          control={control}
-                          name={`assets.${index}.fixed_asset_id`}
-                          render={({ field: { ref, value, onChange } }) => (
-                            <Autocomplete
-                              options={[]}
-                              disabled
-                              size="small"
-                              value={value}
-                              freeSolo
-                              getOptionLabel={(option) =>
-                                `(${option.vladimir_tag_number}) - ${option.asset_description}`
-                              }
-                              isOptionEqualToValue={(option, value) => option?.id === value?.id}
-                              renderInput={(params) => (
-                                <TextField
-                                  required
-                                  color="secondary"
-                                  {...params}
-                                  label="Tag Number"
-                                  multiline
-                                  maxRows={2}
-                                  sx={{
-                                    "& .MuiInputBase-inputMultiline": {
-                                      minHeight: "10px",
-                                    },
-                                  }}
-                                />
-                              )}
-                              sx={{
-                                ".MuiInputBase-root": {
-                                  borderRadius: "10px",
-                                  minHeight: "63px",
-                                },
-                                ".MuiInputLabel-root.Mui-disabled": {
-                                  backgroundColor: "transparent",
-                                },
-                                ".Mui-disabled": {
-                                  backgroundColor: "background.light",
-                                },
-                                ".MuiOutlinedInput-notchedOutline": {
-                                  bgcolor: "#f5c9861c",
-                                },
-                                "& .MuiFormLabel-root": {
-                                  lineHeight: "43px", // Adjust based on the height of the input
-                                },
-                                "& .Mui-focused": {
-                                  top: "-10%", // Center vertically
-                                },
-                                "& .MuiFormLabel-filled": {
-                                  top: "-10%", // Center vertically
-                                },
-                                ml: "-15px",
-                                minWidth: "230px",
-                                maxWidth: "550px",
-                              }}
-                            />
-                          )}
-                        />
-                      </TableCell>
-                      <TableCell className="tbl-cell">
-                        <TextField
-                          {...register(`assets.${index}.asset_accountable`)}
-                          variant="outlined"
-                          disabled
-                          multiline
-                          maxRows={2}
-                          type="text"
-                          error={!!errors?.accountableAccount}
-                          helperText={errors?.accountableAccount?.message}
-                          sx={{
-                            backgroundColor: "transparent",
-                            border: "none",
-                            "& .MuiOutlinedInput-root": {
-                              "& fieldset": {
-                                border: "none",
-                              },
-                            },
-                            "& .MuiInputBase-input": {
-                              backgroundColor: "transparent",
-                              textOverflow: "ellipsis",
-                              // fontWeight: "500",
-                            },
-                            "& .MuiInputBase-inputMultiline": {
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              // textAlign: "center",
-                            },
+                          • {item?.name}
+                        </Typography>
+                      ))
+                    : null}
+                </Box>
+              </Stack>
 
-                            ml: "-15px",
-                            minWidth: "150px",
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell className="tbl-cell">
-                        <Stack width="250px" rowGap={0}>
+              {!!!isSmallScreen && (
+                <Box my={2}>
+                  <Divider />
+                </Box>
+              )}
+            </Stack>
+          </Stack>
+
+          <Box className="request__table">
+            <Box textAlign={"center"}>
+              <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
+                ASSET DETAILS
+              </Typography>
+            </Box>
+
+            <TableContainer className="request__th-body  request__wrapper" sx={{ height: "calc(100vh - 280px)" }}>
+              <Table className="request__table " stickyHeader>
+                <TableHead>
+                  <TableRow
+                    sx={{
+                      "& > *": {
+                        fontWeight: "bold",
+                        whiteSpace: "nowrap",
+                      },
+                    }}
+                  >
+                    <TableCell className="tbl-cell">Index</TableCell>
+                    <TableCell className="tbl-cell">Asset</TableCell>
+                    <TableCell className="tbl-cell">Accountability</TableCell>
+                    <TableCell className="tbl-cell">Chart of Account</TableCell>
+                    <TableCell className="tbl-cell">Date Created</TableCell>
+                    <TableCell className="tbl-cell">Pullout Attachment</TableCell>
+                    <TableCell className="tbl-cell">Evaluation Attachment</TableCell>
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {isDisposalFetching ? (
+                    <LoadingData />
+                  ) : (
+                    fields.map((item, index) => (
+                      <TableRow>
+                        <TableCell className="tbl-cell">
+                          <Avatar
+                            sx={{
+                              width: 24,
+                              height: 24,
+                              backgroundColor: "primary.main",
+                              fontSize: "14px",
+                            }}
+                          >
+                            {index + 1}
+                          </Avatar>
+                        </TableCell>
+                        <TableCell className="tbl-cell">
+                          <Controller
+                            control={control}
+                            name={`assets.${index}.fixed_asset_id`}
+                            render={({ field: { ref, value, onChange } }) => (
+                              <Autocomplete
+                                options={[]}
+                                disabled
+                                size="small"
+                                value={value}
+                                freeSolo
+                                getOptionLabel={(option) =>
+                                  `(${option.vladimir_tag_number}) - ${option.asset_description}`
+                                }
+                                isOptionEqualToValue={(option, value) => option?.id === value?.id}
+                                renderInput={(params) => (
+                                  <TextField
+                                    required
+                                    color="secondary"
+                                    {...params}
+                                    label="Tag Number"
+                                    multiline
+                                    maxRows={2}
+                                    sx={{
+                                      "& .MuiInputBase-inputMultiline": {
+                                        minHeight: "10px",
+                                      },
+                                    }}
+                                  />
+                                )}
+                                sx={{
+                                  ".MuiInputBase-root": {
+                                    borderRadius: "10px",
+                                    minHeight: "63px",
+                                  },
+                                  ".MuiInputLabel-root.Mui-disabled": {
+                                    backgroundColor: "transparent",
+                                  },
+                                  ".Mui-disabled": {
+                                    backgroundColor: "background.light",
+                                  },
+                                  ".MuiOutlinedInput-notchedOutline": {
+                                    bgcolor: "#f5c9861c",
+                                  },
+                                  "& .MuiFormLabel-root": {
+                                    lineHeight: "43px", // Adjust based on the height of the input
+                                  },
+                                  "& .Mui-focused": {
+                                    top: "-10%", // Center vertically
+                                  },
+                                  "& .MuiFormLabel-filled": {
+                                    top: "-10%", // Center vertically
+                                  },
+                                  ml: "-15px",
+                                  minWidth: "230px",
+                                  maxWidth: "550px",
+                                }}
+                              />
+                            )}
+                          />
+                        </TableCell>
+                        <TableCell className="tbl-cell">
                           <TextField
-                            {...register(`assets.${index}.one_charging_id`)}
+                            {...register(`assets.${index}.asset_accountable`)}
                             variant="outlined"
                             disabled
+                            multiline
+                            maxRows={2}
                             type="text"
-                            size="small"
+                            error={!!errors?.accountableAccount}
+                            helperText={errors?.accountableAccount?.message}
                             sx={{
                               backgroundColor: "transparent",
                               border: "none",
-
-                              ml: "-10px",
                               "& .MuiOutlinedInput-root": {
                                 "& fieldset": {
                                   border: "none",
@@ -650,207 +621,35 @@ const ViewDisposal = () => {
                               },
                               "& .MuiInputBase-input": {
                                 backgroundColor: "transparent",
-                                fontWeight: "bold",
-                                fontSize: "11px",
                                 textOverflow: "ellipsis",
+                                // fontWeight: "500",
                               },
-                              "& .Mui-disabled": {
-                                color: "red",
+                              "& .MuiInputBase-inputMultiline": {
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                // textAlign: "center",
                               },
-                              marginTop: "-15px",
+
+                              ml: "-15px",
+                              minWidth: "150px",
                             }}
                           />
+                        </TableCell>
 
-                          <TextField
-                            {...register(`assets.${index}.company_id`)}
-                            variant="outlined"
-                            disabled
-                            type="text"
-                            size="small"
-                            sx={{
-                              backgroundColor: "transparent",
-                              border: "none",
-
-                              ml: "-10px",
-                              "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                  border: "none",
-                                },
-                              },
-                              "& .MuiInputBase-input": {
-                                backgroundColor: "transparent",
-                                fontWeight: "bold",
-                                fontSize: "11px",
-                                textOverflow: "ellipsis",
-                              },
-                              "& .Mui-disabled": {
-                                color: "red",
-                              },
-                              marginTop: "-15px",
-                            }}
-                          />
-
-                          <TextField
-                            {...register(`assets.${index}.business_unit_id`)}
-                            variant="outlined"
-                            disabled
-                            type="text"
-                            size="small"
-                            sx={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              ml: "-10px",
-                              "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                  border: "none",
-                                },
-                              },
-                              "& .MuiInputBase-input": {
-                                backgroundColor: "transparent",
-                                fontWeight: "bold",
-                                fontSize: "11px",
-                                textOverflow: "ellipsis",
-                              },
-                              "& .Mui-disabled": {
-                                color: "red",
-                              },
-                              marginTop: "-15px",
-                            }}
-                          />
-
-                          <TextField
-                            {...register(`assets.${index}.department_id`)}
-                            variant="outlined"
-                            disabled
-                            type="text"
-                            size="small"
-                            sx={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              ml: "-10px",
-                              "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                  border: "none",
-                                },
-                              },
-                              "& .MuiInputBase-input": {
-                                backgroundColor: "transparent",
-                                fontWeight: "bold",
-                                fontSize: "11px",
-                                textOverflow: "ellipsis",
-                              },
-                              "& .Mui-disabled": {
-                                color: "red",
-                              },
-                              marginTop: "-15px",
-                            }}
-                          />
-
-                          <TextField
-                            {...register(`assets.${index}.unit_id`)}
-                            variant="outlined"
-                            disabled
-                            type="text"
-                            size="small"
-                            sx={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              ml: "-10px",
-                              "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                  border: "none",
-                                },
-                              },
-                              "& .MuiInputBase-input": {
-                                backgroundColor: "transparent",
-                                fontWeight: "bold",
-                                fontSize: "11px",
-                                textOverflow: "ellipsis",
-                              },
-                              "& .Mui-disabled": {
-                                color: "red",
-                              },
-                              marginTop: "-15px",
-                            }}
-                          />
-
-                          <TextField
-                            {...register(`assets.${index}.sub_unit_id`)}
-                            variant="outlined"
-                            disabled
-                            type="text"
-                            size="small"
-                            sx={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              ml: "-10px",
-                              "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                  border: "none",
-                                },
-                              },
-                              "& .MuiInputBase-input": {
-                                backgroundColor: "transparent",
-                                fontWeight: "bold",
-                                fontSize: "11px",
-                                textOverflow: "ellipsis",
-                              },
-                              "& .Mui-disabled": {
-                                color: "red",
-                              },
-                              marginTop: "-15px",
-                            }}
-                          />
-
-                          <TextField
-                            {...register(`assets.${index}.location_id`)}
-                            variant="outlined"
-                            disabled
-                            type="text"
-                            size="small"
-                            sx={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              ml: "-10px",
-                              "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                  border: "none",
-                                },
-                              },
-                              "& .MuiInputBase-input": {
-                                backgroundColor: "transparent",
-                                fontWeight: "bold",
-                                fontSize: "11px",
-                                textOverflow: "ellipsis",
-                              },
-                              "& .Mui-disabled": {
-                                color: "red",
-                              },
-                              marginTop: "-15px",
-                              marginBottom: "-10px",
-                            }}
-                          />
-                        </Stack>
-                      </TableCell>
-                      <TableCell className="tbl-cell">
-                        <Box width={"120px"}>
-                          {watch(`assets.${index}.created_at`) !== null ? (
-                            <Chip
-                              variant="filled"
-                              color="secondary"
-                              size="small"
-                              sx={{ borderRadius: "20px", ml: "-13px", width: "100%" }}
-                              label={watch(`assets.${index}.created_at`)}
-                            />
-                          ) : (
+                        <TableCell className="tbl-cell">
+                          <Stack width="250px" rowGap={0}>
                             <TextField
-                              {...register(`assets.${index}.created_at`)}
+                              {...register(`assets.${index}.one_charging_id`)}
                               variant="outlined"
                               disabled
+                              type="text"
+                              size="small"
                               sx={{
                                 backgroundColor: "transparent",
                                 border: "none",
-                                ml: "-11px",
+
+                                ml: "-10px",
                                 "& .MuiOutlinedInput-root": {
                                   "& fieldset": {
                                     border: "none",
@@ -858,92 +657,301 @@ const ViewDisposal = () => {
                                 },
                                 "& .MuiInputBase-input": {
                                   backgroundColor: "transparent",
+                                  fontWeight: "bold",
+                                  fontSize: "11px",
+                                  textOverflow: "ellipsis",
                                 },
+                                "& .Mui-disabled": {
+                                  color: "red",
+                                },
+                                marginTop: "-15px",
                               }}
                             />
-                          )}
-                        </Box>
-                      </TableCell>
-                      <TableCell className="tbl-cell">
-                        <Stack flexDirection="column" gap={1}>
-                          {!!data &&
-                            data.assets[index]?.attachments.map((item) => (
-                              <Tooltip title={"View or Download Evaluation Attachment"} arrow>
-                                <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
-                                  {item?.name}
-                                </Typography>
-                              </Tooltip>
-                            ))}
-                        </Stack>
-                      </TableCell>
-                      <TableCell className="tbl-cell">
-                        <Stack flexDirection="column" gap={0.5}>
-                          {!!data &&
-                            data.assets[index]?.evaluation_attachments.map((item) => (
-                              <Tooltip title={"View or Download Evaluation Attachment"} arrow>
-                                <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
-                                  {item?.name}
-                                </Typography>
-                              </Tooltip>
-                            ))}
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
 
-          {!transactionData?.approved && (
-            <Stack flexDirection="row" justifyContent="space-between" alignItems={"center"} mt={1}>
-              <Typography fontFamily="Anton, Impact, Roboto" fontSize="16px" color="secondary.main">
-                Added: {fields.length > 1 ? `${fields.length} Assets` : `${fields.length} Asset`}
-              </Typography>
-              <Stack flexDirection="row" gap={2}>
-                <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap={2}>
-                  {
-                    <>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        color="secondary"
-                        disabled={isDisposalLoading || isDisposalFetching}
-                        onClick={() =>
-                          onApprovalApproveHandler(
-                            transactionData?.id ? transactionData?.id : transactionData?.disposal_number
-                          )
-                        }
-                        startIcon={<Check color="primary" />}
-                      >
-                        Approve
-                      </Button>
-                      <Button
-                        variant="contained"
-                        size="small"
-                        disabled={isDisposalLoading || isDisposalFetching}
-                        onClick={() =>
-                          onApprovalReturnHandler(
-                            transactionData?.id ? transactionData?.id : transactionData?.disposal_number
-                          )
-                        }
-                        startIcon={<Undo sx={{ color: "#5f3030" }} />}
-                        sx={{
-                          color: "white",
-                          backgroundColor: "error.main",
-                          ":hover": { backgroundColor: "error.dark" },
-                        }}
-                      >
-                        Return
-                      </Button>
-                    </>
-                  }
+                            <TextField
+                              {...register(`assets.${index}.company_id`)}
+                              variant="outlined"
+                              disabled
+                              type="text"
+                              size="small"
+                              sx={{
+                                backgroundColor: "transparent",
+                                border: "none",
+
+                                ml: "-10px",
+                                "& .MuiOutlinedInput-root": {
+                                  "& fieldset": {
+                                    border: "none",
+                                  },
+                                },
+                                "& .MuiInputBase-input": {
+                                  backgroundColor: "transparent",
+                                  fontWeight: "bold",
+                                  fontSize: "11px",
+                                  textOverflow: "ellipsis",
+                                },
+                                "& .Mui-disabled": {
+                                  color: "red",
+                                },
+                                marginTop: "-15px",
+                              }}
+                            />
+
+                            <TextField
+                              {...register(`assets.${index}.business_unit_id`)}
+                              variant="outlined"
+                              disabled
+                              type="text"
+                              size="small"
+                              sx={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                ml: "-10px",
+                                "& .MuiOutlinedInput-root": {
+                                  "& fieldset": {
+                                    border: "none",
+                                  },
+                                },
+                                "& .MuiInputBase-input": {
+                                  backgroundColor: "transparent",
+                                  fontWeight: "bold",
+                                  fontSize: "11px",
+                                  textOverflow: "ellipsis",
+                                },
+                                "& .Mui-disabled": {
+                                  color: "red",
+                                },
+                                marginTop: "-15px",
+                              }}
+                            />
+
+                            <TextField
+                              {...register(`assets.${index}.department_id`)}
+                              variant="outlined"
+                              disabled
+                              type="text"
+                              size="small"
+                              sx={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                ml: "-10px",
+                                "& .MuiOutlinedInput-root": {
+                                  "& fieldset": {
+                                    border: "none",
+                                  },
+                                },
+                                "& .MuiInputBase-input": {
+                                  backgroundColor: "transparent",
+                                  fontWeight: "bold",
+                                  fontSize: "11px",
+                                  textOverflow: "ellipsis",
+                                },
+                                "& .Mui-disabled": {
+                                  color: "red",
+                                },
+                                marginTop: "-15px",
+                              }}
+                            />
+
+                            <TextField
+                              {...register(`assets.${index}.unit_id`)}
+                              variant="outlined"
+                              disabled
+                              type="text"
+                              size="small"
+                              sx={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                ml: "-10px",
+                                "& .MuiOutlinedInput-root": {
+                                  "& fieldset": {
+                                    border: "none",
+                                  },
+                                },
+                                "& .MuiInputBase-input": {
+                                  backgroundColor: "transparent",
+                                  fontWeight: "bold",
+                                  fontSize: "11px",
+                                  textOverflow: "ellipsis",
+                                },
+                                "& .Mui-disabled": {
+                                  color: "red",
+                                },
+                                marginTop: "-15px",
+                              }}
+                            />
+
+                            <TextField
+                              {...register(`assets.${index}.sub_unit_id`)}
+                              variant="outlined"
+                              disabled
+                              type="text"
+                              size="small"
+                              sx={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                ml: "-10px",
+                                "& .MuiOutlinedInput-root": {
+                                  "& fieldset": {
+                                    border: "none",
+                                  },
+                                },
+                                "& .MuiInputBase-input": {
+                                  backgroundColor: "transparent",
+                                  fontWeight: "bold",
+                                  fontSize: "11px",
+                                  textOverflow: "ellipsis",
+                                },
+                                "& .Mui-disabled": {
+                                  color: "red",
+                                },
+                                marginTop: "-15px",
+                              }}
+                            />
+
+                            <TextField
+                              {...register(`assets.${index}.location_id`)}
+                              variant="outlined"
+                              disabled
+                              type="text"
+                              size="small"
+                              sx={{
+                                backgroundColor: "transparent",
+                                border: "none",
+                                ml: "-10px",
+                                "& .MuiOutlinedInput-root": {
+                                  "& fieldset": {
+                                    border: "none",
+                                  },
+                                },
+                                "& .MuiInputBase-input": {
+                                  backgroundColor: "transparent",
+                                  fontWeight: "bold",
+                                  fontSize: "11px",
+                                  textOverflow: "ellipsis",
+                                },
+                                "& .Mui-disabled": {
+                                  color: "red",
+                                },
+                                marginTop: "-15px",
+                                marginBottom: "-10px",
+                              }}
+                            />
+                          </Stack>
+                        </TableCell>
+                        <TableCell className="tbl-cell">
+                          <Box width={"120px"}>
+                            {watch(`assets.${index}.created_at`) !== null ? (
+                              <Chip
+                                variant="filled"
+                                color="secondary"
+                                size="small"
+                                sx={{ borderRadius: "20px", ml: "-13px", width: "100%" }}
+                                label={watch(`assets.${index}.created_at`)}
+                              />
+                            ) : (
+                              <TextField
+                                {...register(`assets.${index}.created_at`)}
+                                variant="outlined"
+                                disabled
+                                sx={{
+                                  backgroundColor: "transparent",
+                                  border: "none",
+                                  ml: "-11px",
+                                  "& .MuiOutlinedInput-root": {
+                                    "& fieldset": {
+                                      border: "none",
+                                    },
+                                  },
+                                  "& .MuiInputBase-input": {
+                                    backgroundColor: "transparent",
+                                  },
+                                }}
+                              />
+                            )}
+                          </Box>
+                        </TableCell>
+                        <TableCell className="tbl-cell">
+                          <Stack flexDirection="column" gap={1}>
+                            {!!data &&
+                              data.assets[index]?.attachments.map((item) => (
+                                <Tooltip title={"View or Download Evaluation Attachment"} arrow>
+                                  <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                                    {item?.name}
+                                  </Typography>
+                                </Tooltip>
+                              ))}
+                          </Stack>
+                        </TableCell>
+                        <TableCell className="tbl-cell">
+                          <Stack flexDirection="column" gap={0.5}>
+                            {!!data &&
+                              data.assets[index]?.evaluation_attachments.map((item) => (
+                                <Tooltip title={"View or Download Evaluation Attachment"} arrow>
+                                  <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                                    {item?.name}
+                                  </Typography>
+                                </Tooltip>
+                              ))}
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {!transactionData?.approved && (
+              <Stack flexDirection="row" justifyContent="space-between" alignItems={"center"} mt={1}>
+                <Typography fontFamily="Anton, Impact, Roboto" fontSize="16px" color="secondary.main">
+                  Added: {fields.length > 1 ? `${fields.length} Assets` : `${fields.length} Asset`}
+                </Typography>
+                <Stack flexDirection="row" gap={2}>
+                  <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap={2}>
+                    {
+                      <>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          color="secondary"
+                          disabled={isDisposalLoading || isDisposalFetching}
+                          onClick={() =>
+                            onApprovalApproveHandler(
+                              transactionData?.id ? transactionData?.id : transactionData?.disposal_number
+                            )
+                          }
+                          startIcon={<Check color="primary" />}
+                        >
+                          Approve
+                        </Button>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          disabled={isDisposalLoading || isDisposalFetching}
+                          onClick={() =>
+                            onApprovalReturnHandler(
+                              transactionData?.id ? transactionData?.id : transactionData?.disposal_number
+                            )
+                          }
+                          startIcon={<Undo sx={{ color: "#5f3030" }} />}
+                          sx={{
+                            color: "white",
+                            backgroundColor: "error.main",
+                            ":hover": { backgroundColor: "error.dark" },
+                          }}
+                        >
+                          Return
+                        </Button>
+                      </>
+                    }
+                  </Stack>
                 </Stack>
               </Stack>
-            </Stack>
-          )}
+            )}
+          </Box>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 };
