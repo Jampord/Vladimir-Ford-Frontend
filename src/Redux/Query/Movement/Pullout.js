@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const pulloutApi = createApi({
   reducerPath: "pulloutApi",
-  tagTypes: ["Pullout"],
+  tagTypes: ["Pullout", "PulloutTransfer"],
 
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.VLADIMIR_BASE_URL,
@@ -95,6 +95,20 @@ export const pulloutApi = createApi({
       }),
       invalidatesTags: ["Pullout"],
     }),
+
+    getPulloutTransferReceivingApi: builder.query({
+      query: (params) => ({ url: `transfer-releasing-viewing`, params }),
+      providesTags: ["PulloutTransfer"],
+    }),
+
+    patchTransferPulloutReleasingApi: builder.mutation({
+      query: (body) => ({
+        url: `/transfer-releasing`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["PulloutTransfer"],
+    }),
   }),
 });
 
@@ -112,4 +126,6 @@ export const {
   usePatchVoidPulloutApiMutation,
   useGetPulloutConfirmationApiQuery,
   usePostPulloutConfirmationApiMutation,
+  useGetPulloutTransferReceivingApiQuery,
+  usePatchTransferPulloutReleasingApiMutation,
 } = pulloutApi;
