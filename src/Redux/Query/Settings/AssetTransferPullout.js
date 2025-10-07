@@ -33,8 +33,8 @@ export const assetTransferPulloutApi = createApi({
     }),
 
     arrangeAssetTransferPulloutApi: builder.mutation({
-      query: ({ one_charging_id, ...data }) => ({
-        url: `/update-pullout-transfer-approver/${one_charging_id}`,
+      query: ({ subunit_id, ...data }) => ({
+        url: `/update-pullout-transfer-approver/${subunit_id}`,
         method: "PUT",
         body: data,
       }),
