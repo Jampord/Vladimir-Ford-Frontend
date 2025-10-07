@@ -49,6 +49,7 @@ const MinorCategory = () => {
     depreciation_debit: null,
     initial_credit: null,
     initial_debit: null,
+    has_atoe: 0,
   });
 
   // Table Sorting --------------------------------
@@ -187,6 +188,7 @@ const MinorCategory = () => {
       depreciation_debit,
       initial_credit,
       initial_debit,
+      has_atoe,
     } = props;
     setUpdateMinorCategory({
       status: true,
@@ -199,6 +201,7 @@ const MinorCategory = () => {
       depreciation_debit,
       initial_credit,
       initial_debit,
+      has_atoe,
     });
   };
 
@@ -213,6 +216,7 @@ const MinorCategory = () => {
       depreciation_debit: null,
       initial_credit: null,
       initial_debit: null,
+      has_atoe: 0,
     });
   };
 
@@ -324,7 +328,12 @@ const MinorCategory = () => {
                             <TableCell className="tbl-cell-category tr-cen-pad45">{data.id}</TableCell>
 
                             <TableCell className="tbl-cell-category text-weight capitalized">
-                              {data.minor_category_name}
+                              {data.minor_category_name}{" "}
+                              {data?.has_atoe === 1 && (
+                                <Typography fontSize={10} fontWeight={600} color="info.main">
+                                  (ATOE)
+                                </Typography>
+                              )}
                             </TableCell>
 
                             <TableCell className="tbl-cell-category capitalized">
