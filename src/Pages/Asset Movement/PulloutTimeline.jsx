@@ -8,6 +8,7 @@ import {
   Construction,
   Error,
   FactCheck,
+  FindReplace,
   HowToReg,
   ManageHistoryTwoTone,
   RemoveCircleOutline,
@@ -184,6 +185,8 @@ const PulloutTimeline = (props) => {
                           <ScreenSearchDesktop sx={{ color: "success.main" }} />
                         ) : item?.action === "Change of Care-of" || item?.action === "Change Care of" ? (
                           <SwapHorizontalCircle sx={{ color: "primary.main" }} />
+                        ) : item?.action === "For Replacement" ? (
+                          <FindReplace sx={{ color: "primary.main" }} />
                         ) : item?.action === "Received" ? (
                           <ThumbUp sx={{ color: "success.main" }} />
                         ) : item?.action === "Repaired" ? (
@@ -216,6 +219,7 @@ const PulloutTimeline = (props) => {
                               : item?.action === "Change of Care-of" ||
                                 item?.action === "Change Care of" ||
                                 item?.action === "Changed care of" ||
+                                item?.action === "For Replacement" ||
                                 item?.action === "Changed care of confirmed"
                               ? "#FFCF86"
                               : "#0088880f",
@@ -240,7 +244,9 @@ const PulloutTimeline = (props) => {
                                 ? "success.light"
                                 : item?.action === "Removed PR Number"
                                 ? "error.light"
-                                : item?.action === "Change of Care-of" || item?.action === "Change Care of"
+                                : item?.action === "Change of Care-of" ||
+                                  item?.action === "Change Care of" ||
+                                  item?.action === "For Replacement"
                                 ? "primary.main"
                                 : "secondary.light",
                             width: "3px",
@@ -279,7 +285,7 @@ const PulloutTimeline = (props) => {
                               </Typography>
                             </>
                           )}
-                          {item?.action === "Repaired" && (
+                          {(item?.action === "Repaired" || item?.action === "Received") && (
                             <>
                               <Typography fontSize={12} fontWeight={600} color="text">
                                 Vladimir Tag Number: {item?.vladimir_tag_number}
