@@ -136,11 +136,11 @@ const AddRole = (props) => {
     "settings",
     "asset-requisition",
     "asset-movement",
+    "capex",
     "approving",
     "monitoring",
     "asset-for-tagging",
     "asset-list",
-    "on-hand",
     "disposal",
     "reports",
     "setup-settings",
@@ -161,8 +161,10 @@ const AddRole = (props) => {
 
     "division",
     "type-of-request",
-    "capex",
+    "capex-index",
     "warehouse",
+    "type-of-expenditure",
+    "enrolled-budget",
     "category",
     "status-category",
     // "small-tools",
@@ -241,6 +243,8 @@ const AddRole = (props) => {
     "type-of-request",
     "capex",
     "warehouse",
+    "type-of-expenditure",
+    "enrolled-budget",
     "category",
     "status-category",
   ];
@@ -262,6 +266,7 @@ const AddRole = (props) => {
     "transfer-pullout-releasing",
     "evaluation",
   ];
+  const capex = ["add-capex", "sub-capex", "additional-cost"];
   const approving = [
     "approving-request",
     "approving-transfer",
@@ -376,10 +381,10 @@ const AddRole = (props) => {
     const Setup = [
       { label: "Asset Requisition", value: "asset-requisition" },
       { label: "Asset Movement", value: "asset-movement" },
+      { label: "Capex", value: "capex-index" },
       { label: "Approving", value: "approving" },
       { label: "Asset for Tagging", value: "asset-for-tagging" },
       { label: "Asset List", value: "asset-list" },
-      { label: "On Hand", value: "on-hand" },
       { label: "Reports", value: "reports" },
       { label: "Setup Settings", value: "setup-settings" },
     ];
@@ -421,6 +426,8 @@ const AddRole = (props) => {
       { label: "Warehouse", value: "warehouse" },
       { label: "Category", value: "category" },
       { label: "Status Category", value: "status-category" },
+      { label: "Type of Expenditure", value: "type-of-expenditure" },
+      { label: "Enrolled Budget", value: "enrolled-budget" },
     ];
     return (
       <Stack flexDirection="row" flexWrap="wrap" justifyContent="space-evenly" gap={1}>
@@ -552,6 +559,20 @@ const AddRole = (props) => {
           <CheckboxGroup items={assetMovement2} />
         </Box>
         <CheckboxGroup title="Warehouse Permission (Pullout)" items={assetMovement3} />
+      </Stack>
+    );
+  };
+
+  const Capex = () => {
+    const capexRoleList = [
+      { label: "Add Capex", value: "add-capex" },
+      { label: "Sub Capex", value: "sub-capex" },
+      { label: "Additional Cost", value: "additional-cost" },
+    ];
+
+    return (
+      <Stack flexDirection="row" flexWrap="wrap" justifyContent="space-evenly" gap={1}>
+        <CheckboxGroup items={capexRoleList} />
       </Stack>
     );
   };
@@ -1188,6 +1209,60 @@ const AddRole = (props) => {
                       />
                     </FormLabel>
                     <AssetMovement />
+                  </FormControl>
+                </Box>
+              )}
+
+              {watch("access_permission").includes("capex-index") && (
+                <Box>
+                  <Divider sx={{ mx: "30px" }} />
+                  <FormControl
+                    fullWidth
+                    component="fieldset"
+                    sx={{
+                      border: "1px solid #a6a6a6af ",
+                      borderRadius: "10px",
+                      px: "10px",
+                      mt: "10px",
+                      mb: "15px",
+                    }}
+                  >
+                    <FormLabel component="legend" sx={{ ml: "1px", pl: "5px" }}>
+                      <FormControlLabel
+                        label="Capex"
+                        value="capex-index"
+                        sx={{ color: "text.main", fontWeight: "bold" }}
+                        disabled={data.action === "view"}
+                        control={
+                          <Checkbox
+                            checked={watch("access_permission").includes("capex-index")}
+                            indeterminate={
+                              capex.some((perm) => watch("access_permission").includes(perm)) &&
+                              !capex.every((perm) => watch("access_permission").includes(perm))
+                            }
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setValue("access_permission", [
+                                  ...new Set([
+                                    ...watch("access_permission"),
+                                    "add-capex",
+                                    "sub-capex",
+                                    "additional-cost",
+                                  ]),
+                                ]);
+                              } else {
+                                const capexEmptyValue = watch("access_permission").filter(
+                                  (perm) => ![...capex, "asset-movement"].includes(perm)
+                                );
+
+                                setValue("access_permission", capexEmptyValue);
+                              }
+                            }}
+                          />
+                        }
+                      />
+                    </FormLabel>
+                    <Capex />
                   </FormControl>
                 </Box>
               )}
