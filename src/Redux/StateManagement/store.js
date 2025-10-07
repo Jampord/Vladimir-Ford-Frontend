@@ -115,6 +115,8 @@ import { assetEvaluationApi } from "../Query/Settings/AssetEvaluation";
 import { shipToApi } from "../Query/Masterlist/YmirCoa/ShipTo";
 import { assetTransferPulloutApi } from "../Query/Settings/AssetTransferPullout";
 import { disposalApi } from "../Query/Movement/Disposal";
+import { typeOfExpenditureApi } from "../Query/Masterlist/TypeofExpenditure";
+import { enrolledBudgetApi } from "../Query/Masterlist/EnrolledBudget";
 
 export const store = configureStore({
   reducer: {
@@ -146,6 +148,8 @@ export const store = configureStore({
     [capexApi.reducerPath]: capexApi.reducer,
     [subCapexApi.reducerPath]: subCapexApi.reducer,
     [warehouseApi.reducerPath]: warehouseApi.reducer,
+    [typeOfExpenditureApi.reducerPath]: typeOfExpenditureApi.reducer,
+    [enrolledBudgetApi.reducerPath]: enrolledBudgetApi.reducer,
     [creditApi.reducerPath]: creditApi.reducer,
     // [serviceProviderApi.reducerPath]: serviceProviderApi.reducer,
 
@@ -248,6 +252,8 @@ export const store = configureStore({
       capexApi.middleware,
       subCapexApi.middleware,
       warehouseApi.middleware,
+      typeOfExpenditureApi.middleware,
+      enrolledBudgetApi.middleware,
       creditApi.middleware,
 
       // serviceProviderApi.middleware,
