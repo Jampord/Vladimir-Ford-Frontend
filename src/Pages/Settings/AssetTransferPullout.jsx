@@ -30,6 +30,7 @@ import moment from "moment";
 import { openDrawer } from "../../Redux/StateManagement/booleanStateSlice";
 import { closeConfirm, onLoading, openConfirm } from "../../Redux/StateManagement/confirmSlice";
 import AddAssetTransferPullout from "./AddEdit/AddAssetTransferPullout";
+import NoRecordsFound from "../../Layout/NoRecordsFound";
 
 const AssetTransferPullout = () => {
   const [search, setSearch] = useState("");
