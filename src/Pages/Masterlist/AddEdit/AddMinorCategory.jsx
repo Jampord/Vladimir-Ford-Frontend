@@ -11,6 +11,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  Checkbox,
   FormControl,
   FormControlLabel,
   FormLabel,
@@ -28,15 +29,12 @@ import {
   usePostMinorCategoryApiMutation,
   useUpdateMinorCategoryApiMutation,
 } from "../../../Redux/Query/Masterlist/Category/MinorCategory";
-// import { useGetMajorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MajorCategory";
-// import { useGetDivisionAllApiQuery } from "../../../Redux/Query/Masterlist/Division";
 
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { LoadingButton } from "@mui/lab";
 import { useGetAccountTitleAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/AccountTitle";
 import { useGetMajorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MajorCategory";
 import { useGetCreditAllQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Credit";
-// import { useGetMajorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Masterlist";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -58,20 +56,6 @@ const schema = yup.object().shape({
     })
     .required()
     .label("Depreciation Credit"),
-  // depreciation_debit_id: yup
-  //   .string()
-  //   .transform((value) => {
-  //     return value?.id.toString();
-  //   })
-  //   .required()
-  //   .label("Depreciation Debit"),
-  // initial_credit_id: yup
-  //   .string()
-  //   .transform((value) => {
-  //     return value?.id.toString();
-  //   })
-  //   .required()
-  //   .label("Initial Credit"),
   initial_debit_id: yup
     .string()
     .transform((value) => {
@@ -79,6 +63,8 @@ const schema = yup.object().shape({
     })
     .required()
     .label("Initial Debit"),
+
+  has_atoe: yup.number().required().label("ATOE"),
 });
 
 const AddMinorCategory = (props) => {
@@ -110,8 +96,6 @@ const AddMinorCategory = (props) => {
     refetch: creditRefetch,
   } = useGetCreditAllQuery();
 
-  // console.log("AccountTitleData", accountTitleData);
-
   const [
     postMinorCategory,
     { data: postData, isLoading: isPostLoading, isSuccess: isPostSuccess, isError: isPostError, error: postError },
@@ -136,6 +120,7 @@ const AddMinorCategory = (props) => {
     reset,
     watch,
     setValue,
+    register,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -186,26 +171,17 @@ const AddMinorCategory = (props) => {
   useEffect(() => {
     if (data.status) {
       setValue("id", data?.id);
-      // setValue("division_id", {
-      //   id: data.division_id,
-      //   division_name: data.division_name,
-      // });
       setValue("major_category_id", data?.major_category);
       setValue("minor_category_name", data?.minor_category_name);
 
       setValue("depreciation_credit_id", data?.depreciation_credit.length === 0 ? null : data?.depreciation_credit);
-      // setValue("depreciation_debit_id", data.depreciation_debit);
-      // setValue("initial_credit_id", data.initial_credit);
       setValue("initial_debit_id", data?.initial_debit);
+      setValue("has_atoe", data?.has_atoe);
     }
   }, [data]);
 
-  // console.log("InitialDebit", watch("initial_debit_id"));
-  // console.log("Debitttttttttttttttttt", watch("depreciation_debit_id"));
-  // console.log("DC", watch("depreciation_credit_id"));
-
   const onSubmitHandler = (formData) => {
-    // console.log("formData", formData);
+    console.log("formData", formData);
     if (data.status) {
       updateMinorCategory(formData);
       return;
@@ -256,11 +232,37 @@ const AddMinorCategory = (props) => {
           label="Minor Category Name"
           type="text"
           color="secondary"
+          value={watch("minor_category_name") + `${watch("has_atoe") === 1 ? " (ATOE)" : ""}`}
           size="small"
           error={!!errors?.minor_category_name?.message}
           helperText={errors?.minor_category_name?.message}
           fullWidth
         />
+        <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1rem" }}>
+          Has ATOE?
+        </Typography>
+        <Stack flexDirection="row" gap={2} alignItems="center" mt={-2.5}>
+          <RadioGroup row name="has_atoe" defaultValue={data?.has_atoe || 0}>
+            <FormControlLabel
+              value={1}
+              control={<Radio {...register("has_atoe")} size="small" disableRipple color="secondary" />}
+              label={
+                <Typography color="secondary.main" sx={{ ml: -1, fontSize: 14, fontWeight: 500 }}>
+                  Yes
+                </Typography>
+              }
+            />
+            <FormControlLabel
+              value={0}
+              control={<Radio {...register("has_atoe")} size="small" disableRipple color="secondary" />}
+              label={
+                <Typography color="secondary.main" sx={{ ml: -1, fontSize: 14, fontWeight: 500 }}>
+                  No
+                </Typography>
+              }
+            />
+          </RadioGroup>
+        </Stack>
 
         {/* Depreciation Debit and Credit */}
         <Stack gap={2}>
@@ -296,46 +298,6 @@ const AddMinorCategory = (props) => {
               return value;
             }}
           />
-
-          {/* <CustomAutoComplete
-            autoComplete
-            name="initial_credit_id"
-            control={control}
-            options={accountTitleData}
-            loading={isAccountTitleLoading}
-            size="small"
-            getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
-            isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
-            renderInput={(params) => (
-              <TextField
-                color="secondary"
-                {...params}
-                label="Initial Credit"
-                error={!!errors?.initial_credit_id}
-                helperText={errors?.initial_credit_id?.message}
-              />
-            )}
-          />
-
-          <CustomAutoComplete
-            autoComplete
-            name="depreciation_debit_id"
-            control={control}
-            options={accountTitleData}
-            loading={isAccountTitleLoading}
-            size="small"
-            getOptionLabel={(option) => option.account_title_code + " - " + option.account_title_name}
-            isOptionEqualToValue={(option, value) => option.account_title_code === value.account_title_code}
-            renderInput={(params) => (
-              <TextField
-                color="secondary"
-                {...params}
-                label="Depreciation Debit"
-                error={!!errors?.depreciation_debit_id}
-                helperText={errors?.depreciation_debit_id?.message}
-              />
-            )}
-          /> */}
 
           <CustomAutoComplete
             autoComplete
