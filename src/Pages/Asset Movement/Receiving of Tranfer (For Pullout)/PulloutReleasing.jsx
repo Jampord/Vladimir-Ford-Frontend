@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Badge, Box, Tab, Tabs, Typography } from "@mui/material";
 import { TabContext, TabPanel } from "@mui/lab";
 import ReleasingTableTransferPullout from "./ReleasingTableTransferPullout";
+import { useGetNotificationApiQuery } from "../../../Redux/Query/Notification";
 
 const PulloutReleasing = () => {
   const [value, setValue] = useState("1");
@@ -10,6 +11,12 @@ const PulloutReleasing = () => {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  const { data: notifData, refetch } = useGetNotificationApiQuery();
+
+  useEffect(() => {
+    refetch();
+  }, [notifData]);
 
   return (
     <Box className="mcontainer">
@@ -22,10 +29,7 @@ const PulloutReleasing = () => {
           <Tabs onChange={handleChange} value={value}>
             <Tab
               label={
-                <Badge
-                  color="error"
-                  // badgeContent={notifData?.toTransferReceiving}
-                >
+                <Badge color="error" badgeContent={notifData?.pulloutTransferReleasingCount}>
                   For Releasing
                 </Badge>
               }
