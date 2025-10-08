@@ -118,6 +118,12 @@ import Disposal from "./Pages/Asset Movement/Disposal/Disposal";
 import AddDisposal from "./Pages/Asset Movement/Disposal/AddDisposal";
 import ViewDisposal from "./Pages/Approving/Disposal/ViewDisposal";
 import ReceivingOfDisposal from "./Pages/Asset Movement/Receiving of Disposal/ReceivingOfDisposal";
+import CapexIndex from "./Pages/Capex";
+import AddCapexIndex from "./Pages/Capex/Add Capex/AddCapexIndex";
+import SubCapexIndex from "./Pages/Capex/Sub Capex/SubCapexIndex";
+import AdditionalCostIndex from "./Pages/Capex/Additional Cost/AdditionalCostIndex";
+import TypeofExpenditure from "./Pages/Masterlist/TypeofExpenditure";
+import EnrolledBudget from "./Pages/Masterlist/EnrolledBudget";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -250,6 +256,16 @@ const router = createBrowserRouter([
                 path: "warehouse",
                 element: <Warehouse />,
                 handle: { permission: "warehouse" },
+              },
+              {
+                path: "type-of-expenditure",
+                element: <TypeofExpenditure />,
+                handle: { permission: "type-of-expenditure" },
+              },
+              {
+                path: "enrolled-budget",
+                element: <EnrolledBudget />,
+                handle: { permission: "enrolled-budget" },
               },
               {
                 path: "service-provider",
@@ -558,6 +574,33 @@ const router = createBrowserRouter([
                 path: "evaluation/to-pickup/:id",
                 element: <ToPickupViewing />,
                 handle: { permission: "evaluation" },
+              },
+            ],
+          },
+
+          {
+            path: "capex",
+            element: <CapexIndex />,
+            handle: { permission: "capex-index" },
+            children: [
+              {
+                index: true,
+                element: <></>,
+              },
+              {
+                path: "add-capex",
+                element: <AddCapexIndex />,
+                handle: { permission: "add-capex" },
+              },
+              {
+                path: "sub-capex",
+                element: <SubCapexIndex />,
+                handle: { permission: "sub-capex" },
+              },
+              {
+                path: "additional-cost",
+                element: <AdditionalCostIndex />,
+                handle: { permission: "additional-cost" },
               },
             ],
           },
