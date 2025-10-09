@@ -92,7 +92,7 @@ import { useGetIpApiQuery } from "../../Redux/Query/IpAddressSetup";
 import { closeConfirm, onLoading, openConfirm } from "../../Redux/StateManagement/confirmSlice";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
 import AssignmentMemo from "./AssignmentMemo";
-import { useGetNotificationApiQuery } from "../../Redux/Query/Notification";
+import { notificationApi, useGetNotificationApiQuery } from "../../Redux/Query/Notification";
 import AddSmallToolsGroup from "./AddEdit/AddSmallToolsGroup";
 import AddTagAddCost from "./AddEdit/AddTagAddCost";
 import ExportPrintFixedAsset from "./ExportPrintFixedAsset";
@@ -418,7 +418,7 @@ const PrintFixedAsset = (props) => {
               ip: ip.data,
               tagNumber: formData?.tagNumber,
             }).unwrap();
-
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
             dispatch(closeConfirm());
             reset();
             refetch();
@@ -461,6 +461,7 @@ const PrintFixedAsset = (props) => {
               fixed_asset_id: formData?.tagNumber,
             }).unwrap();
             setPrintAssignmentMemo(true);
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
             reset();
             refetch();
           } catch (err) {
@@ -1112,26 +1113,34 @@ const PrintFixedAsset = (props) => {
 
                                 <TableCell>
                                   <Typography noWrap variant="h6" fontSize="16px" color="secondary" fontWeight="bold">
-                                    {data.vladimir_tag_number}
+                                    {data?.is_printable === 0 ? "NON-PRINTABLE" : data.vladimir_tag_number}
                                   </Typography>
 
-                                  <Typography noWrap fontSize="13px" color="secondary.main">
+                                  <Typography
+                                    fontSize={"13px"}
+                                    fontWeight={400}
+                                    width="300px"
+                                    overflow="hidden"
+                                    textOverflow="ellipsis"
+                                    color="secondary.main"
+                                    noWrap
+                                  >
                                     {data.asset_description}
                                   </Typography>
 
-                                  <Tooltip title={data.asset_specification} placement="bottom-start" arrow>
-                                    <Typography
-                                      fontSize={12}
-                                      fontWeight={400}
-                                      width="300px"
-                                      overflow="hidden"
-                                      textOverflow="ellipsis"
-                                      color="text.light"
-                                      noWrap
-                                    >
+                                  <Typography
+                                    fontSize={12}
+                                    fontWeight={400}
+                                    width="300px"
+                                    overflow="hidden"
+                                    textOverflow="ellipsis"
+                                    color="text.light"
+                                    noWrap
+                                  >
+                                    <Tooltip title={data.asset_specification} placement="bottom" arrow>
                                       {data.asset_specification}
-                                    </Typography>
-                                  </Tooltip>
+                                    </Tooltip>
+                                  </Typography>
 
                                   <Typography noWrap fontSize="12px" color="primary" fontWeight="bold">
                                     {data.type_of_request.type_of_request_name.toUpperCase()}
@@ -1548,33 +1557,34 @@ const PrintFixedAsset = (props) => {
                                             color="secondary"
                                             fontWeight="bold"
                                           >
-                                            {data.vladimir_tag_number}
+                                            {data?.is_printable === 0 ? "NON-PRINTABLE" : data.vladimir_tag_number}
                                           </Typography>
 
-                                          <Typography noWrap fontSize="13px" color="secondary.main">
+                                          <Typography
+                                            fontSize={"13px"}
+                                            fontWeight={400}
+                                            width="300px"
+                                            overflow="hidden"
+                                            textOverflow="ellipsis"
+                                            color="secondary.main"
+                                            noWrap
+                                          >
                                             {data.asset_description}
                                           </Typography>
 
-                                          <Tooltip
-                                            title={data.asset_specification}
-                                            placement="bottom-start"
-                                            arrow
-                                            // slots={{
-                                            //   transition: Zoom,
-                                            // }}
+                                          <Typography
+                                            fontSize={12}
+                                            fontWeight={400}
+                                            width="300px"
+                                            overflow="hidden"
+                                            textOverflow="ellipsis"
+                                            color="text.light"
+                                            noWrap
                                           >
-                                            <Typography
-                                              fontSize={12}
-                                              fontWeight={400}
-                                              width="300px"
-                                              overflow="hidden"
-                                              textOverflow="ellipsis"
-                                              color="text.light"
-                                              noWrap
-                                            >
+                                            <Tooltip title={data.asset_specification} placement="bottom" arrow>
                                               {data.asset_specification}
-                                            </Typography>
-                                          </Tooltip>
+                                            </Tooltip>
+                                          </Typography>
 
                                           <Typography noWrap fontSize="12px" color="primary" fontWeight="bold">
                                             {data.type_of_request.type_of_request_name.toUpperCase()}{" "}
@@ -2145,18 +2155,18 @@ const PrintFixedAsset = (props) => {
                                             {data.asset_description}
                                           </Typography>
 
-                                          <Tooltip title={data.asset_specification} placement="bottom-start" arrow>
-                                            <Typography
-                                              fontSize="12px"
-                                              color="text.light"
-                                              textOverflow="ellipsis"
-                                              width="300px"
-                                              overflow="hidden"
-                                              noWrap
-                                            >
+                                          <Typography
+                                            fontSize="12px"
+                                            color="text.light"
+                                            textOverflow="ellipsis"
+                                            width="300px"
+                                            overflow="hidden"
+                                            noWrap
+                                          >
+                                            <Tooltip title={data.asset_specification} placement="bottom" arrow>
                                               {data.asset_specification}
-                                            </Typography>
-                                          </Tooltip>
+                                            </Tooltip>
+                                          </Typography>
 
                                           <Typography noWrap fontSize="10px" color="primary" fontWeight="bold">
                                             {data.type_of_request.type_of_request_name.toUpperCase()}
