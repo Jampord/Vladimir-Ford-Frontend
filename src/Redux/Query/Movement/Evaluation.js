@@ -23,7 +23,7 @@ export const evaluationApi = createApi({
     }),
 
     getAssetsToPickupApi: builder.query({
-      query: (params) => `item-to-pullout?per_page=${params.per_page}&page=${params.page}`,
+      query: (params) => ({ url: `item-to-pullout`, params }),
       providesTags: ["Evaluation"],
     }),
 
