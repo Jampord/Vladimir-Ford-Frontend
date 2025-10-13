@@ -107,6 +107,12 @@ import {
   QueuePlayNext,
   MoveUpOutlined,
   HighlightAlt,
+  DomainAdd,
+  AddBox,
+  Gavel,
+  Unarchive,
+  BorderAll,
+  PriceCheck,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -119,6 +125,7 @@ const Sidebar = () => {
   const [settingsCollapse, setSettingsCollapse] = useState(false);
   const [assetRequisitionCollapse, setAssetRequisitionCollapse] = useState(false);
   const [assetMovementCollapse, setAssetMovementCollapse] = useState(false);
+  const [capexCollapse, setCapexCollapse] = useState(false);
   const [approvingCollapse, setApprovingCollapse] = useState(false);
   const [monitoringCollapse, setMonitoringCollapse] = useState(false);
   const [reportCollapse, setReportCollapse] = useState(false);
@@ -153,6 +160,7 @@ const Sidebar = () => {
     setSettingsCollapse(false);
     setAssetRequisitionCollapse(false);
     setAssetMovementCollapse(false);
+    setCapexCollapse(false);
     setApprovingCollapse(false);
     setMonitoringCollapse(false);
     setReportCollapse(false);
@@ -184,6 +192,7 @@ const Sidebar = () => {
       settings: setSettingsCollapse,
       "asset-requisition": setAssetRequisitionCollapse,
       "asset-movement": setAssetMovementCollapse,
+      capex: setCapexCollapse,
       approving: setApprovingCollapse,
       reports: setReportCollapse,
       monitoring: setMonitoringCollapse,
@@ -362,6 +371,18 @@ const Sidebar = () => {
           path: "/masterlist/status-category",
           permission: "status-category",
         },
+        {
+          label: "Type of Expenditure",
+          icon: BorderAll,
+          path: "/masterlist/type-of-expenditure",
+          permission: "type-of-expenditure",
+        },
+        {
+          label: "Enrolled Budget",
+          icon: PriceCheck,
+          path: "/masterlist/enrolled-budget",
+          permission: "enrolled-budget",
+        },
       ],
       open: masterListCollapse,
       setter: (e) => {
@@ -372,6 +393,7 @@ const Sidebar = () => {
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
+        setCapexCollapse(false);
         setApprovingCollapse(false);
         setMonitoringCollapse(false);
         setReportCollapse(false);
@@ -407,6 +429,7 @@ const Sidebar = () => {
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
+        setCapexCollapse(false);
         setApprovingCollapse(false);
         setMonitoringCollapse(false);
         setReportCollapse(false);
@@ -447,6 +470,7 @@ const Sidebar = () => {
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
+        setCapexCollapse(false);
         setApprovingCollapse(false);
         setMonitoringCollapse(false);
         setReportCollapse(false);
@@ -498,6 +522,7 @@ const Sidebar = () => {
         setMasterListCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
+        setCapexCollapse(false);
         setApprovingCollapse(false);
         setMonitoringCollapse(false);
         setReportCollapse(false);
@@ -576,6 +601,7 @@ const Sidebar = () => {
         setFixedAssetCollapse(false);
         setSettingsCollapse(false);
         setAssetMovementCollapse(false);
+        setCapexCollapse(false);
         setApprovingCollapse(false);
         setMonitoringCollapse(false);
         setReportCollapse(false);
@@ -682,9 +708,55 @@ const Sidebar = () => {
         setFixedAssetCollapse(false);
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
+        setCapexCollapse(false);
         setApprovingCollapse(false);
         setMonitoringCollapse(false);
         setReportCollapse(false);
+        closeCollapse;
+        dispatch(openSidebar());
+      },
+    },
+
+    {
+      label: "Capex",
+      icon: DomainAdd,
+      path: "/capex",
+      permission: "capex-index",
+      children: [
+        {
+          label: "Add Capex",
+          icon: AddBox,
+          path: "/capex/add-capex",
+          permission: "add-capex",
+          setter: closeCollapse,
+        },
+        {
+          label: "Sub Capex",
+          icon: Gavel,
+          path: "/capex/sub-capex",
+          permission: "sub-capex",
+          setter: closeCollapse,
+        },
+        {
+          label: "Additional Cost",
+          icon: Unarchive,
+          path: "/capex/additional-cost",
+          permission: "additional-cost",
+          setter: closeCollapse,
+        },
+      ],
+      open: capexCollapse,
+      setter: () => {
+        setMonitoringCollapse(!capexCollapse);
+        setApprovingCollapse(false);
+        setMasterListCollapse(false);
+        setUserManagementCollapse(false);
+        setFixedAssetCollapse(false);
+        setSettingsCollapse(false);
+        setAssetRequisitionCollapse(false);
+        setAssetMovementCollapse(false);
+        setMonitoringCollapse(false);
+        setCapexCollapse(false);
         closeCollapse;
         dispatch(openSidebar());
       },
@@ -753,6 +825,7 @@ const Sidebar = () => {
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
+        setCapexCollapse(false);
         setMonitoringCollapse(false);
         setReportCollapse(false);
         closeCollapse;
@@ -822,6 +895,7 @@ const Sidebar = () => {
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
+        setCapexCollapse(false);
         closeCollapse;
         dispatch(openSidebar());
       },
@@ -886,6 +960,7 @@ const Sidebar = () => {
         setSettingsCollapse(false);
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
+        setCapexCollapse(false);
         closeCollapse;
         dispatch(openSidebar());
       },
