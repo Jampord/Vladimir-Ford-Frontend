@@ -117,6 +117,9 @@ import { assetTransferPulloutApi } from "../Query/Settings/AssetTransferPullout"
 import { disposalApi } from "../Query/Movement/Disposal";
 import { typeOfExpenditureApi } from "../Query/Masterlist/TypeofExpenditure";
 import { enrolledBudgetApi } from "../Query/Masterlist/EnrolledBudget";
+import { capexApproversApi } from "../Query/Settings/Capex";
+import { estimationApproversApi } from "../Query/Settings/Estimation";
+import { subCapexApproversApi } from "../Query/Settings/SubCapex";
 
 export const store = configureStore({
   reducer: {
@@ -209,6 +212,9 @@ export const store = configureStore({
     [assetPulloutApi.reducerPath]: assetPulloutApi.reducer,
     [assetEvaluationApi.reducerPath]: assetEvaluationApi.reducer,
     [assetDisposalApi.reducerPath]: assetDisposalApi.reducer,
+    [capexApproversApi.reducerPath]: capexApproversApi.reducer,
+    [estimationApproversApi.reducerPath]: estimationApproversApi.reducer,
+    [subCapexApproversApi.reducerPath]: subCapexApproversApi.reducer,
     [coordinatorSettingsApi.reducerPath]: coordinatorSettingsApi.reducer,
     [receiverSettingsApi.reducerPath]: receiverSettingsApi.reducer,
 
@@ -314,6 +320,9 @@ export const store = configureStore({
       assetPulloutApi.middleware,
       assetEvaluationApi.middleware,
       assetDisposalApi.middleware,
+      capexApproversApi.middleware,
+      estimationApproversApi.middleware,
+      subCapexApproversApi.middleware,
       coordinatorSettingsApi.middleware,
       receiverSettingsApi.middleware,
 
