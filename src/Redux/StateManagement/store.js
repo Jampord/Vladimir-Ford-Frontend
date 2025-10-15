@@ -120,6 +120,7 @@ import { enrolledBudgetApi } from "../Query/Masterlist/EnrolledBudget";
 import { capexApproversApi } from "../Query/Settings/Capex";
 import { estimationApproversApi } from "../Query/Settings/Estimation";
 import { subCapexApproversApi } from "../Query/Settings/SubCapex";
+import { additionalCostApproversApi } from "../Query/Settings/AdditionalCost";
 
 export const store = configureStore({
   reducer: {
@@ -215,6 +216,7 @@ export const store = configureStore({
     [capexApproversApi.reducerPath]: capexApproversApi.reducer,
     [estimationApproversApi.reducerPath]: estimationApproversApi.reducer,
     [subCapexApproversApi.reducerPath]: subCapexApproversApi.reducer,
+    [additionalCostApproversApi.reducerPath]: additionalCostApproversApi.reducer,
     [coordinatorSettingsApi.reducerPath]: coordinatorSettingsApi.reducer,
     [receiverSettingsApi.reducerPath]: receiverSettingsApi.reducer,
 
@@ -323,6 +325,7 @@ export const store = configureStore({
       capexApproversApi.middleware,
       estimationApproversApi.middleware,
       subCapexApproversApi.middleware,
+      additionalCostApproversApi.middleware,
       coordinatorSettingsApi.middleware,
       receiverSettingsApi.middleware,
 
