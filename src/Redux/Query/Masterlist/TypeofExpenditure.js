@@ -42,6 +42,15 @@ export const typeOfExpenditureApi = createApi({
       }),
       invalidatesTags: ["TypeofExpenditure"],
     }),
+
+    putTypeOfExpenditureUpdateApi: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/type-of-expenditure/${id}`,
+        method: "PATCH",
+        body: body,
+      }),
+      invalidatesTags: ["TypeofExpenditure"],
+    }),
   }),
 });
 
@@ -50,4 +59,5 @@ export const {
   useLazyGetTypeOfExpenditureApiQuery,
   usePostTypeOfExpenditureApiMutation,
   usePatchTypeOfExpenditureStatusApiMutation,
+  usePutTypeOfExpenditureUpdateApiMutation,
 } = typeOfExpenditureApi;
