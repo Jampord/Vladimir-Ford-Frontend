@@ -121,6 +121,8 @@ import { capexApproversApi } from "../Query/Settings/Capex";
 import { estimationApproversApi } from "../Query/Settings/Estimation";
 import { subCapexApproversApi } from "../Query/Settings/SubCapex";
 import { additionalCostApproversApi } from "../Query/Settings/AdditionalCost";
+import { addBudgetApi } from "../Query/Capex/AddBudget";
+import { addCapexApi } from "../Query/Capex/AddCapex";
 
 export const store = configureStore({
   reducer: {
@@ -231,6 +233,10 @@ export const store = configureStore({
     [evaluationApi.reducerPath]: evaluationApi.reducer,
     [disposalApi.reducerPath]: disposalApi.reducer,
 
+    //Capex
+    [addBudgetApi.reducerPath]: addBudgetApi.reducer,
+    [addCapexApi.reducerPath]: addCapexApi.reducer,
+
     // Approval
     [approvalApi.reducerPath]: approvalApi.reducer,
     [transferApprovalApi.reducerPath]: transferApprovalApi.reducer,
@@ -334,6 +340,10 @@ export const store = configureStore({
       requisitionSmsApi.middleware,
       requestContainerApi.middleware,
       purchaseRequestApi.middleware,
+
+      //Capex
+      addBudgetApi.middleware,
+      addCapexApi.middleware,
 
       // Asset Movement
       transferApi.middleware,
