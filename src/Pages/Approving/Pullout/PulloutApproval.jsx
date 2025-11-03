@@ -15,7 +15,7 @@ const PulloutApproval = () => {
     refetch();
   }, [notifData]);
 
-  const handleChange = (event, newValue) => {
+  const handleChange = (_, newValue) => {
     setValue(newValue);
   };
 

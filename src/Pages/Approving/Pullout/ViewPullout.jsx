@@ -13,6 +13,7 @@ import {
   TableRow,
   TextField,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import moment from "moment";
 import { useEffect, useRef, useState } from "react";
@@ -33,6 +34,7 @@ import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 import { LoadingButton } from "@mui/lab";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
+import ApprovalViewPulloutSkeleton from "./Skeleton/ApprovalViewPulloutSkeleton";
 
 const schema = yup.object().shape({
   description: yup.string().required().label("Acquisition Details"),
@@ -45,6 +47,7 @@ const schema = yup.object().shape({
       fixed_asset_id: yup.object().required("Fixed Asset is a Required Field"),
       asset_accountable: yup.string(),
       created_at: yup.date(),
+      one_charging_id: yup.string(),
       company_id: yup.string(),
       business_unit_id: yup.string(),
       department_id: yup.string(),
@@ -56,8 +59,7 @@ const schema = yup.object().shape({
 });
 
 const ViewPullout = () => {
-  const [perPage, setPerPage] = useState(5);
-  const [page, setPage] = useState(1);
+  const isSmallScreen = useMediaQuery("(min-width: 700px)");
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -84,6 +86,8 @@ const ViewPullout = () => {
 
   const pulloutNumberData = pulloutData.at(0);
 
+  console.log("pulloutNumberData: ", pulloutNumberData);
+
   const {
     handleSubmit,
     control,
@@ -98,60 +102,52 @@ const ViewPullout = () => {
     resolver: yupResolver(schema),
     defaultValues: {
       id: "",
-      description: pulloutNumberData?.description || "",
-      care_of: pulloutNumberData?.care_of || "",
-      remarks: pulloutNumberData?.remarks || "",
-      attachments: pulloutNumberData?.attachments || "",
+      description: "",
+      care_of: "",
+      remarks: "",
+      attachments: "",
 
-      assets: [
-        pulloutNumberData?.assets?.map((asset) => ({
-          id: asset.id,
-          fixed_asset_id: +asset.vladimir_tag_number + " - " + asset.asset_description,
-          asset_accountable: asset.accountable === "-" ? "Common" : asset.accountable,
-          created_at: asset.created_at || asset.acquisition_date,
-          company_id: asset.company?.company_name,
-          business_unit_id: asset.business_unit?.business_unit_name,
-          department_id: asset.department?.department_name,
-          unit_id: asset.unit?.unit_name,
-          sub_unit_id: asset.subunit?.subunit_name,
-          location_id: asset.location?.location_name,
-          accountability: asset?.new_accountability,
-          accountable: asset?.new_accountable,
-          receiver_id: asset?.receiver,
-        })),
-      ],
+      assets: [{ id: null, fixed_asset_id: null, asset_accountable: "", created_at: null }],
     },
   });
 
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "assets",
+  });
+
   useEffect(() => {
-    const pulloutNumberData = pulloutData.at(0);
+    // const pulloutNumberData = pulloutData.at(0);
     if (pulloutData) {
       const attachmentFormat = pulloutNumberData?.attachments === null ? "" : pulloutNumberData?.attachments;
 
       setValue("description", pulloutNumberData?.description);
       setValue("care_of", pulloutNumberData?.care_of);
-      setValue("remarks", pulloutNumberData?.remarks);
+      setValue("remarks", pulloutNumberData?.remarks || "-");
       setValue("attachments", attachmentFormat);
       setValue(
         "assets",
         pulloutNumberData?.assets?.map((asset) => ({
           id: asset.id,
-          fixed_asset_id: +asset.vladimir_tag_number + " - " + asset.asset_description,
-          asset_accountable: asset.accountable === "-" ? "Common" : asset.accountable,
+          fixed_asset_id: asset.vladimir_tag_number + " - " + asset.asset_description,
+          asset_accountable: asset?.accountable === "-" ? "Common" : asset?.accountable,
           created_at: asset.created_at || asset.acquisition_date,
-          company_id: asset.company?.company_name,
-          business_unit_id: asset.business_unit?.business_unit_name,
-          department_id: asset.department?.department_name,
-          unit_id: asset.unit?.unit_name,
-          sub_unit_id: asset.subunit?.subunit_name,
-          location_id: asset.location?.location_name,
+          one_charging_id: asset.one_charging?.name,
+          company_id: asset.one_charging?.company_name,
+          business_unit_id: asset.one_charging?.business_unit_name,
+          department_id: asset.one_charging?.department_name,
+          unit_id: asset.one_charging?.unit_name,
+          sub_unit_id: asset.one_charging?.subunit_name,
+          location_id: asset.one_charging?.location_name,
           accountability: asset?.new_accountability,
           accountable: asset?.new_accountable,
           receiver_id: asset?.receiver,
         }))
       );
     }
-  }, [pulloutData, transactionData]);
+  }, [pulloutData, transactionData, pulloutNumberData]);
+
+  console.log("watch: ", watch("assets"));
 
   const UpdateField = ({ value, label }) => {
     return (
@@ -163,6 +159,7 @@ const ViewPullout = () => {
           autoComplete="off"
           color="secondary"
           disabled
+          fullWidth
           value={value > 1 ? `${value} files selected` : value <= 1 ? `${value} file selected` : null}
           InputProps={{
             startAdornment: (
@@ -177,7 +174,6 @@ const ViewPullout = () => {
           sx={{
             ".MuiInputBase-root": {
               borderRadius: "10px",
-              width: "242px",
               // color: "#636363",
             },
 
@@ -236,13 +232,13 @@ const ViewPullout = () => {
               console.log("💣");
               navigate(`/approving/pull-out`);
             } else if (err?.status !== 422) {
-              dispatch(
-                openToast({
-                  message: "Something went wrong. Please try again.",
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
+              // dispatch(
+              //   openToast({
+              //     message: "Something went wrong. Please try again.",
+              //     duration: 5000,
+              //     variant: "error",
+              //   })
+              // );
 
               navigate(`/approving/pull-out`);
             }
@@ -324,13 +320,13 @@ const ViewPullout = () => {
               navigate(`/approving/pull-out`);
             } else if (err?.status !== 422) {
               console.log(err);
-              dispatch(
-                openToast({
-                  message: "Something went wrong. Please try again.",
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
+              // dispatch(
+              //   openToast({
+              //     message: "Something went wrong. Please try again.",
+              //     duration: 5000,
+              //     variant: "error",
+              //   })
+              // );
               navigate(`/approving/pull-out`);
             }
           };
@@ -361,9 +357,42 @@ const ViewPullout = () => {
     );
   };
 
-  const { fields, append, remove } = useFieldArray({
-    control,
-    name: "assets",
+  console.log("fields: ", fields);
+
+  const handleViewFile = async (id) => {
+    try {
+      const response = await fetch(`${process.env.VLADIMIR_BASE_URL}/file/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", "x-api-key": process.env.GL_KEY },
+      });
+      const blob = await response.blob();
+      const fileURL = URL.createObjectURL(blob);
+
+      // Open new window and store reference
+      const newWindow = window.open(fileURL, "_blank");
+
+      if (newWindow) {
+        // Add to cache and setup cleanup listener
+        blobUrlCache.set(newWindow, fileURL);
+        newWindow.addEventListener("unload", () => {
+          URL.revokeObjectURL(fileURL);
+          blobUrlCache.delete(newWindow);
+        });
+      } else {
+        // Revoke immediately if window failed to open
+        URL.revokeObjectURL(fileURL);
+      }
+    } catch (err) {
+      console.error("Error handling file view:", err);
+    }
+  };
+
+  // Cleanup for main window close (optional safety net)
+  window.addEventListener("beforeunload", () => {
+    blobUrlCache.forEach((url, win) => {
+      URL.revokeObjectURL(url);
+      blobUrlCache.delete(win);
+    });
   });
 
   //* Styles ----------------------------------------------------------------
@@ -392,81 +421,98 @@ const ViewPullout = () => {
           Back
         </Button>
 
-        <Box className="request mcontainer__wrapper" p={2}>
-          <Box>
-            <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
-              TRANSACTION No. {pulloutNumberData?.id}
-            </Typography>
-
-            <Box id="requestForm" className="request__form">
-              <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "15px" }}>
-                REQUEST DETAILS
+        <Box className={isSmallScreen ? "request request__wrapper" : "request__wrapper"} p={2}>
+          {isPulloutFetching || isPulloutLoading ? (
+            <ApprovalViewPulloutSkeleton />
+          ) : (
+            <Box>
+              <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
+                PULLOUT NO. {pulloutNumberData?.id}
               </Typography>
-              <Stack gap={2} py={1}>
-                <Box sx={BoxStyle}>
-                  <CustomTextField
-                    control={control}
-                    name="description"
-                    disabled
-                    label="Description"
-                    type="text"
-                    fullWidth
-                    multiline
-                  />
 
-                  <CustomTextField
-                    control={control}
-                    name="care_of"
-                    disabled
-                    label="Care of"
-                    type="text"
-                    fullWidth
-                    multiline
-                  />
-
-                  <CustomTextField
-                    control={control}
-                    name="remarks"
-                    disabled
-                    label="Remarks (Optional)"
-                    optional
-                    type="text"
-                    fullWidth
-                    multiline
-                  />
-
-                  <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "15px" }}>
-                    ATTACHMENTS
+              <Box id="requestForm" className="request__form">
+                <Stack gap={2} py={1}>
+                  <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "16px" }}>
+                    REQUEST DETAILS
                   </Typography>
+                  <Box sx={BoxStyle}>
+                    <CustomTextField
+                      control={control}
+                      name="description"
+                      disabled
+                      label="Description"
+                      type="text"
+                      fullWidth
+                      multiline
+                    />
 
-                  <Stack flexDirection="row" gap={1} alignItems="center">
-                    {watch("attachments") !== null ? (
-                      <UpdateField label={"Attachments"} value={watch("attachments")?.length} />
-                    ) : (
-                      <CustomMultipleAttachment
-                        control={control}
-                        name="attachments"
-                        disabled
-                        label="Attachments"
-                        inputRef={AttachmentRef}
-                        error={!!errors?.attachments?.message}
-                        helperText={errors?.attachments?.message}
-                      />
-                    )}
-                  </Stack>
-                  <Box mt="-13px" ml="10px">
-                    {watch("attachments")
-                      ? watch("attachments").map((item, index) => (
-                          <Typography fontSize="12px" fontWeight="bold" color="gray" key={index}>
-                            {item.name}
-                          </Typography>
-                        ))
-                      : null}
+                    <CustomTextField
+                      control={control}
+                      name="care_of"
+                      disabled
+                      label="Care of"
+                      type="text"
+                      fullWidth
+                      multiline
+                    />
+
+                    <CustomTextField
+                      control={control}
+                      name="remarks"
+                      disabled
+                      label="Remarks (Optional)"
+                      optional
+                      type="text"
+                      fullWidth
+                      multiline
+                    />
+
+                    <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "15px" }}>
+                      ATTACHMENTS
+                    </Typography>
+
+                    <Stack flexDirection="row" gap={1} alignItems="center">
+                      {watch("attachments") !== null ? (
+                        <UpdateField label={"Attachments"} value={watch("attachments")?.length} />
+                      ) : (
+                        <CustomMultipleAttachment
+                          control={control}
+                          name="attachments"
+                          disabled
+                          label="Attachments"
+                          inputRef={AttachmentRef}
+                          error={!!errors?.attachments?.message}
+                          helperText={errors?.attachments?.message}
+                          fullWidth
+                        />
+                      )}
+                    </Stack>
+                    <Box mt="-13px" ml="10px">
+                      {watch("attachments")
+                        ? watch("attachments").map((item, index) => (
+                            <Typography
+                              fontSize="12px"
+                              fontWeight="bold"
+                              color="gray"
+                              key={index}
+                              onClick={() => handleViewFile(item?.id)}
+                              sx={{
+                                cursor: "pointer",
+                                textDecoration: "underline",
+                                mb: 1,
+                              }}
+                              maxWidth={"265px"}
+                            >
+                              {item.name}
+                            </Typography>
+                          ))
+                        : null}
+                    </Box>
                   </Box>
-                </Box>
-              </Stack>
+                </Stack>
+              </Box>
             </Box>
-          </Box>
+          )}
 
           <Box className="request__table">
             <TableContainer
@@ -515,15 +561,19 @@ const ViewPullout = () => {
                             disabled
                             type="text"
                             size="small"
+                            label="Fixed Asset"
                             multiline
                             sx={{
                               backgroundColor: "transparent",
                               border: "none",
+                              minWidth: "230px",
 
                               ml: "-10px",
                               "& .MuiOutlinedInput-root": {
                                 "& fieldset": {
-                                  border: "none",
+                                  // border: "none",
+                                  borderRadius: "10px",
+                                  border: "2px solid #000",
                                 },
                               },
                               "& .MuiInputBase-input": {
@@ -531,9 +581,6 @@ const ViewPullout = () => {
                                 fontWeight: "bold",
                                 fontSize: "14px",
                                 textOverflow: "ellipsis",
-                              },
-                              "& .Mui-disabled": {
-                                color: "red",
                               },
                               marginTop: "-15px",
                             }}
@@ -573,6 +620,35 @@ const ViewPullout = () => {
 
                         <TableCell className="tbl-cell">
                           <Stack width="250px" rowGap={0}>
+                            <TextField
+                              {...register(`assets.${index}.one_charging_id`)}
+                              variant="outlined"
+                              disabled
+                              type="text"
+                              size="small"
+                              sx={{
+                                backgroundColor: "transparent",
+                                border: "none",
+
+                                ml: "-10px",
+                                "& .MuiOutlinedInput-root": {
+                                  "& fieldset": {
+                                    border: "none",
+                                  },
+                                },
+                                "& .MuiInputBase-input": {
+                                  backgroundColor: "transparent",
+                                  fontWeight: "bold",
+                                  fontSize: "11px",
+                                  textOverflow: "ellipsis",
+                                },
+                                "& .Mui-disabled": {
+                                  color: "red",
+                                },
+                                marginTop: "-15px",
+                              }}
+                            />
+
                             <TextField
                               {...register(`assets.${index}.company_id`)}
                               variant="outlined"

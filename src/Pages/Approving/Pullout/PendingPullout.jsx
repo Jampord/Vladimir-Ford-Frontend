@@ -227,14 +227,15 @@ const PendingPullout = (props) => {
             dispatch(closeConfirm());
           } catch (err) {
             if (err?.status === 422) {
-              dispatch(
-                openToast({
-                  // message: err.data.message,
-                  message: err?.data?.errors?.detail,
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
+              // dispatch(
+              //   openToast({
+              //     // message: err.data.message,
+              //     message: err?.data?.errors?.detail,
+              //     duration: 5000,
+              //     variant: "error",
+              //   })
+              // );
+              navigate(`/approving/pull-out`);
             } else if (err?.status !== 422) {
               console.log(err);
               dispatch(
@@ -253,14 +254,14 @@ const PendingPullout = (props) => {
 
   const handleViewPullout = (data) => {
     // const view = true;
-    navigate(`/approving/pullout/${data?.id}`, {
+    navigate(`/approving/pull-out/${data?.id}`, {
       state: { ...data },
     });
   };
 
   return (
     <Stack className="category_height">
-      {approvalLoading && <MasterlistSkeleton category={true} onAdd={true} />}
+      {approvalLoading && <MasterlistSkeleton category={true} />}
       {approvalError && <ErrorFetching refetch={refetch} category={pendingPulloutData} error={errorData} />}
       {pendingPulloutData && !approvalError && (
         <Box className="mcontainer__wrapper">
@@ -365,7 +366,7 @@ const PendingPullout = (props) => {
                               },
                             }}
                           >
-                            <TableCell className="tbl-cell-category text-weight">{data?.id}</TableCell>
+                            <TableCell className="tbl-cell-category">{data?.id}</TableCell>
 
                             <TableCell className="tbl-cell-category ">{data?.description}</TableCell>
 

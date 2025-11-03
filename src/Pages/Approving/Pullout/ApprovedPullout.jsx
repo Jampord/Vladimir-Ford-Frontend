@@ -111,14 +111,14 @@ const ApprovedPullout = (props) => {
     const view = true;
     const approved = true;
 
-    navigate(`/approving/pullout/${data?.id}`, {
+    navigate(`/approving/pull-out/${data?.id}`, {
       state: { ...data, view, approved },
     });
   };
 
   return (
     <Stack className="category_height">
-      {approvalLoading && <MasterlistSkeleton category={true} onAdd={true} />}
+      {approvalLoading && <MasterlistSkeleton category={true} />}
       {approvalError && <ErrorFetching refetch={refetch} category={approvedPulloutData} error={errorData} />}
       {approvedPulloutData && !approvalError && (
         <Box className="mcontainer__wrapper">
@@ -223,7 +223,7 @@ const ApprovedPullout = (props) => {
                               },
                             }}
                           >
-                            <TableCell className="tbl-cell-category text-weight">{data?.id}</TableCell>
+                            <TableCell className="tbl-cell-category">{data?.id}</TableCell>
 
                             <TableCell className="tbl-cell-category ">{data?.description}</TableCell>
 

@@ -8,10 +8,12 @@ import {
   DialogTitle,
   Divider,
   IconButton,
+  Stack,
   Tooltip,
   Typography,
 } from "@mui/material";
 import moment from "moment";
+import StatusComponent from "../../../Components/Reusable/FaStatusComponent";
 
 const ViewEvaluationApproving = ({
   data,
@@ -79,6 +81,8 @@ const ViewEvaluationApproving = ({
           </Box>
         </Box>
 
+        <Divider />
+
         <Box sx={dialogContentStyle}>
           <Typography fontSize="14px" fontWeight={600}>
             Description:
@@ -87,6 +91,8 @@ const ViewEvaluationApproving = ({
             {data?.description}
           </Typography>
         </Box>
+
+        <Divider />
 
         <Box sx={dialogContentStyle}>
           <Typography fontSize="14px" fontWeight={600}>
@@ -97,19 +103,38 @@ const ViewEvaluationApproving = ({
           </Typography>
         </Box>
 
+        <Divider />
+
         <Box sx={dialogContentStyle}>
           <Typography fontSize="14px" fontWeight={600}>
             Evaluation:
           </Typography>
           {/* <Typography fontSize="13px">{data?.evaluation}</Typography> */}
-          <Chip
-            label={data?.evaluation}
-            size="small"
-            color={
-              data?.evaluation === "Repaired" ? "success" : data?.evaluation === "For Disposal" ? "warning" : "primary"
-            }
-          />
+          <Stack gap={0.5}>
+            {/* <Chip
+              label={data?.evaluation}
+              size="small"
+              color={
+                data?.evaluation === "Repaired"
+                  ? "success"
+                  : data?.evaluation === "For Disposal"
+                  ? "warning"
+                  : "primary"
+              }
+            /> */}
+            <StatusComponent faStatus={data?.evaluation} />
+            {data?.evaluation === "Change Care-of" && (
+              <>
+                <Typography fontSize="11px" fontWeight={500}>
+                  Change to:{" "}
+                  {data?.care_of === "Hardware and Maintenance" ? "Machinery & Equipment" : "Hardware and Maintenance"}
+                </Typography>
+              </>
+            )}
+          </Stack>
         </Box>
+
+        <Divider />
 
         <Box sx={dialogContentStyle}>
           <Typography fontSize="14px" fontWeight={600}>
@@ -119,6 +144,8 @@ const ViewEvaluationApproving = ({
             {data?.remarks ? data?.remarks : "-"}
           </Typography>
         </Box>
+
+        <Divider />
 
         <Box sx={dialogContentStyle}>
           <Typography fontSize="14px" fontWeight={600}>

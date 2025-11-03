@@ -11,7 +11,6 @@ const EvaluationApproving = () => {
   const { data: notifData, refetch } = useGetNotificationApiQuery();
 
   useEffect(() => {
-    // console.log("refetched data", notifData);
     refetch();
   }, [notifData]);
 
