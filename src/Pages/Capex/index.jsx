@@ -4,7 +4,7 @@ import { Outlet } from "react-router";
 import { useLocation } from "react-router-dom";
 
 import { Box, Typography, useMediaQuery } from "@mui/material";
-import { AddBox, Gavel, Unarchive } from "@mui/icons-material";
+import { AddBox, Gavel, RequestQuote, Unarchive } from "@mui/icons-material";
 import Cards from "../../Components/Reusable/Cards";
 import { useSelector } from "react-redux";
 
@@ -31,6 +31,14 @@ const CapexList = [
     description: "Requesting for Capex Additional Cost",
     path: "/capex/additional-cost",
     permission: "additional-cost",
+  },
+
+  {
+    icon: <RequestQuote />,
+    label: "Add Budget",
+    description: "Budget Addition for Capex",
+    path: "/capex/add-budget",
+    permission: "add-budget",
   },
 ];
 
