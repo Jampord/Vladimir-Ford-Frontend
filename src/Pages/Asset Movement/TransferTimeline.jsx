@@ -10,6 +10,7 @@ import {
   HowToReg,
   ManageHistoryTwoTone,
   RemoveCircleOutline,
+  Send,
   TimelineTwoTone,
 } from "@mui/icons-material";
 import { closeDialog } from "../../Redux/StateManagement/booleanStateSlice";
@@ -164,6 +165,8 @@ const TransferTimeline = (props) => {
                           item.action === "Rejected" ||
                           item.action === "Cancelled Item To PO" ? (
                           <RemoveCircleOutline sx={{ color: "error.main" }} />
+                        ) : item?.action === "Released" ? (
+                          <Send sx={{ color: "success.main" }} />
                         ) : (
                           <CheckCircleOutlineTwoTone sx={{ color: "secondary.main" }} />
                         )
@@ -181,7 +184,8 @@ const TransferTimeline = (props) => {
                               ? "#ff000017"
                               : item?.action === "Approved" ||
                                 item?.action === "fully Received" ||
-                                item?.action === " FA Approved"
+                                item?.action === " FA Approved" ||
+                                item?.action === "Released"
                               ? "#00800016"
                               : item.action === "Rejected" || item?.action === "Removed PR Number"
                               ? "#ff000017"
@@ -201,7 +205,8 @@ const TransferTimeline = (props) => {
                                 ? "error.light"
                                 : item?.action === "Approved" ||
                                   item?.action === "fully Received" ||
-                                  item?.action === " FA Approved"
+                                  item?.action === " FA Approved" ||
+                                  item?.action === "Released"
                                 ? "success.light"
                                 : item?.action === "Removed PR Number"
                                 ? "error.light"
