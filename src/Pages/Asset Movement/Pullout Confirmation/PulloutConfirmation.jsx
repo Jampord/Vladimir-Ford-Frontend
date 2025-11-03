@@ -30,10 +30,7 @@ const PulloutConfirmation = () => {
           <Tabs onChange={handleChange} value={value}>
             <Tab
               label={
-                <Badge
-                  color="error"
-                  // badgeContent={notifData?.toTransferReceiving}
-                >
+                <Badge color="error" badgeContent={notifData?.repairedCount}>
                   Repaired
                 </Badge>
               }
