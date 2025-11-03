@@ -164,7 +164,8 @@ const AddRole = (props) => {
     "capex-index",
     "warehouse",
     "type-of-expenditure",
-    "enrolled-budget",
+    // "enrolled-budget",
+    "operation",
     "category",
     "status-category",
     // "small-tools",
@@ -244,7 +245,8 @@ const AddRole = (props) => {
     "capex",
     "warehouse",
     "type-of-expenditure",
-    "enrolled-budget",
+    // "enrolled-budget",
+    "operation",
     "category",
     "status-category",
   ];
@@ -266,7 +268,7 @@ const AddRole = (props) => {
     "transfer-pullout-releasing",
     "evaluation",
   ];
-  const capex = ["add-capex", "sub-capex", "additional-cost"];
+  const capex = ["add-capex", "sub-capex", "additional-cost", "add-budget"];
   const approving = [
     "approving-request",
     "approving-transfer",
@@ -427,7 +429,8 @@ const AddRole = (props) => {
       { label: "Category", value: "category" },
       { label: "Status Category", value: "status-category" },
       { label: "Type of Expenditure", value: "type-of-expenditure" },
-      { label: "Enrolled Budget", value: "enrolled-budget" },
+      { label: "Operation", value: "operation" },
+      // { label: "Enrolled Budget", value: "enrolled-budget" },
     ];
     return (
       <Stack flexDirection="row" flexWrap="wrap" justifyContent="space-evenly" gap={1}>
@@ -568,6 +571,7 @@ const AddRole = (props) => {
       { label: "Add Capex", value: "add-capex" },
       { label: "Sub Capex", value: "sub-capex" },
       { label: "Additional Cost", value: "additional-cost" },
+      { label: "Add Budget", value: "add-budget" },
     ];
 
     return (
@@ -1248,6 +1252,7 @@ const AddRole = (props) => {
                                     "add-capex",
                                     "sub-capex",
                                     "additional-cost",
+                                    "add-budget",
                                   ]),
                                 ]);
                               } else {
