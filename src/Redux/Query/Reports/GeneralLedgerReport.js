@@ -17,7 +17,7 @@ export const generalLedgerReportApi = createApi({
   endpoints: (builder) => ({
     getGeneralLedgerReportApi: builder.query({
       query: (params) =>
-        `report/gl-report?adjustment_month=${params.adjustment_date}&per_page=${params.per_page}&page=${params.page}`,
+        `report/gl-report?adjustment_month=${params.adjustment_date}&per_page=${params.per_page}&page=${params.page}&boa=${params.boa}`,
       providesTags: ["GeneralLedgerReport"],
     }),
     getExportGeneralLedgerReportApi: builder.query({
