@@ -30,6 +30,7 @@ const ToPickup = () => {
   const [perPage, setPerPage] = useState(5);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("active");
+  const [locationFilter, setLocationFilter] = useState([]);
 
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
   const navigate = useNavigate();
@@ -57,6 +58,7 @@ const ToPickup = () => {
     {
       page: page,
       per_page: perPage,
+      location_id: locationFilter.length !== 0 ? locationFilter.join(", ") : "",
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -82,6 +84,8 @@ const ToPickup = () => {
             onSearchChange={setSearch}
             onSetPage={setPage}
             hideArchive
+            locationFilter={locationFilter}
+            setLocationFilter={setLocationFilter}
           />
 
           {/* <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }} mr="10px">
@@ -112,6 +116,7 @@ const ToPickup = () => {
                       Request #
                     </TableCell>
                     <TableCell className="tbl-cell-category">Description</TableCell>
+                    <TableCell className="tbl-cell-category">Helpdesk #</TableCell>
                     <TableCell className="tbl-cell-category" align="center">
                       Care of
                     </TableCell>
@@ -154,6 +159,7 @@ const ToPickup = () => {
                             {item?.id}
                           </TableCell>
                           <TableCell className="tbl-cell">{item?.description}</TableCell>
+                          <TableCell className="tbl-cell">{item?.helpdesk_number}</TableCell>
                           <TableCell className="tbl-cell " align="center">
                             <Typography fontSize="12px" color="black" fontWeight="500">
                               {item?.care_of}
