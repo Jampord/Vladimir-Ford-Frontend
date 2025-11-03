@@ -41,7 +41,7 @@ import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
 import RejectTransfer from "./component/RejectTransfer";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
-import { useLazyGetNotificationApiQuery } from "../../../Redux/Query/Notification";
+import { notificationApi, useLazyGetNotificationApiQuery } from "../../../Redux/Query/Notification";
 
 const schema = yup.object().shape({
   transfer_ids: yup.array(),
@@ -128,7 +128,6 @@ const ReceivingTable = ({ received }) => {
   // * -------------------------------------------------------------------
 
   const handleReceive = () => {
-    console.log({ transfer_ids: watch("transfer_ids").map(Number) });
     dispatch(
       openConfirm({
         approval: true,
@@ -183,7 +182,7 @@ const ReceivingTable = ({ received }) => {
                 duration: 5000,
               })
             );
-
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
             dispatch(closeConfirm());
           } catch (err) {
             console.log("err", err);
@@ -251,7 +250,6 @@ const ReceivingTable = ({ received }) => {
                     >
                       {!received && (
                         <TableCell className="tbl-cell">
-                          {" "}
                           <Tooltip title="Select All" placement="top" arrow>
                             <FormControlLabel
                               sx={{ margin: "auto", align: "center" }}
