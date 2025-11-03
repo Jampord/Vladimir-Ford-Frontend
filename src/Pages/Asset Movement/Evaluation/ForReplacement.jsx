@@ -159,12 +159,8 @@ const ForReplacement = ({ tab }) => {
     }
   };
 
-  // console.log("watch", watch("item_id"));
-
   const selectedItems = evaluationData?.data?.filter((item) => watch("item_id").includes(item?.id?.toString()));
   const result = areAllCOASame(selectedItems);
-
-  console.log("selectedItems", selectedItems);
 
   return (
     <Stack className="category_height">
@@ -281,7 +277,6 @@ const ForReplacement = ({ tab }) => {
                               }
                               onChange={(e) => {
                                 handleAllHandler(e.target.checked);
-                                // console.log(e.target.checked);
                               }}
                             />
                           }
@@ -341,17 +336,17 @@ const ForReplacement = ({ tab }) => {
                             <Typography fontWeight={600} fontSize="13px" color="secondary.main">
                               {item?.asset.asset_description}
                             </Typography>
-                            <Tooltip title={item?.asset.asset_specification} placement="bottom" arrow>
-                              <Typography
-                                fontSize="12px"
-                                color="text.light"
-                                textOverflow="ellipsis"
-                                width="300px"
-                                overflow="hidden"
-                              >
+                            <Typography
+                              fontSize="12px"
+                              color="text.light"
+                              textOverflow="ellipsis"
+                              width="300px"
+                              overflow="hidden"
+                            >
+                              <Tooltip title={item?.asset.asset_specification} placement="bottom" arrow>
                                 {item?.asset.asset_specification}
-                              </Typography>
-                            </Tooltip>
+                              </Tooltip>
+                            </Typography>
                           </TableCell>
                           <TableCell className="tbl-cell ">
                             <Typography fontSize={10} color="gray">
