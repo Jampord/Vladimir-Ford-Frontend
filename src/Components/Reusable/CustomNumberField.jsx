@@ -4,7 +4,15 @@ import { Controller } from "react-hook-form";
 import { TextField } from "@mui/material";
 import { NumericFormat } from "react-number-format";
 
-const CustomNumberField = ({ name, control, optional, keepPrefix = false, hasRequest, ...numberfield }) => {
+const CustomNumberField = ({
+  name,
+  control,
+  optional,
+  keepPrefix = false,
+  dontAllowNegative,
+  hasRequest,
+  ...numberfield
+}) => {
   return (
     <Controller
       name={name}
@@ -20,7 +28,9 @@ const CustomNumberField = ({ name, control, optional, keepPrefix = false, hasReq
             value={value}
             size="small"
             color="secondary"
+            allowNegative={dontAllowNegative && false}
             onValueChange={(data) => {
+              console.log(data);
               if (!data.value) return onChange(null);
 
               if (keepPrefix) return onChange(data.formattedValue);
