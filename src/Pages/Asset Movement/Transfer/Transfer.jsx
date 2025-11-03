@@ -432,7 +432,9 @@ const Transfer = () => {
                 size="small"
                 sx={isSmallScreen ? { minWidth: "50px", px: 0 } : { marginRight: "10px" }}
               >
-                {isSmallScreen ? <TransferWithinAStation color="black" sx={{ fontSize: "20px" }} /> : "Transfer"}
+                <Tooltip title="Create Transfer Request" placement="top" arrow>
+                  {isSmallScreen ? <TransferWithinAStation color="black" sx={{ fontSize: "20px" }} /> : "Transfer"}
+                </Tooltip>
               </Button>
             </Box>
 
@@ -533,7 +535,7 @@ const Transfer = () => {
                                 },
                               }}
                             >
-                              <TableCell className="tbl-cell text-weight">{data.id}</TableCell>
+                              <TableCell className="tbl-cell">{data.id}</TableCell>
                               <TableCell className="tbl-cell">{data.description}</TableCell>
                               <TableCell className="tbl-cell">{`(${data.requester?.employee_id}) - ${data.requester?.firstname} ${data.requester?.lastname}`}</TableCell>
                               <TableCell className="tbl-cell tr-cen-pad45">{data.quantity}</TableCell>
