@@ -23,9 +23,7 @@ export const ipAddressSetupApi = createApi({
     }),
 
     getIpApi: builder.query({
-      // query: () => `https://vladimir.rdfmis.ph/server/api/getIP`,
-      query: () => `https://pretestalpha.rdfmis.ph/server/api/getIP`,
-      // query: () => `http://10.10.10.6:9000/api/getIP`,
+      query: () => `/getIP`,
       providesTags: ["Ip"],
     }),
 
