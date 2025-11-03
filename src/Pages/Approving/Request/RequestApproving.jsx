@@ -17,11 +17,6 @@ const RequestApproving = () => {
 
   const { data: notifData, refetch } = useGetNotificationApiQuery();
 
-  useEffect(() => {
-    // console.log("refetched data");
-    refetch();
-  }, []);
-
   const handleChange = (event, newValue) => {
     permissions.includes("final-approving")
       ? dispatch(setRequestApprovalTabValue(newValue))
