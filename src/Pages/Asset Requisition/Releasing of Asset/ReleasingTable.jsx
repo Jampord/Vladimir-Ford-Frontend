@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Moment from "moment";
 import MasterlistToolbar from "../../../Components/Reusable/MasterlistToolbar";
 import ActionMenu from "../../../Components/Reusable/ActionMenu";
@@ -45,23 +45,44 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import AddReleasingInfo from "./AddReleasingInfo";
 import ExportReleasingOfAsset from "./ExportReleasingOfAsset";
+import { useQueryParams } from "../../../Hooks/useQueryParams";
+import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 
 const schema = yup.object().shape({
   warehouse_number_id: yup.array(),
 });
 
 const ReleasingTable = (props) => {
+  const { getParam, getNumericParam, setMultipleParams } = useQueryParams();
+
   const { released } = props;
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("active");
-  const [perPage, setPerPage] = useState(5);
-  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState(getParam("search") || "");
+  const [status, setStatus] = useState(getParam("status") || "active");
+  const [perPage, setPerPage] = useState(getNumericParam("per_page", 5));
+  const [page, setPage] = useState(getNumericParam("page", 1));
   const [wNumber, setWNumber] = useState([]);
 
   const navigate = useNavigate();
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
 
   const dialog = useSelector((state) => state.booleanState.dialog);
+
+  // Update URL when state changes
+  // Memoize the update function
+  const updateUrlParams = useCallback(() => {
+    setMultipleParams({
+      page: page,
+      per_page: perPage,
+      search: search,
+      status: status,
+      tab: released ? "released" : "for_releasing",
+    });
+  }, [page, perPage, search, status, released, setMultipleParams]);
+
+  // Update URL when state changes - but only when values actually change
+  useEffect(() => {
+    updateUrlParams();
+  }, [updateUrlParams]); // Now this only runs when the dependencies of updateUrlParams change
 
   const {
     handleSubmit,
@@ -119,6 +140,7 @@ const ReleasingTable = (props) => {
   const {
     data: releasingData,
     isLoading: releasingLoading,
+    isFetching: releasingFetching,
     isSuccess: releasingSuccess,
     isError: releasingError,
     error: errorData,
@@ -379,7 +401,9 @@ const ReleasingTable = (props) => {
                   </TableHead>
 
                   <TableBody>
-                    {releasingData?.data?.length === 0 ? (
+                    {releasingFetching ? (
+                      <LoadingData />
+                    ) : releasingData?.data?.length === 0 ? (
                       <NoRecordsFound heightData="small" />
                     ) : (
                       <>
@@ -451,27 +475,27 @@ const ReleasingTable = (props) => {
                                   {data.asset_description}
                                 </Typography>
 
-                                <Tooltip title={data.asset_specification} placement="bottom-start" arrow>
-                                  <Typography
-                                    fontSize={12}
-                                    fontWeight={400}
-                                    width="350px"
-                                    overflow="hidden"
-                                    textOverflow="ellipsis"
-                                    color="text.light"
-                                    noWrap
-                                  >
+                                <Typography
+                                  fontSize={12}
+                                  fontWeight={400}
+                                  width="350px"
+                                  overflow="hidden"
+                                  textOverflow="ellipsis"
+                                  color="text.light"
+                                  noWrap
+                                >
+                                  <Tooltip title={data.asset_specification} placement="bottom" arrow>
                                     {data.asset_specification}
-                                  </Typography>
-                                </Tooltip>
+                                  </Tooltip>
+                                </Typography>
 
                                 <Typography fontSize={12} fontWeight={600} color="primary.main">
                                   {data.type_of_request?.type_of_request_name.toUpperCase()}
                                 </Typography>
 
-                                {data?.minor_category?.minor_category_name === "Phone" && (
+                                {data?.minor_category?.has_atoe === 1 && (
                                   <Typography fontSize={12} fontWeight={600} color="info.main">
-                                    Phone Request
+                                    ATOE Request
                                   </Typography>
                                 )}
                               </TableCell>
