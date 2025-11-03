@@ -1,9 +1,11 @@
-import { Box, Skeleton, Stack } from "@mui/material";
+import { Box, Skeleton, Stack, Typography } from "@mui/material";
 
 const ApprovalViewTransferSkeleton = () => {
   return (
     <Stack>
-      <Skeleton variant="text" width={160} height={60} />
+      <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem", pt: 1 }}>
+        PLEASE WAIT...
+      </Typography>
 
       <Box mt={1} />
 
