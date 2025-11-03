@@ -1,9 +1,12 @@
-import { Box, Skeleton, Stack } from "@mui/material";
+import { Box, Skeleton, Stack, Typography } from "@mui/material";
 
 const AddPulloutSkeleton = () => {
   return (
     <Stack>
-      <Skeleton variant="text" width={160} height={60} />
+      {/* <Skeleton variant="text" width={160} height={60} /> */}
+      <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
+        PLEASE WAIT...
+      </Typography>
 
       <Box mt={1} />
 
