@@ -120,9 +120,7 @@ const AddReleasingInfo = (props) => {
   // console.log("data", data);
   // console.log("selectedItems", selectedItems);
 
-  const isPhone = selectedItems?.minor_category?.minor_category_name?.toLowerCase().includes("phone");
-
-  console.log("isPhone", isPhone);
+  const hasATOE = selectedItems?.minor_category?.has_atoe === 1;
 
   const [signature, setSignature] = useState();
   const [trimmedDataURL, setTrimmedDataURL] = useState(null);
@@ -403,7 +401,6 @@ const AddReleasingInfo = (props) => {
   // console.log(warehouseNumberData);
 
   const onSubmitHandler = async (formData) => {
-    console.log({ formData });
     // fileToBase64
     const fileToBase64 = (file) => {
       return new Promise((resolve, reject) => {
@@ -455,9 +452,6 @@ const AddReleasingInfo = (props) => {
       atoe_debit_id: formData?.atoe_debit_id?.sync_id?.toString() || null,
       atoe_credit_id: formData?.atoe_credit_id?.sync_id?.toString() || null,
     };
-
-    console.log("newFormData", newFormData);
-    console.log("watch(atoe_credit_id", watch("atoe_credit_id"));
 
     dispatch(
       openConfirm({
@@ -519,14 +513,6 @@ const AddReleasingInfo = (props) => {
               dispatch(
                 openToast({
                   message: err.data?.errors?.signature[0] || err.data.message,
-                  duration: 5000,
-                  variant: "error",
-                })
-              );
-            } else if (err?.status !== 422) {
-              dispatch(
-                openToast({
-                  message: "Something went wrong. Please try again.",
                   duration: 5000,
                   variant: "error",
                 })
@@ -1074,9 +1060,9 @@ const AddReleasingInfo = (props) => {
             </Stack>
           </Box>
 
-          {isPhone && (
+          {hasATOE && (
             <Box sx={BoxStyle}>
-              <Typography sx={sxSubtitle}>Phone Accounting Entries</Typography>
+              <Typography sx={sxSubtitle}>ATOE Accounting Entries</Typography>
 
               <CustomNumberField
                 control={control}
@@ -1092,8 +1078,12 @@ const AddReleasingInfo = (props) => {
                 }}
                 isAllowed={(values) => {
                   const { floatValue } = values;
-                  return floatValue >= 1;
+                  return floatValue >= 1 && floatValue <= selectedItems?.acquisition_cost;
                 }}
+                helperText={`Acquisition Cost: ₱${selectedItems?.acquisition_cost?.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}`}
               />
 
               <CustomAutoComplete
@@ -1365,7 +1355,7 @@ const AddReleasingInfo = (props) => {
             !isValid ||
             !watch("receiver_img") ||
             (result === false && !watch("authorization_memo_img")) ||
-            (isPhone && (!watch("atoe_amount") || !watch("atoe_debit_id") || !watch("atoe_credit_id")))
+            (hasATOE && (!watch("atoe_amount") || !watch("atoe_debit_id") || !watch("atoe_credit_id")))
           }
         >
           {
