@@ -124,6 +124,8 @@ import SubCapexIndex from "./Pages/Capex/Sub Capex/SubCapexIndex";
 import AdditionalCostIndex from "./Pages/Capex/Additional Cost/AdditionalCostIndex";
 import TypeofExpenditure from "./Pages/Masterlist/TypeofExpenditure";
 import EnrolledBudget from "./Pages/Masterlist/EnrolledBudget";
+import AddBudgetIndex from "./Pages/Capex/Add Budget/AddBudgetIndex";
+import Operation from "./Pages/Masterlist/Operation";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -266,6 +268,11 @@ const router = createBrowserRouter([
                 path: "enrolled-budget",
                 element: <EnrolledBudget />,
                 handle: { permission: "enrolled-budget" },
+              },
+              {
+                path: "operation",
+                element: <Operation />,
+                handle: { permission: "operation" },
               },
               {
                 path: "service-provider",
@@ -601,6 +608,11 @@ const router = createBrowserRouter([
                 path: "additional-cost",
                 element: <AdditionalCostIndex />,
                 handle: { permission: "additional-cost" },
+              },
+              {
+                path: "add-budget",
+                element: <AddBudgetIndex />,
+                handle: { permission: "add-budget" },
               },
             ],
           },
