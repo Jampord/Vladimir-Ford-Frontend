@@ -2,16 +2,15 @@ import React, { useEffect, useState } from "react";
 import { TabContext, TabPanel } from "@mui/lab";
 import { Badge, Box, Tab, Tabs, Typography } from "@mui/material";
 
-// import PendingDisposal from "./PendingDisposal";
-// import ApprovedDisposal from "./ApprovedDisposal";
 import { useGetNotificationApiQuery } from "../../../Redux/Query/Notification";
+import PendingDisposal from "./PendingDisposal";
+import ApprovedDisposal from "./ApprovedDisposal";
 
 const DisposalApproving = () => {
   const [value, setValue] = useState("1");
   const { data: notifData, refetch } = useGetNotificationApiQuery();
 
   useEffect(() => {
-    // console.log("refetched data");
     refetch();
   }, [notifData]);
 
@@ -30,8 +29,8 @@ const DisposalApproving = () => {
           <Tabs onChange={handleChange} value={value}>
             <Tab
               label={
-                <Badge color="error" badgeContent={notifData?.toApproveCount}>
-                  Pending Disposal{"  "}
+                <Badge color="error" badgeContent={notifData?.disposalApprovalCount}>
+                  Pending Disposal
                 </Badge>
               }
               value="1"
@@ -42,11 +41,11 @@ const DisposalApproving = () => {
           </Tabs>
 
           <TabPanel sx={{ p: 0 }} value="1" index="1">
-            {/* <PendingDisposal refetch /> */}
+            <PendingDisposal />
           </TabPanel>
 
           <TabPanel sx={{ p: 0 }} value="2" index="2">
-            {/* <ApprovedDisposal /> */}
+            <ApprovedDisposal />
           </TabPanel>
         </TabContext>
       </Box>
