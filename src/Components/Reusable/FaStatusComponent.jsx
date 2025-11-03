@@ -16,7 +16,7 @@ import {
 } from "@mui/icons-material";
 
 const faStatusComponent = ({ faStatus, data, hover }) => {
-  if (faStatus === "Good" || faStatus === "Repaired") {
+  if (faStatus === "Good" || faStatus === "Repaired" || faStatus === "Received") {
     return (
       <Chip
         size="small"
@@ -65,7 +65,7 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
         }}
       />
     );
-  } else if (faStatus === "For Disposal" || faStatus === "Disposal") {
+  } else if (faStatus === "For Disposal" || faStatus === "Disposal" || faStatus === "disposal") {
     return (
       <Chip
         size="small"
@@ -183,8 +183,8 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
         icon={<FindReplace size="small" color="text.dark" />}
         label={faStatus}
         sx={{
-          backgroundColor: "primary.light",
-          color: "text.dark",
+          backgroundColor: "#FFC773",
+          color: "#905700",
 
           ":hover": hover && { backgroundColor: "primary.main", cursor: "pointer" },
 
