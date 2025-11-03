@@ -157,7 +157,6 @@ const Pullout = () => {
   };
 
   const onVoidHandler = async (id) => {
-    console.log("id", id);
     dispatch(
       openConfirm({
         icon: Report,
@@ -184,7 +183,6 @@ const Pullout = () => {
             let result = await voidPullout({
               movement_id: id,
             }).unwrap();
-            console.log(result);
             dispatch(
               openToast({
                 message: result.message,
@@ -218,10 +216,7 @@ const Pullout = () => {
     );
   };
 
-  console.log("data", pulloutData);
-
   const handleViewPullout = (data) => {
-    // console.log("data: ", data);
     const view = true;
     navigate(`add-pull-out/${data.id}`, {
       state: { ...data, view },
@@ -229,7 +224,6 @@ const Pullout = () => {
   };
 
   const handleViewTimeline = (data) => {
-    // console.log(data);
     dispatch(openDialog());
     setTransactionIdData(data);
   };
@@ -248,19 +242,21 @@ const Pullout = () => {
             <MasterlistToolbar onStatusChange={setStatus} onSearchChange={setSearch} onSetPage={setPage} hideArchive />
 
             <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }} mr="10px">
-              <Button
-                onClick={handlePullout}
-                variant="contained"
-                startIcon={isSmallScreen ? null : <Logout sx={{ transform: "rotate(270deg)" }} />}
-                size="small"
-                sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
-              >
-                {isSmallScreen ? (
-                  <Logout color="black" sx={{ fontSize: "20px", transform: "rotate(270deg)" }} />
-                ) : (
-                  "Pull out"
-                )}
-              </Button>
+              <Tooltip title="Add Pullout Request" placement="top" arrow>
+                <Button
+                  onClick={handlePullout}
+                  variant="contained"
+                  startIcon={isSmallScreen ? null : <Logout sx={{ transform: "rotate(270deg)" }} />}
+                  size="small"
+                  sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+                >
+                  {isSmallScreen ? (
+                    <Logout color="black" sx={{ fontSize: "20px", transform: "rotate(270deg)" }} />
+                  ) : (
+                    "Pullout"
+                  )}
+                </Button>
+              </Tooltip>
             </Box>
 
             <Box>
@@ -342,12 +338,12 @@ const Pullout = () => {
                               {moment(item?.created_at).format("MMM DD, YYYY")}
                             </TableCell>
                             <TableCell className="tbl-cell" align="center">
-                              {(item?.can_delete === 1 || item?.can_edit === 1) && (
+                              {(item?.status === "Waiting to Pick Up" || item?.can_edit === 1) && (
                                 <ActionMenu
                                   data={item}
                                   status={item?.status}
                                   hideArchive
-                                  showVoid={item?.can_delete === 1}
+                                  showVoid={item?.status === "Waiting to Pick Up"}
                                   editPulloutData={item?.can_edit === 1}
                                   onVoidHandler={onVoidHandler}
                                 />
