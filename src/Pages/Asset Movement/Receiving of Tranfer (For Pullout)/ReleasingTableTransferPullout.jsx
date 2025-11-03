@@ -106,8 +106,23 @@ const ReleasingTableTransferPullout = ({ received }) => {
     dispatch(openDialog());
   };
 
+  const areAllCOASame = (assets) => {
+    if (assets) {
+      if (assets?.length === 0) return true; // No assets to compare
+
+      const oneCharging = assets[0]?.to_one_charging?.id;
+
+      for (let i = 1; i < assets.length; i++) {
+        if (assets[i]?.to_one_charging?.id !== oneCharging) {
+          return false; // Found a different one charging
+        }
+      }
+      return true; // All COA are the same
+    }
+  };
+
   const selectedItems = receivingData?.data?.filter((item) => watch("transfer_ids").includes(item?.id?.toString()));
-  console.log("selected items", selectedItems);
+  const result = areAllCOASame(selectedItems);
 
   return (
     <Stack sx={{ height: "calc(100vh - 250px)" }}>
@@ -125,7 +140,7 @@ const ReleasingTableTransferPullout = ({ received }) => {
                 size="small"
                 startIcon={<MoveDownOutlined />}
                 sx={{ position: "absolute", right: 0, top: -40 }}
-                disabled={!watch("transfer_ids") || validateSelectedItems()}
+                disabled={!watch("transfer_ids") || validateSelectedItems() || result === false}
               >
                 Release
               </Button>
