@@ -96,6 +96,7 @@ const PendingEvaluation = () => {
   };
 
   const handleViewFile = async (id) => {
+    const blobUrlCache = new Map();
     try {
       const response = await fetch(`${process.env.VLADIMIR_BASE_URL}/file/${id}`, {
         method: "GET",
