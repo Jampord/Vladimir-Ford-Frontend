@@ -41,6 +41,7 @@ import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
 import RejectDisposal from "./component/RejectDisposal";
+import { notificationApi } from "../../../Redux/Query/Notification";
 
 const schema = yup.object().shape({
   disposal_ids: yup.array(),
@@ -173,7 +174,7 @@ const ReceivingTable = ({ received }) => {
                 duration: 5000,
               })
             );
-
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
             dispatch(closeConfirm());
           } catch (err) {
             console.log("err", err);
@@ -379,29 +380,29 @@ const ReceivingTable = ({ received }) => {
                               </TableCell>
                               <TableCell className="tbl-cell">
                                 {data?.pullout_attachments.map((item) => (
-                                  <Tooltip title={"View or Download Pullout Attachment"} key={item?.id} arrow>
-                                    <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                                  <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)} key={item?.id}>
+                                    <Tooltip title={"View or Download Pullout Attachment"} arrow>
                                       {item?.name}
-                                    </Typography>
-                                  </Tooltip>
+                                    </Tooltip>
+                                  </Typography>
                                 ))}
                               </TableCell>
                               <TableCell className="tbl-cell">
                                 {data?.evaluation_attachments.map((item) => (
-                                  <Tooltip title={"View or Download Evaluation Attachment"} key={item?.id} arrow>
-                                    <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                                  <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)} key={item?.id}>
+                                    <Tooltip title={"View or Download Evaluation Attachment"} arrow>
                                       {item?.name}
-                                    </Typography>
-                                  </Tooltip>
+                                    </Tooltip>
+                                  </Typography>
                                 ))}
                               </TableCell>
                               <TableCell className="tbl-cell">
                                 {data?.disposal_attachments.map((item) => (
-                                  <Tooltip title={"View or Download Disposal Attachment"} key={item?.id} arrow>
-                                    <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                                  <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)} key={item?.id}>
+                                    <Tooltip title={"View or Download Disposal Attachment"} arrow>
                                       {item?.name}
-                                    </Typography>
-                                  </Tooltip>
+                                    </Tooltip>
+                                  </Typography>
                                 ))}
                               </TableCell>
                               <TableCell className="tbl-cell">{moment(data?.created_at).format("LL")}</TableCell>
