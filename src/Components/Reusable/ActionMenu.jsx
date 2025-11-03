@@ -52,6 +52,7 @@ const ActionMenu = (props) => {
     editRequestData,
     editTransferData,
     editPulloutData,
+    editDisposalData,
     onDeleteReferenceHandler,
     // setShowEdit
     setUpdateToggle,
@@ -217,6 +218,13 @@ const ActionMenu = (props) => {
     });
   };
 
+  const handleEditDisposal = () => {
+    const edit = true;
+    navigate(`add-disposal/${data.id}`, {
+      state: { ...data, edit },
+    });
+  };
+
   const handleEditNav = () => {
     navigate(`add-requisition`);
     onUpdateHandler(data);
@@ -304,6 +312,17 @@ const ActionMenu = (props) => {
 
           {editPulloutData && (
             <MenuItem onClick={handleEditPullout} dense>
+              <ListItemIcon>
+                <BorderColor />
+              </ListItemIcon>
+              <ListItemText disableTypography align="left">
+                Edit
+              </ListItemText>
+            </MenuItem>
+          )}
+
+          {editDisposalData && (
+            <MenuItem onClick={handleEditDisposal} dense>
               <ListItemIcon>
                 <BorderColor />
               </ListItemIcon>
