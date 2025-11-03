@@ -9,6 +9,7 @@ import { Delete, Handyman, Info } from "@mui/icons-material";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { usePostEvaluateForReplacementAssetApiMutation } from "../../../Redux/Query/Movement/Evaluation";
 import CustomTextField from "../../../Components/Reusable/CustomTextField";
+import { notificationApi } from "../../../Redux/Query/Notification";
 
 const schema = yup.object().shape({
   remarks: yup.string().nullable().label("Remarks"),
@@ -82,6 +83,7 @@ const ForReplacementDialog = ({ item, action, setAction, reset: item_id_reset, s
                 duration: 5000,
               })
             );
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
             reset();
             item_id_reset();
             handleCloseDialog();
