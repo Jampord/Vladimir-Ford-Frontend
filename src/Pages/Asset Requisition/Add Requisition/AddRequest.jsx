@@ -121,6 +121,7 @@ import { useDownloadAttachment } from "../../../Hooks/useDownloadAttachment";
 import { useLazyGetOneRDFChargingAllApiQuery } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
 import { useLazyGetYmirShipToAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/YmirApi";
 import { useLazyGetShipToAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/ShipTo";
+import { resetGetData } from "../../../Redux/StateManagement/actionMenuSlice";
 // import { useLazyGetMajorCategoryAllApiQuery } from "../../../Redux/Query/Masterlist/Category/MajorCategory";
 
 const schema = yup.object().shape({
@@ -269,9 +270,12 @@ const AddRequisition = (props) => {
   const [scale, setScale] = useState(1);
 
   const { state: transactionData } = useLocation();
-  console.log("trans data: ", transactionData);
+
   const dialog = useSelector((state) => state.booleanState.dialog);
   const drawer = useSelector((state) => state.booleanState.drawer);
+
+  const actionMenuData = useSelector((state) => state.actionMenu.actionData);
+  console.log("actionMenuData", actionMenuData);
 
   const handleDownloadAttachment = (value) => {
     useDownloadAttachment({ attachment: value?.value, id: value?.id });
@@ -284,41 +288,6 @@ const AddRequisition = (props) => {
       bytes[i] = binaryString.charCodeAt(i); // Convert to byte array
     }
     return new Blob([bytes], { type: mimeType });
-  };
-
-  const handleOpenDrawer = (value) => {
-    console.log("valueeeeeee", value);
-    const blob = base64ToBlob(value?.value?.base64, value?.value?.mime_type);
-    const url = URL.createObjectURL(blob);
-
-    console.log("url", url);
-
-    dispatch(openDrawer());
-    setBase64(url);
-    (value?.value?.file_name.includes("jpg") ||
-      value?.value?.file_name.includes("png") ||
-      value?.value?.file_name.includes("jpeg")) &&
-      setImage(true);
-    setDValue(value.data);
-    setName(value.name);
-  };
-
-  const handleCloseDrawer = () => {
-    dispatch(closeDrawer());
-    setBase64("");
-    setImage(false);
-    setDValue(null);
-    setName("");
-    setScale(1);
-  };
-
-  // Zoom handlers
-  const handleZoomIn = () => {
-    setScale((prev) => Math.min(prev + 0.2, 4)); // Limit max zoom to 3x
-  };
-
-  const handleZoomOut = () => {
-    setScale((prev) => Math.max(prev - 0.2, 0.5)); // Limit min zoom to 0.5x
   };
 
   const attachmentSx = {
@@ -375,9 +344,6 @@ const AddRequisition = (props) => {
   } = useGetRequisitionIdApiQuery({ id: transactionData?.transaction_number });
 
   const requisitionStatus = requisitionData?.data[0]?.status;
-
-  // console.log("requisitionData", requisitionStatus);
-  // console.log(transactionData.transaction_number);
 
   const [
     typeOfRequestTrigger,
@@ -560,8 +526,6 @@ const AddRequisition = (props) => {
     },
   ] = useLazyGetFixedAssetAllParamsApiQuery();
 
-  // console.log("fixedAssetSmallToolsApiData", fixedAssetSmallToolsApiData);
-
   const [
     sedarTrigger,
     { data: sedarData = [], isLoading: isSedarLoading, isSuccess: isSedarSuccess, isError: isSedarError },
@@ -600,10 +564,8 @@ const AddRequisition = (props) => {
   } = useGetRequestContainerAllApiQuery({}, { refetchOnMountOrArgChange: true });
   // } = useGetRequestContainerAllApiQuery({ page: page, per_page: perPage }, { refetchOnMountOrArgChange: true });
 
-  console.log("addRequestAllApi", addRequestAllApi);
-
   const hasRequest = addRequestAllApi.length > 0;
-  // console.log("hasRequest", hasRequest);
+  const hasActionMenuData = actionMenuData !== null;
 
   const {
     data: transactionDataApi = [],
@@ -617,8 +579,6 @@ const AddRequisition = (props) => {
     { transaction_number: transactionData?.transaction_number },
     { refetchOnMountOrArgChange: true }
   );
-
-  // console.log("transactiondata", transactionDataApi);
 
   const [postRequest, { data: postRequestData }] = usePostRequestContainerApiMutation();
   const [updateDataRequest, { data: updateRequestData }] = useUpdateRequestContainerApiMutation();
@@ -704,7 +664,6 @@ const AddRequisition = (props) => {
 
   useEffect(() => {
     if (updateRequest.id) {
-      console.log("updaterequest", updateRequest);
       const accountable = {
         general_info: {
           full_id_number: updateRequest.accountable.split(" ")[0],
@@ -762,6 +721,64 @@ const AddRequisition = (props) => {
     }
   }, [updateRequest]);
 
+  useEffect(() => {
+    if (actionMenuData !== null) {
+      const accountable = {
+        general_info: {
+          full_id_number: actionMenuData.accountable.split(" ")[0],
+          full_id_number_full_name: actionMenuData.accountable,
+        },
+      };
+      const fixed_asset = {
+        id: actionMenuData?.id,
+        vladimir_tag_number: actionMenuData?.vladimir_tag_number,
+        asset_description: actionMenuData?.asset_description,
+      };
+      console.log("fixed_asset", fixed_asset);
+      const dateNeededFormat = actionMenuData?.date_needed === "-" ? null : new Date(actionMenuData?.date_needed);
+      const smallToolFormat =
+        actionMenuData?.small_tool_id === (undefined || null) ? null : actionMenuData?.small_tool_id;
+      const cellphoneNumber = actionMenuData?.cellphone_number === "-" ? "" : actionMenuData?.cellphone_number.slice(2);
+      const attachmentFormat = (fields) => (actionMenuData?.[fields] === "-" ? "" : actionMenuData?.[fields]);
+
+      setValue("type_of_request_id", actionMenuData?.type_of_request);
+      setValue("cip_number", actionMenuData?.cip_number);
+      setValue("attachment_type", actionMenuData?.attachment_type);
+      // setValue("receiving_warehouse_id", actionMenuData?.warehouse);
+
+      setValue("major_category_id", actionMenuData?.major_category?.id);
+      setValue("minor_category_id", actionMenuData?.minor_category);
+
+      setValue("one_charging_id", actionMenuData?.one_charging);
+      setValue("department_id", actionMenuData?.department);
+      setValue("company_id", actionMenuData?.company);
+      setValue("business_unit_id", actionMenuData?.business_unit);
+      setValue("unit_id", actionMenuData?.unit);
+      setValue("subunit_id", actionMenuData?.subunit);
+      setValue("location_id", actionMenuData?.location);
+      // setValue("small_tool_id", actionMenuData?.small_tool_id);
+      // setValue("account_title_id", actionMenuData?.account_title);
+      setValue("accountability", actionMenuData?.accountability);
+      setValue("accountable", accountable);
+      setValue("acquisition_details", actionMenuData?.acquisition_details);
+
+      // ASSET INFO
+      setValue("fixed_asset_id", fixed_asset);
+      setValue("small_tool_id", smallToolFormat);
+      setValue("asset_description", actionMenuData?.asset_description);
+      setValue("item_status", "Replacement");
+      setValue("asset_specification", actionMenuData?.asset_specification);
+      setValue("small_tool_item", actionMenuData?.small_tool_item);
+      setValue("date_needed", dateNeededFormat);
+      setValue("quantity", actionMenuData?.quantity);
+      setValue("uom_id", actionMenuData?.unit_of_measure);
+      // setValue("ship_to_id", actionMenuData?.ship_to);
+      setValue("brand", actionMenuData?.brand);
+      setValue("cellphone_number", cellphoneNumber);
+      setValue("additional_info", actionMenuData?.additional_info);
+    }
+  }, [actionMenuData]);
+
   const handleEditRequestData = () => {
     if (transactionData && updateRequest) {
       transactionDataApi[0]?.can_edit === 1 || transactionData?.status === "Return";
@@ -773,22 +790,9 @@ const AddRequisition = (props) => {
   };
 
   const attachmentValidation = (fieldName, formData) => {
-    // console.log("fieldName", fieldName);
-    // console.log("formData", formData);
     const validateAdd = addRequestAllApi.find((item) => item.id === updateRequest.id);
     const validate = transactionDataApi.find((item) => item.id === updateRequest.id);
     const formDataValidate = formData?.[fieldName]?.name;
-    // console.log("formValidate", formDataValidate);
-    // console.log("updateValidate", updateRequest?.[fieldName]?.file_name);
-    // console.log(
-    //   "updateRequest",
-    //   (formDataValidate === undefined
-    //     ? (validateAdd || validate)?.attachments?.[fieldName]?.file_name
-    //     : formDataValidate) === updateRequest?.[fieldName]?.file_name
-    // );
-    // console.log("validateAdd", validateAdd?.attachments);
-    // console.log("validate", validate?.attachments);
-    // console.log("validate", validate);
 
     if (watch(`${fieldName}`) === null) {
       return "";
@@ -810,7 +814,6 @@ const AddRequisition = (props) => {
   //  * CONTAINER
   // Adding of Request
   const addRequestHandler = (formData) => {
-    console.log("formData👀", formData);
     const cipNumberFormat = formData?.cip_number === "" ? "" : formData?.cip_number?.toString();
     // const updatingCoa = (fields, name) => (updateRequest ? formData?.[fields] : formData?.[fields]?.[name]?.toString());
     const accountableFormat =
@@ -825,7 +828,7 @@ const AddRequisition = (props) => {
       attachment_type: formData?.attachment_type?.toString(),
       // receiving_warehouse_id: formData?.receiving_warehouse_id?.id?.toString(),
       major_category_id: !transactionData
-        ? formData?.minor_category_id?.major_category?.id?.toString()
+        ? formData?.minor_category_id?.major_category?.id?.toString() || actionMenuData?.major_category?.id?.toString()
         : formData?.major_category_id?.toString(),
       minor_category_id: formData?.minor_category_id?.id?.toString(),
 
@@ -873,8 +876,6 @@ const AddRequisition = (props) => {
       tool_of_trade: updateRequest && attachmentValidation("tool_of_trade", formData),
       other_attachments: updateRequest && attachmentValidation("other_attachments", formData),
     };
-    // console.log(formData);
-    // console.log("data", data);
 
     const payload = new FormData();
     Object.entries(data).forEach((item) => {
@@ -887,17 +888,7 @@ const AddRequisition = (props) => {
     // validation if the requestor changes the COA while the item in the container is different
     // from the item in the input field
     const validation = () => {
-      console.log(
-        "validation",
-        transactionData,
-        addRequestAllApi,
-        watch("department_id"),
-        watch("unit_id"),
-        watch("subunit_id"),
-        watch("location_id")
-      );
       const coaValidation = (name, value) => {
-        console.log("coaValidation", name, value);
         transactionData && transactionDataApi?.every((item) => item?.[name]?.id !== watch(value)?.id);
       };
 
@@ -1142,6 +1133,7 @@ const AddRequisition = (props) => {
               isRequisitionRefetch();
               dispatch(requisitionApi.util.invalidateTags(["Requisition"]));
               dispatch(requestContainerApi.util.invalidateTags(["RequestContainer"]));
+              dispatch(resetGetData());
             })
             .catch((err) => {
               console.log(err);
@@ -1208,7 +1200,6 @@ const AddRequisition = (props) => {
 
     setSelectedId(null);
   };
-  // console.log("small_tool_id", watch("small_tool_id"));
 
   // CREATE button function
   const onSubmitHandler = () => {
@@ -1408,7 +1399,6 @@ const AddRequisition = (props) => {
           try {
             dispatch(onLoading());
             let result = await deleteRequestContainer(id).unwrap();
-            // console.log(result);
             dispatch(
               openToast({
                 message: result.message,
@@ -1467,7 +1457,6 @@ const AddRequisition = (props) => {
           try {
             dispatch(onLoading());
             let result = await deleteAllRequest().unwrap();
-            // console.log(result);
             dispatch(
               openToast({
                 message: result.message,
@@ -1606,7 +1595,6 @@ const AddRequisition = (props) => {
       additional_info,
       attachments,
     } = props;
-    console.log("props", props);
 
     setUpdateRequest({
       id,
@@ -1782,6 +1770,7 @@ const AddRequisition = (props) => {
                 label="Acquisition Details"
                 type="text"
                 disabled={updateRequest && disable}
+                hasRequest={hasActionMenuData}
                 onBlur={() =>
                   handleInputValidation("acquisition_details", "acquisition_details", "acquisition_details")
                 }
@@ -1801,6 +1790,7 @@ const AddRequisition = (props) => {
                 options={attachmentType}
                 // disabled={transactionData ? transactionData?.length !== 0 : addRequestAllApi?.length !== 0}
                 disabled={updateRequest && disable}
+                hasRequest={hasActionMenuData}
                 renderInput={(params) => (
                   <TextField
                     {...params}
@@ -1888,7 +1878,9 @@ const AddRequisition = (props) => {
                 }
                 disabled={updateRequest && disable}
                 size="small"
-                getOptionLabel={(option) => `${option.id} - ${option.minor_category_name}`}
+                getOptionLabel={(option) =>
+                  `${option.id} - ${option.minor_category_name} ${option?.has_atoe === 1 ? "(ATOE)" : ""}`
+                }
                 isOptionEqualToValue={(option, value) => option.id === value.id}
                 renderInput={(params) => (
                   <TextField
@@ -1928,8 +1920,6 @@ const AddRequisition = (props) => {
                   />
                 )}
                 onChange={(_, value) => {
-                  console.log("value", value);
-
                   if (value) {
                     setValue("department_id", value);
                     setValue("company_id", value);
@@ -2273,7 +2263,6 @@ const AddRequisition = (props) => {
                       />
                     )}
                     onChange={(_, value) => {
-                      console.log("value", value);
                       if (value) {
                         setValue("small_tool_id", value?.small_tools);
                         setValue("asset_description", value?.asset_description);
@@ -2332,7 +2321,6 @@ const AddRequisition = (props) => {
                       />
                     )}
                     onChange={(_, value) => {
-                      console.log("value", value);
                       if (value) {
                         setValue("small_tool_id", value?.small_tools);
                         setValue("asset_description", value?.asset_description);
@@ -2478,7 +2466,7 @@ const AddRequisition = (props) => {
               <CustomDatePicker
                 control={control}
                 name="date_needed"
-                hasRequest={hasRequest && true}
+                hasRequest={(hasRequest || hasActionMenuData) && true}
                 label="Date Needed"
                 size="small"
                 disabled={updateRequest && disable}
@@ -2576,7 +2564,7 @@ const AddRequisition = (props) => {
                 name="additional_info"
                 label="Capex Num / Unit Charging"
                 // optional
-                hasRequest={hasRequest && true}
+                hasRequest={(hasRequest || hasActionMenuData) && true}
                 type="text"
                 disabled={updateRequest && disable}
                 fullWidth
@@ -2891,8 +2879,6 @@ const AddRequisition = (props) => {
     );
   };
 
-  // console.log("pewqpwepeewpw", transactionData);
-
   // Global cache to track opened windows and their blob URLs
   const blobUrlCache = new Map();
 
@@ -2944,13 +2930,15 @@ const AddRequisition = (props) => {
             size="small"
             startIcon={<ArrowBackIosRounded color="secondary" />}
             onClick={() => {
-              transactionData?.requestMonitoring
-                ? navigate("/monitoring/request-monitoring")
-                : transactionData?.warehouseMonitoring
-                ? navigate("/monitoring/warehouse-monitoring")
-                : navigate("/asset-requisition/requisition");
-              // navigate(-1);
+              // transactionData?.requestMonitoring
+              //   ? navigate("/monitoring/request-monitoring")
+              //   : transactionData?.warehouseMonitoring
+              //   ? navigate("/monitoring/warehouse-monitoring")
+              //   :
+              navigate(-1);
+              // navigate("/asset-requisition/requisition");
               // deleteAllRequest();
+              dispatch(resetGetData());
             }}
             disableRipple
             sx={{ width: "90px", ml: "-15px", mt: "-5px", pb: "10px", "&:hover": { backgroundColor: "transparent" } }}
@@ -2966,6 +2954,12 @@ const AddRequisition = (props) => {
               : transactionData?.requestMonitoring || transactionData?.warehouseMonitoring
               ? null
               : transactionData?.can_edit === 1 && formInputs()}
+
+            {!!!isSmallScreen && (
+              <Box my={2}>
+                <Divider />
+              </Box>
+            )}
 
             {/* TABLE */}
             <Box className="request__table">
