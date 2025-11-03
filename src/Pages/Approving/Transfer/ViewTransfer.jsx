@@ -438,7 +438,7 @@ const ViewTransfer = (props) => {
           //   asset_description: asset?.vladimir_tag_number?.asset_description,
           // },
           fixed_asset_id: asset,
-          asset_accountable: asset.accountable === "-" ? "Common" : asset.accountable,
+          asset_accountable: asset.accountable === "-" || asset.accountable === " " ? "Common" : asset.accountable,
           created_at: asset.created_at || asset.acquisition_date,
           depreciation_debit_id: asset?.selected_depreciation_debit,
           remaining_book_value: asset.remaining_book_value,
