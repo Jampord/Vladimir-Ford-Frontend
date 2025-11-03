@@ -28,7 +28,7 @@ const ReceivingOfDisposal = () => {
           <Tabs onChange={handleChange} value={value}>
             <Tab
               label={
-                <Badge color="error" badgeContent={0}>
+                <Badge color="error" badgeContent={notifData?.disposalReceivingCount}>
                   For Receiving
                 </Badge>
               }
