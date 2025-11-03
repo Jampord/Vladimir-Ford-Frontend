@@ -45,6 +45,7 @@ import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import axios from "axios";
 import StatusComponent from "../../../Components/Reusable/FaStatusComponent";
 import CustomAutoComplete from "../../../Components/Reusable/CustomAutoComplete";
+import { notificationApi } from "../../../Redux/Query/Notification";
 
 const schema = yup.object().shape({
   attachments: yup.mixed().label("Attachment"),
@@ -156,6 +157,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
             reset();
             handleCloseDialog();
             dispatch(evaluationApi.util.invalidateTags(["Evaluation"]));
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
           } catch (err) {
             console.log({ err });
             if (err?.status === 422) {
