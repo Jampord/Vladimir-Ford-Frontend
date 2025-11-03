@@ -1,5 +1,6 @@
 import {
   Box,
+  Chip,
   Dialog,
   Grow,
   Stack,
@@ -24,6 +25,7 @@ import FAStatusChange from "../../../Components/Reusable/FaStatusComponent";
 import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
 import PulloutTimeline from "../PulloutTimeline";
 import { useDispatch, useSelector } from "react-redux";
+import moment from "moment";
 
 const ForApprovalEvaluation = ({ tab }) => {
   const [page, setPage] = useState(1);
@@ -87,7 +89,7 @@ const ForApprovalEvaluation = ({ tab }) => {
 
   return (
     <Stack className="category_height">
-      {isEvaluationLoading && <MasterlistSkeleton />}
+      {isEvaluationLoading && <MasterlistSkeleton category />}
       {isEvaluationError && <ErrorFetching refetch={refetch} error={errorData} />}
 
       {evaluationData && !isEvaluationError && !isEvaluationLoading && (
@@ -118,6 +120,7 @@ const ForApprovalEvaluation = ({ tab }) => {
                     <TableCell className="tbl-cell-category" align="center">
                       Description
                     </TableCell>
+                    <TableCell className="tbl-cell-category">Hepldesk #</TableCell>
                     <TableCell className="tbl-cell-category">Asset</TableCell>
                     <TableCell className="tbl-cell-category">Chart of Accounts</TableCell>
                     <TableCell className="tbl-cell-category" align="center">
@@ -126,11 +129,12 @@ const ForApprovalEvaluation = ({ tab }) => {
                     <TableCell className="tbl-cell-category" align="center">
                       Evaluation Status
                     </TableCell>
-                    {/* <TableCell className="tbl-cell-category" align="center">
-                      Attachments
-                    </TableCell> */}
+
                     <TableCell className="tbl-cell-category" align="center">
                       Remarks
+                    </TableCell>
+                    <TableCell className="tbl-cell-category" align="center">
+                      Date Created
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -150,13 +154,14 @@ const ForApprovalEvaluation = ({ tab }) => {
                           }}
                           hover
                         >
-                          <TableCell className="tbl-cell text-weight" align="center">
+                          <TableCell className="tbl-cell" align="center">
                             {item?.id}
                           </TableCell>
                           <TableCell className="tbl-cell " align="center">
                             {item?.description}
                           </TableCell>
 
+                          <TableCell className="tbl-cell ">{item?.helpdesk_number}</TableCell>
                           <TableCell className="tbl-cell ">
                             <Typography fontWeight={700} fontSize="13px" color="primary">
                               {item?.asset.vladimir_tag_number}
@@ -164,17 +169,17 @@ const ForApprovalEvaluation = ({ tab }) => {
                             <Typography fontWeight={600} fontSize="13px" color="secondary.main">
                               {item?.asset.asset_description}
                             </Typography>
-                            <Tooltip title={item?.asset.asset_specification} placement="bottom" arrow>
-                              <Typography
-                                fontSize="12px"
-                                color="text.light"
-                                textOverflow="ellipsis"
-                                width="300px"
-                                overflow="hidden"
-                              >
+                            <Typography
+                              fontSize="12px"
+                              color="text.light"
+                              textOverflow="ellipsis"
+                              width="300px"
+                              overflow="hidden"
+                            >
+                              <Tooltip title={item?.asset.asset_specification} placement="bottom" arrow>
                                 {item?.asset.asset_specification}
-                              </Typography>
-                            </Tooltip>
+                              </Tooltip>
+                            </Typography>
                           </TableCell>
                           <TableCell className="tbl-cell ">
                             <Typography fontSize={10} color="gray">
@@ -227,11 +232,11 @@ const ForApprovalEvaluation = ({ tab }) => {
                               <FAStatusChange faStatus={item?.evaluation} hover />
                             </Box>
                           </TableCell>
-                          {/* <TableCell className="tbl-cell " align="center">
-                            <DlAttachment transfer_number={item?.id} />
-                          </TableCell> */}
                           <TableCell className="tbl-cell " align="center">
                             {item?.remarks === null ? "-" : item?.remarks}
+                          </TableCell>
+                          <TableCell className="tbl-cell " align="center">
+                            {moment(item?.created_at).format("MMM DD, YYYY")}
                           </TableCell>
                         </TableRow>
                       ))}
