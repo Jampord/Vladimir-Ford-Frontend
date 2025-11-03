@@ -283,17 +283,17 @@ const ForDisposal = () => {
                             <Typography fontWeight={600} fontSize="13px" color="secondary.main">
                               {data?.asset.asset_description}
                             </Typography>
-                            <Tooltip title={data?.asset.asset_specification} placement="bottom" arrow>
-                              <Typography
-                                fontSize="12px"
-                                color="text.light"
-                                textOverflow="ellipsis"
-                                width="300px"
-                                overflow="hidden"
-                              >
+                            <Typography
+                              fontSize="12px"
+                              color="text.light"
+                              textOverflow="ellipsis"
+                              width="300px"
+                              overflow="hidden"
+                            >
+                              <Tooltip title={data?.asset.asset_specification} placement="bottom" arrow>
                                 {data?.asset.asset_specification}
-                              </Typography>
-                            </Tooltip>
+                              </Tooltip>
+                            </Typography>
                           </TableCell>
                           <TableCell className="tbl-cell">
                             <Typography fontSize={10} color="gray">
