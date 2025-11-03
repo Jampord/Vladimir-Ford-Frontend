@@ -30,6 +30,8 @@ import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanS
 import PulloutTimeline from "../PulloutTimeline";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
+import MasterlistSkeleton from "../../Skeleton/MasterlistSkeleton";
+import ErrorFetching from "../../ErrorFetching";
 
 const Disposal = () => {
   // const [status, setStatus] = useState("");
@@ -226,10 +228,13 @@ const Disposal = () => {
         Disposal
       </Typography>
 
-      <Box className="mcontainer__wrapper">
-        <MasterlistToolbar onSearchChange={setSearch} onSetPage={setPage} hideArchive />
+      {disposalLoading && <MasterlistSkeleton />}
+      {disposalError && <ErrorFetching refetch={refetch} error={errorData} />}
+      {disposalData && !disposalError && (
+        <Box className="mcontainer__wrapper">
+          <MasterlistToolbar onSearchChange={setSearch} onSetPage={setPage} hideArchive />
 
-        {/* <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }}>
+          {/* <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }}>
           <Button
             onClick={handleDisposal}
             variant="contained"
@@ -241,127 +246,128 @@ const Disposal = () => {
           </Button>
         </Box> */}
 
-        <Box>
-          <TableContainer className="mcontainer__th-body">
-            <Table className="mcontainer__table" stickyHeader>
-              <TableHead>
-                <TableRow
-                  sx={{
-                    "& > *": {
-                      fontWeight: "bold!important",
-                      whiteSpace: "nowrap",
-                    },
-                  }}
-                >
-                  <TableCell className="tbl-cell">Request #</TableCell>
-                  <TableCell className="tbl-cell">Request Description</TableCell>
-                  <TableCell className="tbl-cell tr-cen-pad45">View Information</TableCell>
-                  <TableCell className="tbl-cell">Chart of Account</TableCell>
-                  <TableCell className="tbl-cell tr-cen-pad45">Quantity</TableCell>
-                  <TableCell className="tbl-cell tr-cen-pad45">Status</TableCell>
-                  <TableCell className="tbl-cell">Date Requested</TableCell>
-                  <TableCell className="tbl-cell">Action</TableCell>
-                </TableRow>
-              </TableHead>
+          <Box>
+            <TableContainer className="mcontainer__th-body">
+              <Table className="mcontainer__table" stickyHeader>
+                <TableHead>
+                  <TableRow
+                    sx={{
+                      "& > *": {
+                        fontWeight: "bold!important",
+                        whiteSpace: "nowrap",
+                      },
+                    }}
+                  >
+                    <TableCell className="tbl-cell">Request #</TableCell>
+                    <TableCell className="tbl-cell">Request Description</TableCell>
+                    <TableCell className="tbl-cell tr-cen-pad45">View Information</TableCell>
+                    <TableCell className="tbl-cell">Chart of Account</TableCell>
+                    <TableCell className="tbl-cell tr-cen-pad45">Quantity</TableCell>
+                    <TableCell className="tbl-cell tr-cen-pad45">Status</TableCell>
+                    <TableCell className="tbl-cell">Date Requested</TableCell>
+                    <TableCell className="tbl-cell">Action</TableCell>
+                  </TableRow>
+                </TableHead>
 
-              <TableBody>
-                {disposalData?.data?.length === 0 ? (
-                  <NoRecordsFound heightData="medium" />
-                ) : disposalFetching ? (
-                  <LoadingData />
-                ) : (
-                  disposalSuccess &&
-                  disposalData?.data.map((data) => (
-                    <TableRow
-                      key={data.id}
-                      sx={{
-                        "&:last-child td, &:last-child th": {
-                          borderBottom: 0,
-                        },
-                      }}
-                    >
-                      <TableCell className="tbl-cell text-weight">{data.id}</TableCell>
-                      <TableCell className="tbl-cell">{data?.description}</TableCell>
-                      <TableCell className="tbl-cell tr-cen-pad45">
-                        <Tooltip
-                          placement="top"
-                          title="View 
+                <TableBody>
+                  {disposalData?.data?.length === 0 ? (
+                    <NoRecordsFound heightData="medium" />
+                  ) : disposalFetching ? (
+                    <LoadingData />
+                  ) : (
+                    disposalSuccess &&
+                    disposalData?.data.map((data) => (
+                      <TableRow
+                        key={data.id}
+                        sx={{
+                          "&:last-child td, &:last-child th": {
+                            borderBottom: 0,
+                          },
+                        }}
+                      >
+                        <TableCell className="tbl-cell text-weight">{data.id}</TableCell>
+                        <TableCell className="tbl-cell">{data?.description}</TableCell>
+                        <TableCell className="tbl-cell tr-cen-pad45">
+                          <Tooltip
+                            placement="top"
+                            title="View 
                       Disposal Information"
-                          arrow
-                        >
-                          <IconButton onClick={() => handleViewDisposal(data)}>
-                            <Visibility />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                      <TableCell className="tbl-cell">
-                        <Typography fontSize={10} color="gray">
-                          {`(${data.one_charging?.code || "-"}) - ${data.one_charging?.name || "-"}`}
-                        </Typography>
-                        <Typography fontSize={10} color="gray">
-                          {`(${data.one_charging?.company_code || data?.company?.company_code}) - ${
-                            data.one_charging?.company_name || data?.company?.company_name
-                          }`}
-                        </Typography>
-                        <Typography fontSize={10} color="gray">
-                          {`(${data.one_charging?.business_unit_code || data?.business_unit?.business_unit_code}) - ${
-                            data.one_charging?.business_unit_name || data?.business_unit?.business_unit_name
-                          }`}
-                        </Typography>
-                        <Typography fontSize={10} color="gray">
-                          {`(${data.one_charging?.department_code || data.department?.department_code}) - ${
-                            data.one_charging?.department_name || data.department?.department_name
-                          }`}
-                        </Typography>
-                        <Typography fontSize={10} color="gray">
-                          {`(${data.one_charging?.unit_code || data.unit?.unit_code}) - ${
-                            data.one_charging?.unit_name || data.unit?.unit_name
-                          }`}
-                        </Typography>
-                        <Typography fontSize={10} color="gray">
-                          {`(${data.one_charging?.subunit_code || data.subunit?.subunit_code}) - ${
-                            data.one_charging?.subunit_name || data.subunit?.subunit_name
-                          }`}
-                        </Typography>
-                        <Typography fontSize={10} color="gray">
-                          {`(${data.one_charging?.location_code || data.location?.location_code}) - ${
-                            data.one_charging?.location_name || data.location?.location_name
-                          }`}
-                        </Typography>
-                      </TableCell>
-                      <TableCell className="tbl-cell tr-cen-pad45">{data?.quantity}</TableCell>
-                      <TableCell className="tbl-cell tr-cen-pad45">{transactionStatus(data)}</TableCell>
-                      <TableCell className="tbl-cell">{moment(data?.created_at).format("MMMM DD, YYYY")}</TableCell>
-                      <TableCell className="tbl-cell">
-                        {data?.status === "For Approval of Approver 1" && (
-                          <ActionMenu
-                            data={data}
-                            editDisposalData={data?.status === "For Approval of Approver 1"}
-                            status
-                            hideEdit
-                            hideArchive
-                            showVoid
-                            onVoidHandler={onVoidHandler}
-                          />
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
+                            arrow
+                          >
+                            <IconButton onClick={() => handleViewDisposal(data)}>
+                              <Visibility />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell className="tbl-cell">
+                          <Typography fontSize={10} color="gray">
+                            {`(${data.one_charging?.code || "-"}) - ${data.one_charging?.name || "-"}`}
+                          </Typography>
+                          <Typography fontSize={10} color="gray">
+                            {`(${data.one_charging?.company_code || data?.company?.company_code}) - ${
+                              data.one_charging?.company_name || data?.company?.company_name
+                            }`}
+                          </Typography>
+                          <Typography fontSize={10} color="gray">
+                            {`(${data.one_charging?.business_unit_code || data?.business_unit?.business_unit_code}) - ${
+                              data.one_charging?.business_unit_name || data?.business_unit?.business_unit_name
+                            }`}
+                          </Typography>
+                          <Typography fontSize={10} color="gray">
+                            {`(${data.one_charging?.department_code || data.department?.department_code}) - ${
+                              data.one_charging?.department_name || data.department?.department_name
+                            }`}
+                          </Typography>
+                          <Typography fontSize={10} color="gray">
+                            {`(${data.one_charging?.unit_code || data.unit?.unit_code}) - ${
+                              data.one_charging?.unit_name || data.unit?.unit_name
+                            }`}
+                          </Typography>
+                          <Typography fontSize={10} color="gray">
+                            {`(${data.one_charging?.subunit_code || data.subunit?.subunit_code}) - ${
+                              data.one_charging?.subunit_name || data.subunit?.subunit_name
+                            }`}
+                          </Typography>
+                          <Typography fontSize={10} color="gray">
+                            {`(${data.one_charging?.location_code || data.location?.location_code}) - ${
+                              data.one_charging?.location_name || data.location?.location_name
+                            }`}
+                          </Typography>
+                        </TableCell>
+                        <TableCell className="tbl-cell tr-cen-pad45">{data?.quantity}</TableCell>
+                        <TableCell className="tbl-cell tr-cen-pad45">{transactionStatus(data)}</TableCell>
+                        <TableCell className="tbl-cell">{moment(data?.created_at).format("MMMM DD, YYYY")}</TableCell>
+                        <TableCell className="tbl-cell">
+                          {data?.status === "For Approval of Approver 1" && (
+                            <ActionMenu
+                              data={data}
+                              editDisposalData={data?.status === "For Approval of Approver 1"}
+                              status
+                              hideEdit
+                              hideArchive
+                              showVoid
+                              onVoidHandler={onVoidHandler}
+                            />
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
 
-        <CustomTablePagination
-          total={disposalData?.total}
-          success={disposalSuccess}
-          current_page={disposalData?.current_page}
-          per_page={disposalData?.per_page}
-          onPageChange={pageHandler}
-          onRowsPerPageChange={perPageHandler}
-        />
-      </Box>
+          <CustomTablePagination
+            total={disposalData?.total}
+            success={disposalSuccess}
+            current_page={disposalData?.current_page}
+            per_page={disposalData?.per_page}
+            onPageChange={pageHandler}
+            onRowsPerPageChange={perPageHandler}
+          />
+        </Box>
+      )}
 
       <Dialog
         open={dialog}
