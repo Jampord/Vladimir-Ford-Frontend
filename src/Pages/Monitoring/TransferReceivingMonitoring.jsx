@@ -18,9 +18,16 @@ import { useState } from "react";
 import NoRecordsFound from "../../Layout/NoRecordsFound";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 import moment from "moment";
+import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
+import { useQueryParams } from "../../Hooks/useQueryParams";
 
 const TransferReceivingMonitoring = () => {
-  const [search, setSearch] = useState("");
+  const { getParam, getNumericParam, setMultipleParams } = useQueryParams();
+
+  const [search, setSearch] = useState(getParam("search") || "");
+  const [status, setStatus] = useState(getParam("status") || "active");
+  const [perPage, setPerPage] = useState(getNumericParam("per_page", 25));
+  const [page, setPage] = useState(getNumericParam("page", 1));
 
   const {
     data: transferData,
@@ -30,13 +37,23 @@ const TransferReceivingMonitoring = () => {
     isError: isTransferError,
     error: errorData,
     refetch,
-  } = useGetTransferReceivingMonitoringApiQuery(
-    {
-      pagination: "none",
-      status: "For Receiving",
-    },
-    { refetchOnMountOrArgChange: true }
-  );
+  } = useGetTransferReceivingMonitoringApiQuery({
+    page: page,
+    per_page: perPage,
+    search: search,
+    status: "For Receiving",
+  });
+
+  //* Table Properties ---------------------------------------------------
+  const perPageHandler = (e) => {
+    setPage(1);
+    setPerPage(parseInt(e.target.value));
+  };
+
+  const pageHandler = (_, page) => {
+    // console.log(page + 1);
+    setPage(page + 1);
+  };
 
   return (
     <Box className="mcontainer">
@@ -73,12 +90,12 @@ const TransferReceivingMonitoring = () => {
                   </TableHead>
 
                   <TableBody>
-                    {transferData?.length === 0 ? (
+                    {transferData?.data.length === 0 ? (
                       <NoRecordsFound heightData="small" />
                     ) : isTransferFetching ? (
                       <LoadingData />
                     ) : (
-                      transferData.map((data) => (
+                      transferData?.data.map((data) => (
                         <TableRow key={data?.id}>
                           <TableCell className="tbl-cell">{data?.id}</TableCell>
                           <TableCell className="tbl-cell ">
@@ -140,6 +157,15 @@ const TransferReceivingMonitoring = () => {
                 </Table>
               </TableContainer>
             </Box>
+
+            <CustomTablePagination
+              total={transferData?.total}
+              success={isTransferSuccess}
+              current_page={transferData?.current_page}
+              per_page={transferData?.per_page}
+              onPageChange={pageHandler}
+              onRowsPerPageChange={perPageHandler}
+            />
           </Box>
         )}
       </Stack>
