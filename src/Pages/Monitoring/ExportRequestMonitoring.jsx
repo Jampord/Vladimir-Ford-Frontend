@@ -72,6 +72,7 @@ const ExportRequestMonitoring = () => {
           "Ymir PR Number": item?.ymir_pr_number === null ? "-" : item.ymir_pr_number,
           "Transaction Number": item?.transaction_number,
           "Acquisition Details": item?.acquisition_details,
+          "Asset Description": item?.asset_description,
           "PR Number": item?.pr_number === null ? "-" : item.ymir_pr_number,
           Remaining: item?.remaining,
           Status: item?.status,
