@@ -123,6 +123,7 @@ import { subCapexApproversApi } from "../Query/Settings/SubCapex";
 import { additionalCostApproversApi } from "../Query/Settings/AdditionalCost";
 import { addBudgetApi } from "../Query/Capex/AddBudget";
 import { addCapexApi } from "../Query/Capex/AddCapex";
+import { operationApi } from "../Query/Masterlist/Operation";
 
 export const store = configureStore({
   reducer: {
@@ -156,6 +157,7 @@ export const store = configureStore({
     [warehouseApi.reducerPath]: warehouseApi.reducer,
     [typeOfExpenditureApi.reducerPath]: typeOfExpenditureApi.reducer,
     [enrolledBudgetApi.reducerPath]: enrolledBudgetApi.reducer,
+    [operationApi.reducerPath]: operationApi.reducer,
     [creditApi.reducerPath]: creditApi.reducer,
     // [serviceProviderApi.reducerPath]: serviceProviderApi.reducer,
 
@@ -268,6 +270,7 @@ export const store = configureStore({
       warehouseApi.middleware,
       typeOfExpenditureApi.middleware,
       enrolledBudgetApi.middleware,
+      operationApi.middleware,
       creditApi.middleware,
 
       // serviceProviderApi.middleware,
