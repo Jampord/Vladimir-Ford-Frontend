@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import "../../Style/Masterlist/masterlistToolbar.scss";
 import ScanFixedAsset from "../../Pages/FixedAssets/ScanFixedAsset";
 import { Link, useLocation, useNavigate } from "react-router-dom";
@@ -31,6 +31,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   Dialog,
   Divider,
   Fade,
@@ -55,6 +56,7 @@ import {
   Archive,
   BadgeOutlined,
   CheckBox,
+  Clear,
   Close,
   DateRange,
   Delete,
@@ -78,6 +80,8 @@ import {
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../../Redux/Query/Notification";
 import moment from "moment";
+import { useLazyGetLocationAllApiQuery } from "../../Redux/Query/Masterlist/YmirCoa/Location";
+import NoRecordsFound from "../../Layout/NoRecordsFound";
 // import BarcodeScannerComponent from "react-qr-barcode-scanner";
 
 const MasterlistToolbar = (props) => {
@@ -103,6 +107,8 @@ const MasterlistToolbar = (props) => {
     filter,
     faFilter,
     setFaFilter,
+    locationFilter,
+    setLocationFilter,
     showPr,
     hideSearch,
     isRequest,
@@ -132,8 +138,12 @@ const MasterlistToolbar = (props) => {
   const openRequestFilter = Boolean(anchorElRequestFilter);
   const [anchorElFaFilter, setAnchorElFaFilter] = useState(null);
   const openFaFilter = Boolean(anchorElFaFilter);
+  const [anchorE1LocationFilter, setAnchorE1LocationFilter] = useState(null);
+  const openLocationFilter = Boolean(anchorE1LocationFilter);
   const [tempDateFrom, setTempDateFrom] = useState(null);
   const [tempDateTo, setTempDateTo] = useState(null);
+  const [appliedLocationFilter, setAppliedLocationFilter] = useState([]); // For Location Filter
+  const [searchTerm, setSearchTerm] = useState(""); // For Location Filter
 
   const handleDateSubmit = () => {
     setDateFrom(tempDateFrom ? moment(tempDateFrom).format("YYYY-MM-DD") : "");
@@ -146,7 +156,8 @@ const MasterlistToolbar = (props) => {
       setAnchorElPrintFa(null) ||
       setAnchorElDateFilter(null) ||
       setAnchorElRequestFilter(null) ||
-      setAnchorElFaFilter(null);
+      setAnchorElFaFilter(null) ||
+      setAnchorE1LocationFilter(null);
   };
 
   // const scanFile = useSelector((state) => state.scanFile);
@@ -154,6 +165,24 @@ const MasterlistToolbar = (props) => {
   const permissions = useSelector((state) => state.userLogin?.user.role.access_permission);
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
 
+  // For Location Filter
+  const [
+    locationTrigger,
+    {
+      data: locationData = [],
+      isLoading: isLocationLoading,
+      isSuccess: isLocationSuccess,
+      isError: isLocationError,
+      refetch: isLocationRefetch,
+    },
+  ] = useLazyGetLocationAllApiQuery();
+
+  const filteredLocations = useMemo(() => {
+    if (!searchTerm.trim()) return locationData;
+    return locationData.filter((loc) => loc.location_name.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [searchTerm, locationData]);
+
+  // Functions
   useEffect(() => {
     refetch();
   }, [notifData]);
@@ -213,6 +242,13 @@ const MasterlistToolbar = (props) => {
 
   const handleOpenFaFilter = (e) => {
     setAnchorElFaFilter(e.currentTarget);
+  };
+
+  const handleOpenLocationFilter = (e) => {
+    setAnchorE1LocationFilter(e.currentTarget);
+    if (!isLocationSuccess) {
+      locationTrigger({ pagination: "none" });
+    }
   };
 
   const handleOpenAddCost = (e) => {
@@ -279,6 +315,20 @@ const MasterlistToolbar = (props) => {
     } else {
       setRequestFilter([...requestFilter, value]);
     }
+  };
+
+  const handleLocationChange = (value) => {
+    if (appliedLocationFilter.includes(value)) {
+      setAppliedLocationFilter(
+        appliedLocationFilter.filter((appliedLocationFilter) => appliedLocationFilter !== value)
+      );
+    } else {
+      setAppliedLocationFilter([...appliedLocationFilter, value]);
+    }
+  };
+
+  const handleApplyLocationFilter = () => {
+    setLocationFilter(appliedLocationFilter);
   };
 
   const handleFaFilterChange = (value) => {
@@ -835,6 +885,137 @@ const MasterlistToolbar = (props) => {
                     label="Returned"
                   />
                 </MenuItem>
+              </FormGroup>
+            </Menu>
+          )}
+
+          {locationFilter && (
+            <Tooltip title="Location Filter" TransitionComponent={Zoom} placement="top" arrow>
+              <IconButton onClick={handleOpenLocationFilter}>
+                <FilterList />
+              </IconButton>
+            </Tooltip>
+          )}
+          {Boolean(locationFilter) && (
+            <Menu
+              anchorEl={anchorE1LocationFilter}
+              open={openLocationFilter}
+              onClose={handleClose}
+              TransitionComponent={Grow}
+              disablePortal
+              transformOrigin={{ horizontal: "left", vertical: "top" }}
+              anchorOrigin={{ horizontal: "left", vertical: "top" }}
+              PaperProps={{
+                sx: {
+                  maxHeight: 400, // make it scrollable
+                  overflowY: "auto",
+                  overflowX: "auto",
+                  display: "flex",
+                  flexDirection: "column",
+                },
+              }}
+            >
+              <FormGroup>
+                <Stack
+                  flexDirection="row"
+                  alignItems="center"
+                  p="10px"
+                  gap="10px"
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1,
+                    backgroundColor: "background.paper", // ensures it doesn't overlap with checkboxes visually
+                    borderBottom: 1,
+                    borderColor: "divider",
+                  }}
+                >
+                  <FilterAlt color="primary" />
+                  <Typography fontFamily="Anton, Impact" fontSize="20px" color="secondary">
+                    LOCATION FILTER
+                  </Typography>
+                  <Box>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Search location..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      InputProps={{
+                        startAdornment: <Search fontSize="small" sx={{ mr: 1 }} />,
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: 5,
+                        },
+                      }}
+                    />
+                  </Box>
+                </Stack>
+
+                {/* <Divider /> */}
+                {isLocationLoading ? (
+                  <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : filteredLocations?.length === 0 ? (
+                  <Stack justifyContent={"center"} alignItems="center" p={2}>
+                    <NoRecordsFound />
+                  </Stack>
+                ) : (
+                  filteredLocations.map((data) => (
+                    <MenuItem key={data?.id} dense>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            size="small"
+                            onChange={() => handleLocationChange(data?.id)}
+                            checked={appliedLocationFilter.includes(data?.id)}
+                          />
+                        }
+                        label={data?.location_name}
+                      />
+                    </MenuItem>
+                  ))
+                )}
+
+                <Box
+                  sx={{
+                    position: "sticky",
+                    bottom: 0,
+                    zIndex: 2,
+                    backgroundColor: "background.paper",
+                    borderTop: 1,
+                    borderColor: "divider",
+                    p: 1.5,
+                  }}
+                >
+                  <Stack direction="row" justifyContent="space-between" spacing={1}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={handleApplyLocationFilter}
+                      fullWidth
+                    >
+                      APPLY
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="warning"
+                      size="small"
+                      onClick={() => {
+                        setLocationFilter([]);
+                        setAppliedLocationFilter([]);
+                      }}
+                      disabled={locationFilter.length === 0} // optional: disable if nothing selected
+                    >
+                      <Tooltip title="Clear Filter" arrow placement="top">
+                        <Clear />
+                      </Tooltip>
+                    </Button>
+                  </Stack>
+                </Box>
               </FormGroup>
             </Menu>
           )}
