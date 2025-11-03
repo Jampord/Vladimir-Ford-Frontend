@@ -434,7 +434,6 @@ const AddTransfer = (props) => {
     trigger,
   } = useForm({
     resolver: yupResolver(schema),
-    mode: "onChange",
     defaultValues: {
       id: "",
       description: "",
@@ -490,6 +489,7 @@ const AddTransfer = (props) => {
     name: "assets",
     rules: { required: true, message: "At least one is required" },
   });
+
   const handleAppendItem = () =>
     append({
       id: null,
@@ -508,8 +508,6 @@ const AddTransfer = (props) => {
       receiver_id: null,
       remaining_book_value: null,
     });
-
-  // console.log("watch assets: ", watch("assets[0].fixed_asset_id"));
 
   //* useEffects() ----------------------------------------------------------------
   useEffect(() => {
@@ -563,7 +561,7 @@ const AddTransfer = (props) => {
         assets: data?.assets.map((asset) => ({
           id: asset.id,
           fixed_asset_id: asset,
-          asset_accountable: asset.accountable === "-" ? "Common" : asset.accountable,
+          asset_accountable: asset.accountable === "-" || asset.accountable === " " ? "Common" : asset.accountable,
           created_at: asset.created_at || asset.acquisition_date,
           depreciation_debit_id: asset?.selected_depreciation_debit,
           one_charging_id: asset.one_charging?.name,
@@ -599,7 +597,10 @@ const AddTransfer = (props) => {
         assets: actionMenuData?.map((asset) => ({
           id: asset.id,
           fixed_asset_id: asset?.asset,
-          asset_accountable: asset?.asset?.accountable === "-" ? "Common" : asset?.asset?.accountable,
+          asset_accountable:
+            asset?.asset?.accountable === "-" || asset?.asset?.accountable === " "
+              ? "Common"
+              : asset?.asset?.accountable,
           created_at: asset.created_at || asset.acquisition_date,
           depreciation_debit_id: asset?.asset?.depreciation_debit,
           one_charging_id: asset?.asset.one_charging?.name,
@@ -911,8 +912,6 @@ const AddTransfer = (props) => {
   const isCoordinator = user?.has_handle === 1;
   const user_id = user.id;
   const one_charging_id = watch("one_charging_id_coordinator")?.id || null;
-
-  console.log("watch warehouse", watch("releasing_warehouse_id"));
 
   return (
     <>
