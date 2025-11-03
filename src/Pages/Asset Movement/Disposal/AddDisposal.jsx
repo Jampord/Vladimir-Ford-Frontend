@@ -1,4 +1,4 @@
-import { Add, ArrowBackIosRounded, Create, Info, Remove, RemoveCircle } from "@mui/icons-material";
+import { Add, ArrowBackIosRounded, Create, Info, Remove, RemoveCircle, Report, Warning } from "@mui/icons-material";
 import {
   Autocomplete,
   Avatar,
@@ -36,19 +36,24 @@ import moment from "moment";
 import { useDispatch, useSelector } from "react-redux";
 import { LoadingButton } from "@mui/lab";
 import axios from "axios";
-import { onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
+import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { resetGetData } from "../../../Redux/StateManagement/actionMenuSlice";
 import { assetDisposalApi } from "../../../Redux/Query/Settings/AssetDisposal";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import CustomAutoComplete from "../../../Components/Reusable/CustomAutoComplete";
 import { useLazyGetWarehouseAllApiQuery } from "../../../Redux/Query/Masterlist/Warehouse";
-import { disposalApi, useGetDisposalByIdApiQuery } from "../../../Redux/Query/Movement/Disposal";
+import {
+  disposalApi,
+  useDeleteDisposalItemApiMutation,
+  useGetDisposalByIdApiQuery,
+} from "../../../Redux/Query/Movement/Disposal";
 import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
+import AddDisposalSkeleton from "./Skeleton/AddDisposalSkeleton";
 
 const schema = yup.object().shape({
   description: yup.string().required().label("Description"),
-  remarks: yup.string().label("Remarks"),
-  attachments: yup.mixed().nullable().label("Attachments"),
+  remarks: yup.string().nullable().label("Remarks"),
+  attachments: yup.mixed().required().label("Attachments"),
   receiving_warehouse_id: yup
     .object()
     .nullable()
@@ -114,6 +119,8 @@ const AddDisposal = () => {
     },
   ] = useLazyGetWarehouseAllApiQuery();
 
+  const [deleteDisposalItem, { data: deleteDisposalItemData }] = useDeleteDisposalItemApiMutation();
+
   const {
     handleSubmit,
     control,
@@ -158,6 +165,8 @@ const AddDisposal = () => {
     rules: { required: true, message: "At least one is required" },
   });
 
+  console.log("fields", fields);
+
   useEffect(() => {
     if (data) {
       // fixedAssetTrigger();
@@ -170,7 +179,7 @@ const AddDisposal = () => {
         assets: disposalData[0]?.assets.map((asset) => ({
           id: asset.id,
           fixed_asset_id: asset,
-          asset_accountable: asset?.accountable === "-" ? "Common" : asset?.accountable,
+          asset_accountable: asset?.accountable === "-" || asset?.accountable === " " ? "Common" : asset?.accountable,
           created_at:
             moment(asset.created_at).format("MMM. DD, YYYY") || moment(asset.acquisition_date).format("MMM. DD, YYYY"),
           one_charging_id: asset?.one_charging?.name,
@@ -354,19 +363,25 @@ const AddDisposal = () => {
       receiving_warehouse_id: formData?.receiving_warehouse_id?.sync_id,
       assets: formData?.assets?.map((item) => ({
         fixed_asset_id: item.fixed_asset_id.id,
-        pullout_id: item?.id,
+        pullout_id: item?.fixed_asset_id.pullout_id || item?.id,
       })),
     };
 
     console.log("data", data);
 
     const submitData = () => {
-      return axios.post(`${process.env.VLADIMIR_BASE_URL}/disposal`, data, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      return axios.post(
+        `${process.env.VLADIMIR_BASE_URL}/${
+          transactionData?.edit ? `disposal-update/${transactionData?.id}` : "disposal"
+        }`,
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
     };
 
     dispatch(
@@ -383,7 +398,7 @@ const AddDisposal = () => {
                 fontWeight: "bold",
               }}
             >
-              CREATE
+              {transactionData?.edit ? "UPDATE" : "CREATE"}
             </Typography>{" "}
             this Data?
           </Box>
@@ -392,9 +407,10 @@ const AddDisposal = () => {
           try {
             dispatch(onLoading());
             const test = await submitData();
+            console.log("test", test);
             dispatch(
               openToast({
-                message: "Disposal Request Successfully Added",
+                message: test?.data.message || "Disposal Request Successfully Added",
                 duration: 5000,
               })
             );
@@ -402,6 +418,68 @@ const AddDisposal = () => {
 
             navigate("/asset-movement/disposal");
             dispatch(disposalApi.util.invalidateTags(["Disposal"]));
+          } catch (err) {
+            console.log({ err });
+            if (err?.status === 422) {
+              dispatch(
+                openToast({
+                  message: err?.response?.data?.message || err?.message,
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            } else if (err?.status !== 422) {
+              console.error(err);
+              dispatch(
+                openToast({
+                  message: "Something went wrong. Please try again.",
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            }
+          }
+        },
+      })
+    );
+  };
+
+  const handleRemoveClick = (data) => {
+    remove(data);
+  };
+
+  const handleRemoveDataClick = (data) => {
+    dispatch(
+      openConfirm({
+        icon: Report,
+        iconColor: "warning",
+        message: (
+          <Box>
+            <Typography> Are you sure you want to</Typography>
+            <Typography
+              sx={{
+                display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+              }}
+            >
+              REMOVE
+            </Typography>{" "}
+            this Data?
+          </Box>
+        ),
+        onConfirm: async () => {
+          try {
+            dispatch(onLoading());
+            deleteDisposalItem({ movement_id: transactionData?.id, disposal_id: data?.fixed_asset_id?.disposal_id });
+            dispatch(
+              openToast({
+                message: "Data successfully removed!",
+                duration: 5000,
+              })
+            );
+            // refetch();
+            dispatch(closeConfirm());
           } catch (err) {
             console.log({ err });
             if (err?.status === 422) {
@@ -462,7 +540,13 @@ const AddDisposal = () => {
       >
         <Stack>
           <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
-            {`${transactionData?.view ? "VIEW INFORMATION" : "ADD DISPOSAL REQUEST"} `}
+            {`${
+              transactionData?.view
+                ? "VIEW INFORMATION"
+                : transactionData?.edit
+                ? "EDIT INFORMATION "
+                : "ADD DISPOSAL REQUEST"
+            } `}
           </Typography>
 
           <Stack id="requestForm" className="request__form" gap={2} pb={1}>
@@ -471,86 +555,92 @@ const AddDisposal = () => {
                 DISPOSAL DETAILS
               </Typography>
 
-              <CustomTextField
-                control={control}
-                name="description"
-                label="Description"
-                type="text"
-                error={!!errors?.description}
-                helperText={errors?.description?.message}
-                fullWidth
-                multiline
-                disabled={transactionData?.view}
-              />
-
-              <CustomTextField
-                control={control}
-                name="remarks"
-                label="Remarks (Optional)"
-                optional
-                type="text"
-                error={!!errors?.remarks}
-                helperText={errors?.remarks?.message}
-                fullWidth
-                multiline
-                disabled={transactionData?.view}
-              />
-
-              <CustomAutoComplete
-                control={control}
-                name="receiving_warehouse_id"
-                options={warehouseData}
-                onOpen={() => (isWarehouseSuccess ? null : warehouseTrigger(0))}
-                loading={isWarehouseLoading}
-                disabled={transactionData?.view}
-                getOptionLabel={(option) => option.warehouse_name}
-                getOptionKey={(option) => option.warehouse_code}
-                isOptionEqualToValue={(option, value) => option.id === value.id}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    color="secondary"
-                    label="Receiving Warehouse"
-                    error={!!errors?.receiving_warehouse_id}
-                    helperText={errors?.receiving_warehouse_id?.message}
-                  />
-                )}
-              />
-
-              {watch("attachments") !== null ? (
-                <UpdateField label={"Attachments"} value={watch("attachments")?.length} />
+              {isDisposalLoading ? (
+                <AddDisposalSkeleton />
               ) : (
-                <CustomMultipleAttachment
-                  control={control}
-                  name="attachments"
-                  label="Attachments"
-                  inputRef={AttachmentRef}
-                  error={!!errors?.attachments?.message}
-                  helperText={errors?.attachments?.message}
-                  requiredField
-                />
-              )}
+                <>
+                  <CustomTextField
+                    control={control}
+                    name="description"
+                    label="Description"
+                    type="text"
+                    error={!!errors?.description}
+                    helperText={errors?.description?.message}
+                    fullWidth
+                    multiline
+                    disabled={transactionData?.view}
+                  />
 
-              <Box mt="-13px" ml="10px">
-                {watch("attachments")
-                  ? watch("attachments").map((item, index) => (
-                      <Typography
-                        fontSize="12px"
-                        fontWeight="bold"
-                        key={index}
-                        onClick={() => transactionData?.view && handleFileView(item?.id)}
-                        sx={{
-                          cursor: transactionData?.view && "pointer",
-                          textDecoration: transactionData?.view && "underline",
-                          mb: 1,
-                        }}
-                        maxWidth={"265px"}
-                      >
-                        • {item?.name}
-                      </Typography>
-                    ))
-                  : null}
-              </Box>
+                  <CustomTextField
+                    control={control}
+                    name="remarks"
+                    label="Remarks (Optional)"
+                    optional
+                    type="text"
+                    error={!!errors?.remarks}
+                    helperText={errors?.remarks?.message}
+                    fullWidth
+                    multiline
+                    disabled={transactionData?.view}
+                  />
+
+                  <CustomAutoComplete
+                    control={control}
+                    name="receiving_warehouse_id"
+                    options={warehouseData}
+                    onOpen={() => (isWarehouseSuccess ? null : warehouseTrigger(0))}
+                    loading={isWarehouseLoading}
+                    disabled={transactionData?.view}
+                    getOptionLabel={(option) => option.warehouse_name}
+                    getOptionKey={(option) => option.warehouse_code}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        color="secondary"
+                        label="Receiving Warehouse"
+                        error={!!errors?.receiving_warehouse_id}
+                        helperText={errors?.receiving_warehouse_id?.message}
+                      />
+                    )}
+                  />
+
+                  {watch("attachments") !== null ? (
+                    <UpdateField label={"Attachments"} value={watch("attachments")?.length} requiredField />
+                  ) : (
+                    <CustomMultipleAttachment
+                      control={control}
+                      name="attachments"
+                      label="Attachments"
+                      inputRef={AttachmentRef}
+                      error={!!errors?.attachments?.message}
+                      helperText={errors?.attachments?.message}
+                      requiredField
+                    />
+                  )}
+
+                  <Box mt="-13px" ml="10px">
+                    {watch("attachments")
+                      ? watch("attachments").map((item, index) => (
+                          <Typography
+                            fontSize="12px"
+                            fontWeight="bold"
+                            key={index}
+                            onClick={() => transactionData?.view && handleFileView(item?.id)}
+                            sx={{
+                              cursor: transactionData?.view && "pointer",
+                              textDecoration: transactionData?.view && "underline",
+                              mb: 1,
+                            }}
+                            maxWidth={"265px"}
+                          >
+                            • {item?.name}
+                          </Typography>
+                        ))
+                      : null}
+                  </Box>
+                </>
+              )}
             </Stack>
 
             {!!!isSmallScreen && (
@@ -987,47 +1077,52 @@ const AddDisposal = () => {
                         <Stack flexDirection="column" gap={1}>
                           {actionMenuData &&
                             actionMenuData[index]?.attachments.map((item) => (
-                              <Tooltip title={"View or Download Evaluation Attachment"} arrow>
-                                <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                              <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                                <Tooltip title={"View or Download Evaluation Attachment"} key={item?.id} arrow>
                                   {item?.name}
-                                </Typography>
-                              </Tooltip>
+                                </Tooltip>
+                              </Typography>
                             ))}
                           {!!data &&
                             data.assets[index]?.attachments.map((item) => (
-                              <Tooltip title={"View or Download Evaluation Attachment"} arrow>
-                                <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                              <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                                <Tooltip title={"View or Download Evaluation Attachment"} key={item?.id} arrow>
                                   {item?.name}
-                                </Typography>
-                              </Tooltip>
+                                </Tooltip>
+                              </Typography>
                             ))}
                         </Stack>
                       </TableCell>
                       <TableCell className="tbl-cell">
-                        <Stack flexDirection="column" gap={1}>
+                        <Stack flexDirection="column" gap={0.5}>
                           {actionMenuData &&
                             actionMenuData[index]?.evaluation_attachments.map((item) => (
-                              <Tooltip title={"View or Download Evaluation Attachment"} arrow>
-                                <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                              <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                                <Tooltip title={"View or Download Evaluation Attachment"} key={item?.id} arrow>
                                   {item?.name}
-                                </Typography>
-                              </Tooltip>
+                                </Tooltip>
+                              </Typography>
                             ))}
 
                           {!!data &&
                             data.assets[index]?.evaluation_attachments.map((item) => (
-                              <Tooltip title={"View or Download Evaluation Attachment"} arrow>
-                                <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                              <Typography sx={attachmentSx} onClick={() => handleFileView(item?.id)}>
+                                <Tooltip title={"View or Download Evaluation Attachment"} key={item?.id} arrow>
                                   {item?.name}
-                                </Typography>
-                              </Tooltip>
+                                </Tooltip>
+                              </Typography>
                             ))}
                         </Stack>
                       </TableCell>
 
                       {!transactionData?.view && (
                         <TableCell align="center" className="tbl-cell">
-                          <IconButton onClick={() => remove(index)} disabled={fields.length === 1}>
+                          <IconButton
+                            onClick={
+                              transactionData?.edit ? () => handleRemoveDataClick(item) : () => handleRemoveClick(index)
+                            }
+                            disabled={fields.length === 1}
+                          >
                             <Tooltip title="Delete Row" placement="top" arrow>
                               <RemoveCircle color={fields.length === 1 ? "gray" : "warning"} />
                             </Tooltip>
@@ -1075,11 +1170,10 @@ const AddDisposal = () => {
                     size="small"
                     color="secondary"
                     startIcon={<Create color={"primary"} />}
-                    // loading={isPostLoading || isUpdateLoading}
-                    // disabled={!isValid || !isDirty}
+                    disabled={!isValid || !isDirty}
                     sx={{ mt: "10px" }}
                   >
-                    Create
+                    {transactionData?.edit ? "Update" : "Create"}
                   </LoadingButton>
                 </>
               )}
