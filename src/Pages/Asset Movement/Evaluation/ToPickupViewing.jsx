@@ -26,6 +26,8 @@ import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManage
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import StatusChange from "../../../Components/Reusable/FaStatusComponent";
 import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
+import { notificationApi } from "../../../Redux/Query/Notification";
+import ToPickupSkeleton from "./Skeleton/ToPickupSkeleton";
 
 const ToPickupViewing = () => {
   const dispatch = useDispatch();
@@ -54,6 +56,7 @@ const ToPickupViewing = () => {
     defaultValues: {
       description: pickupData?.description || null,
       care_of: pickupData?.care_of || null,
+      helpdesk_number: pickupData?.helpdesk_number || null,
       requestor:
         `${pickupData?.requester?.employee_id} - ${pickupData?.requester?.first_name} ${pickupData?.requester?.last_name}` ||
         null,
@@ -133,7 +136,7 @@ const ToPickupViewing = () => {
                 duration: 5000,
               })
             );
-
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
             dispatch(closeConfirm());
             navigate(`/asset-movement/evaluation`);
           } catch (err) {
@@ -197,40 +200,56 @@ const ToPickupViewing = () => {
                 REQUEST DETAILS
               </Typography>
               <Stack gap={2} py={1}>
-                <Box sx={BoxStyle}>
-                  <CustomTextField
-                    control={control}
-                    name="description"
-                    disabled
-                    label="Description"
-                    type="text"
-                    fullWidth
-                    multiline
-                  />
+                {isEvaluationLoading ? (
+                  <ToPickupSkeleton />
+                ) : (
+                  <Box sx={BoxStyle}>
+                    <CustomTextField
+                      control={control}
+                      name="description"
+                      disabled
+                      label="Description"
+                      type="text"
+                      fullWidth
+                      multiline
+                    />
+                    <CustomTextField
+                      control={control}
+                      name="helpdesk_number"
+                      disabled
+                      label="Helpdesk Number"
+                      type="text"
+                      fullWidth
+                      multiline
+                    />
 
-                  <CustomTextField
-                    control={control}
-                    name="care_of"
-                    disabled
-                    label="Care Of"
-                    type="text"
-                    fullWidth
-                    multiline
-                  />
-                  <CustomTextField
-                    control={control}
-                    name="requestor"
-                    disabled
-                    label="Requestor"
-                    type="text"
-                    fullWidth
-                    multiline
-                  />
-                </Box>
+                    <CustomTextField
+                      control={control}
+                      name="care_of"
+                      disabled
+                      label="Care Of"
+                      type="text"
+                      fullWidth
+                      multiline
+                    />
+                    <CustomTextField
+                      control={control}
+                      name="requestor"
+                      disabled
+                      label="Requestor"
+                      type="text"
+                      fullWidth
+                      multiline
+                    />
+                  </Box>
+                )}
               </Stack>
             </Box>
           </Box>
           <Box className="request__table">
+            <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }} textAlign={"center"}>
+              ASSET DETAILS
+            </Typography>
             <TableContainer
               className="mcontainer__th-body  mcontainer__wrapper"
               // sx={{ height: transactionData?.approved ? "calc(100vh - 230px)" : "calc(100vh - 280px)", pt: 0 }}
@@ -330,6 +349,10 @@ const ToPickupViewing = () => {
                 </TableBody>
               </Table>
             </TableContainer>
+            <Typography fontFamily="Anton, Impact, Roboto" fontSize="16px" color="secondary.main" pt="10px">
+              No. of Asset in Request: {evaluationData?.assets.length} Asset
+              {evaluationData?.assets.length >= 2 ? "s" : null}
+            </Typography>
           </Box>
         </Box>
       </Box>
