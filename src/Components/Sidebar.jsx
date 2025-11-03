@@ -113,6 +113,7 @@ import {
   Unarchive,
   BorderAll,
   PriceCheck,
+  Engineering,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -378,11 +379,17 @@ const Sidebar = () => {
           permission: "type-of-expenditure",
         },
         {
-          label: "Enrolled Budget",
-          icon: PriceCheck,
-          path: "/masterlist/enrolled-budget",
-          permission: "enrolled-budget",
+          label: "Operation",
+          icon: Engineering,
+          path: "/masterlist/operation",
+          permission: "operation",
         },
+        // {
+        //   label: "Enrolled Budget",
+        //   icon: PriceCheck,
+        //   path: "/masterlist/enrolled-budget",
+        //   permission: "enrolled-budget",
+        // },
       ],
       open: masterListCollapse,
       setter: (e) => {
@@ -744,10 +751,17 @@ const Sidebar = () => {
           permission: "additional-cost",
           setter: closeCollapse,
         },
+        {
+          label: "Add Budget",
+          icon: RequestQuote,
+          path: "/capex/add-budget",
+          permission: "add-budget",
+          setter: closeCollapse,
+        },
       ],
       open: capexCollapse,
       setter: () => {
-        setMonitoringCollapse(!capexCollapse);
+        setCapexCollapse(!capexCollapse);
         setApprovingCollapse(false);
         setMasterListCollapse(false);
         setUserManagementCollapse(false);
@@ -756,7 +770,7 @@ const Sidebar = () => {
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
         setMonitoringCollapse(false);
-        setCapexCollapse(false);
+        setReportCollapse(false);
         closeCollapse;
         dispatch(openSidebar());
       },
@@ -896,6 +910,7 @@ const Sidebar = () => {
         setAssetRequisitionCollapse(false);
         setAssetMovementCollapse(false);
         setCapexCollapse(false);
+        setReportCollapse(false);
         closeCollapse;
         dispatch(openSidebar());
       },
