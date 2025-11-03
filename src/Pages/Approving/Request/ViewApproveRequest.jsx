@@ -746,14 +746,14 @@ const ViewApproveRequest = (props) => {
                                     <Typography fontSize={12} fontWeight={600}>
                                       Letter of Request:
                                     </Typography>
-                                    <Tooltip title={"View or Download Letter of Request"} arrow>
-                                      <Typography
-                                        sx={attachmentSx}
-                                        onClick={() => handleViewFile(data?.attachments?.letter_of_request?.id)}
-                                      >
+                                    <Typography
+                                      sx={attachmentSx}
+                                      onClick={() => handleViewFile(data?.attachments?.letter_of_request?.id)}
+                                    >
+                                      <Tooltip title={"View or Download Letter of Request"} arrow>
                                         {data?.attachments?.letter_of_request?.file_name}
-                                      </Typography>
-                                    </Tooltip>
+                                      </Tooltip>
+                                    </Typography>
                                   </Stack>
                                 )}
 
@@ -762,14 +762,14 @@ const ViewApproveRequest = (props) => {
                                     <Typography fontSize={12} fontWeight={600}>
                                       Quotation:
                                     </Typography>
-                                    <Tooltip title={"View or Download Quotation"} arrow>
-                                      <Typography
-                                        sx={attachmentSx}
-                                        onClick={() => handleViewFile(data?.attachments?.quotation?.id)}
-                                      >
+                                    <Typography
+                                      sx={attachmentSx}
+                                      onClick={() => handleViewFile(data?.attachments?.quotation?.id)}
+                                    >
+                                      <Tooltip title={"View or Download Quotation"} arrow>
                                         {data?.attachments?.quotation?.file_name}
-                                      </Typography>
-                                    </Tooltip>
+                                      </Tooltip>
+                                    </Typography>
                                   </Stack>
                                 )}
 
@@ -778,14 +778,14 @@ const ViewApproveRequest = (props) => {
                                     <Typography fontSize={12} fontWeight={600}>
                                       Specification:
                                     </Typography>
-                                    <Tooltip title={"View or Download Specification Form"} arrow>
-                                      <Typography
-                                        sx={attachmentSx}
-                                        onClick={() => handleViewFile(data?.attachments?.specification_form?.id)}
-                                      >
+                                    <Typography
+                                      sx={attachmentSx}
+                                      onClick={() => handleViewFile(data?.attachments?.specification_form?.id)}
+                                    >
+                                      <Tooltip title={"View or Download Specification Form"} arrow>
                                         {data?.attachments?.specification_form?.file_name}
-                                      </Typography>
-                                    </Tooltip>
+                                      </Tooltip>
+                                    </Typography>
                                   </Stack>
                                 )}
 
@@ -794,14 +794,14 @@ const ViewApproveRequest = (props) => {
                                     <Typography fontSize={12} fontWeight={600}>
                                       Tool of Trade:
                                     </Typography>
-                                    <Tooltip title={"View or Download Tool of Trade"} arrow>
-                                      <Typography
-                                        sx={attachmentSx}
-                                        onClick={() => handleViewFile(data?.attachments?.tool_of_trade?.id)}
-                                      >
+                                    <Typography
+                                      sx={attachmentSx}
+                                      onClick={() => handleViewFile(data?.attachments?.tool_of_trade?.id)}
+                                    >
+                                      <Tooltip title={"View or Download Tool of Trade"} arrow>
                                         {data?.attachments?.tool_of_trade?.file_name}
-                                      </Typography>
-                                    </Tooltip>
+                                      </Tooltip>
+                                    </Typography>
                                   </Stack>
                                 )}
 
@@ -810,14 +810,14 @@ const ViewApproveRequest = (props) => {
                                     <Typography fontSize={12} fontWeight={600}>
                                       Other Attachment:
                                     </Typography>
-                                    <Tooltip title={"View or Download Other Attachment"} arrow>
-                                      <Typography
-                                        sx={attachmentSx}
-                                        onClick={() => handleViewFile(data?.attachments?.other_attachments?.id)}
-                                      >
+                                    <Typography
+                                      sx={attachmentSx}
+                                      onClick={() => handleViewFile(data?.attachments?.other_attachments?.id)}
+                                    >
+                                      <Tooltip title={"View or Download Other Attachment"} arrow>
                                         {data?.attachments?.other_attachments?.file_name}
-                                      </Typography>
-                                    </Tooltip>
+                                      </Tooltip>
+                                    </Typography>
                                   </Stack>
                                 )}
                               </TableCell>
