@@ -74,7 +74,6 @@ const ReportList = [
 const Reports = () => {
   const location = useLocation();
   const isSmallScreen = useMediaQuery("(max-width: 590px)");
-  // console.log(location.pathname);
 
   const permissions = useSelector((state) => state.userLogin?.user.role.access_permission);
 

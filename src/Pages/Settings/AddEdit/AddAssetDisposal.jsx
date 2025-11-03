@@ -56,8 +56,6 @@ const AddAssetDisposal = (props) => {
   const dispatch = useDispatch();
   const isSmallScreen = useMediaQuery("(max-width:1200px)");
 
-  console.log("data", data);
-
   const [
     postAssetDisposal,
     { data: postData, isLoading: isPostLoading, isSuccess: isPostSuccess, isError: isPostError, error: postError },

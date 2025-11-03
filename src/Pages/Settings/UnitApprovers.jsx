@@ -239,7 +239,6 @@ const UnitApprovers = () => {
   };
 
   const onUpdateHandler = (props) => {
-    console.log({ props });
     const { id, unit, subunit, approvers, one_charging } = props;
     setUpdateUnitApprovers({
       status: true,

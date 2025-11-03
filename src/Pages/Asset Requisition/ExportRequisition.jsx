@@ -101,10 +101,7 @@ const ExportRequisition = () => {
         })
       );
       dispatch(closeExport());
-      console.log("exportData", newObj);
     } catch (err) {
-      console.log("err", err);
-
       if (err?.status === 422) {
         dispatch(
           openToast({
