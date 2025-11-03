@@ -154,19 +154,19 @@ const ReleasingTableMonitoring = () => {
                                   {data.asset_description}
                                 </Typography>
 
-                                <Tooltip title={data.asset_specification} placement="bottom-start" arrow>
-                                  <Typography
-                                    fontSize={12}
-                                    fontWeight={400}
-                                    width="350px"
-                                    overflow="hidden"
-                                    textOverflow="ellipsis"
-                                    color="text.light"
-                                    noWrap
-                                  >
+                                <Typography
+                                  fontSize={12}
+                                  fontWeight={400}
+                                  width="350px"
+                                  overflow="hidden"
+                                  textOverflow="ellipsis"
+                                  color="text.light"
+                                  noWrap
+                                >
+                                  <Tooltip title={data.asset_specification} placement="bottom" arrow>
                                     {data.asset_specification}
-                                  </Typography>
-                                </Tooltip>
+                                  </Tooltip>
+                                </Typography>
 
                                 <Typography fontSize={12} fontWeight={600} color="primary.main">
                                   {data.type_of_request?.type_of_request_name.toUpperCase()}
