@@ -1,5 +1,6 @@
 import { IosShareRounded, Search } from "@mui/icons-material";
 import {
+  Autocomplete,
   Box,
   Button,
   Dialog,
@@ -12,6 +13,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -32,6 +34,7 @@ const GeneralLedgerReports = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
+  const [boa, setBoa] = useState({ label: "Depreciation", value: "asset depreciation" });
 
   const isSmallerScreen = useMediaQuery("(max-width: 600px)");
   const isSmallestScreen = useMediaQuery("(max-width: 455px)");
@@ -53,8 +56,9 @@ const GeneralLedgerReports = () => {
       per_page: perPage,
       adjustment_date:
         selectedDate !== null ? moment(selectedDate).format("YYYY-MM") : moment(new Date()).format("YYYY-MM"),
+      boa: boa?.value,
     }
-    // { refetchOnMountOrArgChange: true }
+    // { refetchOnMountOrArgChange: true }4
   );
 
   const perPageHandler = (e) => {
@@ -80,6 +84,14 @@ const GeneralLedgerReports = () => {
     dispatch(openExport());
   };
 
+  const boaOptions = [
+    {
+      label: "Depreciation",
+      value: "asset depreciation",
+    },
+    { label: "ATOE Deduction", value: "atoe deduction" },
+  ];
+
   return (
     <Box className="mcontainer" component={"form"} onSubmit={handleSubmit}>
       <Typography className="mcontainer__title" sx={{ fontFamily: "Anton", fontSize: "1.6rem" }}>
@@ -97,6 +109,17 @@ const GeneralLedgerReports = () => {
             flexWrap={isSmallerScreen ? "wrap" : null}
             mt={1}
           >
+            <Autocomplete
+              disablePortal
+              disableClearable
+              options={boaOptions}
+              sx={{ width: 200 }}
+              onChange={(_, value) => setBoa(value)}
+              value={boa}
+              getOptionLabel={(option) => option.label || ""}
+              isOptionEqualToValue={(option, value) => option.value === value.value}
+              renderInput={(params) => <TextField {...params} label="BOA" />}
+            />
             <DatePicker
               label={"Month and Year"}
               views={["month", "year"]}
@@ -104,6 +127,7 @@ const GeneralLedgerReports = () => {
               value={selectedDate || new Date()} // Bind the state to the DatePicker
               onChange={(newValue) => setSelectedDate(newValue)} // Update state on change
               closeOnSelect={false}
+
               // slotProps={{
               //   textField: {
               //     helperText: selectedDate === null && "Select a Month and Year to fetch data.",
@@ -165,7 +189,7 @@ const GeneralLedgerReports = () => {
                             }}
                           >
                             <TableCell className="tbl-cell">{data?.transactionDate}</TableCell>
-                            <TableCell className="tbl-cell">{data?.drcr}</TableCell>
+                            <TableCell className="tbl-cell">{data?.drcr.toUpperCase()}</TableCell>
                             <TableCell className="tbl-cell">
                               <Typography fontSize="12px" fontWeight={600}>
                                 {data.assetCip || "-"}
