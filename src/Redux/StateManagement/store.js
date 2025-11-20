@@ -124,6 +124,7 @@ import { additionalCostApproversApi } from "../Query/Settings/AdditionalCost";
 import { addBudgetApi } from "../Query/Capex/AddBudget";
 import { addCapexApi } from "../Query/Capex/AddCapex";
 import { operationApi } from "../Query/Masterlist/Operation";
+import { deliveryTypeApi } from "../Query/Delivery Type/DeliveryType";
 
 export const store = configureStore({
   reducer: {
@@ -255,6 +256,9 @@ export const store = configureStore({
     [assetMovementReportApi.reducerPath]: assetMovementReportApi.reducer,
     [generalLedgerReportApi.reducerPath]: generalLedgerReportApi.reducer,
     [purchaseRequestReconApi.reducerPath]: purchaseRequestReconApi.reducer,
+
+    //Delivery Type
+    [deliveryTypeApi.reducerPath]: deliveryTypeApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -370,6 +374,9 @@ export const store = configureStore({
       assetMovementReportApi.middleware,
       generalLedgerReportApi.middleware,
       purchaseRequestReconApi.middleware,
+
+      //Delivery Type
+      deliveryTypeApi.middleware,
     ]),
 });
 
