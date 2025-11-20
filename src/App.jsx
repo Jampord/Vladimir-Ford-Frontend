@@ -126,6 +126,8 @@ import TypeofExpenditure from "./Pages/Masterlist/TypeofExpenditure";
 import EnrolledBudget from "./Pages/Masterlist/EnrolledBudget";
 import AddBudgetIndex from "./Pages/Capex/Add Budget/AddBudgetIndex";
 import Operation from "./Pages/Masterlist/Operation";
+import Redirect from "./Routes/Redirect";
+import DeliveryType from "./Pages/Delivery Type/DeliveryType";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -138,6 +140,10 @@ const router = createBrowserRouter([
   {
     path: "login",
     element: <LoginRoutes />,
+  },
+  {
+    path: "/redirect",
+    element: <Redirect />,
   },
   {
     element: <PrivateRoutes />,
@@ -771,12 +777,13 @@ const router = createBrowserRouter([
                 element: <FixedAssetView view />,
                 handle: { permission: "fixed-asset" },
               },
-              // {
-              //   path: "report3",
-              //   // element: <Category />,
-              //   handle: { permission: "report2" },
-              // },
             ],
+          },
+
+          {
+            path: "delivery-type",
+            element: <DeliveryType />,
+            handle: { permission: "delivery-type" },
           },
         ],
       },
