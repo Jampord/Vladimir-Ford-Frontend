@@ -36,6 +36,7 @@ const ToPickupViewing = () => {
   console.log("pickupData", pickupData);
 
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
+  const isMediumScreen = useMediaQuery("(max-width: 640px)");
 
   const {
     data: evaluationData,
@@ -48,7 +49,6 @@ const ToPickupViewing = () => {
   } = useGetAssetToPickupByIdApiQuery({
     id: pickupData?.id,
   });
-  console.log("evaluationData", evaluationData);
 
   const [pickUpTrigger] = usePatchPickupAssetApiMutation();
 
@@ -174,22 +174,18 @@ const ToPickupViewing = () => {
               <Button
                 onClick={() => onPickupHandler(evaluationData?.id)}
                 variant="contained"
-                startIcon={isSmallScreen ? null : <ShoppingCartCheckout color="primary" />}
+                startIcon={<ShoppingCartCheckout color="primary" />}
                 size="small"
                 color="secondary"
-                sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+                sx={isSmallScreen ? { minWidth: "50px" } : null}
               >
-                {isSmallScreen ? (
-                  <ShoppingCartCheckout color="primary" sx={{ color: "primary.main", fontSize: "20px" }} />
-                ) : (
-                  "Pickup"
-                )}
+                Pickup
               </Button>
             </Box>
           )}
         </Stack>
 
-        <Box className="request mcontainer__wrapper" p={2}>
+        <Box className={isMediumScreen ? "mcontainer__wrapper" : "request mcontainer_wrapper"} p={2}>
           <Box>
             <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
               TRANSACTION No. {pickupData && pickupData?.id}
