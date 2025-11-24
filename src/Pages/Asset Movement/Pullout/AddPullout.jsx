@@ -91,6 +91,7 @@ const AddPullout = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [timelineData, setTimelineData] = useState();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(null);
 
   const isSmallScreen = useMediaQuery("(min-width: 700px)");
 
@@ -98,12 +99,6 @@ const AddPullout = () => {
   const navigate = useNavigate();
   const attachmentRef = useRef(null);
   const { state: transactionData } = useLocation();
-  const open = Boolean(anchorEl);
-
-  console.log("open: ", open);
-  console.log("anchorE1: ", anchorEl);
-
-  console.log("transactionData: ", transactionData);
 
   const dialog = useSelector((state) => state.booleanState.dialog);
 
@@ -188,7 +183,6 @@ const AddPullout = () => {
     });
 
   useEffect(() => {
-    console.log("data", data);
     if (data) {
       fixedAssetTrigger();
       reset({
@@ -218,7 +212,6 @@ const AddPullout = () => {
 
   //* Form functions ----------------------------------------------------------------
   const addPulloutHandler = (formData) => {
-    console.log("formData", formData);
     setIsLoading(true);
     const token = localStorage.getItem("token");
 
@@ -426,11 +419,14 @@ const AddPullout = () => {
     setTimelineData(data);
   };
 
-  const handleClick = (event) => {
+  const handleClick = (event, index) => {
     setAnchorEl(event.currentTarget);
+    setSelectedIndex(index);
   };
+
   const handleClose = () => {
     setAnchorEl(null);
+    setSelectedIndex(null);
   };
 
   const handleRequestNavigateClick = (data) => {
@@ -618,11 +614,7 @@ const AddPullout = () => {
                     <TableCell className="tbl-cell">Index</TableCell>
                     <TableCell className="tbl-cell">Assets</TableCell>
                     <TableCell className="tbl-cell">Accountability</TableCell>
-                    {transactionData?.view && (
-                      <TableCell className="tbl-cell">
-                        <Box ml={2}>Status</Box>
-                      </TableCell>
-                    )}
+                    {transactionData?.view && <TableCell className="tbl-cell tr-cen-pad45">Status</TableCell>}
                     <TableCell className="tbl-cell">Chart of Accounts</TableCell>
                     {/* {transactionData && (
                     <TableCell className="tbl-cell" align="center">
@@ -819,9 +811,9 @@ const AddPullout = () => {
                         </TableCell>
 
                         {transactionData?.view && (
-                          <TableCell className="tbl-cell">
+                          <TableCell className="tbl-cell tr-cen-pad45">
                             {data?.assets[index]?.pullout_status && (
-                              <Box mr={8} onClick={() => handleViewTimeline(data?.assets[index])}>
+                              <Box onClick={() => handleViewTimeline(data?.assets[index])}>
                                 <StatusComponent faStatus={data?.assets[index]?.pullout_status} hover />
                               </Box>
                             )}
@@ -1028,20 +1020,9 @@ const AddPullout = () => {
                             </IconButton>
                           ) : (
                             item?.fixed_asset_id?.pullout_status === "For Replacement" && (
-                              <>
-                                <IconButton onClick={handleClick}>
-                                  <MoreVert color="secondary" />
-                                </IconButton>
-
-                                <Menu anchorEl={anchorEl} open={open} onClose={handleClose} dense>
-                                  <MenuItem onClick={() => handleRequestNavigateClick(data?.assets[index])}>
-                                    <ListItemIcon>
-                                      <AddToPhotos />
-                                    </ListItemIcon>
-                                    <ListItemText> Request</ListItemText>
-                                  </MenuItem>
-                                </Menu>
-                              </>
+                              <IconButton onClick={(e) => handleClick(e, index)}>
+                                <MoreVert color="secondary" />
+                              </IconButton>
                             )
                           )}
                         </TableCell>
@@ -1119,6 +1100,15 @@ const AddPullout = () => {
                     </LoadingButton>
                   </>
                 )}
+
+                <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose} dense>
+                  <MenuItem onClick={() => handleRequestNavigateClick(data?.assets[selectedIndex])}>
+                    <ListItemIcon>
+                      <AddToPhotos />
+                    </ListItemIcon>
+                    <ListItemText> Request</ListItemText>
+                  </MenuItem>
+                </Menu>
 
                 <Dialog
                   open={dialog}
