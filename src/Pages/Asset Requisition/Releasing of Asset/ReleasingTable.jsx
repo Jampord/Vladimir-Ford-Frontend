@@ -52,10 +52,9 @@ const schema = yup.object().shape({
   warehouse_number_id: yup.array(),
 });
 
-const ReleasingTable = (props) => {
+const ReleasingTable = ({ released, direct, warehouse }) => {
   const { getParam, getNumericParam, setMultipleParams } = useQueryParams();
 
-  const { released } = props;
   const [search, setSearch] = useState(getParam("search") || "");
   const [status, setStatus] = useState(getParam("status") || "active");
   const [perPage, setPerPage] = useState(getNumericParam("per_page", 5));
@@ -63,7 +62,7 @@ const ReleasingTable = (props) => {
   const [wNumber, setWNumber] = useState([]);
 
   const navigate = useNavigate();
-  const isSmallScreen = useMediaQuery("(max-width: 500px)");
+  const isSmallScreen = useMediaQuery("(max-width: 940px)");
 
   const dialog = useSelector((state) => state.booleanState.dialog);
 
@@ -75,7 +74,7 @@ const ReleasingTable = (props) => {
       per_page: perPage,
       search: search,
       status: status,
-      tab: released ? "released" : "for_releasing",
+      tab: released ? "released" : direct ? "direct" : warehouse ? "warehouse" : "for_releasing",
     });
   }, [page, perPage, search, status, released, setMultipleParams]);
 
@@ -151,7 +150,8 @@ const ReleasingTable = (props) => {
       per_page: perPage,
       status: status,
       search: search,
-      released: released ? 1 : 0,
+      isReleased: released ? 1 : 0,
+      delivery_type: direct ? "direct" : warehouse ? "warehouse" : "",
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -164,8 +164,6 @@ const ReleasingTable = (props) => {
     });
     dispatch(openDialog());
   };
-
-  // console.log("👀👀👀", watch("warehouse_number_id"));
 
   const handleViewData = (data) => {
     navigate(`/asset-requisition/requisition-releasing/${data.warehouse_number?.warehouse_number}`, {
@@ -196,20 +194,12 @@ const ReleasingTable = (props) => {
   const selectedItem = handleSelectedItems ? handleSelectedItems[0] : null;
   const hasPhone = releasingData?.data?.some((item) => item.minor_category?.minor_category_name === "Phone");
 
-  console.log("hasPhone", hasPhone);
-
-  // console.log("handleSelectedItems", allEqual(handleSelectedItems));
-  console.log("handleSelectedItems", handleSelectedItems);
-  console.log("selectedItem", selectedItem);
-
   //**Validation for Department of Selected Items
   const commonData = [...new Set(handleSelectedItems?.map((item) => item.location.id))].length === 1;
   //**Validation for Location of Selected Items
   const personalData = [...new Set(handleSelectedItems?.map((item) => item.department.id))].length === 1;
 
   // const personalData = handleSelectedItems?.every((item) => item?.accountability !== "Common");
-
-  // console.log("commonData", commonData);
 
   // const validateSelectedItems = () => {
   //   if (commonData && personalData) {
@@ -218,9 +208,6 @@ const ReleasingTable = (props) => {
   //   return !commonData && !personalData;
   // };
   // * -------------------------------------------------------------------
-
-  // console.log("releasingData", releasingData?.data);
-  // console.log("wnumber", wNumber);
 
   const showExport = useSelector((state) => state.booleanState.exportFile);
 
@@ -269,7 +256,7 @@ const ReleasingTable = (props) => {
 
   return (
     <Stack sx={{ height: "calc(100vh - 250px)" }}>
-      {releasingLoading && <MasterlistSkeleton onAdd={true} category />}
+      {releasingLoading && <MasterlistSkeleton onAdd={!isSmallScreen && !released && true} category />}
       {releasingError && <ErrorFetching refetch={refetch} error={errorData} />}
       {releasingData && !releasingError && (
         <>
@@ -281,7 +268,7 @@ const ReleasingTable = (props) => {
                 onClick={() => handleReleasing()}
                 size="small"
                 startIcon={<Output />}
-                sx={{ position: "absolute", right: 0, top: -40 }}
+                sx={{ position: "absolute", right: 0, top: isSmallScreen ? -85 : -40 }}
                 disabled={
                   !watch("warehouse_number_id") ||
                   // || validateSelectedItems()
@@ -467,6 +454,19 @@ const ReleasingTable = (props) => {
                                 </Typography>
                                 <Typography fontSize={12} color="secondary.light">
                                   ({data.warehouse?.id}) - {data.warehouse?.warehouse_name}
+                                </Typography>
+                                <Typography
+                                  fontSize={12}
+                                  fontWeight={"bold"}
+                                  color={
+                                    data.delivery_type === "Direct"
+                                      ? "link.dark"
+                                      : data.delivery_type === "Warehouse"
+                                      ? "error.light"
+                                      : "secondary.light"
+                                  }
+                                >
+                                  {data?.delivery_type !== "-" && `${data.delivery_type} Delivery`}
                                 </Typography>
                               </TableCell>
 
