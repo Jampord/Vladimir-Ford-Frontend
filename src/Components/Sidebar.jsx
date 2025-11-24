@@ -588,7 +588,6 @@ const Sidebar = () => {
           icon: AddToQueue,
           path: "/asset-requisition/requisition-releasing-monitoring",
           permission: "requisition-releasing-monitoring",
-          // notification: notifData?.toRelease,
           setter: closeCollapse,
         },
         // {
@@ -684,13 +683,6 @@ const Sidebar = () => {
           notification: notifData?.repairedCount,
           setter: closeCollapse,
         },
-        // {
-        //   label: "Evaluation",
-        //   icon: RuleFolder,
-        //   path: "/asset-movement/evaluation",
-        //   permission: "evaluation",
-        //   setter: closeCollapse,
-        // },
         {
           label: "Disposal",
           icon: PlaylistRemoveRounded,
@@ -847,30 +839,6 @@ const Sidebar = () => {
       },
     },
 
-    // {
-    //   label: "Asset for Tagging",
-    //   icon: LocalOffer,
-    //   path: "/asset-for-tagging",
-    //   permission: "asset-for-tagging",
-    //   setter: closeCollapse,
-    // },
-
-    // {
-    //   label: "Asset List",
-    //   icon: FormatListBulletedRounded,
-    //   path: "/asset-list",
-    //   permission: "asset-list",
-    //   setter: closeCollapse,
-    // },
-
-    // {
-    //   label: "On Hand in Process",
-    //   icon: ClassRounded,
-    //   path: "/on-hand-in-process",
-    //   permission: "on-hand-in-process",
-    //   setter: closeCollapse,
-    // },
-
     {
       label: "Monitoring",
       icon: Monitor,
@@ -979,6 +947,15 @@ const Sidebar = () => {
         closeCollapse;
         dispatch(openSidebar());
       },
+    },
+
+    {
+      label: "Delivery Type",
+      icon: LocalShipping,
+      path: "/delivery-type",
+      permission: "delivery-type",
+      setter: closeCollapse,
+      notification: notifData?.toDeliveryTypeTaggingCount,
     },
   ];
 
