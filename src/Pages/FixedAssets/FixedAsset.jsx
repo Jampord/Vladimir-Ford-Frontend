@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Moment from "moment";
 import MasterlistToolbar from "../../Components/Reusable/MasterlistToolbar";
 import MasterlistSkeleton from "../Skeleton/MasterlistSkeleton";
@@ -72,14 +72,16 @@ import AssignmentMemoReprint from "./AssignmentMemoReprint";
 import AddFA from "./AddEdit/AddFA";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 import ImportNewCOA from "./ImportNewCOA";
+import { useQueryParams } from "../../Hooks/useQueryParams";
 
 const FixedAsset = ({ view }) => {
+  const { getParam, getNumericParam, setMultipleParams } = useQueryParams();
   const navigate = useNavigate();
   const { excelExport } = useExcel();
-  const [search, setSearch] = useState("");
-  const [perPage, setPerPage] = useState(5);
-  const [page, setPage] = useState(1);
-  const [status, setStatus] = useState("active");
+  const [search, setSearch] = useState(getParam("search") || "");
+  const [status, setStatus] = useState(getParam("status") || "active");
+  const [perPage, setPerPage] = useState(getNumericParam("per_page", 5));
+  const [page, setPage] = useState(getNumericParam("page", 1));
   const [faFilter, setFaFilter] = useState([]);
   const [isRequest, setIsRequest] = useState(0);
   const [steps, setSteps] = useState(0);
@@ -142,12 +144,24 @@ const FixedAsset = ({ view }) => {
     dispatch(closeDrawer());
   }, []);
 
-  // console.log("drawer", drawer);
+  // Update URL when state changes
+  // Memoize the update function
+  const updateUrlParams = useCallback(() => {
+    setMultipleParams({
+      page: page,
+      per_page: perPage,
+      search: search,
+      status: status,
+    });
+  }, [page, perPage, search, status, setMultipleParams]);
+
+  // Update URL when state changes - but only when values actually change
+  useEffect(() => {
+    updateUrlParams();
+  }, [updateUrlParams]); // Now this only runs when the dependencies of updateUrlParams change
 
   const drawer1 = useSelector((state) => state.booleanState.drawerMultiple.drawer1);
   const dialog1 = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
-
-  // console.log("dialog1", dialog1);
 
   const dialog = useSelector((state) => state.booleanState.dialog);
   const add = useSelector((state) => state.booleanState.add);
