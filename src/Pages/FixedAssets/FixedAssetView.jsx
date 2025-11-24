@@ -546,11 +546,7 @@ const FixedAssetView = ({ view }) => {
   });
 
   const onBackHandler = () => {
-    view
-      ? navigate("/reports/fixed-assets-report")
-      : dataApi.data?.is_additional_cost === 0
-      ? navigate("/fixed-asset/fixed-asset")
-      : navigate(-1);
+    view ? navigate("/reports/fixed-assets-report") : navigate(-1);
   };
 
   const handleOpenInclusion = () => {
