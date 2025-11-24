@@ -51,10 +51,9 @@ const ListOfPullout = () => {
   const [evaluation, setEvaluation] = useState("");
   const [transactionData, setTransactionData] = useState();
 
-  console.log("evaluationzz", evaluation);
-
   const open = Boolean(anchorEl);
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
+  const isMediumScreen = useMediaQuery("(max-width: 1000px)");
   const dispatch = useDispatch();
 
   const dialog = useSelector((state) => state.booleanState.dialog);
@@ -89,6 +88,21 @@ const ListOfPullout = () => {
     dispatch(openDialog1());
     setAnchorEl(null);
     setEvaluation("For Disposal");
+  };
+
+  const handleRowClick = (id) => {
+    const current = watch("pullout_ids");
+
+    if (current.includes(id)) {
+      // remove
+      setValue(
+        "pullout_ids",
+        current.filter((item) => item !== id)
+      );
+    } else {
+      // add
+      setValue("pullout_ids", [...current, id]);
+    }
   };
 
   const handleAllHandler = (checked) => {
@@ -154,9 +168,6 @@ const ListOfPullout = () => {
 
   const selectedItems = evaluationData?.data?.filter((item) => watch("pullout_ids").includes(item?.id?.toString()));
 
-  // console.log("🧨🧨", watch("pullout_ids"));
-  // console.log("👀", selectedItems);
-
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -173,7 +184,7 @@ const ListOfPullout = () => {
 
   return (
     <Stack className="category_height">
-      {isEvaluationLoading && <MasterlistSkeleton onAdd={true} category />}
+      {isEvaluationLoading && <MasterlistSkeleton onAdd={!isMediumScreen && true} category />}
       {isEvaluationError && <ErrorFetching refetch={refetch} error={errorData} />}
 
       {evaluationData && !isEvaluationError && !isEvaluationLoading && (
@@ -187,7 +198,7 @@ const ListOfPullout = () => {
           />
 
           {(!isEvaluationLoading || !isEvaluationFetching) && (
-            <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }} mr="10px">
+            <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8, top: isMediumScreen && -90 }} mr="10px">
               <Button
                 onClick={handleClick}
                 variant="contained"
@@ -290,6 +301,7 @@ const ListOfPullout = () => {
                             },
                           }}
                           hover
+                          onClick={() => handleRowClick(item.id.toString())}
                         >
                           <TableCell className="tbl-cell" size="small" align="center">
                             <FormControlLabel
@@ -300,6 +312,7 @@ const ListOfPullout = () => {
                                   size="small"
                                   {...register("pullout_ids")}
                                   checked={watch("pullout_ids").includes(item?.id?.toString())}
+                                  onClick={(e) => e.stopPropagation()}
                                 />
                               }
                             />
