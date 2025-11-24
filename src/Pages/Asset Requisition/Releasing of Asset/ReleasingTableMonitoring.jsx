@@ -51,7 +51,7 @@ const ReleasingTableMonitoring = () => {
       per_page: perPage,
       status: status,
       search: search,
-      released: 0,
+      isReleased: 0,
     },
     { refetchOnMountOrArgChange: true }
   );
