@@ -7,27 +7,30 @@ import { useLocation } from "react-router-dom";
 import { Box, Typography, useMediaQuery } from "@mui/material";
 import { InventoryRounded, PriceChange } from "@mui/icons-material";
 import Cards from "../../Components/Reusable/Cards";
-
-const FixedAssetList = [
-  {
-    icon: <InventoryRounded />,
-    label: "Fixed Assets",
-    description: "List of Fixed Assets",
-    path: "/fixed-asset/fixed-asset",
-  },
-
-  {
-    icon: <PriceChange />,
-    label: "Depreciation",
-    description: "List of Fixed Asset Depreciation",
-    path: "/fixed-asset/depreciation",
-  },
-];
+import { useGetNotificationApiQuery } from "../../Redux/Query/Notification";
 
 const FixedAssetIndex = () => {
+  const { data: notifData, refetch } = useGetNotificationApiQuery(null, { refetchOnMountOrArgChange: true });
   const location = useLocation();
   const isSmallScreen = useMediaQuery("(max-width: 590px)");
   // console.log(location);
+
+  const FixedAssetList = [
+    {
+      icon: <InventoryRounded />,
+      notification: notifData?.toTagCount,
+      label: "Fixed Assets",
+      description: "List of Fixed Assets",
+      path: "/fixed-asset/fixed-asset",
+    },
+
+    {
+      icon: <PriceChange />,
+      label: "Depreciation",
+      description: "List of Fixed Asset Depreciation",
+      path: "/fixed-asset/depreciation",
+    },
+  ];
 
   return (
     <>
