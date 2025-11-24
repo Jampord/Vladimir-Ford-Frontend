@@ -146,7 +146,6 @@ const PrintFixedAsset = (props) => {
   const { data: notifData, refetch } = useGetNotificationApiQuery();
 
   useEffect(() => {
-    // console.log("refetched data");
     refetch();
   }, [notifData]);
 
@@ -164,7 +163,6 @@ const PrintFixedAsset = (props) => {
   const [orderBy, setOrderBy] = useState("id");
 
   const descendingComparator = (a, b, orderBy) => {
-    // console.log(orderBy.split(".").toString());
     const multiple = orderBy.split(".").length > 1;
     if (multiple) {
       const [orderBy1, orderBy2] = orderBy.split(".");
@@ -204,7 +202,6 @@ const PrintFixedAsset = (props) => {
   };
 
   const pageHandler = (_, page) => {
-    // console.log(page + 1);
     setPage(page + 1);
   };
 
@@ -271,8 +268,6 @@ const PrintFixedAsset = (props) => {
     },
     { refetchOnMountOrArgChange: true }
   );
-
-  // console.log("prijntingggg", fixedAssetData);
 
   const {
     handleSubmit,
@@ -390,7 +385,6 @@ const PrintFixedAsset = (props) => {
   }, [isPostError, isMemoError, isPutError, isPutUngroupError]);
 
   const onPrintHandler = (formData) => {
-    // console.log(formData);
     dispatch(
       openConfirm({
         icon: Help,
@@ -423,7 +417,6 @@ const PrintFixedAsset = (props) => {
             reset();
             refetch();
           } catch (err) {
-            console.log(err);
             reset();
           }
         },
@@ -432,7 +425,6 @@ const PrintFixedAsset = (props) => {
   };
 
   const onPrintMemoHandler = async (formData) => {
-    // console.log(formData);
     setFaData(fixedAssetData?.data);
     setSelectedMemo(formData?.tagNumber);
     dispatch(
@@ -465,7 +457,6 @@ const PrintFixedAsset = (props) => {
             reset();
             refetch();
           } catch (err) {
-            console.log(err.data.message);
             if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
               dispatch(
                 openToast({
@@ -480,7 +471,6 @@ const PrintFixedAsset = (props) => {
               //     duration: 5000,
               //   })
               // );
-              console.log(err);
             } else if (err?.status !== 422) {
               dispatch(
                 openToast({
@@ -503,9 +493,7 @@ const PrintFixedAsset = (props) => {
   };
 
   const onTagNonPrintableAssetHandler = (formData) => {
-    console.log("smallTOoldata", smallToolsData);
     const id = smallToolsData.map((data) => data.id);
-    console.log("id", id);
     dispatch(
       openConfirm({
         icon: Help,
@@ -543,9 +531,6 @@ const PrintFixedAsset = (props) => {
               fixed_asset_id: id,
               is_printable: 0,
             }).unwrap();
-            // console.log(formData.tagNumber);
-
-            // console.log(result);
 
             // dispatch(
             //   openToast({
@@ -563,7 +548,6 @@ const PrintFixedAsset = (props) => {
             reset();
             refetch();
           } catch (err) {
-            console.log(err.data.message);
             if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
             } else if (err?.status !== 422) {
             }
@@ -574,9 +558,7 @@ const PrintFixedAsset = (props) => {
   };
 
   const onTagNonPrintableHandler = (formData) => {
-    console.log("smallTOoldata", smallToolsData);
     const id = smallToolsData.map((data) => data.id);
-    console.log("id", id);
     dispatch(
       openConfirm({
         icon: Help,
@@ -614,9 +596,6 @@ const PrintFixedAsset = (props) => {
               fixed_asset_id: id,
               is_printable: 0,
             }).unwrap();
-            // console.log(formData.tagNumber);
-
-            console.log({ result });
 
             // dispatch(
             //   openToast({
@@ -634,7 +613,6 @@ const PrintFixedAsset = (props) => {
             reset();
             refetch();
           } catch (err) {
-            console.log(err);
             if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
             } else if (err?.status !== 422) {
             }
@@ -689,7 +667,6 @@ const PrintFixedAsset = (props) => {
             reset();
             resetHandler();
           } catch (err) {
-            console.log(err);
             dispatch(
               openToast({
                 message: err.data.message || "Something went wrong! Please try again or contact support.",
@@ -745,13 +722,26 @@ const PrintFixedAsset = (props) => {
     }
   };
 
+  const handleRowClick = (id) => {
+    const current = watch("tagNumber");
+
+    if (current.includes(id)) {
+      // remove
+      setValue(
+        "tagNumber",
+        current.filter((item) => item !== id)
+      );
+    } else {
+      // add
+      setValue("tagNumber", [...current, id]);
+    }
+  };
+
+  console.log("watch tag number:", watch("tagNumber"));
+
   const smallToolsData = fixedAssetData?.data.filter((data) => watch("tagNumber").includes(data.vladimir_tag_number));
   const printable = smallToolsData?.map((data) => data?.is_parent).includes(1);
   const isMainAsset = smallToolsData?.map((data) => data?.is_main).includes(1);
-
-  // console.log("printable", printable);
-  console.log("isMainAsset", isMainAsset);
-  console.log("smallToolsData", smallToolsData);
 
   //Validations for Small Tools Grouping
   const areAllCOASame = (assets) => {
@@ -790,8 +780,6 @@ const PrintFixedAsset = (props) => {
   };
 
   const result = areAllCOASame(smallToolsData);
-  // const result = smallToolsData;
-  // console.log("result = ", result);
 
   const containerSx = {
     display: "flex",
@@ -1012,7 +1000,6 @@ const PrintFixedAsset = (props) => {
                               }
                               onChange={(e) => {
                                 tagNumberAllHandler(e.target.checked);
-                                // console.log(e.target.checked);
                               }}
                             />
                           }
@@ -1089,12 +1076,14 @@ const PrintFixedAsset = (props) => {
                             return (
                               <TableRow
                                 key={data.id}
+                                hover
                                 sx={{
                                   "&:last-child td, &:last-child th": {
                                     borderBottom: 0,
                                   },
                                   overflow: "auto",
                                 }}
+                                onClick={() => handleRowClick(data.vladimir_tag_number)}
                               >
                                 <TableCell align="center">
                                   <FormControlLabel
@@ -1106,6 +1095,7 @@ const PrintFixedAsset = (props) => {
                                         size="small"
                                         {...register("tagNumber")}
                                         checked={watch("tagNumber").includes(data.vladimir_tag_number)}
+                                        onClick={(e) => e.stopPropagation()}
                                       />
                                     }
                                   />
@@ -1448,7 +1438,6 @@ const PrintFixedAsset = (props) => {
                                       }
                                       onChange={(e) => {
                                         tagNumberAllHandler(e.target.checked);
-                                        // console.log(e.target.checked);
                                       }}
                                     />
                                   }
@@ -1527,12 +1516,14 @@ const PrintFixedAsset = (props) => {
                                     return (
                                       <TableRow
                                         key={data.id}
+                                        hover
                                         sx={{
                                           "&:last-child td, &:last-child th": {
                                             borderBottom: 0,
                                           },
                                           overflow: "auto",
                                         }}
+                                        onClick={() => handleRowClick(data.vladimir_tag_number)}
                                       >
                                         <TableCell align="center">
                                           <FormControlLabel
@@ -1544,6 +1535,7 @@ const PrintFixedAsset = (props) => {
                                                 size="small"
                                                 {...register("tagNumber")}
                                                 checked={watch("tagNumber").includes(data.vladimir_tag_number)}
+                                                onClick={(e) => e.stopPropagation()}
                                               />
                                             }
                                           />
@@ -2026,7 +2018,6 @@ const PrintFixedAsset = (props) => {
                                       }
                                       onChange={(e) => {
                                         tagNumberAllHandler(e.target.checked);
-                                        // console.log(e.target.checked);
                                       }}
                                     />
                                   }
@@ -2105,12 +2096,14 @@ const PrintFixedAsset = (props) => {
                                     return (
                                       <TableRow
                                         key={data.id}
+                                        hover
                                         sx={{
                                           "&:last-child td, &:last-child th": {
                                             borderBottom: 0,
                                           },
                                           overflow: "auto",
                                         }}
+                                        onClick={() => handleRowClick(data.vladimir_tag_number)}
                                       >
                                         <TableCell align="center">
                                           <FormControlLabel
@@ -2122,13 +2115,11 @@ const PrintFixedAsset = (props) => {
                                                 size="small"
                                                 {...register("tagNumber")}
                                                 checked={watch("tagNumber").includes(data.vladimir_tag_number)}
+                                                onClick={(e) => e.stopPropagation()}
                                               />
                                             }
                                           />
                                         </TableCell>
-
-                                        {/* {console.log("selectedItems", watch("tagNumber"))}
-                                        {console.log("filter", smallToolsData)} */}
 
                                         <TableCell>
                                           <Typography
