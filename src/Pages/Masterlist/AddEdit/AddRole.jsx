@@ -377,6 +377,7 @@ const AddRole = (props) => {
       { label: "Printing of Tag", value: "print-fa" },
       { label: "Settings", value: "settings" },
       { label: "Monitoring", value: "monitoring" },
+      { label: "Delivery Type", value: "delivery-type" },
       // { label: "sample", value: "sample" },
     ];
 
