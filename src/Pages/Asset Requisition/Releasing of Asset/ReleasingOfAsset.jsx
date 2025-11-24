@@ -29,18 +29,36 @@ const ReleasingOfAsset = () => {
 
       <Box>
         <TabContext value={tabValue}>
-          <Tabs onChange={handleChange} value={tabValue}>
+          <Tabs onChange={handleChange} value={tabValue} scrollButtons="auto" variant="scrollable">
             <Tab
               label={
                 <Badge color="error" badgeContent={notifData?.toRelease}>
-                  For Releasing
+                  For Releasing (All)
                 </Badge>
               }
               value="1"
               className={tabValue === "1" ? "tab__background" : null}
             />
 
-            <Tab label="Released" value="2" className={tabValue === "2" ? "tab__background" : null} />
+            <Tab
+              label={
+                <Badge color="error" badgeContent={notifData?.directDeliveryCount} variant="dot">
+                  Direct Delivery
+                </Badge>
+              }
+              value="2"
+              className={tabValue === "2" ? "tab__background" : null}
+            />
+            <Tab
+              label={
+                <Badge color="error" badgeContent={notifData?.warehouseDeliveryCount} variant="dot">
+                  Warehouse Delivery
+                </Badge>
+              }
+              value="3"
+              className={tabValue === "3" ? "tab__background" : null}
+            />
+            <Tab label="Released" value="4" className={tabValue === "4" ? "tab__background" : null} />
           </Tabs>
 
           <TabPanel sx={{ p: 0 }} value="1" index="1">
@@ -48,6 +66,14 @@ const ReleasingOfAsset = () => {
           </TabPanel>
 
           <TabPanel sx={{ p: 0 }} value="2" index="2">
+            <ReleasingTable direct />
+          </TabPanel>
+
+          <TabPanel sx={{ p: 0 }} value="3" index="3">
+            <ReleasingTable warehouse />
+          </TabPanel>
+
+          <TabPanel sx={{ p: 0 }} value="4" index="4">
             <ReleasingTable released />
           </TabPanel>
         </TabContext>
