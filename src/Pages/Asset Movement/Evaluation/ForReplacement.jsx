@@ -55,6 +55,7 @@ const ForReplacement = ({ tab }) => {
 
   const open = Boolean(anchorEl);
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
+  const isMediumScreen = useMediaQuery("(max-width: 1000px)");
   const dispatch = useDispatch();
   const dialog1 = useSelector((state) => state.booleanState.dialog);
   const dialog2 = useSelector((state) => state.booleanState.dialogMultiple.dialog1);
@@ -84,6 +85,21 @@ const ForReplacement = ({ tab }) => {
       item_id: [],
     },
   });
+
+  const handleRowClick = (id) => {
+    const current = watch("item_id");
+
+    if (current.includes(id)) {
+      // remove
+      setValue(
+        "item_id",
+        current.filter((item) => item !== id)
+      );
+    } else {
+      // add
+      setValue("item_id", [...current, id]);
+    }
+  };
 
   const handleAllHandler = (checked) => {
     if (checked) {
@@ -160,11 +176,12 @@ const ForReplacement = ({ tab }) => {
   };
 
   const selectedItems = evaluationData?.data?.filter((item) => watch("item_id").includes(item?.id?.toString()));
+
   const result = areAllCOASame(selectedItems);
 
   return (
     <Stack className="category_height">
-      {isEvaluationLoading && <MasterlistSkeleton onAdd={true} category />}
+      {isEvaluationLoading && <MasterlistSkeleton onAdd={!isSmallScreen && !isMediumScreen && true} category />}
       {isEvaluationError && <ErrorFetching refetch={refetch} error={errorData} />}
       {evaluationData && !isEvaluationError && !isEvaluationLoading && (
         <Box className="mcontainer__wrapper">
@@ -178,7 +195,7 @@ const ForReplacement = ({ tab }) => {
                 startIcon={isSmallScreen ? null : <More />}
                 size="small"
                 disabled={watch("item_id").length === 0}
-                sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+                sx={{ minWidth: isSmallScreen && "50px", top: isMediumScreen && -48 }}
               >
                 {isSmallScreen ? <More color="black" sx={{ fontSize: "20px" }} /> : "Action"}
               </Button>
@@ -210,7 +227,7 @@ const ForReplacement = ({ tab }) => {
                 startIcon={isSmallScreen ? null : <More />}
                 size="small"
                 disabled={watch("item_id").length === 0 || result === false}
-                sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+                sx={{ minWidth: isSmallScreen && "50px", top: isMediumScreen && -48 }}
               >
                 {isSmallScreen ? <More color="black" sx={{ fontSize: "20px" }} /> : "Action"}
               </Button>
@@ -234,7 +251,7 @@ const ForReplacement = ({ tab }) => {
                 startIcon={isSmallScreen ? null : <More />}
                 size="small"
                 disabled={watch("item_id").length === 0 || result === false}
-                sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+                sx={{ minWidth: isSmallScreen && "50px", top: isMediumScreen && -48 }}
               >
                 {isSmallScreen ? <More color="black" sx={{ fontSize: "20px" }} /> : "Action"}
               </Button>
@@ -310,6 +327,7 @@ const ForReplacement = ({ tab }) => {
                             },
                           }}
                           hover
+                          onClick={() => handleRowClick(item?.id.toString())}
                         >
                           {(tab === "5" || tab === "6" || tab === "7") && (
                             <TableCell className="tbl-cell" size="small" align="center">
@@ -321,6 +339,7 @@ const ForReplacement = ({ tab }) => {
                                     size="small"
                                     {...register("item_id")}
                                     checked={watch("item_id").includes(item?.id?.toString())}
+                                    onClick={(e) => e.stopPropagation()}
                                   />
                                 }
                               />
