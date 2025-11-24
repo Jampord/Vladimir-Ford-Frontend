@@ -285,6 +285,17 @@ const PulloutTimeline = (props) => {
                               </Typography>
                             </>
                           )}
+
+                          {item?.action === "For Replacement" && (
+                            <>
+                              <Typography fontSize={12} fontWeight={600} color="text">
+                                Vladimir Tag Number: {item?.vladimir_tag_number}
+                              </Typography>
+                              <Typography fontSize={12} fontWeight={600} color="text.light">
+                                Asset Description: {item?.description}
+                              </Typography>
+                            </>
+                          )}
                           {(item?.action === "Repaired" || item?.action === "Received") && (
                             <>
                               <Typography fontSize={12} fontWeight={600} color="text">
@@ -303,7 +314,8 @@ const PulloutTimeline = (props) => {
                             </Typography>
                           )}
 
-                          {item?.remarks && (
+                          {((typeof item?.remarks === "string" && item?.remarks.trim() !== "") ||
+                            (Array.isArray(item?.remarks) && item?.remarks.length > 0)) && (
                             <Typography fontSize={12} fontWeight={600}>
                               Remarks: {item?.remarks}
                             </Typography>
