@@ -18,8 +18,7 @@ export const assetReleasingApi = createApi({
 
   endpoints: (builder) => ({
     getAssetReleasing: builder.query({
-      query: (params) =>
-        `asset-release?isReleased=${params.released}&search=${params.search}&per_page=${params.per_page}&status=${params.status}&page=${params.page}`,
+      query: (params) => ({ url: `asset-release`, params }),
       providesTags: ["AssetReleasing"],
     }),
 
