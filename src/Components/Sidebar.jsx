@@ -114,6 +114,7 @@ import {
   BorderAll,
   PriceCheck,
   Engineering,
+  Gite,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -390,6 +391,12 @@ const Sidebar = () => {
         //   path: "/masterlist/enrolled-budget",
         //   permission: "enrolled-budget",
         // },
+        {
+          label: "Movement Warehouse",
+          icon: Gite,
+          path: "/masterlist/movement-warehouse",
+          permission: "movement-warehouse",
+        },
       ],
       open: masterListCollapse,
       setter: (e) => {
