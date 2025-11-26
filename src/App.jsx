@@ -128,6 +128,7 @@ import AddBudgetIndex from "./Pages/Capex/Add Budget/AddBudgetIndex";
 import Operation from "./Pages/Masterlist/Operation";
 import Redirect from "./Routes/Redirect";
 import DeliveryType from "./Pages/Delivery Type/DeliveryType";
+import MovementWarehouse from "./Pages/Masterlist/MovementWarehouse";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -294,6 +295,11 @@ const router = createBrowserRouter([
                 path: "status-category",
                 element: <FaStatusCategory />,
                 handle: { permission: "status-category" },
+              },
+              {
+                path: "movement-warehouse",
+                element: <MovementWarehouse />,
+                handle: { permission: "movement-warehouse" },
               },
             ],
           },
