@@ -11,23 +11,16 @@ const Redirect = () => {
   const rawData = query.get("data");
 
   useEffect(() => {
-    const redirectFunction = async () => {
-      try {
-        const data = JSON.parse(decodeURIComponent(rawData));
-        console.log("JSONdata: ", data);
-        const res = await userLogin.post("/auth/login", data);
-        localStorage.setItem("token", res.data.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.data.user));
-        dispatch(addUserDetails(res?.data.data));
-        navigate("/");
-      } catch (e) {
-        window.location.href = `https://one.rdfmis.com/`;
-      }
-    };
-
-    redirectFunction();
+    try {
+      const data = JSON.parse(decodeURIComponent(rawData));
+      localStorage.setItem("token", data?.data?.token);
+      localStorage.setItem("user", JSON.stringify(data?.data?.user));
+      dispatch(addUserDetails(data?.data));
+      navigate("/");
+    } catch (e) {
+      window.location.href = `https://one.rdfmis.com/`;
+    }
   }, [rawData]);
-
   return;
 };
 
