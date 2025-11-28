@@ -8,47 +8,50 @@ import { Box, Typography, useMediaQuery } from "@mui/material";
 import { PlaylistRemoveRounded, RemoveFromQueue, RuleFolder, TransferWithinAStation } from "@mui/icons-material";
 import Cards from "../../Components/Reusable/Cards";
 import { useSelector } from "react-redux";
-
-const ApprovingList = [
-  {
-    icon: <RuleFolder />,
-    label: "Request",
-    description: "Requesting for Asset Evaluation",
-    path: "/approving/request",
-    permission: "approving-request",
-  },
-
-  {
-    icon: <TransferWithinAStation />,
-    label: "Transfer",
-    description: "Requesting for Asset Transfer",
-    path: "/approving/transfer",
-    permission: "approving-transfer",
-  },
-
-  {
-    icon: <RemoveFromQueue />,
-    label: "Pull-Out",
-    description: "Requesting for Asset Pull-Out",
-    path: "/approving/pull-out",
-    permission: "approving-pullout",
-  },
-
-  {
-    icon: <PlaylistRemoveRounded />,
-    label: "Disposal",
-    description: "List of For Disposal Items",
-    path: "/approving/disposal",
-    permission: "approving-disposal",
-  },
-];
+import { useGetNotificationApiQuery } from "../../Redux/Query/Notification";
 
 const Approving = () => {
   const location = useLocation();
   const isSmallScreen = useMediaQuery("(max-width: 590px)");
-  // console.log(location.pathname);
+  const { data: notifData, refetch } = useGetNotificationApiQuery(null, { refetchOnMountOrArgChange: true });
 
   const permissions = useSelector((state) => state.userLogin?.user.role.access_permission);
+
+  const ApprovingList = [
+    {
+      icon: <RuleFolder />,
+      label: "Request",
+      description: "Requesting for Asset Evaluation",
+      path: "/approving/request",
+      permission: "approving-request",
+      notification: notifData?.toApproveCount + notifData?.toAcquisitionFaApproval,
+    },
+
+    {
+      icon: <TransferWithinAStation />,
+      label: "Transfer",
+      description: "Requesting for Asset Transfer",
+      path: "/approving/transfer",
+      permission: "approving-transfer",
+      notification: notifData?.toTransferApproveCount + notifData?.toTransferFaApproval,
+    },
+
+    {
+      icon: <RemoveFromQueue />,
+      label: "Pull-Out",
+      description: "Requesting for Asset Pull-Out",
+      path: "/approving/pull-out",
+      permission: "approving-pullout",
+    },
+
+    {
+      icon: <PlaylistRemoveRounded />,
+      label: "Disposal",
+      description: "List of For Disposal Items",
+      path: "/approving/disposal",
+      permission: "approving-disposal",
+    },
+  ];
 
   return (
     <>
