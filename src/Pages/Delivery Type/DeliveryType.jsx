@@ -13,6 +13,7 @@ import {
   ListItemText,
   Menu,
   MenuItem,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -160,6 +161,7 @@ const DeliveryType = () => {
                 duration: 5000,
               })
             );
+            reset();
             dispatch(notificationApi.util.invalidateTags(["Notif"]));
             dispatch(closeConfirm());
           } catch (err) {
@@ -430,14 +432,21 @@ const DeliveryType = () => {
               </Table>
             </TableContainer>
 
-            <CustomTablePagination
-              total={deliveryTypeData?.total}
-              success={isDeliveryTypeSuccess}
-              current_page={deliveryTypeData?.current_page}
-              per_page={deliveryTypeData?.per_page}
-              onPageChange={pageHandler}
-              onRowsPerPageChange={perPageHandler}
-            />
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Typography fontFamily="Anton, Impact, Roboto" fontSize="16px" color="secondary.main" ml={2}>
+                No. of Selected Asset: {watch("fixed_assets").length} Asset
+                {watch("fixed_assets").length >= 2 ? "s" : null}
+              </Typography>
+
+              <CustomTablePagination
+                total={deliveryTypeData?.total}
+                success={isDeliveryTypeSuccess}
+                current_page={deliveryTypeData?.current_page}
+                per_page={deliveryTypeData?.per_page}
+                onPageChange={pageHandler}
+                onRowsPerPageChange={perPageHandler}
+              />
+            </Stack>
           </Box>
         </Box>
       )}
