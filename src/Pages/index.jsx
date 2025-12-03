@@ -236,7 +236,7 @@ const Dashboard = () => {
                 fontSize: "2rem",
               }}
             >
-              {userDetails?.user.username.toUpperCase()}!
+              {userDetails?.user?.username.toUpperCase()}!
             </Typography>
           </Box>
 
