@@ -16,6 +16,7 @@ import {
   FormGroup,
   FormLabel,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
 
@@ -28,6 +29,8 @@ import {
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { LoadingButton } from "@mui/lab";
 import { AddBox } from "@mui/icons-material";
+import { useLazyGetMovementWarehouseApiQuery } from "../../../Redux/Query/Masterlist/Warehouse";
+import CustomAutoComplete from "../../../Components/Reusable/CustomAutoComplete";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -57,6 +60,19 @@ const AddRole = (props) => {
       error: updateError,
     },
   ] = useUpdateRoleApiMutation();
+
+  const [
+    movementWarehouseTrigger,
+    {
+      data: movementWarehouseData,
+      isLoading: movementWarehouseLoading,
+      isFetching: movementWarehouseFetching,
+      isSuccess: movementWarehouseSuccess,
+      isError: movementWarehouseError,
+      error: errorData,
+      refetch,
+    },
+  ] = useLazyGetMovementWarehouseApiQuery();
 
   const {
     handleSubmit,
@@ -120,11 +136,26 @@ const AddRole = (props) => {
 
   useEffect(() => {
     if (data.status) {
-      setValue("id", data.id);
-      setValue("role_name", data.role_name);
-      setValue("access_permission", data.access_permission);
+      setValue("id", data?.id);
+      setValue("role_name", data?.role_name);
+      setValue("access_permission", data?.access_permission);
+      setValue("movement_warehouse_id", data?.movement_warehouses[0]);
     }
   }, [data]);
+
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      if (name === "access_permission") {
+        const permissions = value.access_permission || [];
+
+        if (!permissions.includes("movement-warehouse")) {
+          setValue("movement_warehouse_id", null);
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, setValue]);
 
   const permissions = [
     // List of permissions
@@ -139,9 +170,6 @@ const AddRole = (props) => {
     "capex",
     "approving",
     "monitoring",
-    "asset-for-tagging",
-    "asset-list",
-    "disposal",
     "reports",
     "setup-settings",
 
@@ -168,6 +196,7 @@ const AddRole = (props) => {
     "operation",
     "category",
     "status-category",
+    "movement-warehouse-masterlist",
     // "small-tools",
 
     // UserManagement
@@ -198,9 +227,7 @@ const AddRole = (props) => {
     "disposal-receiving",
     "transfer-pullout-releasing",
     "evaluation",
-    "mis-warehouse",
-    "fixed-asset-warehouse",
-    "engineering-warehouse",
+    "bidding",
 
     // Approving
     "pending-request",
@@ -229,6 +256,8 @@ const AddRole = (props) => {
     // Setup settings
     "ip-setup",
     "token-setup",
+
+    "movement-warehouse",
   ];
 
   const masterlistValue = [
@@ -249,6 +278,7 @@ const AddRole = (props) => {
     "operation",
     "category",
     "status-category",
+    "movement-warehouse-masterlist",
   ];
   const userManagement = ["user-accounts", "role-management"];
   const settings = ["approver-settings", "form-settings", "coordinator-settings", "receiver-settings"];
@@ -267,6 +297,7 @@ const AddRole = (props) => {
     "disposal-receiving",
     "transfer-pullout-releasing",
     "evaluation",
+    "bidding",
   ];
   const capex = ["add-capex", "sub-capex", "additional-cost", "add-budget"];
   const approving = [
@@ -290,11 +321,12 @@ const AddRole = (props) => {
   const setupSettings = ["ip-setup", "token-setup"];
 
   const onSubmitHandler = (formData) => {
+    const newFormData = { ...formData, movement_warehouse_id: [formData.movement_warehouse_id?.id] };
     if (data.status) {
-      updateRole(formData);
+      updateRole(watch("access_permission").includes("movement-warehouse") ? newFormData : formData);
       return;
     }
-    postRole(formData);
+    postRole(watch("access_permission").includes("movement-warehouse") ? newFormData : formData);
   };
 
   const handleCloseDrawer = () => {
@@ -386,10 +418,9 @@ const AddRole = (props) => {
       { label: "Asset Movement", value: "asset-movement" },
       { label: "Capex", value: "capex-index" },
       { label: "Approving", value: "approving" },
-      { label: "Asset for Tagging", value: "asset-for-tagging" },
-      { label: "Asset List", value: "asset-list" },
       { label: "Reports", value: "reports" },
       { label: "Setup Settings", value: "setup-settings" },
+      { label: "Movement Warehouse", value: "movement-warehouse" },
     ];
 
     return (
@@ -400,6 +431,32 @@ const AddRole = (props) => {
 
         <Box>
           <CheckboxGroup items={Setup} />
+          {watch("access_permission").includes("movement-warehouse") && (
+            <Box mt={-1.5}>
+              <CustomAutoComplete
+                control={control}
+                name="movement_warehouse_id"
+                onOpen={() => {
+                  movementWarehouseSuccess ? null : movementWarehouseTrigger({ pagination: "none" });
+                }}
+                disabled={data.action === "view"}
+                options={movementWarehouseData || []}
+                loading={movementWarehouseLoading || movementWarehouseFetching}
+                getOptionLabel={(option) => option.name}
+                getOptionKey={(option) => option.id}
+                isOptionEqualToValue={(option, value) => option.id === value.id}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    color="secondary"
+                    label="Select Movement Warehouse"
+                    // error={!!errors?.receiving_warehouse_id}
+                    // helperText={errors?.receiving_warehouse_id?.message}
+                  />
+                )}
+              />
+            </Box>
+          )}
         </Box>
       </Stack>
     );
@@ -431,6 +488,7 @@ const AddRole = (props) => {
       { label: "Status Category", value: "status-category" },
       { label: "Type of Expenditure", value: "type-of-expenditure" },
       { label: "Operation", value: "operation" },
+      { label: "Movement Warehouse", value: "movement-warehouse-masterlist" },
       // { label: "Enrolled Budget", value: "enrolled-budget" },
     ];
     return (
@@ -524,15 +582,9 @@ const AddRole = (props) => {
       { label: "Releasing", value: "requisition-releasing" },
     ];
 
-    const assetRequisition2 = [
-      //   { label: "User (Requestor)", value: "user-requestor" },
-      //   { label: "User (Approver)", value: "user-approver" },
-    ];
-
     return (
       <Stack flexDirection="row" flexWrap="wrap" justifyContent="space-evenly" gap={1}>
         <CheckboxGroup items={assetRequisition1} />
-        {/* <CheckboxGroup items={assetRequisition2}  /> */}
       </Stack>
     );
   };
@@ -543,26 +595,15 @@ const AddRole = (props) => {
       { label: "Asset Pullout", value: "pull-out" },
       { label: "Receiving of Transfer", value: "transfer-receiving" },
       { label: "Transfer Releasing (Pullout)", value: "transfer-pullout-releasing" },
-    ];
-
-    const assetMovement2 = [
       { label: "Asset Evaluation", value: "evaluation" },
       { label: "Asset Disposal", value: "disposal" },
       { label: "Receiving of Disposal", value: "disposal-receiving" },
-    ];
-    const assetMovement3 = [
-      { label: "MIS - Warehouse", value: "mis-warehouse" },
-      { label: "Fixed Asset - Warehouse", value: "fixed-asset-warehouse" },
-      { label: "Engineering - Warehouse", value: "engineering-warehouse" },
+      { label: "Bidding", value: "bidding" },
     ];
 
     return (
-      <Stack flexDirection="row" flexWrap="wrap" justifyContent="space-evenly" gap={1}>
-        <Box>
-          <CheckboxGroup items={assetMovement1} />
-          <CheckboxGroup items={assetMovement2} />
-        </Box>
-        <CheckboxGroup title="Warehouse Permission (Pullout)" items={assetMovement3} />
+      <Stack flexDirection="row" flexWrap="wrap" justifyContent="center" gap={1}>
+        <CheckboxGroup items={assetMovement1} />
       </Stack>
     );
   };
@@ -965,6 +1006,7 @@ const AddRole = (props) => {
                                     "category",
                                     "status-category",
                                     "unit-of-measurement",
+                                    "movement-warehouse",
                                     // "small-tools",
                                   ]),
                                 ]);
@@ -1196,9 +1238,7 @@ const AddRole = (props) => {
                                     "disposal-receiving",
                                     "transfer-pullout-releasing",
                                     "evaluation",
-                                    "mis-warehouse",
-                                    "fixed-asset-warehouse",
-                                    "engineering-warehouse",
+                                    "bidding",
                                   ]),
                                 ]);
                               } else {
@@ -1514,7 +1554,10 @@ const AddRole = (props) => {
             loading={isUpdateLoading || isPostLoading}
             disabled={
               // (errors?.role_name ? true : false) ||
-              watch("role_name") === "" || watch("access_permission")?.length === 0 || data.action === "view"
+              watch("role_name") === "" ||
+              watch("access_permission")?.length === 0 ||
+              data.action === "view" ||
+              (watch("access_permission").includes("movement-warehouse") && !watch("movement_warehouse_id"))
             }
             sx={data.action === "view" ? { display: "none" } : null}
           >
