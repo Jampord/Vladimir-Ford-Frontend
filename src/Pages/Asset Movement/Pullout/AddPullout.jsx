@@ -62,11 +62,12 @@ import PulloutTimeline from "../PulloutTimeline";
 import { getData } from "../../../Redux/StateManagement/actionMenuSlice";
 import ErrorFetching from "../../ErrorFetching";
 import MasterlistSkeleton from "../../Skeleton/MasterlistSkeleton";
+import { useLazyGetMovementWarehouseApiQuery } from "../../../Redux/Query/Masterlist/Warehouse";
 
 const schema = yup.object().shape({
   id: yup.string(),
   description: yup.string().required().label("Description"),
-  care_of: yup.string().required().label("Care of").typeError("Care of is a required field"),
+  care_of_id: yup.object().required().label("Care of").typeError("Care of is a required field"),
   remarks: yup.string().label("Remarks"),
   helpdesk_number: yup.string().label("Helpdesk Number"),
   attachments: yup.mixed().label("Attachments"),
@@ -113,6 +114,17 @@ const AddPullout = () => {
     },
   ] = useLazyGetFixedAssetPulloutAllApiQuery({}, { refetchOnMountOrArgChange: true });
 
+  const [
+    movementWarehouseTrigger,
+    {
+      data: movementWarehouseData,
+      isLoading: movementWarehouseLoading,
+      isFetching: movementWarehouseFetching,
+      isSuccess: movementWarehouseSuccess,
+      isError: movementWarehouseError,
+    },
+  ] = useLazyGetMovementWarehouseApiQuery({}, { refetchOnMountOrArgChange: true });
+
   const {
     data: pulloutData = [],
     isLoading: isPulloutLoading,
@@ -138,7 +150,7 @@ const AddPullout = () => {
     defaultValues: {
       id: "",
       description: "",
-      care_of: null,
+      care_of_id: null,
       remarks: "",
       helpdesk_number: "",
       attachments: null,
@@ -190,7 +202,7 @@ const AddPullout = () => {
         remarks: data?.remarks || "",
         helpdesk_number: data?.helpdesk_number,
         attachments: data?.attachments,
-        care_of: data?.care_of,
+        care_of_id: data?.care_of,
 
         assets: data?.assets.map((asset) => ({
           id: asset.id,
@@ -218,7 +230,7 @@ const AddPullout = () => {
     const data = {
       ...formData,
       description: formData?.description.toString(),
-      care_of: formData?.care_of.toString(),
+      care_of_id: formData?.care_of_id?.id.toString(),
       remarks: formData?.remarks.toString(),
       helpdesk_number: formData?.helpdesk_number.toString(),
 
@@ -272,7 +284,6 @@ const AddPullout = () => {
           try {
             dispatch(onLoading());
             const test = await submitData();
-            console.log("test", test);
             dispatch(
               openToast({
                 message: "Pullout Request Successfully Added",
@@ -286,7 +297,7 @@ const AddPullout = () => {
             navigate("/asset-movement/pull-out");
             dispatch(pulloutApi.util.invalidateTags(["Pullout"]));
           } catch (err) {
-            // console.log(err);
+            console.log(err);
             if (err?.status === 422) {
               dispatch(
                 openToast({
@@ -414,7 +425,6 @@ const AddPullout = () => {
   });
 
   const handleViewTimeline = (data) => {
-    // console.log(data);
     dispatch(openDialog());
     setTimelineData(data);
   };
@@ -493,19 +503,21 @@ const AddPullout = () => {
 
                   <CustomAutoComplete
                     autoComplete
-                    name="care_of"
+                    name="care_of_id"
                     control={control}
-                    options={["Hardware and Maintenance", "Machinery & Equipment"]}
+                    options={movementWarehouseData || []}
+                    onOpen={() => (movementWarehouseSuccess ? null : movementWarehouseTrigger({ pagination: "none" }))}
                     disabled={edit ? false : transactionData?.view}
-                    isOptionEqualToValue={(option, value) => option === value}
+                    getOptionLabel={(option) => option.name || ""}
+                    isOptionEqualToValue={(option, value) => option.id === value.id}
+                    disableClearable
                     renderInput={(params) => (
                       <TextField
                         {...params}
                         color="secondary"
                         label="Care of"
-                        multiline
-                        error={!!errors?.accountability}
-                        helperText={errors?.accountability?.message}
+                        error={!!errors?.care_of_id}
+                        helperText={errors?.care_of_id?.message}
                       />
                     )}
                   />
@@ -516,8 +528,8 @@ const AddPullout = () => {
                     disabled={edit ? false : transactionData?.view}
                     label="Remarks (Optional)"
                     type="text"
-                    error={!!errors?.description}
-                    helperText={errors?.description?.message}
+                    error={!!errors?.remarks}
+                    helperText={errors?.remarks?.message}
                     fullWidth
                     multiline
                     optional
@@ -650,7 +662,7 @@ const AddPullout = () => {
                             name={`assets.${index}.fixed_asset_id`}
                             render={({ field: { ref, value, onChange } }) => (
                               <Autocomplete
-                                options={vTagNumberData}
+                                options={data ? data?.assets : vTagNumberData || []} // condition to prevent warning on console log
                                 onOpen={() => (isVTagNumberSuccess ? null : fixedAssetTrigger())}
                                 loading={isVTagNumberLoading}
                                 disabled={edit ? false : transactionData?.view}
@@ -684,8 +696,6 @@ const AddPullout = () => {
                                 }
                                 onChange={(_, newValue) => {
                                   if (newValue) {
-                                    // onChange(newValue);
-                                    console.log("newValue: ", newValue);
                                     onChange(newValue);
                                     setValue(
                                       `assets.${index}.asset_accountability`,
@@ -1019,7 +1029,7 @@ const AddPullout = () => {
                               </Tooltip>
                             </IconButton>
                           ) : (
-                            item?.fixed_asset_id?.pullout_status === "For Replacement" && (
+                            item?.fixed_asset_id?.pullout_status === "Spare" && (
                               <IconButton onClick={(e) => handleClick(e, index)}>
                                 <MoreVert color="secondary" />
                               </IconButton>
@@ -1063,8 +1073,6 @@ const AddPullout = () => {
               <Typography fontFamily="Anton, Impact, Roboto" fontSize="16px" color="secondary.main" pt="10px">
                 Added: {fields.length} Asset{fields.length >= 2 ? "s" : null}
               </Typography>
-
-              {console.log("errors", errors)}
 
               <Stack flexDirection="row" justifyContent="flex-end" gap={2}>
                 {(!transactionData?.view || edit) && (
