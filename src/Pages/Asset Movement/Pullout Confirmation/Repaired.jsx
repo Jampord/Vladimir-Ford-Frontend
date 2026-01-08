@@ -3,7 +3,9 @@ import {
   Button,
   Checkbox,
   Chip,
+  Dialog,
   FormControlLabel,
+  Grow,
   Stack,
   Table,
   TableBody,
@@ -31,12 +33,14 @@ import { Attachment, Info, ThumbUpAlt } from "@mui/icons-material";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { useFileView } from "../../../Hooks/useFileView";
 import StatusComponent from "../../../Components/Reusable/FaStatusComponent";
 import { notificationApi } from "../../../Redux/Query/Notification";
+import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
+import RejectRepaired from "./component/RejectRepaired";
 
 const schema = yup.object().shape({
   pullout_ids: yup.array(),
@@ -49,6 +53,7 @@ const Repaired = () => {
 
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
   const dispatch = useDispatch();
+  const dialog = useSelector((state) => state.booleanState.dialog);
 
   const perPageHandler = (e) => {
     setPage(1);
@@ -128,11 +133,10 @@ const Repaired = () => {
     }
   };
 
-  console.log("watch pullout_ids", watch("pullout_ids"));
-
   const handleConfirmClick = () => {
     dispatch(
       openConfirm({
+        approval: true,
         icon: Info,
         iconColor: "info",
         message: (
@@ -189,8 +193,27 @@ const Repaired = () => {
             }
           }
         },
+
+        onDismiss: async () => {
+          dispatch(openDialog());
+        },
       })
     );
+  };
+
+  const handleRowClick = (id) => {
+    const current = watch("pullout_ids");
+
+    if (current.includes(id)) {
+      // remove
+      setValue(
+        "pullout_ids",
+        current.filter((item) => item !== id)
+      );
+    } else {
+      // add
+      setValue("pullout_ids", [...current, id]);
+    }
   };
 
   return (
@@ -277,6 +300,7 @@ const Repaired = () => {
                             },
                           }}
                           hover
+                          onClick={() => handleRowClick(data?.id.toString())}
                         >
                           <TableCell className="tbl-cell" size="small" align="center">
                             <FormControlLabel
@@ -287,6 +311,7 @@ const Repaired = () => {
                                   size="small"
                                   {...register("pullout_ids")}
                                   checked={watch("pullout_ids").includes(data?.id?.toString())}
+                                  onClick={(e) => e.stopPropagation()}
                                 />
                               }
                             />
@@ -354,7 +379,7 @@ const Repaired = () => {
                             </Typography>
                           </TableCell>
                           <TableCell className="tbl-cell" align="center">
-                            {data?.care_of}
+                            {data?.care_of?.name}
                           </TableCell>
                           <TableCell className="tbl-cell">
                             {DlAttachment(data?.evaluation_attachments[0]?.id)}
@@ -382,6 +407,15 @@ const Repaired = () => {
           </Box>
         </>
       )}
+
+      <Dialog
+        open={dialog}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog())}
+        PaperProps={{ sx: { borderRadius: "10px" } }}
+      >
+        <RejectRepaired data={watch("pullout_ids").map(Number)} />
+      </Dialog>
     </Stack>
   );
 };
