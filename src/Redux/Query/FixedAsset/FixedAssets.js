@@ -156,8 +156,8 @@ export const fixedAssetApi = createApi({
 
     getExportApi: builder.query({
       query: (params) => ({
-        url: `/export-masterlist?search=${params.search}&startDate=${params.startDate}&endDate=${params.endDate}`,
-        // providesTags: ["FixedAsset"]
+        url: `/export-masterlist`,
+        params,
       }),
     }),
 
