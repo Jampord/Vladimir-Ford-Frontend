@@ -42,6 +42,7 @@ import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManage
 import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
 import RejectDisposal from "./component/RejectDisposal";
 import { notificationApi } from "../../../Redux/Query/Notification";
+import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 
 const schema = yup.object().shape({
   disposal_ids: yup.array(),
@@ -70,6 +71,7 @@ const ReceivingTable = ({ received }) => {
   const {
     data: receivingData,
     isLoading: receivingLoading,
+    isFetching: receivingFetching,
     isSuccess: receivingSuccess,
     isError: receivingError,
     error: errorData,
@@ -100,6 +102,21 @@ const ReceivingTable = ({ received }) => {
       );
     } else {
       reset({ disposal_ids: [] });
+    }
+  };
+
+  const handleRowClick = (id) => {
+    const current = watch("disposal_ids");
+
+    if (current.includes(id)) {
+      // remove
+      setValue(
+        "disposal_ids",
+        current.filter((item) => item !== id)
+      );
+    } else {
+      // add
+      setValue("disposal_ids", [...current, id]);
     }
   };
 
@@ -217,7 +234,6 @@ const ReceivingTable = ({ received }) => {
     overflow: "hidden",
   };
 
-  console.log("👀👀", watch("disposal_ids").map(Number));
   return (
     <Stack sx={{ height: "calc(100vh - 250px)" }}>
       {receivingLoading && <MasterlistSkeleton onAdd={true} category />}
@@ -290,6 +306,8 @@ const ReceivingTable = ({ received }) => {
                   <TableBody>
                     {receivingData?.data?.length === 0 ? (
                       <NoRecordsFound heightData="small" />
+                    ) : receivingFetching ? (
+                      <LoadingData />
                     ) : (
                       <>
                         {receivingSuccess &&
@@ -303,6 +321,7 @@ const ReceivingTable = ({ received }) => {
                                 },
                                 cursor: "pointer",
                               }}
+                              onClick={() => handleRowClick(data?.id.toString())}
                             >
                               {!received && (
                                 <TableCell className="tbl-cell" onClick={(e) => e.stopPropagation()}>
@@ -315,6 +334,7 @@ const ReceivingTable = ({ received }) => {
                                         size="small"
                                         {...register("disposal_ids")}
                                         checked={watch("disposal_ids").includes(data.id.toString())}
+                                        onClick={(e) => e.stopPropagation()}
                                       />
                                     }
                                   />
