@@ -33,11 +33,12 @@ export const evaluationApi = createApi({
     }),
 
     patchPickupAssetApi: builder.mutation({
-      query: (params) => ({
-        url: `pick-up/${params.id}`,
+      query: (body) => ({
+        url: `pick-up/${body.id}`,
         method: "PATCH",
+        body,
       }),
-      // invalidatesTags: ["Evaluation"],
+      invalidatesTags: ["Evaluation"],
     }),
     postEvaluateAssetApi: builder.mutation({
       query: (body) => ({
@@ -47,14 +48,34 @@ export const evaluationApi = createApi({
       }),
       invalidatesTags: ["Evaluation"],
     }),
-    getAssetsForReplacementEvaluateApi: builder.query({
-      query: (params) => ({ url: `pullout-for-replacement`, params }),
+    getEvaluatedPulloutAssetsApi: builder.query({
+      query: (params) => ({ url: `evaluated-pullout`, params }),
       providesTags: ["Evaluation"],
     }),
     postEvaluateForReplacementAssetApi: builder.mutation({
       query: (body) => ({
         url: `/handle-for-replacement`,
         method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Evaluation"],
+    }),
+    patchChangeCareOfAssetApi: builder.mutation({
+      query: (body) => ({
+        url: `/change-care-of`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Evaluation"],
+    }),
+    getChangeCareOfPulloutAssetsApi: builder.query({
+      query: (params) => ({ url: `change-care-of/viewing`, params }),
+      providesTags: ["Evaluation"],
+    }),
+    patchChangeCareOfAssetConfirmationApi: builder.mutation({
+      query: (body) => ({
+        url: `/change-care-of/confirmation`,
+        method: "PATCH",
         body,
       }),
       invalidatesTags: ["Evaluation"],
@@ -68,6 +89,9 @@ export const {
   useGetAssetToPickupByIdApiQuery,
   usePatchPickupAssetApiMutation,
   usePostEvaluateAssetApiMutation,
-  useGetAssetsForReplacementEvaluateApiQuery,
+  useGetEvaluatedPulloutAssetsApiQuery,
   usePostEvaluateForReplacementAssetApiMutation,
+  usePatchChangeCareOfAssetApiMutation,
+  useGetChangeCareOfPulloutAssetsApiQuery,
+  usePatchChangeCareOfAssetConfirmationApiMutation,
 } = evaluationApi;
