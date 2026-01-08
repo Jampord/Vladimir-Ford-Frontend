@@ -39,7 +39,6 @@ export const pulloutApprovalApi = createApi({
         method: "PATCH",
         body,
       }),
-      invalidatesTags: ["PulloutApproval"],
     }),
 
     getNextPulloutRequest: builder.query({
