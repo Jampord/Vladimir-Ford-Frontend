@@ -132,7 +132,7 @@ const DeliveryType = () => {
           <Box>
             <Typography>
               {" "}
-              Are you sure you want to tag {watch("fixed_assets").length >= 1 ? "this" : "these"} as
+              Are you sure you want to tag {watch("fixed_assets").length > 1 ? "these" : "this"} as
             </Typography>
             <Typography
               sx={{
