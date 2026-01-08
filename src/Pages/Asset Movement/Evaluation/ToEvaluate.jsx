@@ -24,6 +24,7 @@ import {
   FindReplace,
   Info,
   KeyboardReturn,
+  Lock,
   Remove,
   ScreenSearchDesktop,
   SwapHorizontalCircle,
@@ -49,7 +50,8 @@ import { notificationApi } from "../../../Redux/Query/Notification";
 
 const schema = yup.object().shape({
   attachments: yup.mixed().label("Attachment"),
-  warehouse: yup.mixed().label("Warehouse"),
+  evaluation: yup.mixed().label("Evaluation"),
+  // warehouse: yup.mixed().label("Warehouse"),
 });
 
 const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
@@ -85,7 +87,8 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
     resolver: yupResolver(schema),
     defaultValues: {
       attachments: item.map(() => null), // Initialize attachment for each items
-      warehouse: item.map(() => null), // Initialize attachment for each items
+      evaluation: item.map(() => null), // Initialize attachment for each items
+      // warehouse: item.map(() => null), // Initialize attachment for each items
     },
   });
 
@@ -96,9 +99,14 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
 
     const newFormData = {
       ...formData,
-      warehouse: formData.warehouse.map((item) => item?.value), // Extract value from selected option
-      evaluation: evaluation === "Return" ? "Repaired" : evaluation,
-      care_of: item[0]?.care_of,
+      // warehouse: formData.warehouse.map((item) => item?.value), // Extract value from selected option
+      evaluation: formData.evaluation.map(
+        (item) =>
+          item?.value ||
+          (evaluation === "Return" && "Repaired") ||
+          (evaluation === "For Safekeeping" && "For Safe-Keeping")
+      ),
+      care_of: item[0]?.care_of?.id,
       pullout_ids: item.map((data) => data.id),
     };
 
@@ -106,18 +114,16 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
       submitFormData.append("attachments[]", id);
     });
     submitFormData.append("evaluation", newFormData?.evaluation);
-    evaluation === "Change Care of"
-      ? submitFormData.append(
-          "care_of",
-          newFormData?.care_of === "Hardware and Maintenance" ? "Machinery & Equipment" : "Hardware and Maintenance"
-        )
-      : submitFormData.append("care_of", newFormData?.care_of);
+    submitFormData.append("care_of", newFormData?.care_of);
     newFormData.pullout_ids.forEach((id) => {
       submitFormData.append("pullout_ids[]", id);
     });
-    newFormData.warehouse.forEach((id) => {
-      submitFormData.append("warehouse[]", id);
+    newFormData.evaluation.forEach((data) => {
+      submitFormData.append("evaluation[]", data);
     });
+    // newFormData.warehouse.forEach((id) => {
+    //   submitFormData.append("warehouse[]", id);
+    // });
 
     console.log("newFormData", newFormData);
     // console.log("submitFormData", submitFormData);
@@ -184,16 +190,6 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
     );
   };
 
-  console.log(
-    "watch",
-    watch("attachments").every((file) => file !== null)
-  );
-  console.log(
-    "watch",
-    watch("warehouse")
-    // .every((file) => file !== null)
-  );
-
   const RemoveFile = ({ itemId }) => {
     return (
       <Tooltip title={`Remove Attachment`} arrow>
@@ -238,6 +234,21 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
     },
   ];
 
+  const evaluationOptions = [
+    {
+      value: "Spare",
+      label: "Spare",
+    },
+    {
+      value: "For Disposal",
+      label: "For Disposal",
+    },
+    {
+      value: "For Bidding",
+      label: "For Bidding",
+    },
+  ];
+
   return (
     <>
       <Box component={"form"} onSubmit={handleSubmit(onSubmitHandler)}>
@@ -251,6 +262,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
             {evaluation === "Change Care of" && <SwapHorizontalCircle color="primary" fontSize="medium" />}
             {evaluation === "For Disposal" && <Delete color="primary" fontSize="medium" />}
             {evaluation === "For Replacement" && <FindReplace color="primary" fontSize="medium" />}
+            {evaluation === "For Safekeeping" && <Lock color="primary" fontSize="medium" />}
             {evaluation}
           </Typography>
 
@@ -279,22 +291,22 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
                     {/* <TableCell sx={{ color: "white" }} align="center">
                       Remarks
                     </TableCell> */}
-                    <TableCell sx={{ color: "white" }} align="center">
-                      Attachment
-                    </TableCell>
                     <TableCell sx={{ color: "white", width: 220 }} align="center">
                       Evaluation
+                    </TableCell>
+                    <TableCell sx={{ color: "white" }} align="center">
+                      Attachment
                     </TableCell>
                     {evaluation === "Change Care of" && (
                       <TableCell sx={{ color: "white" }} align="center">
                         Change Care of to
                       </TableCell>
                     )}
-                    {evaluation === "For Replacement" && (
+                    {/* {evaluation === "For Replacement" && (
                       <TableCell sx={{ color: "white" }} align="center">
                         Warehouse
                       </TableCell>
-                    )}
+                    )} */}
                   </TableRow>
                 </TableHead>
 
@@ -317,13 +329,41 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
                       </TableCell>
                       <TableCell align="center">
                         <Typography fontSize="14px" fontWeight={500} color="black">
-                          {data?.care_of}
+                          {data?.care_of?.name}
                         </Typography>
                       </TableCell>
 
                       {/* <TableCell align="center">{data?.remarks || "-"}</TableCell> */}
                       <TableCell align="center">
-                        <Box display="flex" flexDirection="row" alignItems="center" justifyContent="flex-end" gap={1}>
+                        {evaluation === "Return" || evaluation === "For Safekeeping" ? (
+                          <Typography fontSize="14px" fontWeight={500} color="black">
+                            <StatusComponent faStatus={evaluation === "Return" ? "Repaired" : evaluation} />
+                          </Typography>
+                        ) : (
+                          <CustomAutoComplete
+                            control={control}
+                            name={`evaluation.${index}`}
+                            options={evaluationOptions}
+                            disableClearable
+                            getOptionLabel={(option) => {
+                              return option.label;
+                            }}
+                            isOptionEqualToValue={(option, value) => option.value === value.value}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                color={"primary"}
+                                label="Evaluation"
+                                error={!!errors?.evaluation}
+                                helperText={errors?.evaluation?.message}
+                              />
+                            )}
+                          />
+                        )}
+                      </TableCell>
+
+                      <TableCell align="center">
+                        <Box display="flex" flexDirection="row" alignItems="center" justifyContent="center" gap={1}>
                           <CustomAttachmentArray
                             control={control}
                             name={`attachments.${index}`}
@@ -335,23 +375,6 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
                         </Box>
                       </TableCell>
 
-                      <TableCell align="center">
-                        <Typography fontSize="14px" fontWeight={500} color="black">
-                          {/* <Chip
-                            label={evaluation === "Return" ? "Repaired" : evaluation}
-                            color={
-                              evaluation === "Return"
-                                ? "success"
-                                : "primary"
-                                ? evaluation === "For Disposal"
-                                  ? "warning"
-                                  : "primary"
-                                : "primary"
-                            }
-                          /> */}
-                          <StatusComponent faStatus={evaluation === "Return" ? "Repaired" : evaluation} />
-                        </Typography>
-                      </TableCell>
                       {evaluation === "Change Care of" && (
                         <TableCell align="center">
                           <Typography
@@ -360,13 +383,13 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
                             color="black"
                             // sx={{ textDecoration: "underline" }}
                           >
-                            {data?.care_of === "Hardware and Maintenance"
+                            {data?.care_of?.name === "Hardware and Maintenance"
                               ? "Machinery & Equipment"
                               : "Hardware and Maintenance"}
                           </Typography>
                         </TableCell>
                       )}
-                      {evaluation === "For Replacement" && (
+                      {/* {evaluation === "For Replacement" && (
                         <TableCell align="center" sx={{ width: "200px" }}>
                           <CustomAutoComplete
                             control={control}
@@ -388,7 +411,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
                             )}
                           />
                         </TableCell>
-                      )}
+                      )} */}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -408,7 +431,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
             disabled={
               !item.length ||
               watch("attachments").every((file) => file !== null) === false ||
-              (evaluation === "For Replacement" && watch("warehouse").every((file) => file !== null) === false)
+              (evaluation === "For Replacement" && watch("evaluation").every((file) => file !== null) === false)
             }
           >
             Submit
