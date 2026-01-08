@@ -50,6 +50,7 @@ const Approving = () => {
       description: "List of For Disposal Items",
       path: "/approving/disposal",
       permission: "approving-disposal",
+      notification: notifData?.disposalApprovalCount,
     },
   ];
 
