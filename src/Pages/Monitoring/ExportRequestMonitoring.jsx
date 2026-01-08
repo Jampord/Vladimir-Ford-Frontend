@@ -10,7 +10,6 @@ import { useDispatch } from "react-redux";
 import { useLazyGetRequestExportApiQuery } from "../../Redux/Query/Request/Requisition";
 import { openToast } from "../../Redux/StateManagement/toastSlice";
 import moment from "moment";
-import useExcel from "../../Hooks/Xlsx";
 import useExcelJs from "../../Hooks/ExcelJs";
 
 const schema = yup.object().shape({
@@ -20,7 +19,6 @@ const schema = yup.object().shape({
 });
 
 const ExportRequestMonitoring = () => {
-  // const { excelExport } = useExcel();
   const { excelExport } = useExcelJs();
 
   const [
@@ -76,10 +74,13 @@ const ExportRequestMonitoring = () => {
           "PR Number": item?.pr_number === null ? "-" : item.ymir_pr_number,
           Remaining: item?.remaining,
           Status: item?.status,
+          "Attachment Type": item?.attachment_type,
           "Item Status": item?.item_status,
           Quantity: item?.quantity,
           Delivered: item?.delivered,
           Cancelled: item?.cancelled,
+          "Each Amount (₱)": item?.each_amount,
+          "Total Amount (₱)": item?.total_amount,
           "Receiving Warehouse": item?.receiving_warehouse,
           "One Charging Code": item?.one_charging_code,
           "One Charging": item?.one_charging_name,
