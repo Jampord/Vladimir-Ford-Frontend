@@ -125,6 +125,7 @@ import { addBudgetApi } from "../Query/Capex/AddBudget";
 import { addCapexApi } from "../Query/Capex/AddCapex";
 import { operationApi } from "../Query/Masterlist/Operation";
 import { deliveryTypeApi } from "../Query/Delivery Type/DeliveryType";
+import { biddingApi } from "../Query/Movement/Bidding";
 
 export const store = configureStore({
   reducer: {
@@ -235,6 +236,7 @@ export const store = configureStore({
     [pulloutApi.reducerPath]: pulloutApi.reducer,
     [evaluationApi.reducerPath]: evaluationApi.reducer,
     [disposalApi.reducerPath]: disposalApi.reducer,
+    [biddingApi.reducerPath]: biddingApi.reducer,
 
     //Capex
     [addBudgetApi.reducerPath]: addBudgetApi.reducer,
@@ -357,6 +359,7 @@ export const store = configureStore({
       pulloutApi.middleware,
       evaluationApi.middleware,
       disposalApi.middleware,
+      biddingApi.middleware,
 
       // Approval
       approvalApi.middleware,
