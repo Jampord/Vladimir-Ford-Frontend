@@ -40,7 +40,7 @@ import {
 } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
-import useExcel from "../../../Hooks/Xlsx";
+import useExcel from "../../../Hooks/ExcelJs";
 import moment from "moment";
 import {
   useArchiveTransferApiMutation,
