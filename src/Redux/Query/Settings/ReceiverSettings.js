@@ -25,7 +25,8 @@ export const receiverSettingsApi = createApi({
     }),
 
     getReceiverSettingsAllApi: builder.query({
-      query: (params) => `/authorized-transfer-receiver?status=active&pagination=none&department=${params.department}`,
+      query: (params) =>
+        `/authorized-transfer-receiver?status=active&pagination=none&one_charging=${params.one_charging}`,
       providesTags: ["ReceiverSettings"],
     }),
 
