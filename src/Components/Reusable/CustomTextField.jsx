@@ -13,9 +13,8 @@ const CustomTextField = (props) => {
     validateText,
     allowSpecialCharacters = false,
     allowNCharacter = false,
-
+    inputProps,
     hasRequest,
-
     ...textfield
   } = props;
 
@@ -43,6 +42,7 @@ const CustomTextField = (props) => {
               value={value}
               size="small"
               color={hasRequest ? "primary" : "secondary"}
+              inputProps={inputProps}
               onChange={(e) => {
                 const inputValue = e.target.value;
 
