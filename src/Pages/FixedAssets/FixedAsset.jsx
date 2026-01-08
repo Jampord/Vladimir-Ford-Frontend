@@ -11,7 +11,6 @@ import PrintFixedAsset from "./PrintFixedAsset";
 import AddFixedAsset from "./AddEdit/AddFixedAsset";
 import { useLocation, useNavigate } from "react-router-dom";
 import FaStatusChange from "../../Components/Reusable/FaStatusComponent";
-import useExcel from "../../Hooks/Xlsx";
 // import EditFixedAsset from "./AddEdit/FixedAssetComponents/EditFixedAsset_old";
 // import BarcodeScannerComponent from "react-qr-barcode-scanner";
 // import ActionMenu from "../../Components/Reusable/ActionMenu";
@@ -77,7 +76,6 @@ import { useQueryParams } from "../../Hooks/useQueryParams";
 const FixedAsset = ({ view }) => {
   const { getParam, getNumericParam, setMultipleParams } = useQueryParams();
   const navigate = useNavigate();
-  const { excelExport } = useExcel();
   const [search, setSearch] = useState(getParam("search") || "");
   const [status, setStatus] = useState(getParam("status") || "active");
   const [perPage, setPerPage] = useState(getNumericParam("per_page", 5));
