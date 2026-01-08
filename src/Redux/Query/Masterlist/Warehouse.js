@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const warehouseApi = createApi({
   reducerPath: "warehouseApi",
-  tagTypes: ["Warehouse"],
+  tagTypes: ["Warehouse", "MovementWarehouse"],
 
   baseQuery: fetchBaseQuery({
     baseUrl: process.env.VLADIMIR_BASE_URL,
@@ -79,6 +79,46 @@ export const warehouseApi = createApi({
       }),
       invalidatesTags: ["Warehouse"],
     }),
+
+    //Movement Warehouse Endpoint
+    getMovementWarehouseApi: builder.query({
+      query: (params) => ({ url: `/movement-warehouse`, params }),
+      providesTags: ["MovementWarehouse"],
+    }),
+
+    getMovementWarehouseByIdApi: builder.query({
+      query: ({ id }) => ({ url: `/movement-warehouse/${id}` }),
+      providesTags: ["MovementWarehouse"],
+    }),
+
+    putUpdateMovementWarehouseApi: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/movement-warehouse/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["MovementWarehouse"],
+    }),
+
+    postMovementWarehouseApi: builder.mutation({
+      query: (data) => ({
+        url: `/movement-warehouse`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["MovementWarehouse"],
+    }),
+
+    patchMovementWarehouseApi: builder.mutation({
+      query: ({ id, status }) => ({
+        url: `/archive-movement-warehouse/${id}`,
+        method: "PATCH",
+        body: {
+          status: status,
+        },
+      }),
+      invalidatesTags: ["MovementWarehouse"],
+    }),
   }),
 });
 
@@ -92,4 +132,12 @@ export const {
   useUpdateWarehouseApiMutation,
   usePutWarehouseLocationTaggingApiMutation,
   usePutWarehouseOneChargingTaggingApiMutation,
+
+  //Movement Warehouse Hooks
+  useGetMovementWarehouseApiQuery,
+  useLazyGetMovementWarehouseApiQuery,
+  useGetMovementWarehouseByIdApiQuery,
+  usePutUpdateMovementWarehouseApiMutation,
+  usePostMovementWarehouseApiMutation,
+  usePatchMovementWarehouseApiMutation,
 } = warehouseApi;
