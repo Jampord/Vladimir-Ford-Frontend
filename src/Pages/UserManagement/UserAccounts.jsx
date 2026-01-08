@@ -3,8 +3,7 @@ import Moment from "moment";
 import MasterlistToolbar from "../../Components/Reusable/MasterlistToolbar";
 import ActionMenu from "../../Components/Reusable/ActionMenu";
 import AddUserAccounts from "../Masterlist/AddEdit/AddUserAccount";
-import useExcel from "../../Hooks/Xlsx";
-import * as XLSX from "xlsx";
+import useExcel from "../../Hooks/ExcelJs";
 
 // RTK
 import { useDispatch } from "react-redux";
@@ -27,6 +26,7 @@ import {
   Drawer,
   Grow,
   Stack,
+  Tab,
   Table,
   TableBody,
   TableCell,
@@ -34,6 +34,7 @@ import {
   TableHead,
   TableRow,
   TableSortLabel,
+  Tabs,
   Typography,
 } from "@mui/material";
 import { Help, IosShareRounded, ReportProblem } from "@mui/icons-material";
@@ -42,6 +43,7 @@ import ErrorFetching from "../ErrorFetching";
 import NoRecordsFound from "../../Layout/NoRecordsFound";
 import moment from "moment";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
+import { TabContext, TabPanel } from "@mui/lab";
 
 const UserAccounts = () => {
   const [search, setSearch] = useState("");
@@ -66,6 +68,11 @@ const UserAccounts = () => {
     warehouse: null,
     warehouse_id: null,
   });
+  const [value, setValue] = useState("1");
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
 
   const { excelExport } = useExcel();
 
@@ -123,6 +130,7 @@ const UserAccounts = () => {
       per_page: perPage,
       status: status,
       search: search,
+      to_register: value === "1" ? 0 : 1,
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -367,259 +375,517 @@ const UserAccounts = () => {
     }
   };
 
-  const onSetPage = () => {
-    setPage(1);
-  };
-
   return (
     <Box className="mcontainer">
       <Typography sx={{ fontFamily: "Anton", fontSize: "2rem" }} className="mcontainer__title">
         User Accounts
       </Typography>
 
-      {usersLoading && <MasterlistSkeleton onAdd={true} onImport={false} />}
+      <Box>
+        <TabContext value={value}>
+          <Tabs onChange={handleChange} value={value}>
+            <Tab label="Active User Accounts" value="1" className={value === "1" ? "tab__background" : null} />
 
-      {usersError && <ErrorFetching refetch={refetch} error={errorData} />}
+            <Tab
+              label="                                                          Pending User Accounts"
+              value="2"
+              className={value === "2" ? "tab__background" : null}
+            />
+          </Tabs>
 
-      {users && !usersError && (
-        <Box className="mcontainer__wrapper">
-          <MasterlistToolbar
-            path="#"
-            onStatusChange={setStatus}
-            onSearchChange={setSearch}
-            onSetPage={setPage}
-            // onImport={() => {}}
-            onAdd={() => {}}
-          />
+          <TabPanel sx={{ p: 0 }} value="1" index="1">
+            <Box className="category_height">
+              {usersLoading && <MasterlistSkeleton onAdd={true} onImport={false} category />}
+              {usersError && <ErrorFetching refetch={refetch} error={errorData} />}
+              {users && !usersError && (
+                <Box className="mcontainer__wrapper">
+                  <MasterlistToolbar
+                    path="#"
+                    onStatusChange={setStatus}
+                    onSearchChange={setSearch}
+                    onSetPage={setPage}
+                    // onImport={() => {}}
+                    // onAdd={() => {}}
+                  />
 
-          <Box>
-            <TableContainer className="mcontainer__th-body">
-              <Table className="mcontainer__table" stickyHeader>
-                <TableHead>
-                  <TableRow
-                    sx={{
-                      "& > *": {
-                        fontWeight: "bold!important",
-                        whiteSpace: "nowrap",
-                      },
-                    }}
-                  >
-                    <TableCell className="tbl-cell text-center">
-                      <TableSortLabel
-                        active={orderBy === `id`}
-                        direction={orderBy === `id` ? order : `asc`}
-                        onClick={() => onSort(`id`)}
-                      >
-                        ID No.
-                      </TableSortLabel>
-                    </TableCell>
-
-                    <TableCell className="tbl-cell">
-                      <TableSortLabel
-                        active={orderBy === `firstname`}
-                        direction={orderBy === `firstname` ? order : `asc`}
-                        onClick={() => onSort(`firstname`)}
-                      >
-                        Employee
-                      </TableSortLabel>
-                    </TableCell>
-
-                    <TableCell className="tbl-cell">
-                      <TableSortLabel
-                        active={orderBy === `username`}
-                        direction={orderBy === `username` ? order : `asc`}
-                        onClick={() => onSort(`username`)}
-                      >
-                        Username
-                      </TableSortLabel>
-                    </TableCell>
-
-                    {/* <TableCell className="tbl-cell">
-                      <TableSortLabel
-                        active={orderBy === `lastname`}
-                        direction={orderBy === `lastname` ? order : `asc`}
-                        onClick={() => onSort(`lastname`)}
-                      >
-                        Lastname
-                      </TableSortLabel>
-                    </TableCell> */}
-
-                    {/* <TableCell className="tbl-cell">
-                      <TableSortLabel
-                        active={orderBy === `subunit`}
-                        direction={orderBy === `subunit` ? order : `asc`}
-                        onClick={() => onSort(`subunit`)}
-                      >
-                        Sub Unit
-                      </TableSortLabel>
-                    </TableCell> */}
-
-                    <TableCell className="tbl-cell">Role</TableCell>
-                    <TableCell className="tbl-cell">Chart of Account</TableCell>
-                    <TableCell className="tbl-cell text-center">Status</TableCell>
-                    <TableCell className="tbl-cell text-center">
-                      <TableSortLabel
-                        active={orderBy === `created_at`}
-                        direction={orderBy === `created_at` ? order : `asc`}
-                        onClick={() => onSort(`created_at`)}
-                      >
-                        Date Created
-                      </TableSortLabel>
-                    </TableCell>
-
-                    <TableCell className="tbl-cell text-center">Action</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {users.data.length === 0 ? (
-                    <NoRecordsFound heightData="medium" />
-                  ) : (
-                    <>
-                      {usersSuccess &&
-                        [...users.data].sort(comparator(order, orderBy))?.map((users) => (
+                  <Box>
+                    <TableContainer className="mcontainer__th-body-category">
+                      <Table className="mcontainer__table" stickyHeader>
+                        <TableHead>
                           <TableRow
-                            key={users.id}
-                            hover={true}
                             sx={{
-                              "&:last-child td, &:last-child th": {
-                                borderBottom: 0,
+                              "& > *": {
+                                fontWeight: "bold!important",
+                                whiteSpace: "nowrap",
                               },
                             }}
                           >
-                            <TableCell className="tbl-cell tr-cen-pad45">{users.id}</TableCell>
-                            <TableCell className="tbl-cell" sx={{ textTransform: "capitalize" }}>
-                              <Typography fontSize={14} fontWeight={600} color="secondary.main">
-                                {users.firstname}
-                              </Typography>
-                              <Typography fontSize={12}>{users.lastname}</Typography>
-                              <Typography fontSize={12} fontWeight={500} color="quaternary.main">
-                                {users.employee_id}
-                              </Typography>
+                            <TableCell className="tbl-cell text-center">
+                              <TableSortLabel
+                                active={orderBy === `id`}
+                                direction={orderBy === `id` ? order : `asc`}
+                                onClick={() => onSort(`id`)}
+                              >
+                                ID No.
+                              </TableSortLabel>
                             </TableCell>
-                            <TableCell className="tbl-cell">{users.username}</TableCell>
-                            {/* <TableCell className="tbl-cell">
-                              {users.subunit?.subunit_code} - {users.subunit?.subunit_name}
-                            </TableCell> */}
-                            <TableCell className="tbl-cell capitalized" sx={{ whiteSpace: "nowrap" }}>
-                              {users.role.role_name.includes("Warehouse") ||
-                              users.role.role_name.includes("warehouse") ||
-                              users.is_coordinator === 1 ? (
-                                <Stack flexDirection="column">
-                                  {users.role.role_name}
-                                  <Typography fontSize={10} fontWeight={500} color="secondary.main">
-                                    {users.warehouse.warehouse_name}
-                                  </Typography>
-                                  {users.is_coordinator === 1 && (
-                                    <Typography fontSize={10} fontWeight={500} color="secondary.main">
-                                      (Coordinator)
-                                    </Typography>
-                                  )}
-                                </Stack>
-                              ) : (
-                                users.role.role_name
-                              )}
-                            </TableCell>
+
                             <TableCell className="tbl-cell">
-                              <Typography fontSize={10} color="gray">
-                                {`(${users?.one_charging?.code}) - ${users?.one_charging?.name}`}
-                              </Typography>
-                              <Typography fontSize={10} color="gray">
-                                {`(${users.company?.company_code}) - ${users.company?.company_name}`}
-                              </Typography>
-                              <Typography fontSize={10} color="gray">
-                                {`(${users.business_unit?.business_unit_code}) - ${users.business_unit?.business_unit_name}`}
-                              </Typography>
-                              <Typography fontSize={10} color="gray">
-                                {`(${users.department?.department_code}) - ${users.department?.department_name}`}
-                              </Typography>
-                              <Typography fontSize={10} color="gray">
-                                {`(${users.unit?.unit_code}) - ${users.unit?.unit_name}`}
-                              </Typography>
-                              <Typography fontSize={10} color="gray">
-                                {`(${users.subunit?.subunit_code}) - ${users.subunit?.subunit_name}`}
-                              </Typography>
-                              <Typography fontSize={10} color="gray">
-                                {`(${users.location?.location_code}) - ${users.location?.location_name}`}
-                              </Typography>
+                              <TableSortLabel
+                                active={orderBy === `firstname`}
+                                direction={orderBy === `firstname` ? order : `asc`}
+                                onClick={() => onSort(`firstname`)}
+                              >
+                                Employee
+                              </TableSortLabel>
                             </TableCell>
+
+                            <TableCell className="tbl-cell">
+                              <TableSortLabel
+                                active={orderBy === `username`}
+                                direction={orderBy === `username` ? order : `asc`}
+                                onClick={() => onSort(`username`)}
+                              >
+                                Username
+                              </TableSortLabel>
+                            </TableCell>
+
+                            {/* <TableCell className="tbl-cell">
+                  <TableSortLabel
+                    active={orderBy === `lastname`}
+                    direction={orderBy === `lastname` ? order : `asc`}
+                    onClick={() => onSort(`lastname`)}
+                  >
+                    Lastname
+                  </TableSortLabel>
+                </TableCell> */}
+
+                            {/* <TableCell className="tbl-cell">
+                  <TableSortLabel
+                    active={orderBy === `subunit`}
+                    direction={orderBy === `subunit` ? order : `asc`}
+                    onClick={() => onSort(`subunit`)}
+                  >
+                    Sub Unit
+                  </TableSortLabel>
+                </TableCell> */}
+
+                            <TableCell className="tbl-cell">Role</TableCell>
+                            <TableCell className="tbl-cell">Chart of Account</TableCell>
+                            <TableCell className="tbl-cell text-center">Status</TableCell>
                             <TableCell className="tbl-cell text-center">
-                              {users.is_active ? (
-                                <Chip
-                                  size="small"
-                                  variant="contained"
-                                  sx={{
-                                    background: "#27ff811f",
-                                    color: "active.dark",
-                                    fontSize: "0.7rem",
-                                    px: 1,
-                                  }}
-                                  label="ACTIVE"
-                                />
-                              ) : (
-                                <Chip
-                                  size="small"
-                                  variant="contained"
-                                  sx={{
-                                    background: "#fc3e3e34",
-                                    color: "error.light",
-                                    fontSize: "0.7rem",
-                                    px: 1,
-                                  }}
-                                  label="INACTIVE"
-                                />
-                              )}
+                              <TableSortLabel
+                                active={orderBy === `created_at`}
+                                direction={orderBy === `created_at` ? order : `asc`}
+                                onClick={() => onSort(`created_at`)}
+                              >
+                                Date Created
+                              </TableSortLabel>
                             </TableCell>
-                            <TableCell className="tbl-cell tr-cen-pad45">
-                              {Moment(users.created_at).format("MMM DD, YYYY")}
-                            </TableCell>
-                            <TableCell className="tbl-cell text-center">
-                              <ActionMenu
-                                status={status}
-                                data={users}
-                                onArchiveRestoreHandler={onArchiveRestoreHandler}
-                                onUpdateHandler={onUpdateHandler}
-                                onResetHandler={onResetHandler}
-                              />
-                            </TableCell>
+
+                            <TableCell className="tbl-cell text-center">Action</TableCell>
                           </TableRow>
-                        ))}
-                    </>
-                  )}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
+                        </TableHead>
+                        <TableBody>
+                          {users.data.length === 0 ? (
+                            <NoRecordsFound heightData="medium" />
+                          ) : (
+                            <>
+                              {usersSuccess &&
+                                [...users.data].sort(comparator(order, orderBy))?.map((users) => (
+                                  <TableRow
+                                    key={users.id}
+                                    hover={true}
+                                    sx={{
+                                      "&:last-child td, &:last-child th": {
+                                        borderBottom: 0,
+                                      },
+                                    }}
+                                  >
+                                    <TableCell className="tbl-cell tr-cen-pad45">{users.id}</TableCell>
+                                    <TableCell className="tbl-cell" sx={{ textTransform: "capitalize" }}>
+                                      <Typography fontSize={14} fontWeight={600} color="secondary.main">
+                                        {users.firstname}
+                                      </Typography>
+                                      <Typography fontSize={12}>{users.lastname}</Typography>
+                                      <Typography fontSize={12} fontWeight={500} color="quaternary.main">
+                                        {users.employee_id}
+                                      </Typography>
+                                    </TableCell>
+                                    <TableCell className="tbl-cell">{users.username}</TableCell>
+                                    {/* <TableCell className="tbl-cell">
+                          {users.subunit?.subunit_code} - {users.subunit?.subunit_name}
+                        </TableCell> */}
+                                    <TableCell className="tbl-cell capitalized" sx={{ whiteSpace: "nowrap" }}>
+                                      {users?.role?.role_name.includes("Warehouse") ||
+                                      users?.role?.role_name.includes("warehouse") ||
+                                      users?.is_coordinator === 1 ? (
+                                        <Stack flexDirection="column">
+                                          {users?.role?.role_name}
+                                          <Typography fontSize={10} fontWeight={500} color="secondary.main">
+                                            {users.warehouse.warehouse_name}
+                                          </Typography>
+                                          {users.is_coordinator === 1 && (
+                                            <Typography fontSize={10} fontWeight={500} color="secondary.main">
+                                              (Coordinator)
+                                            </Typography>
+                                          )}
+                                        </Stack>
+                                      ) : (
+                                        users?.role?.role_name
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="tbl-cell">
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users?.one_charging?.code}) - ${users?.one_charging?.name}`}
+                                      </Typography>
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users.company?.company_code}) - ${users.company?.company_name}`}
+                                      </Typography>
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users.business_unit?.business_unit_code}) - ${users.business_unit?.business_unit_name}`}
+                                      </Typography>
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users.department?.department_code}) - ${users.department?.department_name}`}
+                                      </Typography>
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users.unit?.unit_code}) - ${users.unit?.unit_name}`}
+                                      </Typography>
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users.subunit?.subunit_code}) - ${users.subunit?.subunit_name}`}
+                                      </Typography>
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users.location?.location_code}) - ${users.location?.location_name}`}
+                                      </Typography>
+                                    </TableCell>
+                                    <TableCell className="tbl-cell text-center">
+                                      {users.is_active ? (
+                                        <Chip
+                                          size="small"
+                                          variant="contained"
+                                          sx={{
+                                            background: "#27ff811f",
+                                            color: "active.dark",
+                                            fontSize: "0.7rem",
+                                            px: 1,
+                                          }}
+                                          label="ACTIVE"
+                                        />
+                                      ) : (
+                                        <Chip
+                                          size="small"
+                                          variant="contained"
+                                          sx={{
+                                            background: "#fc3e3e34",
+                                            color: "error.light",
+                                            fontSize: "0.7rem",
+                                            px: 1,
+                                          }}
+                                          label="INACTIVE"
+                                        />
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="tbl-cell tr-cen-pad45">
+                                      {Moment(users.created_at).format("MMM DD, YYYY")}
+                                    </TableCell>
+                                    <TableCell className="tbl-cell text-center">
+                                      <ActionMenu
+                                        status={status}
+                                        data={users}
+                                        onArchiveRestoreHandler={onArchiveRestoreHandler}
+                                        onUpdateHandler={onUpdateHandler}
+                                        onResetHandler={onResetHandler}
+                                      />
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                            </>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Box>
 
-          <Box className="mcontainer__pagination-export">
-            <Button
-              className="mcontainer__export"
-              variant="outlined"
-              size="small"
-              color="text"
-              startIcon={<IosShareRounded color="primary" />}
-              onClick={handleExport}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "10px 20px",
-              }}
-            >
-              EXPORT
-            </Button>
+                  <Box className="mcontainer__pagination-export">
+                    <Button
+                      className="mcontainer__export"
+                      variant="outlined"
+                      size="small"
+                      color="text"
+                      startIcon={<IosShareRounded color="primary" />}
+                      onClick={handleExport}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        margin: "10px 20px",
+                      }}
+                    >
+                      EXPORT
+                    </Button>
 
-            <CustomTablePagination
-              total={users?.total}
-              success={usersSuccess}
-              current_page={users?.current_page}
-              per_page={users?.per_page}
-              onPageChange={pageHandler}
-              onRowsPerPageChange={perPageHandler}
-              removeShadow
-            />
-          </Box>
-        </Box>
-      )}
+                    <CustomTablePagination
+                      total={users?.total}
+                      success={usersSuccess}
+                      current_page={users?.current_page}
+                      per_page={users?.per_page}
+                      onPageChange={pageHandler}
+                      onRowsPerPageChange={perPageHandler}
+                      removeShadow
+                    />
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          </TabPanel>
+
+          <TabPanel sx={{ p: 0 }} value="2" index="2">
+            <Box className="category_height">
+              {usersLoading && <MasterlistSkeleton onAdd={true} onImport={false} category />}
+              {usersError && <ErrorFetching refetch={refetch} error={errorData} />}
+              {users && !usersError && (
+                <Box className="mcontainer__wrapper">
+                  <MasterlistToolbar
+                    path="#"
+                    onStatusChange={setStatus}
+                    onSearchChange={setSearch}
+                    onSetPage={setPage}
+                    // onImport={() => {}}
+                    // onAdd={() => {}}
+                  />
+
+                  <Box>
+                    <TableContainer className="mcontainer__th-body-category">
+                      <Table className="mcontainer__table" stickyHeader>
+                        <TableHead>
+                          <TableRow
+                            sx={{
+                              "& > *": {
+                                fontWeight: "bold!important",
+                                whiteSpace: "nowrap",
+                              },
+                            }}
+                          >
+                            <TableCell className="tbl-cell text-center">
+                              <TableSortLabel
+                                active={orderBy === `id`}
+                                direction={orderBy === `id` ? order : `asc`}
+                                onClick={() => onSort(`id`)}
+                              >
+                                ID No.
+                              </TableSortLabel>
+                            </TableCell>
+
+                            <TableCell className="tbl-cell">
+                              <TableSortLabel
+                                active={orderBy === `firstname`}
+                                direction={orderBy === `firstname` ? order : `asc`}
+                                onClick={() => onSort(`firstname`)}
+                              >
+                                Employee
+                              </TableSortLabel>
+                            </TableCell>
+
+                            <TableCell className="tbl-cell">
+                              <TableSortLabel
+                                active={orderBy === `username`}
+                                direction={orderBy === `username` ? order : `asc`}
+                                onClick={() => onSort(`username`)}
+                              >
+                                Username
+                              </TableSortLabel>
+                            </TableCell>
+
+                            {/* <TableCell className="tbl-cell">
+                  <TableSortLabel
+                    active={orderBy === `lastname`}
+                    direction={orderBy === `lastname` ? order : `asc`}
+                    onClick={() => onSort(`lastname`)}
+                  >
+                    Lastname
+                  </TableSortLabel>
+                </TableCell> */}
+
+                            {/* <TableCell className="tbl-cell">
+                  <TableSortLabel
+                    active={orderBy === `subunit`}
+                    direction={orderBy === `subunit` ? order : `asc`}
+                    onClick={() => onSort(`subunit`)}
+                  >
+                    Sub Unit
+                  </TableSortLabel>
+                </TableCell> */}
+
+                            <TableCell className="tbl-cell">Role</TableCell>
+                            <TableCell className="tbl-cell">Chart of Account</TableCell>
+                            <TableCell className="tbl-cell text-center">Status</TableCell>
+                            <TableCell className="tbl-cell text-center">
+                              <TableSortLabel
+                                active={orderBy === `created_at`}
+                                direction={orderBy === `created_at` ? order : `asc`}
+                                onClick={() => onSort(`created_at`)}
+                              >
+                                Date Created
+                              </TableSortLabel>
+                            </TableCell>
+
+                            <TableCell className="tbl-cell text-center">Action</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {users.data.length === 0 ? (
+                            <NoRecordsFound heightData="medium" />
+                          ) : (
+                            <>
+                              {usersSuccess &&
+                                [...users.data].sort(comparator(order, orderBy))?.map((users) => (
+                                  <TableRow
+                                    key={users.id}
+                                    hover={true}
+                                    sx={{
+                                      "&:last-child td, &:last-child th": {
+                                        borderBottom: 0,
+                                      },
+                                    }}
+                                  >
+                                    <TableCell className="tbl-cell tr-cen-pad45">{users.id}</TableCell>
+                                    <TableCell className="tbl-cell" sx={{ textTransform: "capitalize" }}>
+                                      <Typography fontSize={14} fontWeight={600} color="secondary.main">
+                                        {users.firstname}
+                                      </Typography>
+                                      <Typography fontSize={12}>{users.lastname}</Typography>
+                                      <Typography fontSize={12} fontWeight={500} color="quaternary.main">
+                                        {users.employee_id}
+                                      </Typography>
+                                    </TableCell>
+                                    <TableCell className="tbl-cell">{users.username}</TableCell>
+                                    {/* <TableCell className="tbl-cell">
+                          {users.subunit?.subunit_code} - {users.subunit?.subunit_name}
+                        </TableCell> */}
+                                    <TableCell className="tbl-cell capitalized" sx={{ whiteSpace: "nowrap" }}>
+                                      {users?.role?.role_name.includes("Warehouse") ||
+                                      users?.role?.role_name.includes("warehouse") ||
+                                      users?.is_coordinator === 1 ? (
+                                        <Stack flexDirection="column">
+                                          {users?.role?.role_name}
+                                          <Typography fontSize={10} fontWeight={500} color="secondary.main">
+                                            {users.warehouse.warehouse_name}
+                                          </Typography>
+                                          {users.is_coordinator === 1 && (
+                                            <Typography fontSize={10} fontWeight={500} color="secondary.main">
+                                              (Coordinator)
+                                            </Typography>
+                                          )}
+                                        </Stack>
+                                      ) : (
+                                        users?.role?.role_name
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="tbl-cell">
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users?.one_charging?.code}) - ${users?.one_charging?.name}`}
+                                      </Typography>
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users.company?.company_code}) - ${users.company?.company_name}`}
+                                      </Typography>
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users.business_unit?.business_unit_code}) - ${users.business_unit?.business_unit_name}`}
+                                      </Typography>
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users.department?.department_code}) - ${users.department?.department_name}`}
+                                      </Typography>
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users.unit?.unit_code}) - ${users.unit?.unit_name}`}
+                                      </Typography>
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users.subunit?.subunit_code}) - ${users.subunit?.subunit_name}`}
+                                      </Typography>
+                                      <Typography fontSize={10} color="gray">
+                                        {`(${users.location?.location_code}) - ${users.location?.location_name}`}
+                                      </Typography>
+                                    </TableCell>
+                                    <TableCell className="tbl-cell text-center">
+                                      {users.is_active ? (
+                                        <Chip
+                                          size="small"
+                                          variant="contained"
+                                          sx={{
+                                            background: "#27ff811f",
+                                            color: "active.dark",
+                                            fontSize: "0.7rem",
+                                            px: 1,
+                                          }}
+                                          label="ACTIVE"
+                                        />
+                                      ) : (
+                                        <Chip
+                                          size="small"
+                                          variant="contained"
+                                          sx={{
+                                            background: "#fc3e3e34",
+                                            color: "error.light",
+                                            fontSize: "0.7rem",
+                                            px: 1,
+                                          }}
+                                          label="INACTIVE"
+                                        />
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="tbl-cell tr-cen-pad45">
+                                      {Moment(users.created_at).format("MMM DD, YYYY")}
+                                    </TableCell>
+                                    <TableCell className="tbl-cell text-center">
+                                      <ActionMenu
+                                        status={status}
+                                        data={users}
+                                        onArchiveRestoreHandler={onArchiveRestoreHandler}
+                                        onUpdateHandler={onUpdateHandler}
+                                        onResetHandler={onResetHandler}
+                                      />
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                            </>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </Box>
+
+                  <Box className="mcontainer__pagination-export">
+                    <Button
+                      className="mcontainer__export"
+                      variant="outlined"
+                      size="small"
+                      color="text"
+                      startIcon={<IosShareRounded color="primary" />}
+                      onClick={handleExport}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        margin: "10px 20px",
+                      }}
+                    >
+                      EXPORT
+                    </Button>
+
+                    <CustomTablePagination
+                      total={users?.total}
+                      success={usersSuccess}
+                      current_page={users?.current_page}
+                      per_page={users?.per_page}
+                      onPageChange={pageHandler}
+                      onRowsPerPageChange={perPageHandler}
+                      removeShadow
+                    />
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          </TabPanel>
+        </TabContext>
+      </Box>
 
       {/* <Drawer anchor="right" open={drawer} onClose={() => {}}>
         <AddUserAccounts data={updateUser} onUpdateResetHandler={onUpdateResetHandler} />
