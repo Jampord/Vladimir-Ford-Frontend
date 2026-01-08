@@ -3,8 +3,7 @@ import { Card, CardActionArea, CardContent, Typography, Badge, Stack, useMediaQu
 import { ArrowForward } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
-const Cards = (props) => {
-  const { data } = props;
+const Cards = ({ data }) => {
   const navigate = useNavigate();
   const isSmallScreen = useMediaQuery("(max-width: 590px)");
 
