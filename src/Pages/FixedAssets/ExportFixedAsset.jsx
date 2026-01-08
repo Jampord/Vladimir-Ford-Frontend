@@ -4,8 +4,6 @@ import moment from "moment";
 import CustomDatePicker from "../../Components/Reusable/CustomDatePicker";
 import CustomTextField from "../../Components/Reusable/CustomTextField";
 
-import useExcel from "../../Hooks/Xlsx";
-
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { IosShareRounded } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
@@ -22,18 +20,19 @@ import { useLazyGetExportApiQuery } from "../../Redux/Query/FixedAsset/FixedAsse
 import ExportIcon from "../../Img/SVG/ExportIcon.svg";
 import { openToast } from "../../Redux/StateManagement/toastSlice";
 import useExcelJs from "../../Hooks/ExcelJs";
+import CustomAutoComplete from "../../Components/Reusable/CustomAutoComplete";
+import { useLazyGetOneRDFChargingAllApiQuery } from "../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
 
 const schema = yup.object().shape({
   id: yup.string(),
   search: yup.string().nullable().label("Search"),
   startDate: yup.string().nullable().typeError("Please provide a start date"),
   endDate: yup.string().nullable().typeError("Please provide a end date"),
+  one_charging_id: yup.object().nullable().label("One Charging"),
 });
 
 const ExportFixedAsset = () => {
   const dispatch = useDispatch();
-
-  // const { excelExport } = useExcel();
   const { excelExport } = useExcelJs();
 
   const [
@@ -48,6 +47,17 @@ const ExportFixedAsset = () => {
       refetch: exportApiRefetch,
     },
   ] = useLazyGetExportApiQuery();
+
+  const [
+    oneChargingTrigger,
+    {
+      data: oneChargingData = [],
+      isLoading: isOneChargingLoading,
+      isSuccess: isOneChargingSuccess,
+      isError: isOneChargingError,
+      refetch: isOneChargingRefetch,
+    },
+  ] = useLazyGetOneRDFChargingAllApiQuery();
 
   // const {
   //   data: typeOfRequestData = [],
@@ -65,12 +75,14 @@ const ExportFixedAsset = () => {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      id: "",
       search: "",
       startDate: null,
       endDate: null,
+      one_charging_id: null,
     },
   });
+
+  console.log({ errors });
 
   useEffect(() => {
     if (exportApiError && exportError?.status === 422) {
@@ -93,14 +105,16 @@ const ExportFixedAsset = () => {
   }, [exportApiError]);
 
   const handleExport = async (data) => {
+    console.log({ data });
     const newData = {
       ...data,
       startDate: data.startDate === null ? "" : moment(new Date(data.startDate)).format("YYYY-MM-DD"),
       endDate: data.endDate === null ? "" : moment(new Date(data.endDate)).format("YYYY-MM-DD"),
+      one_charging_id: data.one_charging_id === null ? "" : data?.one_charging_id?.id,
     };
 
+    console.log({ newData });
     try {
-      // console.log(newData);
       const res = await trigger(newData);
       // console.log(res);
 
@@ -283,6 +297,27 @@ const ExportFixedAsset = () => {
             maxDate={new Date()}
             error={!!errors?.endDate}
             helperText={errors?.endDate?.message}
+          />
+
+          <CustomAutoComplete
+            autoComplete
+            control={control}
+            name="one_charging_id"
+            options={oneChargingData || []}
+            onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
+            loading={isOneChargingLoading}
+            size="small"
+            getOptionLabel={(option) => option.code + " - " + option.name}
+            isOptionEqualToValue={(option, value) => option.id === value.id}
+            renderInput={(params) => (
+              <TextField
+                color="secondary"
+                {...params}
+                label="One RDF Charging"
+                error={!!errors?.one_charging_id}
+                helperText={errors?.one_charging_id?.message}
+              />
+            )}
           />
         </Box>
 
