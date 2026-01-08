@@ -82,7 +82,7 @@ const ViewDisposal = () => {
     isFetching: isDisposalFetching,
     isSuccess: isDisposalSuccess,
     isError: isDisposalError,
-    error: disposalError,
+    error: errorData,
     refetch,
   } = useGetDisposalByIdApiQuery({ id: transactionData?.id }, { refetchOnMountOrArgChange: true });
 
@@ -172,7 +172,6 @@ const ViewDisposal = () => {
           label={label}
           autoComplete="off"
           color="secondary"
-          disabled
           value={value > 1 ? `${value} files selected` : value <= 1 ? `${value} file selected` : null}
           InputProps={{
             startAdornment: (
@@ -385,8 +384,8 @@ const ViewDisposal = () => {
       </Stack>
 
       {isDisposalLoading && <MasterlistSkeleton />}
-      {disposalError && <ErrorFetching refetch={refetch} error={errorData} />}
-      {disposalData && !disposalError && !isDisposalLoading && (
+      {isDisposalError && <ErrorFetching refetch={refetch} error={errorData} />}
+      {disposalData && !isDisposalError && !isDisposalLoading && (
         <Box
           className={isSmallScreen ? "request request__wrapper" : "request__wrapper"}
           p={2}
@@ -395,7 +394,7 @@ const ViewDisposal = () => {
         >
           <Stack>
             <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
-              {`DISPOSAL No. ${transactionData?.id} `}
+              {`TRANSACTION No. ${transactionData?.id} `}
             </Typography>
 
             <Stack id="requestForm" className="request__form" gap={2} pb={1}>
@@ -413,7 +412,7 @@ const ViewDisposal = () => {
                   helperText={errors?.description?.message}
                   fullWidth
                   multiline
-                  disabled
+                  InputProps={{ readOnly: true }}
                 />
 
                 <CustomTextField
@@ -426,15 +425,16 @@ const ViewDisposal = () => {
                   helperText={errors?.remarks?.message}
                   fullWidth
                   multiline
-                  disabled
+                  InputProps={{ readOnly: true }}
                 />
 
                 <CustomAutoComplete
                   control={control}
                   name="receiving_warehouse_id"
                   options={[]}
-                  disabled
+                  InputProps={{ readOnly: true }}
                   freeSolo
+                  disableClearable
                   getOptionLabel={(option) => option.warehouse_name}
                   getOptionKey={(option) => option.warehouse_code}
                   isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -547,7 +547,7 @@ const ViewDisposal = () => {
                             render={({ field: { ref, value, onChange } }) => (
                               <Autocomplete
                                 options={[]}
-                                disabled
+                                readOnly
                                 size="small"
                                 value={value}
                                 freeSolo
@@ -558,6 +558,7 @@ const ViewDisposal = () => {
                                 renderInput={(params) => (
                                   <TextField
                                     required
+                                    InputProps={{ readOnly: true }}
                                     color="secondary"
                                     {...params}
                                     label="Tag Number"
