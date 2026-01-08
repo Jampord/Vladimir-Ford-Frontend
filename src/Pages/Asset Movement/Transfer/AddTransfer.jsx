@@ -111,14 +111,7 @@ import { useLazyGetWarehouseAllApiQuery } from "../../../Redux/Query/Masterlist/
 const schema = yup.object().shape({
   id: yup.string(),
   description: yup.string().required().label("Description"),
-  // accountability: yup.string().typeError("Accountability is a required field").required().label("Accountability"),
-  // accountable: yup
-  //   .object()
-  //   .nullable()
-  //   .when("accountability", {
-  //     is: (value) => value === "Personal Issued",
-  //     then: (yup) => yup.label("Accountable").required().typeError("Accountable is a required field"),
-  //   }),
+  // type_of_transfer: yup.string().required().label("Type of Transfer"),
 
   //Transfer From
   one_charging_id_coordinator: yup.object().nullable().label("One RDF Charging From"),
@@ -136,7 +129,6 @@ const schema = yup.object().shape({
   unit_id: yup.object().required().label("Unit").typeError("Unit is a required field"),
   subunit_id: yup.object().required().label("Subunit").typeError("Subunit is a required field"),
   location_id: yup.object().required().label("Location").typeError("Location is a required field"),
-  // account_title_id: yup.object().required().label("Account Title").typeError("Account Title is a required field"),
 
   remarks: yup.string().label("Remarks"),
   attachments: yup.mixed().nullable().label("Attachments"),
@@ -176,11 +168,13 @@ const AddTransfer = (props) => {
   const isSmallScreen = useMediaQuery("(min-width: 700px)");
 
   const user = JSON.parse(localStorage.getItem("user"));
+
   const AttachmentRef = useRef(null);
   const { state: transactionData } = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const actionMenuData = useSelector((state) => state?.actionMenu?.actionData);
+  console.log("actionMenuData", actionMenuData);
 
   const [updateRequest, setUpdateRequest] = useState({
     id: "",
@@ -381,6 +375,7 @@ const AddTransfer = (props) => {
     {
       data: vTagNumberData = [],
       isLoading: isVTagNumberLoading,
+      isFetching: isVTagNumberFetching,
       isSuccess: isVTagNumberSuccess,
       isError: isVTagNumberError,
       error: vTagNumberError,
@@ -401,7 +396,13 @@ const AddTransfer = (props) => {
 
   const [
     userAccountTrigger,
-    { data: userData = [], isLoading: isUserLoading, isSuccess: isUserSuccess, isError: isUserError },
+    {
+      data: userData = [],
+      isLoading: isUserLoading,
+      isFetching: isUserFetching,
+      isSuccess: isUserSuccess,
+      isError: isUserError,
+    },
   ] = useLazyGetUserAccountByUnitApiQuery();
   // console.log("userdata", userData);
 
@@ -437,8 +438,9 @@ const AddTransfer = (props) => {
     defaultValues: {
       id: "",
       description: "",
-      // accountability: null,
-      // accountable: null,
+
+      // type_of_transfer: "",
+      releasing_warehouse_id: null,
 
       one_charging_id_coordinator: null,
       department_id_coordinator: null,
@@ -536,10 +538,11 @@ const AddTransfer = (props) => {
     if (data) {
       // fixedAssetTrigger();
       reset({
-        // id: "",
         description: data?.description,
-        // accountability: data?.accountability,
-        // accountable: data?.accountable,
+        remarks: data?.remarks || "",
+        attachments: data?.attachments,
+        // type_of_transfer: data?.is_spare === 1 ? "Spare Transfer" : "Normal Transfer",
+
         department_id_coordinator: data?.department_from,
         company_id_coordinator: data?.company_from,
         business_unit_id_coordinator: data?.business_unit_from,
@@ -553,10 +556,6 @@ const AddTransfer = (props) => {
         subunit_id: data?.one_charging,
         location_id: data?.one_charging,
         releasing_warehouse_id: data?.releasing_warehouse,
-        // account_title_id: null,
-
-        remarks: data?.remarks || "",
-        attachments: data?.attachments,
 
         assets: data?.assets.map((asset) => ({
           id: asset.id,
@@ -586,6 +585,7 @@ const AddTransfer = (props) => {
       reset({
         description: "",
         one_charging_id: null,
+        // type_of_transfer: actionMenuData?.length > 0 ? "Spare Transfer" : "Normal Transfer",
         department_id: null,
         company_id: null,
         business_unit_id: null,
@@ -652,10 +652,11 @@ const AddTransfer = (props) => {
         receiver_id: item?.receiver_id?.user?.id || item?.receiver_id?.id,
       })),
 
-      is_spare: actionMenuData !== null || spareData === 1 ? 1 : 0,
+      is_spare: transactionData?.evaluation_transfer && transactionData.is_spare ? 1 : 0,
+      for_safe_keeping: transactionData?.evaluation_transfer && transactionData.for_safe_keeping ? 1 : 0,
     };
 
-    console.log("data", data);
+    // console.log("data to submit", data);
 
     const submitData = () => {
       setIsLoading(true);
@@ -701,7 +702,6 @@ const AddTransfer = (props) => {
           try {
             dispatch(onLoading());
             const test = await submitData();
-            // console.log("test", test);
             dispatch(
               openToast({
                 message: "Transfer Request Successfully Added",
@@ -912,6 +912,7 @@ const AddTransfer = (props) => {
   const isCoordinator = user?.has_handle === 1;
   const user_id = user.id;
   const one_charging_id = watch("one_charging_id_coordinator")?.id || null;
+  const user_one_charging_id = user?.coa?.one_charging?.id || null;
 
   return (
     <>
@@ -1009,6 +1010,42 @@ const AddTransfer = (props) => {
                     fullWidth
                     multiline
                   />
+
+                  {/* <CustomAutoComplete
+                    autoComplete
+                    name="type_of_transfer"
+                    control={control}
+                    disabled={edit ? false : transactionData?.view || actionMenuData !== null}
+                    disableClearable
+                    options={["Normal Transfer", "Spare Transfer", "For Safekeeping Transfer"]}
+                    size="small"
+                    onChange={(_, value) => {
+                      fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.receiver_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.accountable`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.depreciation_debit_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.one_charging_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
+                      return value;
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        color="secondary"
+                        {...params}
+                        label="Type of Transfer"
+                        // error={!!errors?.department_id}
+                        // helperText={errors?.department_id?.message}
+                      />
+                    )}
+                  /> */}
                 </Stack>
 
                 {isCoordinator && (
@@ -1022,6 +1059,7 @@ const AddTransfer = (props) => {
                       control={control}
                       disabled={edit ? false : transactionData?.view}
                       name="one_charging_id_coordinator"
+                      disableClearable
                       options={oneChargingData1 || []}
                       // onOpen={() => oneChargingTrigger({ pagination: "none", user_id: user.id })}
                       loading={isOneChargingLoading}
@@ -1322,8 +1360,6 @@ const AddTransfer = (props) => {
                         setValue("location_id", null);
                       }
 
-                      fields.forEach((item, index) => setValue(`assets.${index}.receiver_id`, null));
-                      fields.forEach((item, index) => setValue(`assets.${index}.accountable`, null));
                       return value;
                     }}
                   />
@@ -1546,7 +1582,7 @@ const AddTransfer = (props) => {
           {/* TABLE */}
           <Box className="request__table">
             <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
-              {`${transactionData ? `TRANSACTION NO. ${transactionData?.id}` : "FIXED ASSET"}`}
+              {`${transactionData?.id ? `TRANSACTION NO. ${transactionData?.id}` : "FIXED ASSET"}`}
             </Typography>
 
             <TableContainer className="request__th-body  request__wrapper" sx={{ height: "calc(100vh - 280px)" }}>
@@ -1608,7 +1644,11 @@ const AddTransfer = (props) => {
                                       : vTagNumberCoordinatorData
                                   }
                                   onOpen={() =>
-                                    fixedAssetCoordinatorTrigger({ one_charging_id: one_charging_id, is_spare: 0 })
+                                    fixedAssetCoordinatorTrigger({
+                                      one_charging_id: one_charging_id,
+                                      is_spare: 0,
+                                      for_safe_keeping: 0,
+                                    })
                                   }
                                   loading={isVTagNumberCoordinatorLoading || isVTagNumberCoordinatorFetching}
                                   disabled={
@@ -1715,8 +1755,13 @@ const AddTransfer = (props) => {
                               render={({ field: { ref, value, onChange } }) => (
                                 <Autocomplete
                                   options={vTagNumberData}
-                                  onOpen={() => (isVTagNumberSuccess ? null : fixedAssetTrigger({ is_spare: 0 }))}
-                                  loading={isVTagNumberLoading}
+                                  onOpen={() =>
+                                    fixedAssetTrigger({
+                                      is_spare: 0,
+                                      for_safe_keeping: 0,
+                                    })
+                                  }
+                                  loading={isVTagNumberLoading || isVTagNumberFetching}
                                   disabled={edit ? false : transactionData?.view || actionMenuData !== null}
                                   size="small"
                                   value={value}
@@ -1933,7 +1978,7 @@ const AddTransfer = (props) => {
                                           watch("location_id") === null
                                     }
                                     onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.unit_id })}
-                                    loading={isUserLoading}
+                                    loading={isUserLoading || isUserFetching}
                                     filterOptions={filterOptions}
                                     getOptionLabel={(option) => option?.full_id_number_full_name}
                                     isOptionEqualToValue={(option, value) =>
@@ -2024,7 +2069,7 @@ const AddTransfer = (props) => {
                                           transactionData?.view
                                     }
                                     onOpen={() =>
-                                      receiverAccountTrigger({ department: watch("department_id")?.department_id })
+                                      receiverAccountTrigger({ one_charging: watch("one_charging_id")?.id })
                                     }
                                     loading={isReceiverLoading}
                                     filterOptions={filterOptions}
@@ -2113,7 +2158,7 @@ const AddTransfer = (props) => {
                                           transactionData?.view
                                     }
                                     onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.unit_id })}
-                                    loading={isUserLoading}
+                                    loading={isUserLoading || isUserFetching}
                                     filterOptions={filterOptions}
                                     getOptionLabel={(option) => option?.full_id_number_full_name}
                                     isOptionEqualToValue={(option, value) =>
@@ -2664,7 +2709,7 @@ const AddTransfer = (props) => {
                       variant="contained"
                       size="small"
                       color="secondary"
-                      startIcon={<Create color={"primary"} />}
+                      startIcon={<Create color="primary" />}
                       loading={isPostLoading || isUpdateLoading}
                       disabled={!isValid || !isDirty || (actionMenuData !== null && !watch("releasing_warehouse_id"))}
                       sx={{ mt: "10px" }}
