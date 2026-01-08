@@ -37,9 +37,7 @@ import {
 import { AddBox, AddCircleSharp, IosShareRounded, LibraryAdd, Visibility } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { closeDialog, closeExport, openDialog, openExport } from "../../Redux/StateManagement/booleanStateSlice";
-import useExcel from "../../Hooks/Xlsx";
 import moment from "moment";
-import ExportRequestMonitoring from "../Monitoring/ExportRequestMonitoring";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 import { TabContext } from "@mui/lab";
 import ExportWarehouseMonitoring from "./ExportWarehouseMonitoring";
@@ -64,8 +62,6 @@ const WarehouseMonitoring = () => {
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
   const dialog = useSelector((state) => state.booleanState.dialog);
   const showExport = useSelector((state) => state.booleanState.exportFile);
-
-  const { excelExport } = useExcel();
 
   const handleChange = (event, newValue) => {
     // setFilterValue(newValue);

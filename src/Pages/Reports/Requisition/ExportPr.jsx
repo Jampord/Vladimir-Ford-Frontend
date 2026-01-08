@@ -4,8 +4,6 @@ import moment from "moment";
 import CustomDatePicker from "../../../Components/Reusable/CustomDatePicker";
 import CustomTextField from "../../../Components/Reusable/CustomTextField";
 
-import useExcel from "../../../Hooks/Xlsx";
-
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { IosShareRounded } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
@@ -32,8 +30,6 @@ const schema = yup.object().shape({
 
 const ExportPr = () => {
   const dispatch = useDispatch();
-
-  // const { excelExport } = useExcel();
   const { excelExport } = useExcelJs();
 
   const [

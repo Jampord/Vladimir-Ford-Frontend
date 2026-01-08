@@ -13,7 +13,6 @@ import {
 } from "../../Redux/Query/Request/Requisition";
 import { openToast } from "../../Redux/StateManagement/toastSlice";
 import moment from "moment";
-import useExcel from "../../Hooks/Xlsx";
 import useExcelJs from "../../Hooks/ExcelJs";
 
 const schema = yup.object().shape({
@@ -23,7 +22,6 @@ const schema = yup.object().shape({
 });
 
 const ExportWarehouseMonitoring = () => {
-  // const { excelExport } = useExcel();
   const { excelExport } = useExcelJs();
 
   const [
