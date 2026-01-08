@@ -129,6 +129,7 @@ import Operation from "./Pages/Masterlist/Operation";
 import Redirect from "./Routes/Redirect";
 import DeliveryType from "./Pages/Delivery Type/DeliveryType";
 import MovementWarehouse from "./Pages/Masterlist/MovementWarehouse";
+import Bidding from "./Pages/Asset Movement/Bidding/Bidding";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -299,7 +300,7 @@ const router = createBrowserRouter([
               {
                 path: "movement-warehouse",
                 element: <MovementWarehouse />,
-                handle: { permission: "movement-warehouse" },
+                handle: { permission: "movement-warehouse-masterlist" },
               },
             ],
           },
@@ -594,6 +595,11 @@ const router = createBrowserRouter([
                 element: <ToPickupViewing />,
                 handle: { permission: "evaluation" },
               },
+              {
+                path: "bidding",
+                element: <Bidding />,
+                handle: { permission: "bidding" },
+              },
             ],
           },
 
@@ -690,24 +696,6 @@ const router = createBrowserRouter([
                 handle: { permission: "approving" },
               },
             ],
-          },
-
-          {
-            path: "asset-for-tagging",
-            // element: <AssetForTagging />,
-            handle: { permission: "asset-for-tagging" },
-          },
-
-          {
-            path: "asset-list",
-            // element: <AssetList />,
-            handle: { permission: "asset-list" },
-          },
-
-          {
-            path: "on-hand-in-process",
-            // element: <OnHandInProcess />,
-            handle: { permission: "on-hand-in-process" },
           },
 
           {
