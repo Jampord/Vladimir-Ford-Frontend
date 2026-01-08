@@ -3,8 +3,8 @@ import { Badge, Box, Tab, Tabs, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useGetNotificationApiQuery } from "../../../Redux/Query/Notification";
 import Repaired from "./Repaired";
-import ChangeCareof from "./ChangeCareof";
 import ForDisposal from "./ForDisposal";
+import ChangeCareOf from "./ChangeCareOf";
 
 const PulloutConfirmation = () => {
   const [value, setValue] = useState("1");
@@ -38,7 +38,7 @@ const PulloutConfirmation = () => {
               className={value === "1" ? "tab__background" : null}
             />
 
-            {/* <Tab label="Change Care of" value="2" className={value === "2" ? "tab__background" : null} /> */}
+            <Tab label="Change Care of" value="2" className={value === "2" ? "tab__background" : null} />
             {/* <Tab label="For Disposal" value="3" className={value === "3" ? "tab__background" : null} /> */}
           </Tabs>
 
@@ -46,9 +46,9 @@ const PulloutConfirmation = () => {
             <Repaired />
           </TabPanel>
 
-          {/* <TabPanel sx={{ p: 0 }} value="2" index="2">
-            <ChangeCareof />
-          </TabPanel> */}
+          <TabPanel sx={{ p: 0 }} value="2" index="2">
+            <ChangeCareOf />
+          </TabPanel>
 
           {/* <TabPanel sx={{ p: 0 }} value="3" index="3">
             <ForDisposal />
