@@ -78,6 +78,7 @@ const ExportReleasingOfAsset = ({ released }) => {
           "Asset Specification": item.asset_specification,
           Accountability: item.accountability,
           Accountable: item.accountable,
+          "Delivery Type": item?.delivery_type,
           "One Charging Code": item.one_charging.code,
           "One Charging": item.one_charging.name,
           "Company Code": item.one_charging.company_code,
@@ -111,8 +112,6 @@ const ExportReleasingOfAsset = ({ released }) => {
           "Date Released": released === true ? item?.release_date : "For Releasing",
         };
       });
-
-      console.log("newObj", newObj);
 
       await excelExport(newObj, released === true ? "Vladimir-Released-Asset" : "Vladimir-For-Releasing-of-Asset");
       dispatch(
@@ -215,3 +214,4 @@ const ExportReleasingOfAsset = ({ released }) => {
 };
 
 export default ExportReleasingOfAsset;
+                                                                                                        
