@@ -224,7 +224,7 @@ const ForApprovalEvaluation = ({ tab }) => {
                           </TableCell>
                           <TableCell className="tbl-cell " align="center">
                             <Typography fontSize="12px" color="black" fontWeight="500">
-                              {item?.care_of}
+                              {item?.care_of?.name}
                             </Typography>
                           </TableCell>
                           <TableCell className="tbl-cell " align="center">
