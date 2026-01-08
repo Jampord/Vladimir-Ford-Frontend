@@ -74,7 +74,6 @@ export const ipAddressPretestSetupApi = createApi({
   tagTypes: ["IpPretest"],
 
   baseQuery: fetchBaseQuery({
-    // baseUrl: `https://vladimir.rdfmis.ph/server/api/`,
     baseUrl: process.env.VLADIMIR_BASE_URL,
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");

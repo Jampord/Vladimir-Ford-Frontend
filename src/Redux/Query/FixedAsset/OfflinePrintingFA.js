@@ -4,9 +4,7 @@ export const printOfflineFaApi = createApi({
   reducerPath: "printFixedAssetApi",
 
   baseQuery: fetchBaseQuery({
-    // baseUrl: `http://10.10.10.6:9000/api`,
     baseUrl: process.env.VLADIMIR_BASE_URL,
-    // baseUrl: `https://pretestalpha.rdfmis.ph/server/api`,
 
     prepareHeaders: (headers) => {
       const token = localStorage.getItem("token");
