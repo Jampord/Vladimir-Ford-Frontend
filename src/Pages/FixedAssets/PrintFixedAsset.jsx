@@ -96,6 +96,7 @@ import { notificationApi, useGetNotificationApiQuery } from "../../Redux/Query/N
 import AddSmallToolsGroup from "./AddEdit/AddSmallToolsGroup";
 import AddTagAddCost from "./AddEdit/AddTagAddCost";
 import ExportPrintFixedAsset from "./ExportPrintFixedAsset";
+import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -1067,7 +1068,9 @@ const PrintFixedAsset = (props) => {
                   </TableHead>
 
                   <TableBody>
-                    {fixedAssetSuccess && fixedAssetData.data.length === 0 ? (
+                    {fixedAssetFetching ? (
+                      <LoadingData dialog />
+                    ) : fixedAssetSuccess && fixedAssetData.data.length === 0 ? (
                       <NoRecordsFound heightData="xs" />
                     ) : (
                       <>
@@ -1134,6 +1137,22 @@ const PrintFixedAsset = (props) => {
 
                                   <Typography noWrap fontSize="12px" color="primary" fontWeight="bold">
                                     {data.type_of_request.type_of_request_name.toUpperCase()}
+                                  </Typography>
+
+                                  <Typography
+                                    fontSize={12}
+                                    fontWeight={"bold"}
+                                    color={
+                                      data.delivery_type === "Direct"
+                                        ? "link.dark"
+                                        : data.delivery_type === "Warehouse"
+                                        ? "error.light"
+                                        : "secondary.light"
+                                    }
+                                  >
+                                    {data?.delivery_type !== "-" &&
+                                      data?.delivery_type !== null &&
+                                      `${data?.delivery_type} Delivery`}
                                   </Typography>
                                 </TableCell>
 
@@ -1507,7 +1526,9 @@ const PrintFixedAsset = (props) => {
                           </TableHead>
 
                           <TableBody>
-                            {fixedAssetSuccess && fixedAssetData.data.length === 0 ? (
+                            {fixedAssetFetching ? (
+                              <LoadingData dialog />
+                            ) : fixedAssetSuccess && fixedAssetData.data.length === 0 ? (
                               <NoRecordsFound heightData="xs" />
                             ) : (
                               <>
@@ -1579,8 +1600,24 @@ const PrintFixedAsset = (props) => {
                                           </Typography>
 
                                           <Typography noWrap fontSize="12px" color="primary" fontWeight="bold">
-                                            {data.type_of_request.type_of_request_name.toUpperCase()}{" "}
+                                            {data.type_of_request.type_of_request_name.toUpperCase()}
                                             {data?.is_main ? "(Grouped)" : null}
+                                          </Typography>
+
+                                          <Typography
+                                            fontSize={12}
+                                            fontWeight={"bold"}
+                                            color={
+                                              data.delivery_type === "Direct"
+                                                ? "link.dark"
+                                                : data.delivery_type === "Warehouse"
+                                                ? "error.light"
+                                                : "secondary.light"
+                                            }
+                                          >
+                                            {data?.delivery_type !== "-" &&
+                                              data?.delivery_type !== null &&
+                                              `${data.delivery_type} Delivery`}
                                           </Typography>
                                         </TableCell>
 
@@ -2087,7 +2124,9 @@ const PrintFixedAsset = (props) => {
                           </TableHead>
 
                           <TableBody>
-                            {fixedAssetSuccess && fixedAssetData.data.length === 0 ? (
+                            {fixedAssetFetching ? (
+                              <LoadingData dialog />
+                            ) : fixedAssetSuccess && fixedAssetData.data.length === 0 ? (
                               <NoRecordsFound heightData="xs" />
                             ) : (
                               <>
@@ -2161,6 +2200,22 @@ const PrintFixedAsset = (props) => {
 
                                           <Typography noWrap fontSize="10px" color="primary" fontWeight="bold">
                                             {data.type_of_request.type_of_request_name.toUpperCase()}
+                                          </Typography>
+
+                                          <Typography
+                                            fontSize={12}
+                                            fontWeight={"bold"}
+                                            color={
+                                              data.delivery_type === "Direct"
+                                                ? "link.dark"
+                                                : data.delivery_type === "Warehouse"
+                                                ? "error.light"
+                                                : "secondary.light"
+                                            }
+                                          >
+                                            {data?.delivery_type !== "-" &&
+                                              data?.delivery_type !== null &&
+                                              `${data?.delivery_type} Delivery`}
                                           </Typography>
                                         </TableCell>
 
