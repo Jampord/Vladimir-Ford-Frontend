@@ -26,7 +26,7 @@ import MasterlistSkeleton from "../../Skeleton/MasterlistSkeleton";
 import { useGetAssetsToEvaluateApiQuery } from "../../../Redux/Query/Movement/Evaluation";
 import { useState } from "react";
 import NoRecordsFound from "../../../Layout/NoRecordsFound";
-import { Attachment, Construction, FindReplace, IosShareRounded, ScreenSearchDesktop } from "@mui/icons-material";
+import { Attachment, Construction, FindReplace, IosShareRounded, Lock, ScreenSearchDesktop } from "@mui/icons-material";
 import { useDownloadTransferAttachment } from "../../../Hooks/useDownloadAttachment";
 import ErrorFetching from "../../ErrorFetching";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
@@ -84,10 +84,10 @@ const ListOfPullout = () => {
     setEvaluation("Change Care of");
   };
 
-  const handleOpenEvaluateDisposalDialog = () => {
+  const handleOpenEvaluateSafeKeepingDialog = () => {
     dispatch(openDialog1());
     setAnchorEl(null);
-    setEvaluation("For Disposal");
+    setEvaluation("For Safekeeping");
   };
 
   const handleRowClick = (id) => {
@@ -223,8 +223,13 @@ const ListOfPullout = () => {
                   </ListItemIcon>
                   <ListItemText>For Replacement</ListItemText>
                 </MenuItem>
+                <MenuItem dense onClick={handleOpenEvaluateSafeKeepingDialog}>
+                  <ListItemIcon>
+                    <Lock fontSize="small" color="secondary" />
+                  </ListItemIcon>
+                  <ListItemText>For Safekeeping</ListItemText>
+                </MenuItem>
                 {/* <MenuItem onClick={handleOpenEvaluateChangeDialog}>Change Care of</MenuItem> */}
-                {/* <MenuItem onClick={handleOpenEvaluateDisposalDialog}>For Disposal</MenuItem> */}
               </Menu>
             </Box>
           )}
@@ -338,7 +343,7 @@ const ListOfPullout = () => {
                               width="300px"
                               overflow="hidden"
                             >
-                              <Tooltip title={item?.asset.asset_specification} placement="bottom" arrow>
+                              <Tooltip title={<>{item?.asset.asset_specification}</>} placement="bottom" arrow>
                                 {item?.asset.asset_specification}
                               </Tooltip>
                             </Typography>
@@ -387,7 +392,7 @@ const ListOfPullout = () => {
                           </TableCell>
                           <TableCell className="tbl-cell " align="center">
                             <Typography fontSize="12px" color="black" fontWeight="500">
-                              {item?.care_of}
+                              {item?.care_of?.name}
                             </Typography>
                           </TableCell>
                           <TableCell className="tbl-cell " align="center">
