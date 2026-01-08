@@ -40,7 +40,7 @@ import {
 } from "@mui/material";
 
 import { ExpandCircleDown, ExpandCircleDownOutlined, Help, IosShareRounded, ReportProblem } from "@mui/icons-material";
-import useExcel from "../../Hooks/Xlsx";
+import useExcel from "../../Hooks/ExcelJs";
 
 import { openExport, closeImport } from "../../Redux/StateManagement/booleanStateSlice";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
