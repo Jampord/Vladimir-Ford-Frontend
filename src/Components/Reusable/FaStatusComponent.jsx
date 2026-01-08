@@ -3,16 +3,22 @@ import { Box, Chip } from "@mui/material";
 import {
   BuildCircle,
   CheckCircleRounded,
+  Delete,
   DeleteForever,
   EditOff,
   FileCopy,
   FindReplace,
   FolderDelete,
+  Gavel,
+  GavelRounded,
+  Inventory,
+  Lock,
   Pending,
   Print,
   RadioButtonUncheckedRounded,
   Sell,
   SwapHorizontalCircle,
+  ThumbsUpDown,
 } from "@mui/icons-material";
 
 const faStatusComponent = ({ faStatus, data, hover }) => {
@@ -48,7 +54,12 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
         }}
       />
     );
-  } else if (faStatus === "For Releasing" || faStatus === "Not yet evaluated" || faStatus === "Not yet pick-up") {
+  } else if (
+    faStatus === "For Releasing" ||
+    faStatus === "Not yet evaluated" ||
+    faStatus === "Not yet pick-up" ||
+    faStatus === "For Evaluation"
+  ) {
     return (
       <Chip
         size="small"
@@ -72,6 +83,23 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
         variant="contained"
         icon={<FolderDelete size="small" color="#d13202" />}
         label="For Disposal"
+        sx={{
+          backgroundColor: "#fd8e6c3a",
+          color: "#d13202",
+
+          ":hover": hover && { backgroundColor: "#FFB098", cursor: "pointer" },
+
+          p: "0 5px",
+        }}
+      />
+    );
+  } else if (faStatus === "disposed") {
+    return (
+      <Chip
+        size="small"
+        variant="contained"
+        icon={<Delete size="small" color="#d13202" />}
+        label="Disposed"
         sx={{
           backgroundColor: "#fd8e6c3a",
           color: "#d13202",
@@ -204,6 +232,57 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
           color: "text",
 
           ":hover": hover && { backgroundColor: "primary.main", cursor: "pointer" },
+
+          p: "0 5px",
+        }}
+      />
+    );
+  } else if (faStatus === "For Safe-Keeping" || faStatus === "For Safe-keeping" || faStatus === "For Safekeeping") {
+    return (
+      <Chip
+        size="small"
+        variant="contained"
+        icon={<Lock size="small" color="#283e42" />}
+        label={faStatus}
+        sx={{
+          backgroundColor: "#b2d3e7",
+          // color: "text",
+
+          ":hover": hover && { backgroundColor: "#93a3a7", cursor: "pointer" },
+
+          p: "0 5px",
+        }}
+      />
+    );
+  } else if (faStatus === "For Confirmation") {
+    return (
+      <Chip
+        size="small"
+        variant="contained"
+        icon={<ThumbsUpDown size="small" color="#6a7678" />}
+        label={faStatus}
+        sx={{
+          backgroundColor: "#86badb",
+          // color: "text",
+
+          ":hover": hover && { backgroundColor: "#a6dce9", cursor: "pointer" },
+
+          p: "0 5px",
+        }}
+      />
+    );
+  } else if (faStatus === "For Bidding") {
+    return (
+      <Chip
+        size="small"
+        variant="contained"
+        icon={<GavelRounded fontSize="small" color="#fdaaaa" />}
+        label={faStatus}
+        sx={{
+          backgroundColor: "#fdaaaa",
+          color: "text",
+
+          ":hover": hover && { backgroundColor: "#fccccc", cursor: "pointer" },
 
           p: "0 5px",
         }}
