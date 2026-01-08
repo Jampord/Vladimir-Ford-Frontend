@@ -102,7 +102,8 @@ export const assetReceivingApi = createApi({
 
     getRrSummaryApi: builder.query({
       query: (params) => ({
-        url: `/rr-summary?${params?.search}&per_page=${params.per_page}&page=${params.page}&status=${params.status}`,
+        url: `/rr-summary`,
+        params,
         transformResponse: (res) => res.data,
       }),
       invalidatesTags: ["AssetReceiving"],
