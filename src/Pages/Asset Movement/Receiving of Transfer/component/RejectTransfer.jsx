@@ -16,7 +16,6 @@ const schema = yup.object().shape({
 });
 
 const RejectTransfer = ({ data, singleReceiving }) => {
-  console.log("data: ", data);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

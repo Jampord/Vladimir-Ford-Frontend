@@ -25,7 +25,6 @@ import Moment from "moment";
 
 const PulloutTimeline = (props) => {
   const { data: transactionData } = props;
-  console.log("transactionData", transactionData);
   const dispatch = useDispatch();
 
   return (
@@ -152,7 +151,6 @@ const PulloutTimeline = (props) => {
                 direction="up"
                 sx={{ width: "100%" }}
               >
-                {console.log("item", item)}
                 <Step key={index} last>
                   <Stack position="relative" justifyContent="center" flexDirection="column">
                     {/* Date and Time */}

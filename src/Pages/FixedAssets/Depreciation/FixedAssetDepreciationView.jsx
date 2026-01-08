@@ -76,9 +76,6 @@ const FixedAssetDepreciationView = (props) => {
     refetchOnMountOrArgChange: true,
   });
 
-  console.log("FAData", dataApi);
-  console.log("Data", data);
-
   const [getCalcDepreApi, { data: calcDepreApi, refetch: calcDepreApiRefetch }] = useLazyGetCalcDepreApiQuery();
   const [postCalcDepreAddCostApi, { data: calcDepreAddCostApi }] = usePostCalcDepreAddCostApiMutation();
   const [patchFixedAssetStatusApi, { isLoading: isPatchLoading }] = useArchiveFixedAssetStatusApiMutation();

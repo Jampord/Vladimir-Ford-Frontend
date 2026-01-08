@@ -30,7 +30,6 @@ const CustomNumberField = ({
             color="secondary"
             allowNegative={dontAllowNegative && false}
             onValueChange={(data) => {
-              console.log(data);
               if (!data.value) return onChange(null);
 
               if (keepPrefix) return onChange(data.formattedValue);

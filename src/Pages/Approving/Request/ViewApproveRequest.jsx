@@ -56,6 +56,7 @@ import {
   useLazyGetMinorCategorySmallToolsApiQuery,
 } from "../../../Redux/Query/Masterlist/Category/MinorCategory";
 import CustomTextField from "../../../Components/Reusable/CustomTextField";
+import { notificationApi } from "../../../Redux/Query/Notification";
 
 const schema = yup.object().shape({
   major_category_id: yup.object().nullable(),
@@ -67,14 +68,13 @@ const schema = yup.object().shape({
 const ViewApproveRequest = (props) => {
   const { approving } = props;
   const { state: transactionData } = useLocation();
-  console.log("transactionData", transactionData);
+
   const [perPage, setPerPage] = useState(5);
   const [page, setPage] = useState(1);
 
   const [referenceNumber, setReferenceNumber] = useState("");
 
   const [isSmallTools, setIsSmallTools] = useState(false);
-  console.log("isSmallTools", isSmallTools);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -89,7 +89,7 @@ const ViewApproveRequest = (props) => {
     getNextRequest,
     { data: nextData, isLoading: isNextRequestLoading, isFetching: isNextRequestFetching, error: nextRequestError },
   ] = useLazyGetNextRequestQuery();
-  console.log("nextData", nextData);
+
   const [removePrNumber] = useRemovePurchaseRequestApiMutation();
 
   // CONTAINER
@@ -105,8 +105,6 @@ const ViewApproveRequest = (props) => {
     { page: page, per_page: perPage, transaction_number: transactionData?.transaction_number },
     { refetchOnMountOrArgChange: true }
   );
-
-  console.log("approve request", approveRequestData?.data);
 
   const [
     minorCategoryTrigger,
@@ -210,22 +208,16 @@ const ViewApproveRequest = (props) => {
               transactionData?.final === true
             ) {
               const requestData = approveRequestData?.data[0];
-              // console.log("requestData", requestData);
               try {
                 const getYmirDataApi = await getYmirData({ transaction_number }).unwrap();
-                // console.log("getYmirDataApi", getYmirDataApi);
                 if (requestData.is_pr_returned === 1) {
                   const patchYmirData = await patchPr({
                     ...getYmirDataApi,
                     pr_number: requestData.pr_number,
                     pr_description: requestData.acquisition_details,
                   });
-                  ///************* */
-                  console.log("Resubmit - patchYmirData", patchYmirData);
                 } else {
                   const postYmirData = await postPr(getYmirDataApi);
-                  //*********** */
-                  console.log("Submit(Asset Sync) - postYmirData", postYmirData);
                 }
 
                 const next = await getNextRequest({
@@ -259,7 +251,6 @@ const ViewApproveRequest = (props) => {
                 final_approval: transactionData?.final || requestData?.final_approval === 1 ? 1 : 0,
               }).unwrap();
               navigate(`/approving/request/${next?.[0].transaction_number}`, { state: next?.[0], replace: true });
-              // console.log("ERROR:", requestData);
             }
 
             dispatch(
@@ -268,9 +259,10 @@ const ViewApproveRequest = (props) => {
                 duration: 5000,
               })
             );
+
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
           } catch (err) {
             noNextData(err);
-            console.log("error in approving", err);
             if (err?.status === 404) {
               dispatch(
                 openToast({
@@ -327,8 +319,7 @@ const ViewApproveRequest = (props) => {
             }).unwrap();
             navigate(`/approving/request/${next?.[0].transaction_number}`, { state: next?.[0], replace: true });
             // dispatch(requisitionApi.util.invalidateTags(["Requisition"]));
-
-            console.log("nextRequestError", nextRequestError);
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
 
             dispatch(
               openToast({
@@ -403,12 +394,10 @@ const ViewApproveRequest = (props) => {
   };
 
   const pageHandler = (_, page) => {
-    // console.log(page + 1);
     setPage(page + 1);
   };
 
   const onUpdateHandler = (props) => {
-    console.log("props", props);
     setReferenceNumber(props.reference_number);
     setFormValue("major_category_id", props.major_category);
     setFormValue("minor_category_id", props.minor_category);
@@ -419,7 +408,6 @@ const ViewApproveRequest = (props) => {
   };
 
   const onSubmitHandler = async (formData) => {
-    console.log("formData: ", formData);
     const newFormData = {
       major_category_id: formData.minor_category_id?.major_category?.id,
       minor_category_id: formData.minor_category_id?.id,
@@ -427,7 +415,6 @@ const ViewApproveRequest = (props) => {
       specification: formData.specification,
       id: referenceNumber,
     };
-    console.log("newFormData: ", newFormData);
 
     dispatch(
       openConfirm({
@@ -951,7 +938,6 @@ const ViewApproveRequest = (props) => {
                   />
                 )}
                 onChange={(_, value) => {
-                  console.log("value", value);
                   if (value) {
                     setFormValue("major_category_id", value.major_category);
                   } else {
