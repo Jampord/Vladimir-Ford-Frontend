@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import ToPickup from "./ToPickup";
 import ListOfPullout from "./ListOfPullout";
 import ForApprovalEvaluation from "./ForApprovalEvaluation";
-import ForReplacement from "./ForReplacement";
+import EvaluatedPullout from "./EvaluatedPullout";
 import { useDispatch, useSelector } from "react-redux";
 import { setEvaluationTabValue } from "../../../Redux/StateManagement/tabSlice";
 import { useGetNotificationApiQuery } from "../../../Redux/Query/Notification";
@@ -18,9 +18,9 @@ const Evaluation = () => {
 
   const { data: notifData, refetch } = useGetNotificationApiQuery();
 
-  useEffect(() => {
-    refetch();
-  }, [notifData]);
+  // useEffect(() => {
+  //   refetch();
+  // }, [notifData]);
 
   const handleChange = (_, newValue) => {
     // setValue(newValue);
@@ -28,9 +28,8 @@ const Evaluation = () => {
   };
 
   const user = JSON.parse(localStorage.getItem("user")) || {};
-  const hasPermission = user?.role?.access_permission.includes(
-    "mis-warehouse" || "fixed-asset-warehouse" || "engineering-warehouse"
-  );
+  const hasPermission = user?.role?.access_permission.includes("evaluation");
+
   return (
     <Box className="mcontainer">
       <Typography className="mcontainer__title" sx={{ fontFamily: "Anton", fontSize: "1.6rem" }}>
@@ -39,7 +38,7 @@ const Evaluation = () => {
 
       <Box>
         <TabContext value={value}>
-          <Tabs onChange={handleChange} value={value}>
+          <Tabs onChange={handleChange} value={value} variant="scrollable" scrollButtons="auto">
             <Tab
               label={
                 <Badge color="error" badgeContent={notifData?.toPickUpCount}>
@@ -63,8 +62,8 @@ const Evaluation = () => {
             {hasPermission && (
               <Tab
                 label={
-                  <Badge color="error" badgeContent={notifData?.toReplaceCount}>
-                    For Replacement
+                  <Badge color="error" badgeContent={0}>
+                    For Safekeeping
                   </Badge>
                 }
                 value="5"
@@ -74,7 +73,7 @@ const Evaluation = () => {
             {hasPermission && (
               <Tab
                 label={
-                  <Badge color="error" badgeContent={notifData?.spareCount}>
+                  <Badge color="error" badgeContent={0}>
                     Spare
                   </Badge>
                 }
@@ -85,12 +84,23 @@ const Evaluation = () => {
             {hasPermission && (
               <Tab
                 label={
-                  <Badge color="error" badgeContent={notifData?.disposalCount}>
+                  <Badge color="error" badgeContent={0}>
                     For Disposal
                   </Badge>
                 }
                 value="7"
                 className={value === "7" ? "tab__background" : null}
+              />
+            )}
+            {hasPermission && (
+              <Tab
+                label={
+                  <Badge color="error" badgeContent={0}>
+                    For Bidding
+                  </Badge>
+                }
+                value="8"
+                className={value === "8" ? "tab__background" : null}
               />
             )}
           </Tabs>
@@ -111,13 +121,16 @@ const Evaluation = () => {
             <ForApprovalEvaluation tab={value} />
           </TabPanel>
           <TabPanel sx={{ p: 0 }} value="5" index="5">
-            <ForReplacement tab={value} />
+            <EvaluatedPullout tab={"For Safe-Keeping"} />
           </TabPanel>
           <TabPanel sx={{ p: 0 }} value="6" index="6">
-            <ForReplacement tab={value} />
+            <EvaluatedPullout tab={"Spare"} />
           </TabPanel>
           <TabPanel sx={{ p: 0 }} value="7" index="7">
-            <ForReplacement tab={value} />
+            <EvaluatedPullout tab={"For Disposal"} />
+          </TabPanel>
+          <TabPanel sx={{ p: 0 }} value="8" index="8">
+            <EvaluatedPullout tab={"For Bidding"} />
           </TabPanel>
         </TabContext>
       </Box>
