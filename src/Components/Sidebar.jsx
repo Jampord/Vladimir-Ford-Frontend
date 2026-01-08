@@ -115,6 +115,7 @@ import {
   PriceCheck,
   Engineering,
   Gite,
+  LocalAtm,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 
@@ -395,7 +396,7 @@ const Sidebar = () => {
           label: "Movement Warehouse",
           icon: Gite,
           path: "/masterlist/movement-warehouse",
-          permission: "movement-warehouse",
+          permission: "movement-warehouse-masterlist",
         },
       ],
       open: masterListCollapse,
@@ -663,7 +664,7 @@ const Sidebar = () => {
           setter: closeCollapse,
         },
         {
-          label: "Pull Out",
+          label: "Pullout",
           icon: RemoveFromQueue,
           path: "/asset-movement/pull-out",
           permission: "pull-out",
@@ -683,7 +684,7 @@ const Sidebar = () => {
           setter: closeCollapse,
         },
         {
-          label: "Pull Out Confirmation",
+          label: "Pullout Confirmation",
           icon: AssignmentTurnedIn,
           path: "/asset-movement/pull-out-confirmation",
           permission: "pull-out",
@@ -703,6 +704,14 @@ const Sidebar = () => {
           path: "/asset-movement/disposal-receiving",
           permission: "disposal-receiving",
           notification: notifData?.disposalReceivingCount,
+          setter: closeCollapse,
+        },
+        {
+          label: "Bidding",
+          icon: LocalAtm,
+          path: "/asset-movement/bidding",
+          permission: "bidding",
+          // notification: notifData?.disposalReceivingCount,
           setter: closeCollapse,
         },
       ],
@@ -1076,7 +1085,7 @@ const Sidebar = () => {
                                       Asset Transfer
                                     </Divider>
                                   </>
-                                ) : item?.label === "Asset Movement" && childItem.label === "Pull Out" ? (
+                                ) : item?.label === "Asset Movement" && childItem.label === "Pullout" ? (
                                   <>
                                     <Divider sx={{ mt: 1, mx: "15px", fontSize: "11px", color: "text.secondary" }}>
                                       Asset Pullout
