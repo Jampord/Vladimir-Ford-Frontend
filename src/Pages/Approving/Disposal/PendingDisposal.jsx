@@ -27,6 +27,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
 import PulloutTimeline from "../../Asset Movement/PulloutTimeline";
+import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 
 const PendingDisposal = () => {
   const [page, setPage] = useState(1);
@@ -42,6 +43,7 @@ const PendingDisposal = () => {
   const {
     data: pendingDisposalData,
     isLoading: approvalLoading,
+    isFetching: approvalFetching,
     isSuccess: approvalSuccess,
     isError: approvalError,
     error: errorData,
@@ -182,6 +184,8 @@ const PendingDisposal = () => {
                 <TableBody>
                   {pendingDisposalData?.data.length === 0 ? (
                     <NoRecordsFound heightData="small" />
+                  ) : approvalFetching ? (
+                    <LoadingData />
                   ) : (
                     <>
                       {approvalSuccess &&
