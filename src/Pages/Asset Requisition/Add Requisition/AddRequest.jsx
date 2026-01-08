@@ -275,19 +275,9 @@ const AddRequisition = (props) => {
   const drawer = useSelector((state) => state.booleanState.drawer);
 
   const actionMenuData = useSelector((state) => state.actionMenu.actionData);
-  console.log("actionMenuData", actionMenuData);
 
   const handleDownloadAttachment = (value) => {
     useDownloadAttachment({ attachment: value?.value, id: value?.id });
-  };
-
-  const base64ToBlob = (base64, mimeType) => {
-    const binaryString = atob(base64); // Decode Base64 to binary string
-    const bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = binaryString.charCodeAt(i); // Convert to byte array
-    }
-    return new Blob([bytes], { type: mimeType });
   };
 
   const attachmentSx = {
@@ -1142,15 +1132,11 @@ const AddRequisition = (props) => {
                 openToast({
                   message: err?.response?.data?.errors?.detail
                     ? err?.response?.data?.errors?.detail
-                    : //  Object?.entries(err?.response?.data?.errors)?.at(0)?.at(1)?.at(0),
-                    err?.response?.data?.errors?.fixed_asset_id
+                    : err?.response?.data?.errors?.fixed_asset_id
                     ? err?.response?.data?.errors?.fixed_asset_id
                     : err?.response?.data?.errors?.item_id
                     ? err?.response?.data?.errors?.item_id
                     : "Something went wrong. Please try again.",
-                  // err?.response?.data?.errors?.detail ||
-                  // err?.response?.data?.errors[0]?.detail ||
-                  // err?.response?.data?.message,
                   duration: 5000,
                   variant: "error",
                 })
@@ -2930,14 +2916,7 @@ const AddRequisition = (props) => {
             size="small"
             startIcon={<ArrowBackIosRounded color="secondary" />}
             onClick={() => {
-              // transactionData?.requestMonitoring
-              //   ? navigate("/monitoring/request-monitoring")
-              //   : transactionData?.warehouseMonitoring
-              //   ? navigate("/monitoring/warehouse-monitoring")
-              //   :
               navigate(-1);
-              // navigate("/asset-requisition/requisition");
-              // deleteAllRequest();
               dispatch(resetGetData());
             }}
             disableRipple
@@ -3368,16 +3347,6 @@ const AddRequisition = (props) => {
                   </TableBody>
                 </Table>
               </TableContainer>
-              {/* {(isTransactionSuccess || isRequestSuccess) && (
-              <CustomTablePagination
-                total={(transactionDataApiPage || addRequestAllApi)?.total}
-                success={isTransactionSuccess || isRequestSuccess}
-                current_page={(transactionDataApiPage || addRequestAllApi)?.current_page}
-                per_page={(transactionDataApiPage || addRequestAllApi)?.per_page}
-                onPageChange={pageHandler}
-                onRowsPerPageChange={perPageHandler}
-              />
-            )} */}
 
               {/* Buttons */}
               <Stack flexDirection="row" justifyContent="space-between" alignItems={"center"}>
