@@ -19,8 +19,7 @@ export const userAccountsApi = createApi({
 
   endpoints: (builder) => ({
     getUserAccountsApi: builder.query({
-      query: (params) =>
-        `user?search=${params.search}&page=${params.page}&per_page=${params.per_page}&status=${params.status}`,
+      query: (params) => ({ url: `user`, params }),
       providesTags: ["User"],
     }),
 
