@@ -50,7 +50,6 @@
     "sort-by": "^0.0.2",
     "sortablejs": "^1.15.0",
     "use-scan-detection-react18": "^0.2.3",
-    "xlsx": "^0.18.5",
     "yup": "^0.32.11"
   },
   "devDependencies": {
