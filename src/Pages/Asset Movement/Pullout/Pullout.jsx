@@ -231,7 +231,7 @@ const Pullout = () => {
   return (
     <Box className="mcontainer">
       <Typography className="mcontainer__title" sx={{ fontFamily: "Anton", fontSize: "2rem" }}>
-        Pull Out
+        Pullout
       </Typography>
 
       {isPulloutLoading && <MasterlistSkeleton onAdd={true} />}
@@ -319,7 +319,7 @@ const Pullout = () => {
                               {item?.description}
                             </TableCell>
                             <TableCell className="tbl-cell text-weight" align="center">
-                              {item?.care_of}
+                              {item?.care_of?.name}
                             </TableCell>
                             <TableCell className="tbl-cell tr-cen-pad45" align="center">
                               {item?.quantity}
