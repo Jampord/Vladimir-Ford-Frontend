@@ -39,6 +39,7 @@ import {
   usePostReceivingSyncApiMutation,
 } from "../../../Redux/Query/Request/AssetReceiving";
 import { useLazyGetYmirReceivingAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/YmirApi";
+import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 
 const ReceivingTable = (props) => {
   const { received } = props;
@@ -162,6 +163,7 @@ const ReceivingTable = (props) => {
   const {
     data: receivingData,
     isLoading: receivingLoading,
+    isFetching: receivingFetching,
     isSuccess: receivingSuccess,
     isError: receivingError,
     error: errorData,
@@ -279,6 +281,8 @@ const ReceivingTable = (props) => {
                   <TableBody>
                     {receivingData?.data?.length === 0 ? (
                       <NoRecordsFound heightData="small" />
+                    ) : receivingFetching ? (
+                      <LoadingData />
                     ) : (
                       <>
                         {receivingSuccess &&
