@@ -175,13 +175,14 @@ const Role = () => {
   };
 
   const onUpdateHandler = (props) => {
-    const { id, role_name, access_permission } = props;
+    const { id, role_name, access_permission, movement_warehouses } = props;
     setUpdateRole({
       status: true,
       action: "updateRole",
       id: id,
       role_name: role_name,
       access_permission: access_permission,
+      movement_warehouses,
     });
   };
 
@@ -192,17 +193,19 @@ const Role = () => {
       id: null,
       role_name: "",
       access_permission: null,
+      movement_warehouses: null,
     });
   };
 
   const onViewRoleHandler = (props) => {
-    const { id, role_name, access_permission } = props;
+    const { id, role_name, access_permission, movement_warehouses } = props;
     setUpdateRole({
       status: true,
       action: "view",
       id: id,
       role_name: role_name,
       access_permission: access_permission,
+      movement_warehouses,
     });
   };
 
