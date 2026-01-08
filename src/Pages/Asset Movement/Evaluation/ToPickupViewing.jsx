@@ -7,6 +7,8 @@ import {
 import {
   Box,
   Button,
+  Checkbox,
+  FormControlLabel,
   Skeleton,
   Stack,
   Table,
@@ -18,9 +20,11 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { ArrowBackIosRounded, Help, ShoppingCartCheckout } from "@mui/icons-material";
+import { ArrowBackIosRounded, Cancel, CoPresent, Help, ReportProblem, ShoppingCartCheckout } from "@mui/icons-material";
 import CustomTextField from "../../../Components/Reusable/CustomTextField";
 import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import { useDispatch } from "react-redux";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
@@ -29,11 +33,14 @@ import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 import { notificationApi } from "../../../Redux/Query/Notification";
 import ToPickupSkeleton from "./Skeleton/ToPickupSkeleton";
 
+const schema = yup.object().shape({
+  item_id: yup.array(),
+});
+
 const ToPickupViewing = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { state: pickupData } = useLocation();
-  console.log("pickupData", pickupData);
 
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
   const isMediumScreen = useMediaQuery("(max-width: 640px)");
@@ -52,16 +59,44 @@ const ToPickupViewing = () => {
 
   const [pickUpTrigger] = usePatchPickupAssetApiMutation();
 
-  const { control, setValue } = useForm({
+  const { control, watch, reset, register, setValue } = useForm({
+    resolver: yupResolver(schema),
     defaultValues: {
+      item_id: [],
       description: pickupData?.description || null,
-      care_of: pickupData?.care_of || null,
+      care_of: pickupData?.care_of?.name || null,
       helpdesk_number: pickupData?.helpdesk_number || null,
       requestor:
         `${pickupData?.requester?.employee_id} - ${pickupData?.requester?.first_name} ${pickupData?.requester?.last_name}` ||
         null,
     },
   });
+
+  const handleRowClick = (id) => {
+    const current = watch("item_id");
+
+    if (current.includes(id)) {
+      // remove
+      setValue(
+        "item_id",
+        current.filter((item) => item !== id)
+      );
+    } else {
+      // add
+      setValue("item_id", [...current, id]);
+    }
+  };
+
+  const handleAllHandler = (checked) => {
+    if (checked) {
+      setValue(
+        "item_id",
+        evaluationData?.assets?.map((item) => item.pullout_id?.toString())
+      );
+    } else {
+      reset({ item_id: [] });
+    }
+  };
 
   //   useEffect(() => {
   //     if (evaluationData) {
@@ -78,11 +113,12 @@ const ToPickupViewing = () => {
     pb: "10px",
   };
 
-  const onPickupHandler = (id) => {
+  const onPickupHandler = (data) => {
+    console.log("pickuphandler data", data);
     dispatch(
       openConfirm({
-        icon: Help,
-        iconColor: "info",
+        icon: data?.action === "Cancel" ? ReportProblem : Help,
+        iconColor: data?.action === "Cancel" ? "warning" : "info",
         message: (
           <Box>
             <Typography> Are you sure you want to</Typography>
@@ -94,7 +130,7 @@ const ToPickupViewing = () => {
                 fontFamily: "Raleway",
               }}
             >
-              PICKUP
+              {data.action.toUpperCase()}
             </Typography>{" "}
             this asset?
           </Box>
@@ -128,7 +164,7 @@ const ToPickupViewing = () => {
 
           try {
             dispatch(onLoading());
-            const result = await pickUpTrigger({ id }).unwrap();
+            const result = await pickUpTrigger(data).unwrap();
 
             dispatch(
               openToast({
@@ -170,79 +206,140 @@ const ToPickupViewing = () => {
           {isEvaluationLoading || isEvaluationFetching ? (
             <Skeleton variant="rounded" width={80} height={30} />
           ) : (
-            <Box>
+            <Box sx={{ display: "flex", gap: 1 }}>
               <Button
-                onClick={() => onPickupHandler(evaluationData?.id)}
+                onClick={() =>
+                  onPickupHandler({
+                    id: evaluationData?.id,
+                    movement_id: [evaluationData?.id],
+                    pullout_id: watch("item_id"),
+                    action: "Pick-up",
+                  })
+                }
                 variant="contained"
-                startIcon={<ShoppingCartCheckout color="primary" />}
+                startIcon={!isSmallScreen && <ShoppingCartCheckout color={"primary"} />}
                 size="small"
                 color="secondary"
-                sx={isSmallScreen ? { minWidth: "50px" } : null}
+                disabled={watch("item_id").length === 0}
               >
                 Pickup
+              </Button>
+              <Button
+                onClick={() =>
+                  onPickupHandler({
+                    id: evaluationData?.id,
+                    movement_id: [evaluationData?.id],
+                    pullout_id: watch("item_id"),
+                    action: "On-site",
+                  })
+                }
+                variant="contained"
+                startIcon={!isSmallScreen && <CoPresent color="secondary" />}
+                size="small"
+                color="primary"
+                disabled={watch("item_id").length === 0}
+              >
+                on-site
+              </Button>
+              <Button
+                onClick={() =>
+                  onPickupHandler({
+                    id: evaluationData?.id,
+                    movement_id: [evaluationData?.id],
+                    pullout_id: watch("item_id"),
+                    action: "Cancel",
+                  })
+                }
+                variant="contained"
+                startIcon={!isSmallScreen && <Cancel color="#973131" />}
+                size="small"
+                color="warning"
+                disabled={watch("item_id").length === 0}
+              >
+                Cancel
               </Button>
             </Box>
           )}
         </Stack>
 
-        <Box className={isMediumScreen ? "mcontainer__wrapper" : "request mcontainer_wrapper"} p={2}>
-          <Box>
+        <Box
+          className={"mcontainer__wrapper"}
+          p={2}
+          sx={{
+            display: "flex",
+            flexDirection: isMediumScreen ? "column" : "row",
+            gap: 2,
+          }}
+        >
+          {isMediumScreen && (
             <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
               TRANSACTION No. {pickupData && pickupData?.id}
             </Typography>
-
-            <Box id="requestForm" className="request__form">
-              <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "15px" }}>
-                REQUEST DETAILS
+          )}
+          <Box
+            id="requestForm"
+            className="request__form"
+            sx={{ order: isMediumScreen ? 2 : 1, flex: 1, borderTop: isMediumScreen && 1, borderColor: "divider" }}
+          >
+            {!isMediumScreen && (
+              <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }} mb={2}>
+                TRANSACTION No. {pickupData && pickupData?.id}
               </Typography>
-              <Stack gap={2} py={1}>
-                {isEvaluationLoading ? (
-                  <ToPickupSkeleton />
-                ) : (
-                  <Box sx={BoxStyle}>
-                    <CustomTextField
-                      control={control}
-                      name="description"
-                      disabled
-                      label="Description"
-                      type="text"
-                      fullWidth
-                      multiline
-                    />
-                    <CustomTextField
-                      control={control}
-                      name="helpdesk_number"
-                      disabled
-                      label="Helpdesk Number"
-                      type="text"
-                      fullWidth
-                      multiline
-                    />
+            )}
+            <Typography
+              color="secondary.main"
+              sx={{ fontFamily: "Anton", fontSize: "15px", marginTop: isMediumScreen && 2 }}
+            >
+              REQUEST DETAILS
+            </Typography>
+            <Stack gap={2} py={1}>
+              {isEvaluationLoading ? (
+                <ToPickupSkeleton />
+              ) : (
+                <Box sx={BoxStyle}>
+                  <CustomTextField
+                    control={control}
+                    name="description"
+                    label="Description"
+                    type="text"
+                    fullWidth
+                    multiline
+                    inputProps={{ readOnly: true }}
+                  />
+                  <CustomTextField
+                    control={control}
+                    name="helpdesk_number"
+                    label="Helpdesk Number"
+                    type="text"
+                    fullWidth
+                    multiline
+                    inputProps={{ readOnly: true }}
+                  />
 
-                    <CustomTextField
-                      control={control}
-                      name="care_of"
-                      disabled
-                      label="Care Of"
-                      type="text"
-                      fullWidth
-                      multiline
-                    />
-                    <CustomTextField
-                      control={control}
-                      name="requestor"
-                      disabled
-                      label="Requestor"
-                      type="text"
-                      fullWidth
-                      multiline
-                    />
-                  </Box>
-                )}
-              </Stack>
-            </Box>
+                  <CustomTextField
+                    control={control}
+                    name="care_of"
+                    label="Care Of"
+                    type="text"
+                    fullWidth
+                    multiline
+                    inputProps={{ readOnly: true }}
+                  />
+                  <CustomTextField
+                    control={control}
+                    name="requestor"
+                    label="Requestor"
+                    type="text"
+                    fullWidth
+                    multiline
+                    inputProps={{ readOnly: true }}
+                  />
+                </Box>
+              )}
+            </Stack>
           </Box>
-          <Box className="request__table">
+
+          <Box className="request__table" sx={{ order: isMediumScreen ? 1 : 2 }}>
             <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }} textAlign={"center"}>
               ASSET DETAILS
             </Typography>
@@ -260,6 +357,25 @@ const ToPickupViewing = () => {
                       },
                     }}
                   >
+                    <TableCell align="center" className="tbl-cell">
+                      <FormControlLabel
+                        sx={{ margin: "auto", align: "center" }}
+                        control={
+                          <Checkbox
+                            value=""
+                            size="small"
+                            checked={
+                              !!evaluationData?.assets
+                                ?.map((mapItem) => mapItem?.pullout_id?.toString())
+                                ?.every((item) => watch("item_id").includes(item?.toString()))
+                            }
+                            onChange={(e) => {
+                              handleAllHandler(e.target.checked);
+                            }}
+                          />
+                        }
+                      />
+                    </TableCell>
                     <TableCell className="tbl-cell" align="center">
                       Id
                     </TableCell>
@@ -284,7 +400,21 @@ const ToPickupViewing = () => {
                     <LoadingData />
                   ) : (
                     evaluationData?.assets?.map((item) => (
-                      <TableRow key={item.id}>
+                      <TableRow key={item.id} hover onClick={() => handleRowClick(item?.pullout_id.toString())}>
+                        <TableCell className="tbl-cell" size="small" align="center">
+                          <FormControlLabel
+                            value={item?.pullout_id}
+                            sx={{ margin: "auto" }}
+                            control={
+                              <Checkbox
+                                size="small"
+                                {...register("item_id")}
+                                checked={watch("item_id").includes(item?.pullout_id?.toString())}
+                                onClick={(e) => e.stopPropagation()}
+                              />
+                            }
+                          />
+                        </TableCell>
                         <TableCell className="tbl-cell text-weight" align="center">
                           {item.id}
                         </TableCell>
@@ -345,10 +475,15 @@ const ToPickupViewing = () => {
                 </TableBody>
               </Table>
             </TableContainer>
-            <Typography fontFamily="Anton, Impact, Roboto" fontSize="16px" color="secondary.main" pt="10px">
-              No. of Asset in Request: {evaluationData?.assets.length} Asset
-              {evaluationData?.assets.length >= 2 ? "s" : null}
-            </Typography>
+            <Box sx={{ justifyContent: "space-between", display: "flex", mt: 1 }}>
+              <Typography fontFamily="Anton, Impact, Roboto" fontSize="16px" color="secondary.main" pt="10px">
+                Selected: {watch("item_id").length} {watch("item_id").length >= 2 ? "Assets" : "Asset"}
+              </Typography>
+
+              <Typography fontFamily="Anton, Impact, Roboto" fontSize="16px" color="secondary.main" pt="10px">
+                No. of Asset in Request: {evaluationData?.assets.length}
+              </Typography>
+            </Box>
           </Box>
         </Box>
       </Box>
