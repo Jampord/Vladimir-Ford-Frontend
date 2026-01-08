@@ -8,7 +8,6 @@ import { IosShareRounded } from "@mui/icons-material";
 import { closeExport } from "../../Redux/StateManagement/booleanStateSlice";
 import { useDispatch } from "react-redux";
 import { useLazyGetRequestExportApiQuery } from "../../Redux/Query/Request/Requisition";
-import useExcel from "../../Hooks/Xlsx";
 import { openToast } from "../../Redux/StateManagement/toastSlice";
 import moment from "moment";
 import useExcelJs from "../../Hooks/ExcelJs";
@@ -19,7 +18,6 @@ const schema = yup.object().shape({
   to: yup.string().required().typeError("Please provide a TO date"),
 });
 const ExportRequisition = () => {
-  // const { excelExport } = useExcel();
   const { excelExport } = useExcelJs();
 
   const [
