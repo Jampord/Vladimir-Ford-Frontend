@@ -130,6 +130,7 @@ import Redirect from "./Routes/Redirect";
 import DeliveryType from "./Pages/Delivery Type/DeliveryType";
 import MovementWarehouse from "./Pages/Masterlist/MovementWarehouse";
 import Bidding from "./Pages/Asset Movement/Bidding/Bidding";
+import AssetMonitoring from "./Pages/Monitoring/AssetMonitoring";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -727,6 +728,11 @@ const router = createBrowserRouter([
                 path: "transfer-receiving-monitoring",
                 element: <TransferReceivingMonitoring />,
                 handle: { permission: "transfer-receiving-monitoring" },
+              },
+              {
+                path: "asset-monitoring",
+                element: <AssetMonitoring />,
+                handle: { permission: "asset-monitoring" },
               },
             ],
           },
