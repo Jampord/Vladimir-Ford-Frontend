@@ -116,8 +116,10 @@ import {
   Engineering,
   Gite,
   LocalAtm,
+  ImportantDevices,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
+import { resetGetData } from "../Redux/StateManagement/actionMenuSlice";
 
 const Sidebar = () => {
   const [state, setState] = useState(true);
@@ -882,6 +884,13 @@ const Sidebar = () => {
           permission: "transfer-receiving-monitoring",
           setter: closeCollapse,
         },
+        {
+          label: "Asset Monitoring",
+          icon: ImportantDevices,
+          path: "/monitoring/asset-monitoring",
+          permission: "asset-monitoring",
+          setter: closeCollapse,
+        },
       ],
       open: monitoringCollapse,
       setter: () => {
@@ -1033,6 +1042,7 @@ const Sidebar = () => {
                   }}
                   disablePadding
                   dense
+                  onClick={() => dispatch(resetGetData())}
                 >
                   <Tooltip title={!collapse && item.label} TransitionComponent={Zoom} placement="right" arrow>
                     <ListItemButton
