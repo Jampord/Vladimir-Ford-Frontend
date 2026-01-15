@@ -157,6 +157,13 @@ export const requisitionApi = createApi({
       // `/export-aging?from=${params?.from}&to=${params?.to}&data_all=${params?.export}`,
       providesTags: ["Requisition"],
     }),
+
+    getAssetMonitoringApi: builder.query({
+      query: (params) => ({ url: "department-asset-monitoring", params }),
+
+      // `/export-aging?from=${params?.from}&to=${params?.to}&data_all=${params?.export}`,
+      providesTags: ["Requisition"],
+    }),
   }),
 });
 
@@ -180,4 +187,5 @@ export const {
   useDeleteRequisitionReferenceApiMutation,
   useLazyGetRequestExportApiQuery,
   useLazyGetWarehouseExportApiQuery,
+  useGetAssetMonitoringApiQuery,
 } = requisitionApi;
