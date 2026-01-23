@@ -8,6 +8,7 @@ import { Box, Typography, useMediaQuery } from "@mui/material";
 import {
   Addchart,
   Analytics,
+  InventoryRounded,
   PlaylistRemoveRounded,
   Radar,
   RemoveFromQueue,
@@ -54,6 +55,13 @@ const ReportList = [
     description: "List of Depreciation Monthly Report",
     path: "/reports/depreciation-monthly-report",
     permission: "depreciation-monthly-report",
+  },
+  {
+    icon: <InventoryRounded />,
+    label: "Fixed Assets Report",
+    description: "List of Fixed Assets Report",
+    path: "/reports/fixed-assets-report",
+    permission: "fixed-assets-report",
   },
 
   // {
