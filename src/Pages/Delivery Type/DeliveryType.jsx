@@ -121,8 +121,6 @@ const DeliveryType = () => {
     setAnchorEl(null);
   };
 
-  console.log("123", watch("fixed_assets").map(Number));
-
   const handleActionClick = (data) => {
     dispatch(
       openConfirm({
@@ -370,32 +368,32 @@ const DeliveryType = () => {
                                 {" - "} {data?.one_charging?.name}
                               </Typography>
                               <Typography fontSize="10px" color="gray">
-                                {data.one_charging.company_code}
-                                {" - "} {data.one_charging.company_name}
+                                {data?.one_charging?.company_code}
+                                {" - "} {data?.one_charging?.company_name}
                               </Typography>
                               <Typography fontSize="10px" color="gray">
-                                {data.one_charging.business_unit_code}
+                                {data?.one_charging?.business_unit_code}
                                 {" - "}
-                                {data.one_charging.business_unit_name}
+                                {data?.one_charging?.business_unit_name}
                               </Typography>
                               <Typography fontSize="10px" color="gray">
-                                {data.one_charging.department_code}
+                                {data?.one_charging?.department_code}
                                 {" - "}
-                                {data.one_charging.department_name}
+                                {data?.one_charging?.department_name}
                               </Typography>
                               <Typography fontSize="10px" color="gray">
-                                {data.one_charging.unit_code}
+                                {data?.one_charging?.unit_code}
                                 {" - "}
-                                {data.one_charging.unit_name}
+                                {data?.one_charging?.unit_name}
                               </Typography>
                               <Typography fontSize="10px" color="gray">
-                                {data.one_charging.subunit_code}
+                                {data?.one_charging?.subunit_code}
                                 {" - "}
-                                {data.one_charging.subunit_name}
+                                {data?.one_charging?.subunit_name}
                               </Typography>
                               <Typography fontSize="10px" color="gray">
-                                {data.one_charging.location_code} {" - "}
-                                {data.one_charging.location_name}
+                                {data?.one_charging?.location_code} {" - "}
+                                {data?.one_charging?.location_name}
                               </Typography>
                             </TableCell>
 
