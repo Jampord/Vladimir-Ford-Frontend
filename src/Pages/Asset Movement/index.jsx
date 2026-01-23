@@ -10,6 +10,7 @@ import {
   CallReceived,
   HighlightAlt,
   History,
+  LocalAtm,
   MoveDownOutlined,
   PlaylistRemoveRounded,
   RemoveFromQueue,
@@ -93,6 +94,13 @@ const AssetMovement = () => {
       path: "/asset-movement/disposal-receiving",
       permission: "disposal-receiving",
       notification: notifData?.disposalReceivingCount,
+    },
+    {
+      icon: <LocalAtm />,
+      label: "Bidding",
+      description: "List and Details of Asset Bidding",
+      path: "/asset-movement/bidding",
+      permission: "bidding",
     },
   ];
   const location = useLocation();
