@@ -60,6 +60,7 @@ const ReleasingTable = ({ released, direct, warehouse }) => {
   const [perPage, setPerPage] = useState(getNumericParam("per_page", 5));
   const [page, setPage] = useState(getNumericParam("page", 1));
   const [wNumber, setWNumber] = useState([]);
+  const [locationFilter, setLocationFilter] = useState([]);
 
   const navigate = useNavigate();
   const isSmallScreen = useMediaQuery("(max-width: 940px)");
@@ -152,6 +153,7 @@ const ReleasingTable = ({ released, direct, warehouse }) => {
       search: search,
       isReleased: released ? 1 : 0,
       delivery_type: direct ? "direct" : warehouse ? "warehouse" : "",
+      location_id: locationFilter,
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -261,7 +263,14 @@ const ReleasingTable = ({ released, direct, warehouse }) => {
       {releasingData && !releasingError && (
         <>
           <Box className="mcontainer__wrapper">
-            <MasterlistToolbar onStatusChange={setStatus} onSearchChange={setSearch} onSetPage={setPage} hideArchive />
+            <MasterlistToolbar
+              onStatusChange={setStatus}
+              onSearchChange={setSearch}
+              onSetPage={setPage}
+              hideArchive
+              locationFilter={locationFilter}
+              setLocationFilter={setLocationFilter}
+            />
             {!released && (
               <Button
                 variant="contained"
