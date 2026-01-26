@@ -218,6 +218,7 @@ const AddRole = (props) => {
     "requisition-rr-summary",
     "requisition-releasing",
     "requisition-releasing-monitoring",
+    "delivery-type",
 
     //Asset Movement
     "transfer",
@@ -426,6 +427,7 @@ const AddRole = (props) => {
       { label: "Approving", value: "approving" },
       { label: "Reports", value: "reports" },
       { label: "Setup Settings", value: "setup-settings" },
+      { label: "Physical Inventory", value: "physical-inventory" },
       { label: "Movement Warehouse", value: "movement-warehouse" },
     ];
 
@@ -1024,7 +1026,7 @@ const AddRole = (props) => {
                                     "category",
                                     "status-category",
                                     "unit-of-measurement",
-                                    "movement-warehouse",
+                                    "movement-warehouse-masterlist",
                                     // "small-tools",
                                   ]),
                                 ]);
