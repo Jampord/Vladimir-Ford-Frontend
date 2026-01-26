@@ -126,6 +126,7 @@ import { addCapexApi } from "../Query/Capex/AddCapex";
 import { operationApi } from "../Query/Masterlist/Operation";
 import { deliveryTypeApi } from "../Query/Delivery Type/DeliveryType";
 import { biddingApi } from "../Query/Movement/Bidding";
+import { physicalInventoryApi } from "../Query/Physical Inventory/PhysicalInventory";
 
 export const store = configureStore({
   reducer: {
@@ -261,6 +262,9 @@ export const store = configureStore({
 
     //Delivery Type
     [deliveryTypeApi.reducerPath]: deliveryTypeApi.reducer,
+
+    //Physical Inventory
+    [physicalInventoryApi.reducerPath]: physicalInventoryApi.reducer,
   },
 
   middleware: (getDefaultMiddleware) =>
@@ -380,6 +384,9 @@ export const store = configureStore({
 
       //Delivery Type
       deliveryTypeApi.middleware,
+
+      //Physical Inventory
+      physicalInventoryApi.middleware,
     ]),
 });
 
