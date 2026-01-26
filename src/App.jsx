@@ -131,6 +131,7 @@ import DeliveryType from "./Pages/Delivery Type/DeliveryType";
 import MovementWarehouse from "./Pages/Masterlist/MovementWarehouse";
 import Bidding from "./Pages/Asset Movement/Bidding/Bidding";
 import AssetMonitoring from "./Pages/Monitoring/AssetMonitoring";
+import PhysicalInventory from "./Pages/Physical Inventory/PhysicalInventory";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -784,6 +785,11 @@ const router = createBrowserRouter([
             path: "delivery-type",
             element: <DeliveryType />,
             handle: { permission: "delivery-type" },
+          },
+          {
+            path: "physical-inventory",
+            element: <PhysicalInventory />,
+            handle: { permission: "physical-inventory" },
           },
         ],
       },
