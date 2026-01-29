@@ -7,6 +7,7 @@ import {
   MoreVert,
   Remove,
   RemoveCircle,
+  TransferWithinAStation,
 } from "@mui/icons-material";
 import {
   Autocomplete,
@@ -442,6 +443,15 @@ const AddPullout = () => {
   const handleRequestNavigateClick = (data) => {
     dispatch(getData(data));
     navigate("/asset-requisition/requisition/add-requisition", {
+      // state: { ...data, pullout: true },
+      // replace: true,
+    });
+    setAnchorEl(null);
+  };
+
+  const handleTransferNavigateClick = (data) => {
+    dispatch(getData(data));
+    navigate("/asset-movement/transfer/add-transfer", {
       // state: { ...data, pullout: true },
       // replace: true,
     });
@@ -1115,6 +1125,13 @@ const AddPullout = () => {
                       <AddToPhotos />
                     </ListItemIcon>
                     <ListItemText> Request</ListItemText>
+                  </MenuItem>
+                  {/* added asset to match other api's response*/}
+                  <MenuItem onClick={() => handleTransferNavigateClick([{ asset: data?.assets[selectedIndex] }])}>
+                    <ListItemIcon>
+                      <TransferWithinAStation />
+                    </ListItemIcon>
+                    <ListItemText> Transfer</ListItemText>
                   </MenuItem>
                 </Menu>
 
