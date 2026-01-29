@@ -117,6 +117,8 @@ import {
   Gite,
   LocalAtm,
   ImportantDevices,
+  Inventory,
+  ChangeCircle,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 import { resetGetData } from "../Redux/StateManagement/actionMenuSlice";
@@ -694,6 +696,14 @@ const Sidebar = () => {
           setter: closeCollapse,
         },
         {
+          label: "Care of Confirmation",
+          icon: ChangeCircle,
+          path: "/asset-movement/change-care-of-confirmation",
+          permission: "pull-out",
+          notification: notifData?.repairedCount,
+          setter: closeCollapse,
+        },
+        {
           label: "Disposal",
           icon: PlaylistRemoveRounded,
           path: "/asset-movement/disposal",
@@ -981,6 +991,13 @@ const Sidebar = () => {
       permission: "delivery-type",
       setter: closeCollapse,
       notification: notifData?.toDeliveryTypeTaggingCount,
+    },
+    {
+      label: "Physical Inventory",
+      icon: Inventory,
+      path: "/physical-inventory",
+      permission: "physical-inventory",
+      setter: closeCollapse,
     },
   ];
 
