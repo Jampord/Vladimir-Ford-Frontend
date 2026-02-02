@@ -107,7 +107,7 @@ import FixedAssetDepreciationView from "./Pages/FixedAssets/Depreciation/FixedAs
 import PurchaseRequestRecon from "./Pages/Reports/PurchaseRequestRecon";
 import DepreciationMonthlyReport from "./Pages/Reports/DepreciationMonthlyReport";
 import OneRDFCharging from "./Pages/Masterlist/OneRDFCharging";
-import PulloutConfirmation from "./Pages/Asset Movement/Pullout Confirmation/PulloutConfirmation";
+import RepairConfirmation from "./Pages/Asset Movement/Pullout Confirmation/RepairConfirmation";
 import ReleasingOfAssetMonitoring from "./Pages/Asset Requisition/Releasing of Asset/ReleasingOfAssetMonitoring";
 import ShipTo from "./Pages/Masterlist/ShipTo";
 import Monitoring from "./Pages/Monitoring";
@@ -132,6 +132,8 @@ import MovementWarehouse from "./Pages/Masterlist/MovementWarehouse";
 import Bidding from "./Pages/Asset Movement/Bidding/Bidding";
 import AssetMonitoring from "./Pages/Monitoring/AssetMonitoring";
 import PhysicalInventory from "./Pages/Physical Inventory/PhysicalInventory";
+import ChangeCareOf from "./Pages/Asset Movement/Pullout Confirmation/ChangeCareOf";
+import RepairMonitoring from "./Pages/Monitoring/RepairMonitoring";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -538,8 +540,13 @@ const router = createBrowserRouter([
                 handle: { permission: "pull-out" },
               },
               {
-                path: "pull-out-confirmation",
-                element: <PulloutConfirmation />,
+                path: "repair-confirmation",
+                element: <RepairConfirmation />,
+                handle: { permission: "pull-out" },
+              },
+              {
+                path: "change-care-of-confirmation",
+                element: <ChangeCareOf />,
                 handle: { permission: "pull-out" },
               },
               {
@@ -734,6 +741,11 @@ const router = createBrowserRouter([
                 path: "asset-monitoring",
                 element: <AssetMonitoring />,
                 handle: { permission: "asset-monitoring" },
+              },
+              {
+                path: "repair-monitoring",
+                element: <RepairMonitoring />,
+                handle: { permission: "repair-monitoring" },
               },
             ],
           },
