@@ -18,7 +18,7 @@ export const pulloutApi = createApi({
 
   endpoints: (builder) => ({
     getPulloutApi: builder.query({
-      query: (params) => `pullout?per_page=${params.per_page}&page=${params.page}`,
+      query: (params) => ({ url: `pullout`, params }),
       providesTags: ["Pullout"],
     }),
 
