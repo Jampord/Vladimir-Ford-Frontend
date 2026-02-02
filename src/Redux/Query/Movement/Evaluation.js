@@ -80,6 +80,14 @@ export const evaluationApi = createApi({
       }),
       invalidatesTags: ["Evaluation"],
     }),
+    patchReturnEvaluationApi: builder.mutation({
+      query: (body) => ({
+        url: `return-to-evaluation`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Evaluation"],
+    }),
   }),
 });
 
@@ -94,4 +102,5 @@ export const {
   usePatchChangeCareOfAssetApiMutation,
   useGetChangeCareOfPulloutAssetsApiQuery,
   usePatchChangeCareOfAssetConfirmationApiMutation,
+  usePatchReturnEvaluationApiMutation,
 } = evaluationApi;
