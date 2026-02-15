@@ -682,17 +682,20 @@ const Sidebar = () => {
           notification:
             notifData?.toPickUpCount +
             notifData?.toEvaluateCount +
-            notifData?.toReplaceCount +
+            // notifData?.toReplaceCount +
+            notifData?.repairedCount +
+            notifData?.forSafeKeepingCount +
             notifData?.spareCount +
+            notifData?.forBiddingCount +
             notifData?.disposalCount,
           setter: closeCollapse,
         },
         {
-          label: "Pullout Confirmation",
-          icon: AssignmentTurnedIn,
-          path: "/asset-movement/pull-out-confirmation",
+          label: "Repair Confirmation",
+          icon: HomeRepairService,
+          path: "/asset-movement/repair-confirmation",
           permission: "pull-out",
-          notification: notifData?.repairedCount,
+          notification: notifData?.repairedConfirmationCount,
           setter: closeCollapse,
         },
         {
@@ -700,7 +703,7 @@ const Sidebar = () => {
           icon: ChangeCircle,
           path: "/asset-movement/change-care-of-confirmation",
           permission: "pull-out",
-          notification: notifData?.repairedCount,
+          notification: notifData?.careOfConfirmationCount,
           setter: closeCollapse,
         },
         {
@@ -899,6 +902,13 @@ const Sidebar = () => {
           icon: ImportantDevices,
           path: "/monitoring/asset-monitoring",
           permission: "asset-monitoring",
+          setter: closeCollapse,
+        },
+        {
+          label: "Repair Monitoring",
+          icon: HomeRepairService,
+          path: "/monitoring/repair-monitoring",
+          permission: "repair-monitoring",
           setter: closeCollapse,
         },
       ],
