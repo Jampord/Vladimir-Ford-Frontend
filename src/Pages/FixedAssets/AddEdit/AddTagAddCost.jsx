@@ -18,6 +18,7 @@ import * as yup from "yup";
 import { closeConfirm, onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import CustomNumberField from "../../../Components/Reusable/CustomNumberField";
+import moment from "moment";
 
 const schema = yup.object().shape({
   //   selected_fixed_asset_id: yup.string().nullable(),
@@ -26,12 +27,12 @@ const schema = yup.object().shape({
 });
 
 const AddTagAddCost = ({ data, resetHandler, tabValue }) => {
-  console.log("data: ", data);
-  console.log("tabValue: ", tabValue);
   const selectedFixedAsset = data.map((item) => item?.vladimir_tag_number);
-  //   console.log("selectedFixedAsset: ", selectedFixedAsset);
   const selectedFixedAssetId = data.map((item) => item?.id);
-  //   console.log("selectedFixedAssetId: ", selectedFixedAssetId);
+
+  const dateNowMonthYear = new Date().toLocaleDateString("en-US", { month: "2-digit", year: "numeric" });
+
+  const dateMatch = dateNowMonthYear == data.map((item) => moment(item?.created_at).format("MM/YYYY"));
 
   const dispatch = useDispatch();
 
@@ -78,8 +79,7 @@ const AddTagAddCost = ({ data, resetHandler, tabValue }) => {
     getValues,
   } = useForm({
     resolver: yupResolver(schema),
-    // mode: "onSubmit",
-    defaultValues: { selected_fixed_asset_id: selectedFixedAsset, fixed_asset_id: null, usefulLife: 1 },
+    defaultValues: { selected_fixed_asset_id: selectedFixedAsset, fixed_asset_id: null, usefulLife: dateMatch ? 0 : 1 },
   });
 
   useEffect(() => {
@@ -108,13 +108,11 @@ const AddTagAddCost = ({ data, resetHandler, tabValue }) => {
   }, [isPostError]);
 
   const onSubmitHandler = (formData) => {
-    console.log("formdata", formData);
     const newFormData = {
       vTagNumber: formData?.fixed_asset_id?.vladimir_tag_number,
       addCost: selectedFixedAssetId,
       usefulLife: formData?.usefulLife,
     };
-    console.log("submit", newFormData);
 
     dispatch(
       openConfirm({
@@ -134,9 +132,6 @@ const AddTagAddCost = ({ data, resetHandler, tabValue }) => {
               SELECTED
             </Typography>{" "}
             items as Additional Cost?
-            {/* <Typography color="error" fontSize={"14px"}>
-                This action is irreversible.
-              </Typography> */}
           </Box>
         ),
         onConfirm: async () => {
@@ -149,11 +144,6 @@ const AddTagAddCost = ({ data, resetHandler, tabValue }) => {
             resetHandler();
           } catch (err) {
             console.log(err);
-            // if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
-            //   // reset();
-            // } else if (err?.status !== 422) {
-            //   // reset();
-            // }
           }
         },
       })
@@ -242,7 +232,7 @@ const AddTagAddCost = ({ data, resetHandler, tabValue }) => {
             helperText={errors?.usefulLife?.message}
             isAllowed={(values) => {
               const { floatValue } = values;
-              return floatValue >= 1;
+              return dateMatch ? floatValue >= 0 : floatValue >= 1;
             }}
           />
         </Box>
