@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Chip,
   Dialog,
   Grow,
   IconButton,
@@ -58,7 +57,6 @@ const Pullout = () => {
   };
 
   const pageHandler = (_, page) => {
-    // console.log(page + 1);
     setPage(page + 1);
   };
 
@@ -74,87 +72,13 @@ const Pullout = () => {
     {
       page: page,
       per_page: perPage,
+      search: search,
+      // status: status,
     },
     { refetchOnMountOrArgChange: true }
   );
 
   const [voidPullout] = usePatchVoidPulloutApiMutation();
-
-  const transactionStatus = (data) => {
-    let statusColor, hoverColor, textColor, variant;
-
-    switch (data.status) {
-      case "Waiting to be Received":
-        statusColor = "success.light";
-        hoverColor = "success.main";
-        textColor = "white";
-        variant = "filled";
-        break;
-
-      case "Received":
-        statusColor = "success.dark";
-        hoverColor = "success.dark";
-        variant = "filled";
-        break;
-
-      case "On Evaluation":
-        statusColor = "primary.main";
-        textColor = "primary.main";
-        hoverColor = "";
-        variant = "outlined";
-        break;
-
-      // case "Sent to ymir for PO":
-      //   statusColor = "ymir.light";
-      //   hoverColor = "ymir.main";
-      //   variant = "filled";
-      //   break;
-
-      case "Returned":
-      case "Cancelled":
-      case "Returned From Ymir":
-        statusColor = "error.light";
-        hoverColor = "error.main";
-        variant = "filled";
-        break;
-
-      default:
-        statusColor = "success.main";
-        hoverColor = "none";
-        textColor = "success.main";
-        variant = "outlined";
-    }
-
-    return (
-      <>
-        <Tooltip title={data?.current_approver} placement="top" arrow>
-          <Chip
-            placement="top"
-            onClick={() => handleViewTimeline(data)}
-            size="small"
-            variant={variant}
-            sx={{
-              ...(variant === "filled" && {
-                backgroundColor: statusColor,
-                color: "white",
-              }),
-              ...(variant === "outlined" && {
-                borderColor: statusColor,
-                color: textColor,
-              }),
-              fontSize: "11px",
-              px: 1,
-              ":hover": {
-                ...(variant === "filled" && { backgroundColor: hoverColor }),
-                ...(variant === "outlined" && { borderColor: hoverColor, color: textColor }),
-              },
-            }}
-            label={data.status}
-          />
-        </Tooltip>
-      </>
-    );
-  };
 
   const onVoidHandler = async (id) => {
     dispatch(
@@ -287,9 +211,6 @@ const Pullout = () => {
                         View Information
                       </TableCell>
                       <TableCell className="tbl-cell" align="center">
-                        Status
-                      </TableCell>
-                      <TableCell className="tbl-cell" align="center">
                         Date Requested
                       </TableCell>
                       <TableCell className="tbl-cell" align="center">
@@ -299,7 +220,9 @@ const Pullout = () => {
                   </TableHead>
 
                   <TableBody>
-                    {pulloutData?.data.length === 0 ? (
+                    {isPulloutFetching ? (
+                      <LoadingData />
+                    ) : pulloutData?.data.length === 0 ? (
                       <NoRecordsFound heightData="medium" />
                     ) : (
                       <>
@@ -330,9 +253,6 @@ const Pullout = () => {
                                   <Visibility />
                                 </IconButton>
                               </Tooltip>
-                            </TableCell>
-                            <TableCell className="tbl-cell" align="center">
-                              {transactionStatus(item)}
                             </TableCell>
                             <TableCell className="tbl-cell" align="center">
                               {moment(item?.created_at).format("MMM DD, YYYY")}
