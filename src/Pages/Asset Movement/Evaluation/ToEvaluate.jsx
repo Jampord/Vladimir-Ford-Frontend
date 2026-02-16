@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { closeDialog, closeDialog1 } from "../../../Redux/StateManagement/booleanStateSlice";
+import { closeDialog, closeDialog1, closeDialog3 } from "../../../Redux/StateManagement/booleanStateSlice";
 import {
   Button,
   Stack,
@@ -22,6 +22,7 @@ import "../../../Style/AssetMovement/toEvaluate.scss";
 import {
   Delete,
   FindReplace,
+  Gavel,
   Info,
   KeyboardReturn,
   Lock,
@@ -54,7 +55,7 @@ const schema = yup.object().shape({
   // warehouse: yup.mixed().label("Warehouse"),
 });
 
-const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
+const ToEvaluate = ({ item, evaluation, setEvaluation, safekeeping }) => {
   const [isLoading, setIsLoading] = useState(false);
   console.log("item", item);
   console.log("evaluation", evaluation);
@@ -67,7 +68,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
   console.log("attachmentRef", attachmentRef);
 
   const handleCloseDialog = () => {
-    dispatch(closeDialog1());
+    safekeeping ? dispatch(closeDialog3()) : dispatch(closeDialog1());
     setEvaluation("");
   };
 
@@ -104,7 +105,8 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
         (item) =>
           item?.value ||
           (evaluation === "Return" && "Repaired") ||
-          (evaluation === "For Safekeeping" && "For Safe-Keeping")
+          (evaluation === "For Safekeeping" && "For Safe-Keeping") ||
+          (evaluation === "For Bidding" && "For Bidding")
       ),
       care_of: item[0]?.care_of?.id,
       pullout_ids: item.map((data) => data.id),
@@ -243,10 +245,10 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
       value: "For Disposal",
       label: "For Disposal",
     },
-    {
-      value: "For Bidding",
-      label: "For Bidding",
-    },
+    // {
+    //   value: "For Bidding",
+    //   label: "For Bidding",
+    // },
   ];
 
   return (
@@ -263,6 +265,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
             {evaluation === "For Disposal" && <Delete color="primary" fontSize="medium" />}
             {evaluation === "For Replacement" && <FindReplace color="primary" fontSize="medium" />}
             {evaluation === "For Safekeeping" && <Lock color="primary" fontSize="medium" />}
+            {evaluation === "For Bidding" && <Gavel color="primary" fontSize="medium" />}
             {evaluation}
           </Typography>
 
@@ -335,7 +338,7 @@ const ToEvaluate = ({ item, evaluation, setEvaluation }) => {
 
                       {/* <TableCell align="center">{data?.remarks || "-"}</TableCell> */}
                       <TableCell align="center">
-                        {evaluation === "Return" || evaluation === "For Safekeeping" ? (
+                        {evaluation === "Return" || evaluation === "For Safekeeping" || evaluation === "For Bidding" ? (
                           <Typography fontSize="14px" fontWeight={500} color="black">
                             <StatusComponent faStatus={evaluation === "Return" ? "Repaired" : evaluation} />
                           </Typography>
