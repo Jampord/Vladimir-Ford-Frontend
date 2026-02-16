@@ -32,10 +32,26 @@ const AssignmentMemo = (props) => {
   console.log("data", data);
   console.log("selectedMemo", selectedMemo);
 
+  // useEffect(() => {
+  //   const filteredData = data?.filter((item) => selectedMemo.includes(item.vladimir_tag_number));
+  //   setNewData(filteredData);
+  //   console.log("filteredData", filteredData);
+  // }, [data, selectedMemo, series]);
+
   useEffect(() => {
+    const newData = [];
     const filteredData = data?.filter((item) => selectedMemo.includes(item.vladimir_tag_number));
-    setNewData(filteredData);
     console.log("filteredData", filteredData);
+
+    filteredData.forEach((asset) => {
+      newData.push(asset);
+
+      asset.additional_cost?.forEach((cost) => {
+        newData.push(cost);
+      });
+    });
+
+    setNewData(newData);
   }, [data, selectedMemo, series]);
 
   const handlePrintAssignmentMemo = useReactToPrint({
