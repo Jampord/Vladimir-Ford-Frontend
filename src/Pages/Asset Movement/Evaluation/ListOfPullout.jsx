@@ -50,10 +50,11 @@ const ListOfPullout = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [evaluation, setEvaluation] = useState("");
   const [transactionData, setTransactionData] = useState();
+  const [businessUnitFilter, setBusinessUnitFilter] = useState([]);
 
   const open = Boolean(anchorEl);
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
-  const isMediumScreen = useMediaQuery("(max-width: 1000px)");
+  const isMediumScreen = useMediaQuery("(max-width: 1300px)");
   const dispatch = useDispatch();
 
   const dialog = useSelector((state) => state.booleanState.dialog);
@@ -140,6 +141,7 @@ const ListOfPullout = () => {
       page: page,
       per_page: perPage,
       status: "For Evaluation",
+      business_unit_id: businessUnitFilter,
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -195,6 +197,8 @@ const ListOfPullout = () => {
             onSearchChange={setSearch}
             onSetPage={setPage}
             hideArchive
+            businessUnitFilter={businessUnitFilter}
+            setBusinessUnitFilter={setBusinessUnitFilter}
           />
 
           {(!isEvaluationLoading || !isEvaluationFetching) && (
@@ -293,7 +297,9 @@ const ListOfPullout = () => {
                 </TableHead>
 
                 <TableBody>
-                  {evaluationData?.data.length === 0 ? (
+                  {isEvaluationFetching ? (
+                    <LoadingData />
+                  ) : evaluationData?.data.length === 0 ? (
                     <NoRecordsFound heightData="medium" />
                   ) : (
                     <>
@@ -449,10 +455,6 @@ const ListOfPullout = () => {
 
       <Dialog
         open={dialog1}
-        // onClose={() => {
-        //   closeDialog();
-        //   setEvaluation("");
-        // }}
         maxWidth={"xl"}
         fullWidth
         TransitionComponent={Grow}
