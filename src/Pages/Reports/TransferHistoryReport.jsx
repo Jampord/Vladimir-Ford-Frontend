@@ -109,13 +109,13 @@ const TransferHistoryReport = () => {
         variant = "filled";
         break;
 
-      case "Claimed":
+      case "Spare":
         statusColor = "success.dark";
         hoverColor = "success.dark";
         variant = "filled";
         break;
 
-      case "Sent to Ymir":
+      case "For Replacement":
         statusColor = "ymir.light";
         hoverColor = "ymir.main";
         variant = "filled";
@@ -201,6 +201,8 @@ const TransferHistoryReport = () => {
                       <TableCell className="tbl-cell">Status</TableCell>
                       <TableCell className="tbl-cell">Transfer From</TableCell>
                       <TableCell className="tbl-cell">Transfer To</TableCell>
+                      <TableCell className="tbl-cell">One Charging From</TableCell>
+                      <TableCell className="tbl-cell">One Charging To</TableCell>
                       <TableCell className="tbl-cell">Date Created</TableCell>
                     </TableRow>
                   </TableHead>
@@ -255,6 +257,18 @@ const TransferHistoryReport = () => {
                                   </Typography>
                                   <Typography fontSize="13px" color="black">
                                     {userToSplit[1]}
+                                  </Typography>
+                                </TableCell>
+
+                                <TableCell className="tbl-cell">
+                                  <Typography fontSize="13px" color="black">
+                                    {data?.from_one_charging?.code} - {data?.from_one_charging?.name}
+                                  </Typography>
+                                </TableCell>
+
+                                <TableCell className="tbl-cell">
+                                  <Typography fontSize="13px" color="black">
+                                    {data?.to_one_charging?.code} - {data?.to_one_charging?.name}
                                   </Typography>
                                 </TableCell>
 
