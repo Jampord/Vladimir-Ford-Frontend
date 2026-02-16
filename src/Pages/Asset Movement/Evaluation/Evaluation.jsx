@@ -29,6 +29,12 @@ const Evaluation = () => {
 
   const user = JSON.parse(localStorage.getItem("user")) || {};
   const hasPermission = user?.role?.access_permission.includes("evaluation");
+  const toPickupPermission = user?.movement_warehouse?.evaluation_permission.includes("To Pickup");
+  const listOfPulloutPermission = user?.movement_warehouse?.evaluation_permission.includes("List of Pullout");
+  const forSafekeepingPermission = user?.movement_warehouse?.evaluation_permission.includes("For Safe-Keeping");
+  const sparePermission = user?.movement_warehouse?.evaluation_permission.includes("Spare");
+  const forDisposalPermission = user?.movement_warehouse?.evaluation_permission.includes("For Disposal");
+  const forBiddingPermission = user?.movement_warehouse?.evaluation_permission.includes("For Bidding");
 
   return (
     <Box className="mcontainer">
@@ -39,30 +45,42 @@ const Evaluation = () => {
       <Box>
         <TabContext value={value}>
           <Tabs onChange={handleChange} value={value} variant="scrollable" scrollButtons="auto">
-            <Tab
-              label={
-                <Badge color="error" badgeContent={notifData?.toPickUpCount}>
-                  To Pickup
-                </Badge>
-              }
-              value="1"
-              className={value === "1" ? "tab__background" : null}
-            />
-            <Tab
-              label={
-                <Badge color="error" badgeContent={notifData?.toEvaluateCount}>
-                  List of Pullout
-                </Badge>
-              }
-              value="2"
-              className={value === "2" ? "tab__background" : null}
-            />
-            {/* <Tab label="For Approval" value="3" className={value === "3" ? "tab__background" : null} /> */}
-            <Tab label="Repaired" value="4" className={value === "4" ? "tab__background" : null} />
-            {hasPermission && (
+            {toPickupPermission && (
               <Tab
                 label={
-                  <Badge color="error" badgeContent={0}>
+                  <Badge color="error" badgeContent={notifData?.toPickUpCount}>
+                    To Pickup
+                  </Badge>
+                }
+                value="1"
+                className={value === "1" ? "tab__background" : null}
+              />
+            )}
+            {listOfPulloutPermission && (
+              <Tab
+                label={
+                  <Badge color="error" badgeContent={notifData?.toEvaluateCount}>
+                    List of Pullout
+                  </Badge>
+                }
+                value="2"
+                className={value === "2" ? "tab__background" : null}
+              />
+            )}
+            {/* <Tab label="For Approval" value="3" className={value === "3" ? "tab__background" : null} /> */}
+            <Tab
+              label={
+                <Badge color="error" badgeContent={notifData?.repairedCount}>
+                  Repaired
+                </Badge>
+              }
+              value="4"
+              className={value === "4" ? "tab__background" : null}
+            />
+            {hasPermission && forSafekeepingPermission && (
+              <Tab
+                label={
+                  <Badge color="error" badgeContent={notifData?.forSafeKeepingCount}>
                     For Safekeeping
                   </Badge>
                 }
@@ -70,10 +88,10 @@ const Evaluation = () => {
                 className={value === "5" ? "tab__background" : null}
               />
             )}
-            {hasPermission && (
+            {hasPermission && sparePermission && (
               <Tab
                 label={
-                  <Badge color="error" badgeContent={0}>
+                  <Badge color="error" badgeContent={notifData?.spareCount}>
                     Spare
                   </Badge>
                 }
@@ -81,10 +99,10 @@ const Evaluation = () => {
                 className={value === "6" ? "tab__background" : null}
               />
             )}
-            {hasPermission && (
+            {hasPermission && forDisposalPermission && (
               <Tab
                 label={
-                  <Badge color="error" badgeContent={0}>
+                  <Badge color="error" badgeContent={notifData?.disposalCount}>
                     For Disposal
                   </Badge>
                 }
@@ -92,10 +110,10 @@ const Evaluation = () => {
                 className={value === "7" ? "tab__background" : null}
               />
             )}
-            {hasPermission && (
+            {hasPermission && forBiddingPermission && (
               <Tab
                 label={
-                  <Badge color="error" badgeContent={0}>
+                  <Badge color="error" badgeContent={notifData?.forBiddingCount}>
                     For Bidding
                   </Badge>
                 }
