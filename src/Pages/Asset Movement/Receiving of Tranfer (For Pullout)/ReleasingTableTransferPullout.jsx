@@ -183,10 +183,11 @@ const ReleasingTableTransferPullout = ({ received }) => {
                       <TableCell className="tbl-cell">Transaction #</TableCell>
                       <TableCell className="tbl-cell">Asset</TableCell>
                       <TableCell className="tbl-cell">Custodian</TableCell>
+                      {received && <TableCell className="tbl-cell">Received by</TableCell>}
                       <TableCell className="tbl-cell">From</TableCell>
                       <TableCell className="tbl-cell">To</TableCell>
                       <TableCell className="tbl-cell">Asset Status</TableCell>
-                      <TableCell className="tbl-cell">Date Created</TableCell>
+                      <TableCell className="tbl-cell">{received ? "Date Released" : "Date Created"}</TableCell>
                     </TableRow>
                   </TableHead>
 
@@ -253,6 +254,19 @@ const ReleasingTableTransferPullout = ({ received }) => {
                                   {data?.accountability}
                                 </Typography>
                               </TableCell>
+                              {received && (
+                                <TableCell className="tbl-cell">
+                                  <Typography fontSize={14} fontWeight={550} color="secondary.main">
+                                    {data?.receiver.split(" ")[0]}
+                                  </Typography>
+
+                                  <Typography fontSize={13} fontWeight={400} color="secondary.main">
+                                    {data?.receiver.split(" ")[1]} {data?.receiver.split(" ")[2]}{" "}
+                                    {data?.receiver.split(" ")[3]} {data?.receiver.split(" ")[4]}{" "}
+                                    {data?.receiver.split(" ")[5]}
+                                  </Typography>
+                                </TableCell>
+                              )}
                               <TableCell>
                                 <Typography fontSize={10} color="gray">
                                   ({data?.from_one_charging?.code}) - {data?.from_one_charging?.name}
