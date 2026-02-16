@@ -603,6 +603,11 @@ const ReleasingTable = ({ released, direct, warehouse }) => {
               >
                 EXPORT
               </Button>
+              {
+                <Typography noWrap fontSize="15px" fontFamily="Anton" color="text">
+                  Selected items: {watch("warehouse_number_id").length}
+                </Typography>
+              }
 
               {result === false && (
                 <Typography noWrap fontSize="13px" color="error">
