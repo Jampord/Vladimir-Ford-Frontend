@@ -37,6 +37,7 @@ import {
 import { useGetSubUnitAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/SubUnit";
 import { useGetUnitAllApiQuery } from "../../../Redux/Query/Masterlist/YmirCoa/Unit";
 import { useLazyGetOneRDFChargingAllApiQuery } from "../../../Redux/Query/Masterlist/OneRDF/OneRDFCharging";
+import { useLazyGetMovementWarehouseApiQuery } from "../../../Redux/Query/Masterlist/Warehouse";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -56,6 +57,8 @@ const AddAssetDisposal = (props) => {
   const dispatch = useDispatch();
   const isSmallScreen = useMediaQuery("(max-width:1200px)");
 
+  console.log("data in add asset disposal:", data?.movement_warehouse);
+
   const [
     postAssetDisposal,
     { data: postData, isLoading: isPostLoading, isSuccess: isPostSuccess, isError: isPostError, error: postError },
@@ -71,6 +74,17 @@ const AddAssetDisposal = (props) => {
       error: updateError,
     },
   ] = useArrangeAssetDisposalApiMutation();
+
+  const [
+    movementWarehouseTrigger,
+    {
+      data: movementWarehouseData,
+      isLoading: movementWarehouseLoading,
+      isFetching: movementWarehouseFetching,
+      isSuccess: movementWarehouseSuccess,
+      isError: movementWarehouseError,
+    },
+  ] = useLazyGetMovementWarehouseApiQuery({});
 
   const [
     oneChargingTrigger,
@@ -118,6 +132,7 @@ const AddAssetDisposal = (props) => {
     resolver: yupResolver(schema),
     defaultValues: {
       id: "",
+      movement_warehouse_id: null,
       one_charging_id: null,
       department_id: null,
       company_id: null,
@@ -170,6 +185,7 @@ const AddAssetDisposal = (props) => {
 
   useEffect(() => {
     if (data.status) {
+      setValue("movement_warehouse_id", data?.movement_warehouse);
       setValue("one_charging_id", data?.one_charging);
       setValue("department_id", data?.one_charging);
       setValue("company_id", data?.one_charging);
@@ -210,6 +226,7 @@ const AddAssetDisposal = (props) => {
 
   const onSubmitHandler = (formData) => {
     const newFormData = {
+      movement_warehouse_id: formData.movement_warehouse_id?.id,
       one_charging_id: formData.one_charging_id?.id,
       unit_id: formData.one_charging_id?.unit_id,
       subunit_id: formData.one_charging_id?.subunit_id,
@@ -263,6 +280,28 @@ const AddAssetDisposal = (props) => {
               width: isSmallScreen ? "100%" : "70%",
             }}
           >
+            <CustomAutoComplete
+              autoComplete
+              name="movement_warehouse_id"
+              control={control}
+              disabled={data?.action === "view"}
+              options={movementWarehouseData || []}
+              onOpen={() => (movementWarehouseSuccess ? null : movementWarehouseTrigger({ pagination: "none" }))}
+              getOptionLabel={(option) => option.name || ""}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              disableClearable
+              loading={movementWarehouseLoading || movementWarehouseFetching}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  color="secondary"
+                  label="Movement Warehouse"
+                  error={!!errors?.movement_warehouse_id}
+                  helperText={errors?.movement_warehouse_id?.message}
+                />
+              )}
+            />
+
             <CustomAutoComplete
               autoComplete
               control={control}
