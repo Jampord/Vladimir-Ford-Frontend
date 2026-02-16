@@ -122,8 +122,8 @@ const ExportFixedAsset = () => {
         // console.log(item);
         return {
           // ID: item.id,
-          "Vladimir Tag Number":
-            item.vladimir_tag_number + (item.add_cost_sequence === null ? "" : `-${item.add_cost_sequence}`),
+          "Vladimir Tag Number": item.add_cost_sequence == null ? item.vladimir_tag_number : `-`,
+          Sequence: item.add_cost_sequence || "-",
           "Type Of Request": item.type_of_request,
           "Charged Department": item.charged_department,
           CAPEX: item.capex,
@@ -131,6 +131,7 @@ const ExportFixedAsset = () => {
           "Sub Capex": item.sub_capex,
           "Sub Project Name": item.sub_project,
           // "Old Asset": item.is_old_asset,
+          "Main Asset": item.add_cost_sequence != null ? item.vladimir_tag_number : `-` || "-",
           "Tag Number": item.tag_number,
           "Old Tag Number": item.tag_number_old,
 
