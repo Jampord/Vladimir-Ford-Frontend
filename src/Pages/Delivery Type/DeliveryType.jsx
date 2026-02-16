@@ -162,6 +162,7 @@ const DeliveryType = () => {
             reset();
             dispatch(notificationApi.util.invalidateTags(["Notif"]));
             dispatch(closeConfirm());
+            setAnchorEl(null);
           } catch (err) {
             console.log("err", err);
             if (err?.status === 404) {
