@@ -41,7 +41,10 @@ import { resetGetData } from "../../../Redux/StateManagement/actionMenuSlice";
 import { assetDisposalApi } from "../../../Redux/Query/Settings/AssetDisposal";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import CustomAutoComplete from "../../../Components/Reusable/CustomAutoComplete";
-import { useLazyGetWarehouseAllApiQuery } from "../../../Redux/Query/Masterlist/Warehouse";
+import {
+  useLazyGetMovementWarehouseApiQuery,
+  useLazyGetWarehouseAllApiQuery,
+} from "../../../Redux/Query/Masterlist/Warehouse";
 import {
   disposalApi,
   useDeleteDisposalItemApiMutation,
@@ -117,7 +120,9 @@ const AddDisposal = () => {
       isError: isWarehouseError,
       refetch: isWarehouseRefetch,
     },
-  ] = useLazyGetWarehouseAllApiQuery();
+  ] = useLazyGetMovementWarehouseApiQuery();
+
+  const disposeWarehouseOptions = warehouseData.filter((option) => option.can_dispose == 1);
 
   const [deleteDisposalItem, { data: deleteDisposalItemData }] = useDeleteDisposalItemApiMutation();
 
@@ -360,7 +365,7 @@ const AddDisposal = () => {
       description: formData?.description,
       remarks: formData?.remarks,
       attachments: formData?.attachments,
-      receiving_warehouse_id: formData?.receiving_warehouse_id?.sync_id,
+      receiving_warehouse_id: formData?.receiving_warehouse_id?.id,
       assets: formData?.assets?.map((item) => ({
         fixed_asset_id: item.fixed_asset_id.id,
         pullout_id: item?.fixed_asset_id.pullout_id || item?.id,
@@ -587,12 +592,12 @@ const AddDisposal = () => {
                   <CustomAutoComplete
                     control={control}
                     name="receiving_warehouse_id"
-                    options={warehouseData}
-                    onOpen={() => (isWarehouseSuccess ? null : warehouseTrigger(0))}
+                    options={disposeWarehouseOptions || []}
+                    onOpen={() => (isWarehouseSuccess ? null : warehouseTrigger({ pagination: "none" }))}
                     loading={isWarehouseLoading}
                     disabled={transactionData?.view}
-                    getOptionLabel={(option) => option.warehouse_name}
-                    getOptionKey={(option) => option.warehouse_code}
+                    getOptionLabel={(option) => option.name || option.warehouse_name}
+                    getOptionKey={(option) => option.code || option.warehouse_code}
                     isOptionEqualToValue={(option, value) => option.id === value.id}
                     renderInput={(params) => (
                       <TextField
