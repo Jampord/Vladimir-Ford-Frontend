@@ -245,6 +245,7 @@ const AddRole = (props) => {
     "warehouse-monitoring",
     "transfer-receiving-monitoring",
     "asset-monitoring",
+    "repair-monitoring",
 
     // Reports
     "reports",
@@ -315,6 +316,7 @@ const AddRole = (props) => {
     "warehouse-monitoring",
     "transfer-receiving-monitoring",
     "asset-monitoring",
+    "repair-monitoring",
   ];
 
   const reports = [
@@ -779,6 +781,18 @@ const AddRole = (props) => {
               <Checkbox
                 {...register("access_permission")}
                 checked={watch("access_permission")?.includes("asset-monitoring")}
+              />
+            }
+          />
+
+          <FormControlLabel
+            disabled={data.action === "view"}
+            label="Repair Monitoring"
+            value="repair-monitoring"
+            control={
+              <Checkbox
+                {...register("access_permission")}
+                checked={watch("access_permission")?.includes("repair-monitoring")}
               />
             }
           />
@@ -1432,6 +1446,7 @@ const AddRole = (props) => {
                                     "warehouse-monitoring",
                                     "transfer-receiving-monitoring",
                                     "asset-monitoring",
+                                    "repair-monitoring",
                                   ]),
                                 ]);
                               } else {
