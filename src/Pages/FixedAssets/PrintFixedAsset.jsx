@@ -738,8 +738,6 @@ const PrintFixedAsset = (props) => {
     }
   };
 
-  console.log("watch tag number:", watch("tagNumber"));
-
   const smallToolsData = fixedAssetData?.data.filter((data) => watch("tagNumber").includes(data.vladimir_tag_number));
   const printable = smallToolsData?.map((data) => data?.is_parent).includes(1);
   const isMainAsset = smallToolsData?.map((data) => data?.is_main).includes(1);
@@ -1137,6 +1135,7 @@ const PrintFixedAsset = (props) => {
 
                                   <Typography noWrap fontSize="12px" color="primary" fontWeight="bold">
                                     {data.type_of_request.type_of_request_name.toUpperCase()}
+                                    {data?.is_main ? "(Grouped)" : null}
                                   </Typography>
 
                                   <Typography
@@ -2200,6 +2199,7 @@ const PrintFixedAsset = (props) => {
 
                                           <Typography noWrap fontSize="10px" color="primary" fontWeight="bold">
                                             {data.type_of_request.type_of_request_name.toUpperCase()}
+                                            {data?.is_main ? "(Grouped)" : null}
                                           </Typography>
 
                                           <Typography
