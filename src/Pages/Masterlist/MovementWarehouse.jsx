@@ -38,6 +38,7 @@ const MovementWarehouse = () => {
     status: false,
     id: null,
     name: "",
+    evaluation_permission: [],
   });
 
   const drawer = useSelector((state) => state.booleanState.drawer);
@@ -134,11 +135,14 @@ const MovementWarehouse = () => {
   };
 
   const onUpdateHandler = (props) => {
-    const { id, name } = props;
+    const { id, name, evaluation_permission, can_dispose, can_bid } = props;
     setUpdateMovementWarehouse({
       status: true,
       id: id,
       name: name,
+      evaluation_permission: evaluation_permission,
+      can_dispose: can_dispose,
+      can_bid: can_bid,
     });
   };
 
@@ -147,6 +151,9 @@ const MovementWarehouse = () => {
       status: false,
       id: null,
       name: "",
+      evaluation_permission: [],
+      can_dispose: false,
+      can_bid: false,
     });
   };
 
@@ -176,7 +183,7 @@ const MovementWarehouse = () => {
                   >
                     <TableCell className="tbl-cell tr-cen-pad45">ID No.</TableCell>
                     <TableCell className="tbl-cell tr-cen-pad45">Movement Warehouse</TableCell>
-                    <TableCell className="tbl-cell tr-cen-pad45">Code</TableCell>
+                    {/* <TableCell className="tbl-cell tr-cen-pad45">Code</TableCell> */}
                     <TableCell className="tbl-cell tr-cen-pad45">Date Created</TableCell>
                     <TableCell className="tbl-cell tr-cen-pad45">Action</TableCell>
                   </TableRow>
@@ -201,7 +208,7 @@ const MovementWarehouse = () => {
                           >
                             <TableCell className="tbl-cell tr-cen-pad45">{data.id}</TableCell>
                             <TableCell className="tbl-cell tr-cen-pad45">{data.name}</TableCell>
-                            <TableCell className="tbl-cell tr-cen-pad45">{data.code}</TableCell>
+                            {/* <TableCell className="tbl-cell tr-cen-pad45">{data.code}</TableCell> */}
                             <TableCell className="tbl-cell tr-cen-pad45">
                               {moment(data.created_at).format("MMMM DD, YYYY")}
                             </TableCell>
