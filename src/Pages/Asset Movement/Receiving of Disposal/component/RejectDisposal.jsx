@@ -9,6 +9,7 @@ import CustomTextField from "../../../../Components/Reusable/CustomTextField";
 import { LoadingButton } from "@mui/lab";
 import { closeDialog } from "../../../../Redux/StateManagement/booleanStateSlice";
 import { closeConfirm } from "../../../../Redux/StateManagement/confirmSlice";
+import { openToast } from "../../../../Redux/StateManagement/toastSlice";
 
 const schema = yup.object().shape({
   remarks: yup.string().required().label("Remarks"),
@@ -69,10 +70,7 @@ const RejectDisposal = ({ data }) => {
   };
 
   return (
-    <Box
-      component="form"
-      //   onSubmit={handleSubmit(onSubmitHandler)}
-    >
+    <Box component="form" onSubmit={handleSubmit(onSubmitHandler)}>
       <Stack gap={1.5} pt={1} margin={3}>
         <Typography fontFamily="Anton" fontWeight="bold" fontSize={18} color="secondary" align="left">
           Asset Disposal Reject Remarks
