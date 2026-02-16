@@ -1,12 +1,17 @@
 import {
   Box,
+  Dialog,
+  Grow,
+  IconButton,
   Stack,
+  Tab,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Tabs,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -20,6 +25,11 @@ import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
 import moment from "moment";
 import CustomTablePagination from "../../Components/Reusable/CustomTablePagination";
 import { useQueryParams } from "../../Hooks/useQueryParams";
+import { TabContext, TabPanel } from "@mui/lab";
+import { closeDialog, openDialog } from "../../Redux/StateManagement/booleanStateSlice";
+import { useDispatch, useSelector } from "react-redux";
+import PulloutTimeline from "../Asset Movement/PulloutTimeline";
+import { Timeline } from "@mui/icons-material";
 
 const TransferReceivingMonitoring = () => {
   const { getParam, getNumericParam, setMultipleParams } = useQueryParams();
@@ -28,6 +38,15 @@ const TransferReceivingMonitoring = () => {
   const [status, setStatus] = useState(getParam("status") || "active");
   const [perPage, setPerPage] = useState(getNumericParam("per_page", 25));
   const [page, setPage] = useState(getNumericParam("page", 1));
+  const [value, setValue] = useState("1");
+  const [transactionIdData, setTransactionIdData] = useState();
+
+  const dialog = useSelector((state) => state.booleanState.dialog);
+  const dispatch = useDispatch();
+
+  const handleChange = (event, newValue) => {
+    setValue(newValue);
+  };
 
   const {
     data: transferData,
@@ -41,7 +60,7 @@ const TransferReceivingMonitoring = () => {
     page: page,
     per_page: perPage,
     search: search,
-    status: "For Receiving",
+    status: value === "1" ? "To Receive" : "Received",
   });
 
   //* Table Properties ---------------------------------------------------
@@ -51,8 +70,12 @@ const TransferReceivingMonitoring = () => {
   };
 
   const pageHandler = (_, page) => {
-    // console.log(page + 1);
     setPage(page + 1);
+  };
+
+  const handleViewTimeline = (data) => {
+    dispatch(openDialog());
+    setTransactionIdData(data);
   };
 
   return (
@@ -60,115 +83,145 @@ const TransferReceivingMonitoring = () => {
       <Typography className="mcontainer__title" sx={{ fontFamily: "Anton", fontSize: "1.6rem" }}>
         Transfer Receiving Monitoring
       </Typography>
-      <Stack height="100%">
-        {isTransferLoading && <MasterlistSkeleton onAdd={false} />}
-        {isTransferError && <ErrorFetching refetch={refetch} error={errorData} />}
 
-        {transferData && !isTransferError && (
-          <Box className="mcontainer__wrapper">
-            <MasterlistToolbar onSearchChange={setSearch} hideArchive />
+      <Box>
+        <TabContext value={value}>
+          <Tabs onChange={handleChange} value={value}>
+            <Tab label="To Receive" value="1" className={value === "1" ? "tab__background" : null} />
 
-            <Box>
-              <TableContainer className="mcontainer__th-body">
-                <Table className="mcontainer__table" stickyHeader>
-                  <TableHead>
-                    <TableRow
-                      sx={{
-                        "& > *": {
-                          fontWeight: "bold!important",
-                          whiteSpace: "nowrap",
-                        },
-                      }}
-                    >
-                      <TableCell className="tbl-cell">ID</TableCell>
-                      <TableCell className="tbl-cell">Asset</TableCell>
-                      <TableCell className="tbl-cell">Chart of Account</TableCell>
-                      <TableCell className="tbl-cell">Depreciation Debit</TableCell>
-                      <TableCell className="tbl-cell">Receiver</TableCell>
-                      <TableCell className="tbl-cell">Date Created</TableCell>
-                    </TableRow>
-                  </TableHead>
+            <Tab label="Received" value="2" className={value === "2" ? "tab__background" : null} />
+          </Tabs>
+        </TabContext>
 
-                  <TableBody>
-                    {transferData?.data.length === 0 ? (
-                      <NoRecordsFound heightData="small" />
-                    ) : isTransferFetching ? (
-                      <LoadingData />
-                    ) : (
-                      transferData?.data.map((data) => (
-                        <TableRow key={data?.id}>
-                          <TableCell className="tbl-cell">{data?.id}</TableCell>
-                          <TableCell className="tbl-cell ">
-                            <Typography fontWeight={700} fontSize="13px" color="primary">
-                              {data?.vladimir_tag_number}
-                            </Typography>
-                            <Typography fontWeight={600} fontSize="13px" color="secondary.main">
-                              {data?.description}
-                            </Typography>
-                          </TableCell>
-                          <TableCell className="tbl-cell ">
-                            <Typography fontSize={10} color="gray">
-                              {`(${data?.one_charging?.code || "-"}) - ${data?.one_charging?.name || "-"}`}
-                            </Typography>
-                            <Typography fontSize={10} color="gray">
-                              {`(${data?.one_charging?.company_code || data?.company?.company_code}) - ${
-                                data?.one_charging?.company_name || data?.company?.company_name
-                              }`}
-                            </Typography>
-                            <Typography fontSize={10} color="gray">
-                              {`(${
-                                data?.one_charging?.business_unit_code || data?.business_unit?.business_unit_code
-                              }) - ${
-                                data?.one_charging?.business_unit_name || data?.business_unit?.business_unit_name
-                              }`}
-                            </Typography>
-                            <Typography fontSize={10} color="gray">
-                              {`(${data?.one_charging?.department_code || data?.department?.department_code}) - ${
-                                data?.one_charging?.department_name || data?.department?.department_name
-                              }`}
-                            </Typography>
-                            <Typography fontSize={10} color="gray">
-                              {`(${data?.one_charging?.unit_code || data?.unit?.unit_code}) - ${
-                                data?.one_charging?.unit_name || data?.unit?.unit_name
-                              }`}
-                            </Typography>
-                            <Typography fontSize={10} color="gray">
-                              {`(${data?.one_charging?.subunit_code || data?.subunit?.subunit_code}) - ${
-                                data?.one_charging?.subunit_name || data?.subunit?.subunit_name
-                              }`}
-                            </Typography>
-                            <Typography fontSize={10} color="gray">
-                              {`(${data?.one_charging?.location_code || data?.location?.location_code}) - ${
-                                data?.one_charging?.location_name || data?.location?.location_name
-                              }`}
-                            </Typography>
-                          </TableCell>
-                          <TableCell className="tbl-cell">
-                            <Typography fontSize="12px" color="secondary.main">
-                              {`(${data?.depreciation_debit_code}) - ${data?.depreciation_debit}`}
-                            </Typography>
-                          </TableCell>
-                          <TableCell className="tbl-cell">{data?.receiver}</TableCell>
-                          <TableCell className="tbl-cell">{moment(data?.created_at).format("MMMM DD, YYYY")}</TableCell>
-                        </TableRow>
-                      ))
-                    )}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+        <Box className="category_height">
+          {isTransferLoading && <MasterlistSkeleton onAdd={false} />}
+          {isTransferError && <ErrorFetching refetch={refetch} error={errorData} />}
+
+          {transferData && !isTransferError && (
+            <Box className="mcontainer__wrapper">
+              <MasterlistToolbar onSearchChange={setSearch} hideArchive />
+
+              <Box>
+                <TableContainer className="mcontainer__th-body-category">
+                  <Table className="mcontainer__table" stickyHeader>
+                    <TableHead>
+                      <TableRow
+                        sx={{
+                          "& > *": {
+                            fontWeight: "bold!important",
+                            whiteSpace: "nowrap",
+                          },
+                        }}
+                      >
+                        <TableCell className="tbl-cell">ID</TableCell>
+                        <TableCell className="tbl-cell">Asset</TableCell>
+                        <TableCell className="tbl-cell">Chart of Account</TableCell>
+                        <TableCell className="tbl-cell">History</TableCell>
+                        <TableCell className="tbl-cell">Depreciation Debit</TableCell>
+                        <TableCell className="tbl-cell">Receiver</TableCell>
+                        <TableCell className="tbl-cell">{value === "2" ? "Date Received" : "Date Created"}</TableCell>
+                      </TableRow>
+                    </TableHead>
+
+                    <TableBody>
+                      {transferData?.data.length === 0 ? (
+                        <NoRecordsFound heightData="small" />
+                      ) : isTransferFetching ? (
+                        <LoadingData />
+                      ) : (
+                        transferData?.data.map((data) => (
+                          <TableRow key={data?.id}>
+                            <TableCell className="tbl-cell">{data?.id}</TableCell>
+                            <TableCell className="tbl-cell ">
+                              <Typography fontWeight={700} fontSize="13px" color="primary">
+                                {data?.vladimir_tag_number}
+                              </Typography>
+                              <Typography fontWeight={600} fontSize="13px" color="secondary.main">
+                                {data?.description}
+                              </Typography>
+                            </TableCell>
+                            <TableCell className="tbl-cell ">
+                              <Typography fontSize={10} color="gray">
+                                {`(${data?.one_charging?.code || "-"}) - ${data?.one_charging?.name || "-"}`}
+                              </Typography>
+                              <Typography fontSize={10} color="gray">
+                                {`(${data?.one_charging?.company_code || data?.company?.company_code}) - ${
+                                  data?.one_charging?.company_name || data?.company?.company_name
+                                }`}
+                              </Typography>
+                              <Typography fontSize={10} color="gray">
+                                {`(${
+                                  data?.one_charging?.business_unit_code || data?.business_unit?.business_unit_code
+                                }) - ${
+                                  data?.one_charging?.business_unit_name || data?.business_unit?.business_unit_name
+                                }`}
+                              </Typography>
+                              <Typography fontSize={10} color="gray">
+                                {`(${data?.one_charging?.department_code || data?.department?.department_code}) - ${
+                                  data?.one_charging?.department_name || data?.department?.department_name
+                                }`}
+                              </Typography>
+                              <Typography fontSize={10} color="gray">
+                                {`(${data?.one_charging?.unit_code || data?.unit?.unit_code}) - ${
+                                  data?.one_charging?.unit_name || data?.unit?.unit_name
+                                }`}
+                              </Typography>
+                              <Typography fontSize={10} color="gray">
+                                {`(${data?.one_charging?.subunit_code || data?.subunit?.subunit_code}) - ${
+                                  data?.one_charging?.subunit_name || data?.subunit?.subunit_name
+                                }`}
+                              </Typography>
+                              <Typography fontSize={10} color="gray">
+                                {`(${data?.one_charging?.location_code || data?.location?.location_code}) - ${
+                                  data?.one_charging?.location_name || data?.location?.location_name
+                                }`}
+                              </Typography>
+                            </TableCell>
+                            <TableCell className="tbl-cell">
+                              <IconButton onClick={() => handleViewTimeline(data)}>
+                                <Tooltip title="View History">
+                                  <Timeline fontSize="small" color="primary" />
+                                </Tooltip>
+                              </IconButton>
+                            </TableCell>
+                            <TableCell className="tbl-cell">
+                              <Typography fontSize="12px" color="secondary.main">
+                                {`(${data?.depreciation_debit_code}) - ${data?.depreciation_debit}`}
+                              </Typography>
+                            </TableCell>
+                            <TableCell className="tbl-cell">{data?.receiver}</TableCell>
+                            <TableCell className="tbl-cell">
+                              {moment(data?.created_at).format("MMMM DD, YYYY")}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+
+              <CustomTablePagination
+                total={transferData?.total}
+                success={isTransferSuccess}
+                current_page={transferData?.current_page}
+                per_page={transferData?.per_page}
+                onPageChange={pageHandler}
+                onRowsPerPageChange={perPageHandler}
+              />
             </Box>
+          )}
+        </Box>
+      </Box>
 
-            <CustomTablePagination
-              total={transferData?.total}
-              success={isTransferSuccess}
-              current_page={transferData?.current_page}
-              per_page={transferData?.per_page}
-              onPageChange={pageHandler}
-              onRowsPerPageChange={perPageHandler}
-            />
-          </Box>
-        )}
-      </Stack>
+      <Dialog
+        open={dialog}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog())}
+        PaperProps={{ sx: { borderRadius: "10px", maxWidth: "700px" } }}
+      >
+        <PulloutTimeline data={transactionIdData} />
+      </Dialog>
     </Box>
   );
 };
