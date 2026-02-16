@@ -174,7 +174,8 @@ const AddTransfer = (props) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const actionMenuData = useSelector((state) => state?.actionMenu?.actionData);
-  console.log("actionMenuData", actionMenuData);
+
+  const actionMenuWarehouse = (!!actionMenuData && actionMenuData[0]?.asset?.care_of) || null;
 
   const [updateRequest, setUpdateRequest] = useState({
     id: "",
@@ -284,7 +285,6 @@ const AddTransfer = (props) => {
       refetch: isDepartmentRefetch,
     },
   ] = useLazyGetDepartmentAllApiQuery();
-  // console.log("deptData: ", departmentData);
 
   const [
     departmentCoordinatorTrigger,
@@ -296,7 +296,6 @@ const AddTransfer = (props) => {
       refetch: isDepartmentCoordinatorRefetch,
     },
   ] = useLazyGetDepartmentAllCoordinatorApiQuery();
-  // console.log("deptData: ", departmentData);
 
   const [
     unitTrigger,
@@ -368,7 +367,6 @@ const AddTransfer = (props) => {
     sedarTrigger,
     { data: sedarData = [], isLoading: isSedarLoading, isSuccess: isSedarSuccess, isError: isSedarError },
   ] = useLazyGetSedarUsersApiQuery();
-  // console.log("sedarData: ", sedarData);
 
   const [
     fixedAssetTrigger,
@@ -404,7 +402,6 @@ const AddTransfer = (props) => {
       isError: isUserError,
     },
   ] = useLazyGetUserAccountByUnitApiQuery();
-  // console.log("userdata", userData);
 
   const [
     receiverAccountTrigger,
@@ -621,7 +618,6 @@ const AddTransfer = (props) => {
 
   //* Form functions ----------------------------------------------------------------
   const addTransferHandler = (formData) => {
-    console.log("formData", formData);
     setIsLoading(true);
     const token = localStorage.getItem("token");
 
@@ -655,8 +651,6 @@ const AddTransfer = (props) => {
       is_spare: transactionData?.evaluation_transfer && transactionData.is_spare ? 1 : 0,
       for_safe_keeping: transactionData?.evaluation_transfer && transactionData.for_safe_keeping ? 1 : 0,
     };
-
-    // console.log("data to submit", data);
 
     const submitData = () => {
       setIsLoading(true);
@@ -908,11 +902,11 @@ const AddTransfer = (props) => {
     matchFrom: "any",
   });
 
-  // console.log("user", user);
   const isCoordinator = user?.has_handle === 1;
   const user_id = user.id;
   const one_charging_id = watch("one_charging_id_coordinator")?.id || null;
   const user_one_charging_id = user?.coa?.one_charging?.id || null;
+  const user_warehouse = user?.movement_warehouse;
 
   return (
     <>
@@ -1076,8 +1070,6 @@ const AddTransfer = (props) => {
                         />
                       )}
                       onChange={(_, value) => {
-                        console.log("value", value);
-
                         if (value) {
                           setValue("department_id_coordinator", value);
                           setValue("company_id_coordinator", value);
@@ -1140,36 +1132,6 @@ const AddTransfer = (props) => {
                           helperText={errors?.department_id_coordinator?.message}
                         />
                       )}
-                      // onChange={(_, value) => {
-                      //   // console.log("value: ", value);
-                      //   if (value) {
-                      //     const companyID = companyData?.find((item) => item.sync_id === value.company.company_sync_id);
-                      //     const businessUnitID = businessUnitData?.find(
-                      //       (item) => item.sync_id === value.business_unit.business_unit_sync_id
-                      //     );
-
-                      //     setValue("company_id_coordinator", companyID);
-                      //     setValue("business_unit_id_coordinator", businessUnitID);
-                      //   } else if (value === null) {
-                      //     setValue("company_id_coordinator", null);
-                      //     setValue("business_unit_id_coordinator", null);
-                      //   }
-                      //   // fields.forEach((item, index) => setValue(`assets.${index}.fixed_asset_id`, null));
-                      //   // fields.forEach((item, index) => setValue(`assets.${index}.asset_accountable`, null));
-                      //   // fields.forEach((item, index) => setValue(`assets.${index}.company_id`, null));
-                      //   // fields.forEach((item, index) => setValue(`assets.${index}.business_unit_id`, null));
-                      //   // fields.forEach((item, index) => setValue(`assets.${index}.department_id`, null));
-                      //   // fields.forEach((item, index) => setValue(`assets.${index}.unit_id`, null));
-                      //   // fields.forEach((item, index) => setValue(`assets.${index}.sub_unit_id`, null));
-                      //   // fields.forEach((item, index) => setValue(`assets.${index}.location_id`, null));
-                      //   // fields.forEach((item, index) => setValue(`assets.${index}.created_at`, null));
-                      //   // fields.forEach((item, index) => setValue(`assets.${index}.remaining_book_value`, null));
-
-                      //   setValue("unit_id_coordinator", null);
-                      //   setValue("subunit_id_coordinator", null);
-                      //   setValue("location_id_coordinator", null);
-                      //   return value;
-                      // }}
                     />
 
                     <CustomAutoComplete
@@ -1343,7 +1305,6 @@ const AddTransfer = (props) => {
                       />
                     )}
                     onChange={(_, value) => {
-                      console.log("value", value);
                       if (value) {
                         setValue("department_id", value);
                         setValue("company_id", value);
@@ -1504,9 +1465,11 @@ const AddTransfer = (props) => {
                       options={warehouseData}
                       onOpen={() => (isWarehouseSuccess ? null : warehouseTrigger(0))}
                       loading={isWarehouseLoading}
-                      disabled={transactionData?.view}
-                      getOptionLabel={(option) => option.warehouse_name}
-                      getOptionKey={(option) => option.warehouse_code}
+                      freeSolo
+                      disabled
+                      defaultValue={actionMenuWarehouse || user_warehouse || null}
+                      getOptionLabel={(option) => option?.name || option}
+                      getOptionKey={(option) => option?.code}
                       isOptionEqualToValue={(option, value) => option.id === value.id}
                       renderInput={(params) => (
                         <TextField
@@ -1681,7 +1644,6 @@ const AddTransfer = (props) => {
                                   }
                                   onChange={(_, newValue) => {
                                     if (newValue) {
-                                      console.log("newValue: ", newValue);
                                       onChange(newValue);
                                       setValue(
                                         `assets.${index}.asset_accountable`,
@@ -1791,7 +1753,6 @@ const AddTransfer = (props) => {
                                   }
                                   onChange={(_, newValue) => {
                                     if (newValue) {
-                                      // console.log("newValue: ", newValue);
                                       onChange(newValue);
                                       setValue(
                                         `assets.${index}.asset_accountable`,
@@ -2017,7 +1978,6 @@ const AddTransfer = (props) => {
                                       />
                                     )}
                                     onChange={(_, newValue) => {
-                                      // console.log("New Custodian newValue: ", newValue);
                                       onChange(newValue);
                                       if (newValue) {
                                         setValue(`assets.${index}.receiver_id`, newValue);
@@ -2109,7 +2069,6 @@ const AddTransfer = (props) => {
                                       />
                                     )}
                                     onChange={(_, newValue) => {
-                                      // console.log("New Custodian newValue: ", newValue);
                                       onChange(newValue);
                                       if (newValue) {
                                         setValue("receiver_id", newValue);
@@ -2196,7 +2155,6 @@ const AddTransfer = (props) => {
                                       />
                                     )}
                                     onChange={(_, newValue) => {
-                                      // console.log("New Custodian newValue: ", newValue);
                                       onChange(newValue);
                                       if (newValue) {
                                         setValue("receiver_id", newValue);
@@ -2226,49 +2184,6 @@ const AddTransfer = (props) => {
                                 )}
                               />
                             )}
-
-                            {/* <CustomAutoComplete
-                              name={`assets.${index}.receiver_id`}
-                              disabled={
-                                edit ? false : transactionData?.view || watch("accountability") === "Personal Issued"
-                                //  ||
-                                // watch("assets[0].fixed_asset_id") === null
-                              }
-                              control={control}
-                              includeInputInList
-                              disablePortal
-                              filterOptions={filterOptions}
-                              options={userData}
-                              onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
-                              loading={isUserLoading}
-                              getOptionLabel={(option) => option?.full_id_number_full_name}
-                              isOptionEqualToValue={(option, value) =>
-                                option?.full_id_number_full_name === value?.full_id_number_full_name
-                                }
-                              renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  color="secondary"
-                                  label="Receiver"
-                                  error={!!errors?.accountable?.message}
-                                  helperText={errors?.accountable?.message}
-                                  />
-                                  )}
-                              // onChange={(_, newValue) => {
-                              //   // console.log("Receiver newValue: ", newValue);
-                              //   if (newValue) {
-                                //     setValue("receiver_id", newValue);
-                              //     setValue("department_id", newValue.department);
-                              //     setValue("company_id", newValue.company);
-                              //     setValue("business_unit_id", newValue.business_unit);
-                              //     setValue("unit_id", newValue.unit);
-                              //     setValue("subunit_id", newValue.subunit);
-                              //     setValue("location_id", newValue.location);
-                              //     // setValue("accountable", newValue);
-                              //   }
-                              //   return newValue;
-                              // }}
-                            /> */}
                           </Stack>
                         </TableCell>
 
@@ -2711,7 +2626,7 @@ const AddTransfer = (props) => {
                       color="secondary"
                       startIcon={<Create color="primary" />}
                       loading={isPostLoading || isUpdateLoading}
-                      disabled={!isValid || !isDirty || (actionMenuData !== null && !watch("releasing_warehouse_id"))}
+                      disabled={!isValid || !isDirty}
                       sx={{ mt: "10px" }}
                     >
                       {transactionData?.status === "Returned"
