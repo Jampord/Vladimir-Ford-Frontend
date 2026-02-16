@@ -189,7 +189,11 @@ const ChangeCareOf = () => {
   };
 
   return (
-    <Stack sx={{ height: "calc(100vh - 250px)" }}>
+    <Box className="mcontainer">
+      <Typography className="mcontainer__title" sx={{ fontFamily: "Anton", fontSize: "2rem" }}>
+        Change Care of Confirmation
+      </Typography>
+
       {pulloutLoading && <MasterlistSkeleton category />}
       {pulloutError && <ErrorFetching refetch={refetch} error={errorData} />}
       {pulloutData && !pulloutError && (
@@ -209,8 +213,7 @@ const ChangeCareOf = () => {
             </Button>
           </Box>
 
-          <Box></Box>
-          <TableContainer className="mcontainer__th-body-category">
+          <TableContainer className="mcontainer__th-body">
             <Table className="mcontainer__table" stickyHeader>
               <TableHead>
                 <TableRow
@@ -381,7 +384,7 @@ const ChangeCareOf = () => {
       >
         <RejectChangeCareof data={watch("pullout_ids").map(Number)} />
       </Dialog>
-    </Stack>
+    </Box>
   );
 };
 
