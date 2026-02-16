@@ -45,7 +45,7 @@ import RejectRepaired from "./component/RejectRepaired";
 const schema = yup.object().shape({
   pullout_ids: yup.array(),
 });
-const Repaired = () => {
+const Repaired = ({ received }) => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("active");
   const [perPage, setPerPage] = useState(5);
@@ -61,7 +61,6 @@ const Repaired = () => {
   };
 
   const pageHandler = (_, page) => {
-    // console.log(page + 1);
     setPage(page + 1);
   };
 
@@ -95,6 +94,8 @@ const Repaired = () => {
       status: status,
       search: search,
       type_of_evaluation: "repaired",
+      for_monitoring: 0,
+      is_received: received,
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -225,18 +226,20 @@ const Repaired = () => {
           <Box className="mcontainer__wrapper">
             <MasterlistToolbar onStatusChange={setStatus} onSearchChange={setSearch} onSetPage={setPage} hideArchive />
 
-            <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }} mr="10px">
-              <Button
-                onClick={handleConfirmClick}
-                variant="contained"
-                startIcon={isSmallScreen ? null : <ThumbUpAlt />}
-                size="small"
-                sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
-                disabled={watch("pullout_ids").length === 0}
-              >
-                {isSmallScreen ? <ThumbUpAlt color="black" sx={{ fontSize: "20px" }} /> : "Confirm"}
-              </Button>
-            </Box>
+            {received === 0 && (
+              <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }} mr="10px">
+                <Button
+                  onClick={handleConfirmClick}
+                  variant="contained"
+                  startIcon={isSmallScreen ? null : <ThumbUpAlt />}
+                  size="small"
+                  sx={isSmallScreen ? { minWidth: "50px", px: 0 } : null}
+                  disabled={watch("pullout_ids").length === 0}
+                >
+                  {isSmallScreen ? <ThumbUpAlt color="black" sx={{ fontSize: "20px" }} /> : "Confirm"}
+                </Button>
+              </Box>
+            )}
 
             <Box>
               <TableContainer className="mcontainer__th-body-category">
@@ -250,26 +253,27 @@ const Repaired = () => {
                         },
                       }}
                     >
-                      <TableCell align="center" className="tbl-cell">
-                        <FormControlLabel
-                          sx={{ margin: "auto", align: "center" }}
-                          control={
-                            <Checkbox
-                              value=""
-                              size="small"
-                              checked={
-                                !!pulloutData?.data
-                                  ?.map((mapItem) => mapItem?.id?.toString())
-                                  ?.every((item) => watch("pullout_ids").includes(item?.toString()))
-                              }
-                              onChange={(e) => {
-                                handleAllHandler(e.target.checked);
-                                // console.log(e.target.checked);
-                              }}
-                            />
-                          }
-                        />
-                      </TableCell>
+                      {received === 0 && (
+                        <TableCell align="center" className="tbl-cell">
+                          <FormControlLabel
+                            sx={{ margin: "auto", align: "center" }}
+                            control={
+                              <Checkbox
+                                value=""
+                                size="small"
+                                checked={
+                                  !!pulloutData?.data
+                                    ?.map((mapItem) => mapItem?.id?.toString())
+                                    ?.every((item) => watch("pullout_ids").includes(item?.toString()))
+                                }
+                                onChange={(e) => {
+                                  handleAllHandler(e.target.checked);
+                                }}
+                              />
+                            }
+                          />
+                        </TableCell>
+                      )}
                       <TableCell className="tbl-cell">Pull Out No.</TableCell>
                       <TableCell className="tbl-cell">Description</TableCell>
                       <TableCell className="tbl-cell">Asset</TableCell>
@@ -302,20 +306,22 @@ const Repaired = () => {
                           hover
                           onClick={() => handleRowClick(data?.id.toString())}
                         >
-                          <TableCell className="tbl-cell" size="small" align="center">
-                            <FormControlLabel
-                              value={data?.id}
-                              sx={{ margin: "auto" }}
-                              control={
-                                <Checkbox
-                                  size="small"
-                                  {...register("pullout_ids")}
-                                  checked={watch("pullout_ids").includes(data?.id?.toString())}
-                                  onClick={(e) => e.stopPropagation()}
-                                />
-                              }
-                            />
-                          </TableCell>
+                          {received === 0 && (
+                            <TableCell className="tbl-cell" size="small" align="center">
+                              <FormControlLabel
+                                value={data?.id}
+                                sx={{ margin: "auto" }}
+                                control={
+                                  <Checkbox
+                                    size="small"
+                                    {...register("pullout_ids")}
+                                    checked={watch("pullout_ids").includes(data?.id?.toString())}
+                                    onClick={(e) => e.stopPropagation()}
+                                  />
+                                }
+                              />
+                            </TableCell>
+                          )}
                           <TableCell className="tbl-cell">{data?.id}</TableCell>
                           <TableCell className="tbl-cell">{data?.description}</TableCell>
                           <TableCell className="tbl-cell">
