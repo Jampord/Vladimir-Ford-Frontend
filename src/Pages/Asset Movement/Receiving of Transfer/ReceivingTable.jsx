@@ -275,7 +275,7 @@ const ReceivingTable = ({ received }) => {
                       <TableCell className="tbl-cell">Custodian</TableCell>
                       <TableCell className="tbl-cell">Chart Of Account </TableCell>
                       <TableCell className="tbl-cell">Asset Status</TableCell>
-                      <TableCell className="tbl-cell">Date Created</TableCell>
+                      <TableCell className="tbl-cell">{received ? "Date Received" : "Date Created"}</TableCell>
                       {/* <TableCell className="tbl-cell">Action</TableCell> */}
                     </TableRow>
                   </TableHead>
