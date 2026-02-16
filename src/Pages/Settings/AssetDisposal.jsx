@@ -237,7 +237,7 @@ const AssetDisposal = () => {
   };
 
   const onUpdateHandler = (props) => {
-    const { id, unit, subunit, approvers, one_charging } = props;
+    const { id, unit, subunit, approvers, one_charging, movement_warehouse } = props;
     setUpdateAssetDisposal({
       status: true,
       action: "update",
@@ -245,6 +245,7 @@ const AssetDisposal = () => {
       unit,
       subunit,
       approvers,
+      movement_warehouse,
     });
   };
 
@@ -255,11 +256,12 @@ const AssetDisposal = () => {
       unit_id: null,
       subunit_id: null,
       approvers: [],
+      movement_warehouse: null,
     });
   };
 
   const onViewHandler = (props) => {
-    const { unit, subunit, approvers, one_charging } = props;
+    const { unit, subunit, approvers, one_charging, movement_warehouse } = props;
     setUpdateAssetDisposal({
       status: true,
       action: "view",
@@ -267,6 +269,7 @@ const AssetDisposal = () => {
       unit,
       subunit,
       approvers,
+      movement_warehouse,
     });
   };
 
@@ -310,6 +313,7 @@ const AssetDisposal = () => {
                     >
                       <TableCell className="tbl-cell">Index</TableCell>
                       <TableCell className="tbl-cell">One Charging</TableCell>
+                      <TableCell className="tbl-cell tr-cen-pad45">Movement Warehouse</TableCell>
 
                       <TableCell align="center" className="tbl-cell">
                         Approvers
@@ -352,6 +356,11 @@ const AssetDisposal = () => {
                               <TableCell className="tbl-cell capitalized">
                                 <Typography fontSize={12} fontWeight={570} color="secondary">
                                   {`(${data?.one_charging?.code})`} - {data?.one_charging?.name}
+                                </Typography>
+                              </TableCell>
+                              <TableCell className="tbl-cell tr-cen-pad45">
+                                <Typography fontSize={12} fontWeight={500} color="secondary">
+                                  {data?.movement_warehouse?.name}
                                 </Typography>
                               </TableCell>
                               <TableCell align="center" className="tbl-cell text-weight capitalized">
