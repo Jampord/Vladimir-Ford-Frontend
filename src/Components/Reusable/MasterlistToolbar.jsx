@@ -82,6 +82,7 @@ import { useGetNotificationApiQuery } from "../../Redux/Query/Notification";
 import moment from "moment";
 import { useLazyGetLocationAllApiQuery } from "../../Redux/Query/Masterlist/YmirCoa/Location";
 import NoRecordsFound from "../../Layout/NoRecordsFound";
+import { useLazyGetBusinessUnitAllApiQuery } from "../../Redux/Query/Masterlist/YmirCoa/BusinessUnit";
 // import BarcodeScannerComponent from "react-qr-barcode-scanner";
 
 const MasterlistToolbar = (props) => {
@@ -109,6 +110,8 @@ const MasterlistToolbar = (props) => {
     setFaFilter,
     locationFilter,
     setLocationFilter,
+    businessUnitFilter,
+    setBusinessUnitFilter,
     showPr,
     hideSearch,
     isRequest,
@@ -140,10 +143,14 @@ const MasterlistToolbar = (props) => {
   const openFaFilter = Boolean(anchorElFaFilter);
   const [anchorE1LocationFilter, setAnchorE1LocationFilter] = useState(null);
   const openLocationFilter = Boolean(anchorE1LocationFilter);
+  const [anchorE1BusinessUnitFilter, setAnchorE1BusinessUnitFilter] = useState(null);
+  const openBusinessUnitFilter = Boolean(anchorE1BusinessUnitFilter);
   const [tempDateFrom, setTempDateFrom] = useState(null);
   const [tempDateTo, setTempDateTo] = useState(null);
   const [appliedLocationFilter, setAppliedLocationFilter] = useState([]); // For Location Filter
   const [searchTerm, setSearchTerm] = useState(""); // For Location Filter
+  const [appliedBusinessUnitFilter, setAppliedBusinessUnitFilter] = useState([]); // For BusinessUnit Filter
+  const [searchTermBusinessUnit, setSearchTermBusinessUnit] = useState(""); // For BusinessUnit Filter
 
   const handleDateSubmit = () => {
     setDateFrom(tempDateFrom ? moment(tempDateFrom).format("YYYY-MM-DD") : "");
@@ -157,7 +164,8 @@ const MasterlistToolbar = (props) => {
       setAnchorElDateFilter(null) ||
       setAnchorElRequestFilter(null) ||
       setAnchorElFaFilter(null) ||
-      setAnchorE1LocationFilter(null);
+      setAnchorE1LocationFilter(null) ||
+      setAnchorE1BusinessUnitFilter(null);
   };
 
   // const scanFile = useSelector((state) => state.scanFile);
@@ -177,10 +185,29 @@ const MasterlistToolbar = (props) => {
     },
   ] = useLazyGetLocationAllApiQuery();
 
+  // For Business Unit Filter
+  const [
+    businessUnitTrigger,
+    {
+      data: businessUnitData = [],
+      isLoading: isBusinessUnitLoading,
+      isSuccess: isBusinessUnitSuccess,
+      isError: isBusinessUnitError,
+      refetch: isBusinessUnitRefetch,
+    },
+  ] = useLazyGetBusinessUnitAllApiQuery();
+
   const filteredLocations = useMemo(() => {
     if (!searchTerm.trim()) return locationData;
     return locationData.filter((loc) => loc.location_name.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [searchTerm, locationData]);
+
+  const filteredBusinessUnits = useMemo(() => {
+    if (!searchTermBusinessUnit.trim()) return businessUnitData;
+    return businessUnitData.filter((loc) =>
+      loc.business_unit_name.toLowerCase().includes(searchTermBusinessUnit.toLowerCase())
+    );
+  }, [searchTermBusinessUnit, businessUnitData]);
 
   // Functions
   useEffect(() => {
@@ -251,6 +278,13 @@ const MasterlistToolbar = (props) => {
     }
   };
 
+  const handleOpenBusinessUnitFilter = (e) => {
+    setAnchorE1BusinessUnitFilter(e.currentTarget);
+    if (!isBusinessUnitSuccess) {
+      businessUnitTrigger({ pagination: "none" });
+    }
+  };
+
   const handleOpenAddCost = (e) => {
     // dispatch(openAdd());
     navigate(`additional-cost`);
@@ -317,6 +351,7 @@ const MasterlistToolbar = (props) => {
     }
   };
 
+  // Location Filter Handler
   const handleLocationChange = (value) => {
     if (appliedLocationFilter.includes(value)) {
       setAppliedLocationFilter(
@@ -329,6 +364,21 @@ const MasterlistToolbar = (props) => {
 
   const handleApplyLocationFilter = () => {
     setLocationFilter(appliedLocationFilter);
+  };
+
+  // Business Unit Filter Handler
+  const handleBusinessUnitChange = (value) => {
+    if (appliedBusinessUnitFilter.includes(value)) {
+      setAppliedBusinessUnitFilter(
+        appliedBusinessUnitFilter.filter((appliedBusinessUnitFilter) => appliedBusinessUnitFilter !== value)
+      );
+    } else {
+      setAppliedBusinessUnitFilter([...appliedBusinessUnitFilter, value]);
+    }
+  };
+
+  const handleApplyBusinessUnitFilter = () => {
+    setBusinessUnitFilter(appliedBusinessUnitFilter);
   };
 
   const handleFaFilterChange = (value) => {
@@ -1009,6 +1059,137 @@ const MasterlistToolbar = (props) => {
                         setAppliedLocationFilter([]);
                       }}
                       disabled={locationFilter.length === 0} // optional: disable if nothing selected
+                    >
+                      <Tooltip title="Clear Filter" arrow placement="top">
+                        <Clear />
+                      </Tooltip>
+                    </Button>
+                  </Stack>
+                </Box>
+              </FormGroup>
+            </Menu>
+          )}
+
+          {businessUnitFilter && (
+            <Tooltip title="Business Unit Filter" TransitionComponent={Zoom} placement="top" arrow>
+              <IconButton onClick={handleOpenBusinessUnitFilter}>
+                <FilterList />
+              </IconButton>
+            </Tooltip>
+          )}
+          {Boolean(businessUnitFilter) && (
+            <Menu
+              anchorEl={anchorE1BusinessUnitFilter}
+              open={openBusinessUnitFilter}
+              onClose={handleClose}
+              TransitionComponent={Grow}
+              disablePortal
+              transformOrigin={{ horizontal: "left", vertical: "top" }}
+              anchorOrigin={{ horizontal: "left", vertical: "top" }}
+              PaperProps={{
+                sx: {
+                  maxHeight: 400, // make it scrollable
+                  overflowY: "auto",
+                  overflowX: "auto",
+                  display: "flex",
+                  flexDirection: "column",
+                },
+              }}
+            >
+              <FormGroup>
+                <Stack
+                  flexDirection="row"
+                  alignItems="center"
+                  p="10px"
+                  gap="10px"
+                  sx={{
+                    position: "sticky",
+                    top: 0,
+                    zIndex: 1,
+                    backgroundColor: "background.paper", // ensures it doesn't overlap with checkboxes visually
+                    borderBottom: 1,
+                    borderColor: "divider",
+                  }}
+                >
+                  <FilterAlt color="primary" />
+                  <Typography fontFamily="Anton, Impact" fontSize="20px" color="secondary">
+                    BUSINESS UNIT FILTER
+                  </Typography>
+                  <Box>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder="Search business unit..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTermBusinessUnit(e.target.value)}
+                      InputProps={{
+                        startAdornment: <Search fontSize="small" sx={{ mr: 1 }} />,
+                      }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: 5,
+                        },
+                      }}
+                    />
+                  </Box>
+                </Stack>
+
+                {/* <Divider /> */}
+                {isBusinessUnitLoading ? (
+                  <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : filteredBusinessUnits?.length === 0 ? (
+                  <Stack justifyContent={"center"} alignItems="center" p={2}>
+                    <NoRecordsFound />
+                  </Stack>
+                ) : (
+                  filteredBusinessUnits.map((data) => (
+                    <MenuItem key={data?.id} dense>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            size="small"
+                            onChange={() => handleBusinessUnitChange(data?.id)}
+                            checked={appliedBusinessUnitFilter.includes(data?.id)}
+                          />
+                        }
+                        label={data?.business_unit_name}
+                      />
+                    </MenuItem>
+                  ))
+                )}
+
+                <Box
+                  sx={{
+                    position: "sticky",
+                    bottom: 0,
+                    zIndex: 2,
+                    backgroundColor: "background.paper",
+                    borderTop: 1,
+                    borderColor: "divider",
+                    p: 1.5,
+                  }}
+                >
+                  <Stack direction="row" justifyContent="space-between" spacing={1}>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={handleApplyBusinessUnitFilter}
+                      fullWidth
+                    >
+                      APPLY
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="warning"
+                      size="small"
+                      onClick={() => {
+                        setBusinessUnitFilter([]);
+                        setAppliedBusinessUnitFilter([]);
+                      }}
+                      disabled={businessUnitFilter.length === 0} // optional: disable if nothing selected
                     >
                       <Tooltip title="Clear Filter" arrow placement="top">
                         <Clear />
