@@ -96,10 +96,10 @@ const ChangeCareOfDialog = ({ item, reset: selectedItemReset, selectedItems }) =
                 duration: 5000,
               })
             );
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
 
             selectedItemReset();
             handleCloseDialog();
-            dispatch(notificationApi.util.invalidateTags(["Notif"]));
           } catch (err) {
             console.log({ err });
             if (err?.status === 422) {
@@ -141,6 +141,7 @@ const ChangeCareOfDialog = ({ item, reset: selectedItemReset, selectedItems }) =
             {...register}
             readOnly
             // required
+            freeSolo
             multiple
             name="fixed_asset_tag_number"
             value={fixedAssets || []}
@@ -164,6 +165,7 @@ const ChangeCareOfDialog = ({ item, reset: selectedItemReset, selectedItems }) =
             name="movement_warehouse_id"
             control={control}
             options={movementWarehouseData || []}
+            loading={movementWarehouseLoading || movementWarehouseFetching}
             onOpen={() => (movementWarehouseSuccess ? null : movementWarehouseTrigger({ pagination: "none" }))}
             getOptionLabel={(option) => option.name || ""}
             isOptionEqualToValue={(option, value) => option.id === value.id}
