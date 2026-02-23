@@ -18,6 +18,8 @@ const Redirect = () => {
       dispatch(addUserDetails(data?.data));
       navigate("/");
     } catch (e) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
       window.location.href = `https://one.rdfmis.com/`;
     }
   }, [rawData]);
