@@ -642,6 +642,8 @@ const Sidebar = () => {
         notifData?.spareCount ||
         notifData?.disposalCount ||
         notifData?.repairedCount ||
+        notifData?.repairedConfirmationCount ||
+        notifData?.toPrCount ||
         notifData?.disposalReceivingCount,
       children: [
         {
@@ -681,13 +683,13 @@ const Sidebar = () => {
           permission: "evaluation",
           notification:
             notifData?.toPickUpCount +
-            notifData?.toEvaluateCount +
-            // notifData?.toReplaceCount +
-            notifData?.repairedCount +
-            notifData?.forSafeKeepingCount +
-            notifData?.spareCount +
-            notifData?.forBiddingCount +
-            notifData?.disposalCount,
+              notifData?.toEvaluateCount +
+              notifData?.repairedCount +
+              notifData?.forSafeKeepingCount +
+              notifData?.spareCount +
+              notifData?.forBiddingCount +
+              notifData?.toPrCount +
+              notifData?.disposalCount || null,
           setter: closeCollapse,
         },
         {
