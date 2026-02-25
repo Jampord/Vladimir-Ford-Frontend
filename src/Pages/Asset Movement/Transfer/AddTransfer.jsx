@@ -540,10 +540,13 @@ const AddTransfer = (props) => {
         attachments: data?.attachments,
         // type_of_transfer: data?.is_spare === 1 ? "Spare Transfer" : "Normal Transfer",
 
-        department_id_coordinator: data?.department_from,
-        company_id_coordinator: data?.company_from,
-        business_unit_id_coordinator: data?.business_unit_from,
-        location_id_coordinator: data?.location_from,
+        one_charging_id_coordinator: data?.one_charging_from,
+        department_id_coordinator: data?.one_charging_from,
+        company_id_coordinator: data?.one_charging_from,
+        business_unit_id_coordinator: data?.one_charging_from,
+        location_id_coordinator: data?.one_charging_from,
+        unit_id_coordinator: data?.one_charging_from,
+        subunit_id_coordinator: data?.one_charging_from,
 
         one_charging_id: data?.one_charging,
         department_id: data?.one_charging,
@@ -1749,7 +1752,8 @@ const AddTransfer = (props) => {
                                     />
                                   )}
                                   getOptionDisabled={(option) =>
-                                    !!fields.find((item) => item?.fixed_asset_id?.id === option.id)
+                                    !!fields.find((item) => item?.fixed_asset_id?.id === option.id) ||
+                                    option?.asset_status !== "Good"
                                   }
                                   onChange={(_, newValue) => {
                                     if (newValue) {
