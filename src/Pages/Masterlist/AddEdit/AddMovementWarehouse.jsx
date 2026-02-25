@@ -1,6 +1,6 @@
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, FormControlLabel, FormGroup, Switch, TextField, Typography } from "@mui/material";
 import React, { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useDispatch } from "react-redux";
@@ -12,9 +12,13 @@ import { closeDrawer } from "../../../Redux/StateManagement/booleanStateSlice";
 import { LoadingButton } from "@mui/lab";
 import CustomTextField from "../../../Components/Reusable/CustomTextField";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
+import CustomAutoComplete from "../../../Components/Reusable/CustomAutoComplete";
 
 const schema = yup.object().shape({
   name: yup.string().required().label("Movement Warehouse"),
+  evaluation_permission: yup.array().required().label("Evaluation Permission"),
+  can_dispose: yup.number().required().label("Disposal Permission"),
+  can_bid: yup.number().required().label("Bidding Permission"),
 });
 
 const AddMovementWarehouse = ({ data, onUpdateResetHandler }) => {
@@ -48,8 +52,14 @@ const AddMovementWarehouse = ({ data, onUpdateResetHandler }) => {
     resolver: yupResolver(schema),
     defaultValues: {
       name: "",
+      evaluation_permission: [],
+      can_dispose: 0,
+      can_bid: 0,
     },
   });
+
+  console.log("watchdispose", watch("can_dispose"));
+  console.log("watchbid", watch("can_bid"));
 
   useEffect(() => {
     if ((isPostError || isUpdateError) && (postError?.status === 422 || updateError?.status === 422)) {
@@ -87,7 +97,12 @@ const AddMovementWarehouse = ({ data, onUpdateResetHandler }) => {
 
   useEffect(() => {
     if (data.status) {
+      console.log(data);
+      setValue("id", data?.id);
       setValue("name", data.name);
+      setValue("evaluation_permission", data?.evaluation_permission);
+      setValue("can_dispose", data?.can_dispose);
+      setValue("can_bid", data?.can_bid);
     }
   }, [data]);
 
@@ -110,7 +125,7 @@ const AddMovementWarehouse = ({ data, onUpdateResetHandler }) => {
   return (
     <Box className="add-masterlist">
       <Typography color="secondary.main" sx={{ fontFamily: "Anton", fontSize: "1.5rem" }}>
-        {data.status ? "Edit Movement warehouse" : "Add Movement warehouse"}
+        {data.status ? "Edit Movement Warehouse" : "Add Movement Warehouse"}
       </Typography>
 
       <Box component="form" onSubmit={handleSubmit(onSubmitHandler)} className="add-masterlist__content">
@@ -125,6 +140,64 @@ const AddMovementWarehouse = ({ data, onUpdateResetHandler }) => {
           helperText={errors?.name?.message}
           fullWidth
         />
+
+        <CustomAutoComplete
+          control={control}
+          name="evaluation_permission"
+          options={[
+            "To Pickup",
+            "List of Pullout",
+            "For PR",
+            "For Safe-Keeping",
+            "Spare",
+            "For Disposal",
+            "For Bidding",
+          ]}
+          // isOptionEqualToValue={(option, value) => option === value}
+          multiple
+          disableCloseOnSelect
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              color={"secondary"}
+              label="Evaluation Permission"
+              error={!!errors?.evaluation_permission}
+              helperText={errors?.evaluation_permission?.message}
+            />
+          )}
+        />
+
+        <FormGroup row sx={{ gap: 5 }}>
+          <Controller
+            name="can_dispose"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                label="Disposal"
+                control={
+                  <Switch
+                    checked={Boolean(field.value)}
+                    defaultValue={0}
+                    onChange={(e) => field.onChange(e.target.checked ? 1 : 0)}
+                  />
+                }
+              />
+            )}
+          />
+          <Controller
+            name="can_bid"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                label="Bidding"
+                control={
+                  <Switch checked={Boolean(field.value)} onChange={(e) => field.onChange(e.target.checked ? 1 : 0)} />
+                }
+              />
+            )}
+          />
+        </FormGroup>
+
         <Box className="add-masterlist__buttons">
           <LoadingButton
             type="submit"
