@@ -112,7 +112,8 @@ const LoginPage = () => {
           dispatch(openChangePassword());
         }
       } else {
-        Login(`/${route}`);
+        // Login(`/${route}`);
+        Login(`/`);
         reset();
       }
 
