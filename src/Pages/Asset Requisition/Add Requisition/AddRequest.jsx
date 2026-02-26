@@ -2374,9 +2374,10 @@ const AddRequisition = (props) => {
                 label="Asset Description"
                 type="text"
                 disabled={
-                  (updateRequest && disable) ||
+                  updateRequest && disable
+                  // ||
                   // watch("type_of_request_id")?.type_of_request_name === "Small Tools" &&
-                  watch("item_status") === "Replacement"
+                  // watch("item_status") === "Replacement"
                 }
                 allowSpecialCharacters
                 error={!!errors?.asset_description}
@@ -2392,9 +2393,10 @@ const AddRequisition = (props) => {
                 label="Asset Specification"
                 type="text"
                 disabled={
-                  (updateRequest && disable) ||
+                  updateRequest && disable
+                  // ||
                   // watch("type_of_request_id")?.type_of_request_name === "Small Tools" &&
-                  watch("item_status") === "Replacement"
+                  // watch("item_status") === "Replacement"
                 }
                 allowSpecialCharacters
                 error={!!errors?.asset_specification}
@@ -2468,8 +2470,7 @@ const AddRequisition = (props) => {
                 label="Quantity"
                 type="number"
                 disabled={
-                  updateRequest && disable
-                  // ||
+                  (updateRequest && disable) || watch("item_status") === "Replacement"
                   // (watch("item_status") === "Replacement" &&
                   //   watch("type_of_request_id")?.type_of_request_name === "Small Tools")
                 }
