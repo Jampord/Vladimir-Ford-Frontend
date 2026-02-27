@@ -728,7 +728,10 @@ const Sidebar = () => {
           icon: LocalAtm,
           path: "/asset-movement/bidding",
           permission: "bidding",
-          // notification: notifData?.disposalReceivingCount,
+          notification:
+            notifData?.forDisposalForBookSlipCount +
+              notifData?.forBiddingForBookSlipCount +
+              notifData?.forBiddingForSoldCount || null,
           setter: closeCollapse,
         },
       ],
