@@ -21,18 +21,21 @@ import {
   ThumbUp,
   TimelineTwoTone,
 } from "@mui/icons-material";
-import { closeDialog } from "../../Redux/StateManagement/booleanStateSlice";
+import { closeDialog, closeDialog1 } from "../../Redux/StateManagement/booleanStateSlice";
 import { useDispatch } from "react-redux";
 import NoDataFile from "../../Img/PNG/no-data.png";
 import Moment from "moment";
 
 const PulloutTimeline = (props) => {
-  const { data: transactionData } = props;
+  const { data: transactionData, closeDialog1props } = props;
   const dispatch = useDispatch();
 
   return (
     <Box className="timelineSteps" minWidth="600px">
-      <IconButton onClick={() => dispatch(closeDialog())} sx={{ position: "absolute", top: 10, right: 10 }}>
+      <IconButton
+        onClick={() => (closeDialog1props ? dispatch(closeDialog1()) : dispatch(closeDialog()))}
+        sx={{ position: "absolute", top: 10, right: 10 }}
+      >
         <Close />
       </IconButton>
 
