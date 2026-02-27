@@ -97,6 +97,7 @@ import {
   useGetUserAccountAllApiQuery,
   useLazyGetUserAccountAllApiQuery,
   useLazyGetUserAccountByUnitApiQuery,
+  useLazyGetUserAccountsApiQuery,
 } from "../../../Redux/Query/UserManagement/UserAccountsApi";
 import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 import { useLazyGetReceiverSettingsAllApiQuery } from "../../../Redux/Query/Settings/ReceiverSettings";
@@ -401,7 +402,7 @@ const AddTransfer = (props) => {
       isSuccess: isUserSuccess,
       isError: isUserError,
     },
-  ] = useLazyGetUserAccountByUnitApiQuery();
+  ] = useLazyGetUserAccountsApiQuery();
 
   const [
     receiverAccountTrigger,
@@ -911,6 +912,7 @@ const AddTransfer = (props) => {
   const user_one_charging_id = user?.coa?.one_charging?.id || null;
   const user_warehouse = user?.movement_warehouse;
 
+  console.log("watchhhhhhhhhhhhhhhh", watch("one_charging_id"));
   return (
     <>
       <Box className="mcontainer">
@@ -1323,6 +1325,9 @@ const AddTransfer = (props) => {
                         setValue("subunit_id", null);
                         setValue("location_id", null);
                       }
+
+                      fields.forEach((item, index) => setValue(`assets.${index}.receiver_id`, null));
+                      fields.forEach((item, index) => setValue(`assets.${index}.accountable`, null));
 
                       return value;
                     }}
@@ -1942,7 +1947,12 @@ const AddTransfer = (props) => {
                                           // watch(`assets.${index}.fixed_asset_id`) === null ||
                                           watch("location_id") === null
                                     }
-                                    onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.unit_id })}
+                                    onOpen={() =>
+                                      userAccountTrigger({
+                                        one_charging: watch("one_charging_id")?.id,
+                                        pagination: "none",
+                                      })
+                                    }
                                     loading={isUserLoading || isUserFetching}
                                     filterOptions={filterOptions}
                                     getOptionLabel={(option) => option?.full_id_number_full_name}
@@ -2120,7 +2130,9 @@ const AddTransfer = (props) => {
                                           watch("location_id") === null ||
                                           transactionData?.view
                                     }
-                                    onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.unit_id })}
+                                    onOpen={() =>
+                                      userAccountTrigger({ unit: watch("one_charging_id")?.id, pagination: "none" })
+                                    }
                                     loading={isUserLoading || isUserFetching}
                                     filterOptions={filterOptions}
                                     getOptionLabel={(option) => option?.full_id_number_full_name}
