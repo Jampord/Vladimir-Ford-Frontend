@@ -31,6 +31,7 @@ const ToPickup = () => {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("active");
   const [locationFilter, setLocationFilter] = useState([]);
+  const [businessUnitFilter, setBusinessUnitFilter] = useState([]);
 
   const isSmallScreen = useMediaQuery("(max-width: 500px)");
   const navigate = useNavigate();
@@ -59,6 +60,7 @@ const ToPickup = () => {
       page: page,
       per_page: perPage,
       location_id: locationFilter.length !== 0 ? locationFilter.join(", ") : "",
+      business_unit_id: businessUnitFilter.length !== 0 ? businessUnitFilter.join(", ") : "",
     },
     { refetchOnMountOrArgChange: true }
   );
@@ -86,6 +88,8 @@ const ToPickup = () => {
             hideArchive
             locationFilter={locationFilter}
             setLocationFilter={setLocationFilter}
+            businessUnitFilter={businessUnitFilter}
+            setBusinessUnitFilter={setBusinessUnitFilter}
           />
 
           {/* <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }} mr="10px">
@@ -211,7 +215,7 @@ const ToPickup = () => {
           </Box>
 
           <Box className="mcontainer__pagination-export">
-            <Button
+            {/* <Button
               className="mcontainer__export"
               variant="outlined"
               size="small"
@@ -226,7 +230,8 @@ const ToPickup = () => {
               }}
             >
               EXPORT
-            </Button>
+            </Button> */}
+            <Box />
 
             <CustomTablePagination
               total={evaluationData?.total}
