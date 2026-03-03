@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { Box, Tab, Tabs, Typography } from "@mui/material";
+import { Badge, Box, Tab, Tabs, Typography } from "@mui/material";
 import { TabContext, TabPanel } from "@mui/lab";
 import BiddingTabPanel from "./BiddingTabPanel";
+import { useGetNotificationApiQuery } from "../../../Redux/Query/Notification";
 
 const Bidding = () => {
   const [value, setValue] = useState("1");
@@ -9,6 +10,8 @@ const Bidding = () => {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  const { data: notifData } = useGetNotificationApiQuery();
 
   return (
     <Box className="mcontainer">
@@ -19,10 +22,34 @@ const Bidding = () => {
       <Box>
         <TabContext value={value}>
           <Tabs onChange={handleChange} value={value}>
-            <Tab label="For Disposal" value="1" className={value === "1" ? "tab__background" : null} />
+            <Tab
+              label={
+                <Badge color="error" badgeContent={notifData?.forDisposalForBookSlipCount}>
+                  For Disposal
+                </Badge>
+              }
+              value="1"
+              className={value === "1" ? "tab__background" : null}
+            />
             <Tab label="Disposed" value="2" className={value === "2" ? "tab__background" : null} />
-            <Tab label="For Bid" value="3" className={value === "3" ? "tab__background" : null} />
-            <Tab label="Bidding" value="4" className={value === "4" ? "tab__background" : null} />
+            <Tab
+              label={
+                <Badge color="error" badgeContent={notifData?.forBiddingForBookSlipCount}>
+                  For Bid
+                </Badge>
+              }
+              value="3"
+              className={value === "3" ? "tab__background" : null}
+            />
+            <Tab
+              label={
+                <Badge color="error" badgeContent={notifData?.forBiddingForSoldCount}>
+                  Bidding
+                </Badge>
+              }
+              value="4"
+              className={value === "4" ? "tab__background" : null}
+            />
             <Tab label="Sold" value="5" className={value === "5" ? "tab__background" : null} />
           </Tabs>
 
