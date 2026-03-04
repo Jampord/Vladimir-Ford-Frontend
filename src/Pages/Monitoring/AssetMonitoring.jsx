@@ -67,8 +67,8 @@ const AssetMonitoring = () => {
           : filterValue === "8"
           ? "Repair"
           : "",
-    }
-    // { refetchOnMountOrArgChange: true }
+    },
+    { refetchOnMountOrArgChange: true }
   );
 
   // Update URL when state changes
@@ -219,8 +219,12 @@ const AssetMonitoring = () => {
 
                         <TableCell className="tbl-cell tr-cen-pad45">Care of</TableCell>
 
+                        {filterValue == "2" && <TableCell className="tbl-cell tr-cen-pad45">Transfer From</TableCell>}
+                        {filterValue == "2" && <TableCell className="tbl-cell tr-cen-pad45">Transfer To</TableCell>}
+
                         <TableCell className="tbl-cell tr-cen-pad45">Status</TableCell>
 
+                        {filterValue == "2" && <TableCell className="tbl-cell tr-cen-pad45">Date Received</TableCell>}
                         <TableCell className="tbl-cell tr-cen-pad45">
                           <TableSortLabel
                             active={orderBy === `created_at`}
@@ -238,7 +242,7 @@ const AssetMonitoring = () => {
                         <NoRecordsFound heightData="medium" />
                       ) : (
                         <>
-                          {requisitionFetching ? (
+                          {requisitionFetching || requisitionLoading ? (
                             <LoadingData />
                           ) : (
                             requisitionSuccess &&
@@ -302,13 +306,33 @@ const AssetMonitoring = () => {
                                   </Typography>
                                 </TableCell>
                                 <TableCell className="tbl-cell tr-cen-pad45">
-                                  <Typography fontSize={14} fontWeight={600} color="secondary.main">
+                                  <Typography fontSize={12} fontWeight={500} color="secondary.main">
                                     {data.care_of || "-"}
                                   </Typography>
                                 </TableCell>
+                                {filterValue == "2" && (
+                                  <TableCell className="tbl-cell tr-cen-pad45">
+                                    <Typography fontSize={12} fontWeight={450} color="secondary.main">
+                                      {data?.one_charging?.name || "-"}
+                                    </Typography>
+                                  </TableCell>
+                                )}
+                                {filterValue == "2" && (
+                                  <TableCell className="tbl-cell tr-cen-pad45">
+                                    <Typography fontSize={12} fontWeight={450} color="secondary.main">
+                                      {data?.transfer[0]?.one_charging?.name || "-"}
+                                    </Typography>
+                                  </TableCell>
+                                )}
                                 <TableCell className="tbl-cell tr-cen-pad45">
                                   {<FaStatusComponent faStatus={data?.asset_status?.asset_status_name} />}
                                 </TableCell>
+
+                                {filterValue == "2" && (
+                                  <TableCell className="tbl-cell tr-cen-pad45">
+                                    {moment(data?.transfer[0]?.created_at || "-").format("MMM DD, YYYY")}
+                                  </TableCell>
+                                )}
                                 <TableCell className="tbl-cell tr-cen-pad45">
                                   {moment(data.created_at).format("MMM DD, YYYY")}
                                 </TableCell>
