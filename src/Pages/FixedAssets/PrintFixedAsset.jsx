@@ -33,6 +33,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import {
+  ChangeCircle,
   DataArrayTwoTone,
   Filter,
   FilterAlt,
@@ -63,12 +64,15 @@ import {
   closeDialog1,
   closeDialog2,
   closeDialog3,
+  closeDialog4,
+  closeDialog5,
   closeExport,
   closePrint,
   openDialog1,
   openDialog2,
   openDialog3,
   openDialog4,
+  openDialog5,
   openExport,
 } from "../../Redux/StateManagement/booleanStateSlice";
 import {
@@ -97,6 +101,7 @@ import AddSmallToolsGroup from "./AddEdit/AddSmallToolsGroup";
 import AddTagAddCost from "./AddEdit/AddTagAddCost";
 import ExportPrintFixedAsset from "./ExportPrintFixedAsset";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
+import ChangeMemoCharging from "./AddEdit/ChangeMemoCharging";
 
 const schema = yup.object().shape({
   id: yup.string(),
@@ -138,6 +143,7 @@ const PrintFixedAsset = (props) => {
   const dialog = useSelector((state) => state.booleanState.dialogMultiple.dialog2);
   const dialog2 = useSelector((state) => state.booleanState.dialogMultiple.dialog3);
   const dialog3 = useSelector((state) => state.booleanState.dialogMultiple.dialog4);
+  const dialog4 = useSelector((state) => state.booleanState.dialogMultiple.dialog5);
 
   const isSmallerScreen = useMediaQuery("(max-width: 600px)");
   const isSmallScreen = useMediaQuery("(max-width: 850px)");
@@ -419,6 +425,7 @@ const PrintFixedAsset = (props) => {
             refetch();
           } catch (err) {
             reset();
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
           }
         },
       })
@@ -458,6 +465,7 @@ const PrintFixedAsset = (props) => {
             reset();
             refetch();
           } catch (err) {
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
             if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
               dispatch(
                 openToast({
@@ -778,7 +786,23 @@ const PrintFixedAsset = (props) => {
     }
   };
 
+  const areAllAccountableSame = (assets) => {
+    if (assets) {
+      if (assets?.length === 0) return true; // No assets to compare
+
+      const accountable = assets[0]?.accountable;
+
+      for (let i = 1; i < assets.length; i++) {
+        if (assets[i]?.accountable !== accountable) {
+          return false; // Found a different accountable
+        }
+      }
+      return true; // All accountable are the same
+    }
+  };
+
   const result = areAllCOASame(smallToolsData);
+  const sameAccountable = areAllAccountableSame(smallToolsData);
 
   const containerSx = {
     display: "flex",
@@ -1898,6 +1922,27 @@ const PrintFixedAsset = (props) => {
                           </LoadingButton>
                         )}
 
+                        {printMemo && (
+                          <LoadingButton
+                            onClick={() => dispatch(openDialog5())}
+                            size="small"
+                            variant="contained"
+                            loading={isLoading || isIpFetching || isIpLoading}
+                            startIcon={
+                              isLoading ? null : (
+                                <ChangeCircle
+                                  color={watch("tagNumber").length === 0 || result === false ? "gray" : "primary"}
+                                />
+                              )
+                            }
+                            disabled={watch("tagNumber").length === 0 || result === false}
+                            color="secondary"
+                            sx={{ color: "white" }}
+                          >
+                            Change Charging
+                          </LoadingButton>
+                        )}
+
                         <LoadingButton
                           size="small"
                           variant="contained"
@@ -2494,6 +2539,27 @@ const PrintFixedAsset = (props) => {
                           </LoadingButton>
                         )}
 
+                        {printMemo && (
+                          <LoadingButton
+                            onClick={() => dispatch(openDialog5())}
+                            size="small"
+                            variant="contained"
+                            loading={isLoading || isIpFetching || isIpLoading}
+                            startIcon={
+                              isLoading ? null : (
+                                <ChangeCircle
+                                  color={watch("tagNumber").length === 0 || result === false ? "gray" : "primary"}
+                                />
+                              )
+                            }
+                            disabled={watch("tagNumber").length === 0 || result === false}
+                            color="secondary"
+                            sx={{ color: "white" }}
+                          >
+                            Change Charging
+                          </LoadingButton>
+                        )}
+
                         <LoadingButton
                           size="small"
                           variant="contained"
@@ -2585,10 +2651,19 @@ const PrintFixedAsset = (props) => {
         <Dialog
           open={dialog3}
           TransitionComponent={Grow}
-          onClose={() => dispatch(closeDialog3())}
+          onClose={() => dispatch(closeDialog4())}
           PaperProps={{ sx: { maxWidth: "1320px", borderRadius: "10px", p: 3 } }}
         >
           <ExportPrintFixedAsset tabValue={tabValue} />
+        </Dialog>
+        <Dialog
+          open={dialog4}
+          TransitionComponent={Grow}
+          onClose={() => dispatch(closeDialog5())}
+          fullWidth
+          maxWidth="sm"
+        >
+          <ChangeMemoCharging data={smallToolsData} resetHandler={reset} />
         </Dialog>
       </Box>
     </>
