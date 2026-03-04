@@ -1,9 +1,14 @@
 import React, { useState } from "react";
-import { useGetBiddingApiQuery, usePostMarkAsSoldApiMutation } from "../../../Redux/Query/Movement/Bidding";
+import {
+  useGetBiddingApiQuery,
+  usePatchReturnToDisposalApiMutation,
+  usePostMarkAsSoldApiMutation,
+} from "../../../Redux/Query/Movement/Bidding";
 import {
   Box,
   Button,
   Checkbox,
+  Chip,
   Dialog,
   FormControlLabel,
   Grow,
@@ -33,7 +38,7 @@ import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 import moment from "moment";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
 import { useDispatch, useSelector } from "react-redux";
-import { CheckCircle, Info, MenuBook, More } from "@mui/icons-material";
+import { CheckCircle, Info, MenuBook, More, Report, Undo } from "@mui/icons-material";
 import AddBookSlip from "./Component/AddBookSlip";
 import { openDialog1 } from "../../../Redux/StateManagement/booleanStateSlice";
 import { onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
@@ -84,6 +89,7 @@ const BiddingTabPanel = ({ tab }) => {
   const selectedItems = biddingData?.data?.filter((item) => watch("item_id").includes(item?.id?.toString()));
   const fixed_asset_ids = selectedItems?.map((item) => item?.asset?.id);
   const [postMarkAsSold] = usePostMarkAsSoldApiMutation();
+  const [patchReturn] = usePatchReturnToDisposalApiMutation();
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -192,6 +198,74 @@ const BiddingTabPanel = ({ tab }) => {
     );
   };
 
+  const handleReturnClick = () => {
+    dispatch(
+      openConfirm({
+        icon: Report,
+        iconColor: "warning",
+        message: (
+          <Box gap={2}>
+            <Typography>
+              Are you sure you want to{" "}
+              <Typography
+                sx={{
+                  display: "inline-block",
+                  color: "secondary.main",
+                  fontWeight: "bold",
+                  fontFamily: "Raleway",
+                }}
+              >
+                RETURN
+              </Typography>{" "}
+              this Data?
+            </Typography>
+          </Box>
+        ),
+        remarks: true,
+
+        onConfirm: async (data) => {
+          try {
+            dispatch(onLoading());
+            const res = await patchReturn({
+              request_id: watch("item_id"),
+              type: tab == "For Disposal" ? "for disposal" : tab == "Bid" ? "for bidding" : "",
+              remarks: data,
+            }).unwrap();
+            dispatch(
+              openToast({
+                message: res?.message || "Returned Successfully!",
+                duration: 5000,
+              })
+            );
+            reset();
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
+            setAnchorEl(null);
+          } catch (err) {
+            console.log({ err });
+            if (err?.status === 422) {
+              dispatch(
+                openToast({
+                  message: err?.response?.data?.errors?.detail || err?.message,
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            } else if (err?.status !== 422) {
+              console.error(err);
+              dispatch(
+                openToast({
+                  message: "Something went wrong. Please try again.",
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            }
+          }
+        },
+      })
+    );
+  };
+
   return (
     <Stack className="category_height">
       {isBiddingLoading && <MasterlistSkeleton onAdd category />}
@@ -220,6 +294,13 @@ const BiddingTabPanel = ({ tab }) => {
                   </ListItemIcon>
                   <ListItemText>Add Bookslip</ListItemText>
                 </MenuItem>
+
+                <MenuItem dense onClick={handleReturnClick}>
+                  <ListItemIcon>
+                    <Undo fontSize="small" color="warning" />
+                  </ListItemIcon>
+                  <ListItemText>Return</ListItemText>
+                </MenuItem>
               </Menu>
             </Box>
           )}
@@ -243,6 +324,13 @@ const BiddingTabPanel = ({ tab }) => {
                     <MenuBook fontSize="small" color="secondary" />
                   </ListItemIcon>
                   <ListItemText>Add Bookslip</ListItemText>
+                </MenuItem>
+
+                <MenuItem dense onClick={handleReturnClick}>
+                  <ListItemIcon>
+                    <Undo fontSize="small" color="warning" />
+                  </ListItemIcon>
+                  <ListItemText>Return</ListItemText>
                 </MenuItem>
               </Menu>
             </Box>
@@ -310,7 +398,9 @@ const BiddingTabPanel = ({ tab }) => {
                     <TableCell className="tbl-cell">Helpdesk #</TableCell>
                     <TableCell className="tbl-cell">Asset</TableCell>
                     <TableCell className="tbl-cell">Chart of Account</TableCell>
-                    <TableCell className="tbl-cell">Status</TableCell>
+                    {(tab === "Disposed" || tab === "Bidding" || tab === "Sold") && (
+                      <TableCell className="tbl-cell">Bookslip #</TableCell>
+                    )}
                     <TableCell className="tbl-cell">Requestor</TableCell>
                     <TableCell className="tbl-cell">Date Created</TableCell>
                   </TableRow>
@@ -413,7 +503,11 @@ const BiddingTabPanel = ({ tab }) => {
                               }`}
                             </Typography>
                           </TableCell>
-                          <TableCell className="tbl-cell">{item?.remarks}</TableCell>
+                          {(tab === "Disposed" || tab === "Bidding" || tab === "Sold") && (
+                            <TableCell className="tbl-cell">
+                              <Chip label={item?.book_slip_number} size="small" color="info" variant="outlined" />
+                            </TableCell>
+                          )}
                           <TableCell className="tbl-cell">
                             <Typography fontSize={12} fontWeight={700} color="primary.main">
                               {item.requester.employee_id}
