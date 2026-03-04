@@ -220,6 +220,17 @@ export const fixedAssetApi = createApi({
       invalidatesTags: ["FixedAsset"],
     }),
 
+    patchChangeMemoPrintApi: builder.mutation({
+      query: (params) => {
+        return {
+          url: `/memo-print/change-charging`,
+          method: "PATCH",
+          body: params,
+        };
+      },
+      invalidatesTags: ["FixedAsset"],
+    }),
+
     putSmallToolsPrintableApi: builder.mutation({
       query: (params) => {
         return {
@@ -367,6 +378,7 @@ export const {
   useLazyGetExportDepreciationApiQuery,
   usePostPrintApiMutation,
   usePutMemoPrintApiMutation,
+  usePatchChangeMemoPrintApiMutation,
   usePutSmallToolsPrintableApiMutation,
   usePutUngroupSmallToolsApiMutation,
   usePostTagFixedAssetAddCostApiMutation,
