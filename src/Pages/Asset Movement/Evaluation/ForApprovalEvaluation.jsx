@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Chip,
   Dialog,
   Grow,
@@ -10,6 +11,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
@@ -20,12 +22,13 @@ import MasterlistSkeleton from "../../Skeleton/MasterlistSkeleton";
 import ErrorFetching from "../../ErrorFetching";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
 import NoRecordsFound from "../../../Layout/NoRecordsFound";
-import { Attachment } from "@mui/icons-material";
+import { Attachment, IosShareRounded } from "@mui/icons-material";
 import FAStatusChange from "../../../Components/Reusable/FaStatusComponent";
-import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
+import { closeDialog, closeExport, openDialog, openExport } from "../../../Redux/StateManagement/booleanStateSlice";
 import PulloutTimeline from "../PulloutTimeline";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
+import ExportRepaired from "./Export/ExportRepaired";
 
 const ForApprovalEvaluation = ({ tab }) => {
   const [page, setPage] = useState(1);
@@ -35,6 +38,7 @@ const ForApprovalEvaluation = ({ tab }) => {
   const [transactionData, setTransactionData] = useState();
 
   const dialog = useSelector((state) => state.booleanState.dialog);
+  const exportFile = useSelector((state) => state.booleanState.exportFile);
   const dispatch = useDispatch();
 
   const {
@@ -233,7 +237,33 @@ const ForApprovalEvaluation = ({ tab }) => {
                             </Box>
                           </TableCell>
                           <TableCell className="tbl-cell " align="center">
-                            {item?.remarks === null ? "-" : item?.remarks}
+                            <TextField
+                              size="small"
+                              value={item?.remarks || "-"}
+                              inputProps={{ readOnly: true }}
+                              multiline
+                              maxRows={2}
+                              sx={{
+                                "& .MuiInputBase-input": {
+                                  fontSize: "12px",
+                                  color: "text.light",
+                                  width: "150px",
+                                },
+                                /* Disable hover effects */
+                                "& .MuiOutlinedInput-root:hover": {
+                                  backgroundColor: "transparent",
+                                },
+
+                                "& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline": {
+                                  borderColor: "rgba(0,0,0,0.23)", // default border color
+                                },
+
+                                /* Prevent focus styles as well (optional) */
+                                "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                                  borderColor: "rgba(0,0,0,0.23)",
+                                },
+                              }}
+                            />
                           </TableCell>
                           <TableCell className="tbl-cell " align="center">
                             {moment(item?.created_at).format("MMM DD, YYYY")}
@@ -247,14 +277,35 @@ const ForApprovalEvaluation = ({ tab }) => {
             </TableContainer>
           </Box>
 
-          <CustomTablePagination
-            total={evaluationData?.total}
-            success={isEvaluationSuccess}
-            current_page={evaluationData?.current_page}
-            per_page={evaluationData?.per_page}
-            onPageChange={pageHandler}
-            onRowsPerPageChange={perPageHandler}
-          />
+          <Box className="mcontainer__pagination-export">
+            {tab === "4" && (
+              <Button
+                className="mcontainer__export"
+                variant="outlined"
+                size="small"
+                color="text"
+                startIcon={<IosShareRounded color="primary" />}
+                onClick={() => dispatch(openExport())}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "10px 20px",
+                }}
+              >
+                EXPORT
+              </Button>
+            )}
+
+            <CustomTablePagination
+              total={evaluationData?.total}
+              success={isEvaluationSuccess}
+              current_page={evaluationData?.current_page}
+              per_page={evaluationData?.per_page}
+              onPageChange={pageHandler}
+              onRowsPerPageChange={perPageHandler}
+            />
+          </Box>
         </Box>
       )}
 
@@ -265,6 +316,23 @@ const ForApprovalEvaluation = ({ tab }) => {
         PaperProps={{ sx: { borderRadius: "10px", maxWidth: "700px" } }}
       >
         <PulloutTimeline data={transactionData} />
+      </Dialog>
+
+      <Dialog
+        open={exportFile}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeExport())}
+        PaperProps={{
+          sx: {
+            borderRadius: "10px",
+            margin: "0",
+            maxWidth: "90%",
+            padding: "20px",
+            backgroundColor: "background.light",
+          },
+        }}
+      >
+        <ExportRepaired />
       </Dialog>
     </Stack>
   );
