@@ -17,6 +17,7 @@ import {
   Print,
   RadioButtonUncheckedRounded,
   Sell,
+  ShoppingCart,
   SwapHorizontalCircle,
   ThumbsUpDown,
 } from "@mui/icons-material";
@@ -156,6 +157,23 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
         }}
       />
     );
+  } else if (faStatus === "For PR" || faStatus === "For Pr") {
+    return (
+      <Chip
+        size="small"
+        variant="filled"
+        icon={<ShoppingCart size="small" color="#00ba34" />}
+        label={faStatus}
+        sx={{
+          borderColor: "#00ba34",
+          color: "#00ba34",
+          backgroundColor: "#00ba3545",
+
+          ":hover": hover && { backgroundColor: "#00ba3525", cursor: "pointer" },
+          p: "0 5px",
+        }}
+      />
+    );
   } else if (faStatus === "Disposed") {
     return (
       <Chip
@@ -280,7 +298,7 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
         label={faStatus}
         sx={{
           backgroundColor: "#fdaaaa",
-          color: "text",
+          color: "#9b3838",
 
           ":hover": hover && { backgroundColor: "#fccccc", cursor: "pointer" },
 
