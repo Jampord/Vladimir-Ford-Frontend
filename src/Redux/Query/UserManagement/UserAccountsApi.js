@@ -84,6 +84,7 @@ export const userAccountsApi = createApi({
 
 export const {
   useGetUserAccountsApiQuery,
+  useLazyGetUserAccountsApiQuery,
   useGetUserAccountAllApiQuery,
   useLazyGetUserAccountAllApiQuery,
   useLazyGetUserAccountByUnitApiQuery,
