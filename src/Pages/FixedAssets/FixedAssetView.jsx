@@ -7,6 +7,7 @@ import {
   useArchiveFixedAssetStatusApiMutation,
   useGetFixedAssetIdApiQuery,
   useLazyGetCalcDepreApiQuery,
+  usePutMemoPrintApiMutation,
 } from "../../Redux/Query/FixedAsset/FixedAssets";
 import FaStatusChange from "../../Components/Reusable/FaStatusComponent";
 import NoDataFile from "../../Img/PNG/no-data.png";
@@ -92,6 +93,7 @@ import {
 import AddInclusion from "../Asset Requisition/Received Asset/AddInclusion";
 import EditSmallTools from "./AddEdit/EditSmallTools";
 import EditAssetDescription from "./AddEdit/EditAssetDescription";
+import { notificationApi } from "../../Redux/Query/Notification";
 
 const FixedAssetView = ({ view }) => {
   const [search, setSearch] = useState(null);
@@ -184,8 +186,10 @@ const FixedAssetView = ({ view }) => {
     refetchOnMountOrArgChange: true,
   });
 
+  const isMemoPrinted = dataApi?.data?.is_memo_printed === 1;
+
   console.log("FAData", dataApi);
-  // console.log("Data", data);
+  console.log("IsMemoPrinted", isMemoPrinted);
 
   const [getCalcDepreApi, { data: calcDepreApi, refetch: calcDepreApiRefetch }] = useLazyGetCalcDepreApiQuery();
   const [postCalcDepreAddCostApi, { data: calcDepreAddCostApi }] = usePostCalcDepreAddCostApiMutation();
@@ -200,6 +204,11 @@ const FixedAssetView = ({ view }) => {
     printAsset,
     { data: postData, isLoading: isPrintLoading, isSuccess: isPostSuccess, isError: isPostError, errors: postError },
   ] = usePostPrintApiMutation();
+
+  const [
+    putMemo,
+    { data: memoData, isLoading: isMemoLoading, isError: isMemoError, isSuccess: isMemoSuccess, error: memoError },
+  ] = usePutMemoPrintApiMutation();
 
   // Printing -------------------------------------------------------
   const {
@@ -557,6 +566,59 @@ const FixedAssetView = ({ view }) => {
     dispatch(openDialog1());
   };
 
+  const onPrintMemoHandler = async () => {
+    dispatch(
+      openConfirm({
+        icon: Help,
+        iconColor: "info",
+        message: (
+          <Box>
+            <Typography>Are you sure you want to print</Typography>
+            <Typography
+              sx={{
+                display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+                fontFamily: "Raleway",
+              }}
+            >
+              ASSIGNMENT MEMO?
+            </Typography>
+          </Box>
+        ),
+        onConfirm: async () => {
+          try {
+            dispatch(onLoading());
+            const res = await putMemo({
+              fixed_asset_id: [dataApi?.data?.vladimir_tag_number],
+            }).unwrap();
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
+            dataApiRefetch();
+            setPrintAssignmentMemo(true);
+          } catch (err) {
+            if (err?.status === 403 || err?.status === 404 || err?.status === 422) {
+              dispatch(
+                openToast({
+                  message: err?.data?.errors?.detail || err.data?.message,
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            } else if (err?.status !== 422) {
+              dispatch(
+                openToast({
+                  message: "Something went wrong. Please try again.",
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            }
+          }
+        },
+      })
+    );
+  };
+
   return (
     <>
       {dataApiLoading && <FixedAssetViewSkeleton onAdd={true} onImport={true} onPrint={true} />}
@@ -634,19 +696,21 @@ const FixedAssetView = ({ view }) => {
                   overflow: "auto",
                 }}
               >
-                {/* <Tooltip title="Print Assignment Memo" placement="top" arrow>
+                <Tooltip title="Print Assignment Memo" placement="top" arrow>
                   <span>
                     <IconButton
                       variant="contained"
                       size="small"
                       color="quaternary"
-                      onClick={() => setPrintAssignmentMemo(true)}
+                      onClick={() => {
+                        isMemoPrinted ? setPrintAssignmentMemo(true) : onPrintMemoHandler();
+                      }}
                       disabled={dataApi.data?.accountability === "Common"}
                     >
                       <PrintTwoTone color={dataApi.data?.accountability === "Common" ? "gray" : "tertiary"} />
                     </IconButton>
                   </span>
-                </Tooltip> */}
+                </Tooltip>
 
                 {!view && (
                   <Button
@@ -1738,7 +1802,7 @@ const FixedAssetView = ({ view }) => {
         />
       </Dialog>
 
-      {/* <Dialog
+      <Dialog
         open={printAssignmentMemo}
         PaperProps={{
           sx: {
@@ -1752,9 +1816,16 @@ const FixedAssetView = ({ view }) => {
         }}
       >
         <Box>
-          <AssignmentMemo dataId={dataApi?.data} setPrintAssignmentMemo={setPrintAssignmentMemo} />
+          <AssignmentMemo
+            data={[dataApi?.data]}
+            setPrintAssignmentMemo={setPrintAssignmentMemo}
+            memoData={memoData}
+            selectedMemo={dataApi?.data?.vladimir_tag_number}
+            fixedAssetRefetch={dataApiRefetch}
+            series={dataApi?.data?.memo?.memo_series}
+          />
         </Box>
-      </Dialog> */}
+      </Dialog>
 
       <Drawer
         open={drawer}
