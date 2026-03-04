@@ -45,6 +45,14 @@ export const biddingApi = createApi({
       }),
       invalidatesTags: ["Bidding"],
     }),
+    patchReturnToDisposalApi: builder.mutation({
+      query: (data) => ({
+        url: `return-to-disposal`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: ["Bidding"],
+    }),
   }),
 });
 
@@ -53,4 +61,5 @@ export const {
   usePostForBiddingApiMutation,
   usePostAddBookSlipApiMutation,
   usePostMarkAsSoldApiMutation,
+  usePatchReturnToDisposalApiMutation,
 } = biddingApi;
