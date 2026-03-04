@@ -19,7 +19,16 @@ export const evaluationApi = createApi({
   endpoints: (builder) => ({
     getAssetsToEvaluateApi: builder.query({
       query: (params) => ({ url: `items-to-evaluate`, params }),
-      providesTags: ["Evaluation"],
+      providesTags: (result) =>
+        result?.data
+          ? [
+              ...result.data.map((item) => ({
+                type: "Evaluation",
+                id: item.id,
+              })),
+              { type: "Evaluation", id: "LIST" },
+            ]
+          : [{ type: "Evaluation", id: "LIST" }],
     }),
 
     getAssetsToPickupApi: builder.query({
@@ -88,11 +97,37 @@ export const evaluationApi = createApi({
       }),
       invalidatesTags: ["Evaluation"],
     }),
+    saveNoteEvaluationApi: builder.mutation({
+      query: ({ id, ...body }) => ({
+        url: `/evaluate-pullout/note/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      async onQueryStarted({ id, note }, { dispatch, queryFulfilled }) {
+        // 🔥 update only the affected row
+        const patchResult = dispatch(
+          evaluationApi.util.updateQueryData("getAssetsToEvaluateApi", undefined, (draft) => {
+            const item = draft.data.find((row) => row.id === id);
+            if (item) {
+              item.note = note;
+            }
+          })
+        );
+
+        try {
+          await queryFulfilled;
+        } catch {
+          // rollback if API fails
+          patchResult.undo();
+        }
+      },
+    }),
   }),
 });
 
 export const {
   useGetAssetsToEvaluateApiQuery,
+  useLazyGetAssetsToEvaluateApiQuery,
   useGetAssetsToPickupApiQuery,
   useGetAssetToPickupByIdApiQuery,
   usePatchPickupAssetApiMutation,
@@ -103,4 +138,5 @@ export const {
   useGetChangeCareOfPulloutAssetsApiQuery,
   usePatchChangeCareOfAssetConfirmationApiMutation,
   usePatchReturnEvaluationApiMutation,
+  useSaveNoteEvaluationApiMutation,
 } = evaluationApi;
