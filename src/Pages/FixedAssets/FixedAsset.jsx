@@ -407,16 +407,6 @@ const FixedAsset = ({ view }) => {
                       </TableSortLabel>
                     </TableCell>
 
-                    <TableCell className="tbl-cell-fa">
-                      <TableSortLabel
-                        active={orderBy === `division`}
-                        direction={orderBy === `division` ? order : `asc`}
-                        onClick={() => onSort(`division`)}
-                      >
-                        Division
-                      </TableSortLabel>
-                    </TableCell>
-
                     <TableCell className="tbl-cell-fa">Requestor</TableCell>
 
                     <TableCell className="tbl-cell-fa">
@@ -438,6 +428,18 @@ const FixedAsset = ({ view }) => {
                         onClick={() => onSort(`asset_status_name`)}
                       >
                         Asset Status
+                      </TableSortLabel>
+                    </TableCell>
+
+                    <TableCell className="tbl-cell-fa tr-cen-pad45">Accountability</TableCell>
+
+                    <TableCell className="tbl-cell-fa">
+                      <TableSortLabel
+                        active={orderBy === `division`}
+                        direction={orderBy === `division` ? order : `asc`}
+                        onClick={() => onSort(`division`)}
+                      >
+                        Division
                       </TableSortLabel>
                     </TableCell>
 
@@ -535,19 +537,13 @@ const FixedAsset = ({ view }) => {
                               </TableCell>
 
                               <TableCell className="tbl-cell-fa">
-                                <Typography fontSize="14px" color="secondary">
-                                  {data.division.division_name}
-                                </Typography>
-                              </TableCell>
-
-                              <TableCell className="tbl-cell-fa">
-                                <Typography fontSize={12} fontWeight={700} color="secondary.main">
+                                <Typography fontSize={12} fontWeight={700} color="primary.main">
                                   {data.requestor.employee_id}
                                 </Typography>
-                                <Typography fontSize={11} fontWeight={600} color="secondary.main">
+                                <Typography fontSize={11} fontWeight={550} color="secondary.main">
                                   {data.requestor.first_name}
                                 </Typography>
-                                <Typography fontSize={11} fontWeight={600} color="secondary.main">
+                                <Typography fontSize={11} fontWeight={550} color="secondary.main">
                                   {data.requestor.last_name}
                                 </Typography>
                               </TableCell>
@@ -616,6 +612,21 @@ const FixedAsset = ({ view }) => {
                                   faStatus={data.asset_status.asset_status_name}
                                   data={data.asset_status.asset_status_name}
                                 />
+                              </TableCell>
+
+                              <TableCell className="tbl-cell-fa tr-cen-pad45">
+                                <Typography fontSize={12} fontWeight={600} color="secondary.main">
+                                  {data?.accountability || "-"}
+                                </Typography>
+                                <Typography fontSize={12} fontWeight={400} color="secondary.main">
+                                  {data?.accountable || "-"}
+                                </Typography>
+                              </TableCell>
+
+                              <TableCell className="tbl-cell-fa">
+                                <Typography fontSize="14px" color="secondary">
+                                  {data.division.division_name}
+                                </Typography>
                               </TableCell>
 
                               <TableCell className="tbl-cell-fa tr-cen-pad45">
