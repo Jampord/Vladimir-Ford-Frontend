@@ -229,6 +229,7 @@ const AddRole = (props) => {
     "transfer-pullout-releasing",
     "evaluation",
     "bidding",
+    "repaired",
 
     // Approving
     "pending-request",
@@ -301,6 +302,7 @@ const AddRole = (props) => {
     "transfer-pullout-releasing",
     "evaluation",
     "bidding",
+    "repaired",
   ];
   const capex = ["add-capex", "sub-capex", "additional-cost", "add-budget"];
   const approving = [
@@ -609,6 +611,7 @@ const AddRole = (props) => {
       { label: "Asset Disposal", value: "disposal" },
       { label: "Receiving of Disposal", value: "disposal-receiving" },
       { label: "Bidding", value: "bidding" },
+      { label: "Repaired", value: "repaired" },
     ];
 
     return (
@@ -1273,6 +1276,7 @@ const AddRole = (props) => {
                                     "transfer-pullout-releasing",
                                     "evaluation",
                                     "bidding",
+                                    "repaired",
                                   ]),
                                 ]);
                               } else {
