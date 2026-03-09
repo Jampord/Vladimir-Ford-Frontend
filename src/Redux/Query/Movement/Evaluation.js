@@ -133,6 +133,7 @@ export const {
   usePatchPickupAssetApiMutation,
   usePostEvaluateAssetApiMutation,
   useGetEvaluatedPulloutAssetsApiQuery,
+  useLazyGetEvaluatedPulloutAssetsApiQuery,
   usePostEvaluateForReplacementAssetApiMutation,
   usePatchChangeCareOfAssetApiMutation,
   useGetChangeCareOfPulloutAssetsApiQuery,
