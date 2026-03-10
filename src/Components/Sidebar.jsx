@@ -119,6 +119,7 @@ import {
   ImportantDevices,
   Inventory,
   ChangeCircle,
+  Build,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 import { resetGetData } from "../Redux/StateManagement/actionMenuSlice";
@@ -690,6 +691,13 @@ const Sidebar = () => {
               notifData?.forBiddingCount +
               notifData?.toPrCount +
               notifData?.disposalCount || null,
+          setter: closeCollapse,
+        },
+        {
+          label: "Repaired",
+          icon: Build,
+          path: "/asset-movement/repaired",
+          permission: "repaired",
           setter: closeCollapse,
         },
         {
