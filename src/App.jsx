@@ -134,6 +134,7 @@ import AssetMonitoring from "./Pages/Monitoring/AssetMonitoring";
 import PhysicalInventory from "./Pages/Physical Inventory/PhysicalInventory";
 import ChangeCareOf from "./Pages/Asset Movement/Pullout Confirmation/ChangeCareOf";
 import RepairMonitoring from "./Pages/Monitoring/RepairMonitoring";
+import Repaired from "./Pages/Asset Movement/Repaired/Repaired";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -608,6 +609,11 @@ const router = createBrowserRouter([
                 path: "bidding",
                 element: <Bidding />,
                 handle: { permission: "bidding" },
+              },
+              {
+                path: "repaired",
+                element: <Repaired />,
+                handle: { permission: "repaired" },
               },
             ],
           },
