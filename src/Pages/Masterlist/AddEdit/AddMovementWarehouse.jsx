@@ -17,6 +17,7 @@ import CustomAutoComplete from "../../../Components/Reusable/CustomAutoComplete"
 const schema = yup.object().shape({
   name: yup.string().required().label("Movement Warehouse"),
   evaluation_permission: yup.array().required().label("Evaluation Permission"),
+  type: yup.string().required().label("Type"),
   can_dispose: yup.number().required().label("Disposal Permission"),
   can_bid: yup.number().required().label("Bidding Permission"),
 });
@@ -53,20 +54,21 @@ const AddMovementWarehouse = ({ data, onUpdateResetHandler }) => {
     defaultValues: {
       name: "",
       evaluation_permission: [],
+      type: "",
       can_dispose: 0,
       can_bid: 0,
     },
   });
-
-  console.log("watchdispose", watch("can_dispose"));
-  console.log("watchbid", watch("can_bid"));
-
+  console.log("postError", postError);
   useEffect(() => {
     if ((isPostError || isUpdateError) && (postError?.status === 422 || updateError?.status === 422)) {
-      setError("name", {
-        type: "validate",
-        message: postError?.data?.errors.name || updateError?.data?.errors.name,
-      });
+      dispatch(
+        openToast({
+          message: postError?.data?.message,
+          duration: 5000,
+          variant: "error",
+        })
+      );
     } else if ((isPostError && postError?.status !== 422) || (isUpdateError && updateError?.status !== 422)) {
       dispatch(
         openToast({
@@ -97,12 +99,12 @@ const AddMovementWarehouse = ({ data, onUpdateResetHandler }) => {
 
   useEffect(() => {
     if (data.status) {
-      console.log(data);
       setValue("id", data?.id);
       setValue("name", data.name);
       setValue("evaluation_permission", data?.evaluation_permission);
       setValue("can_dispose", data?.can_dispose);
       setValue("can_bid", data?.can_bid);
+      setValue("type", data?.type);
     }
   }, [data]);
 
@@ -153,7 +155,6 @@ const AddMovementWarehouse = ({ data, onUpdateResetHandler }) => {
             "For Disposal",
             "For Bidding",
           ]}
-          // isOptionEqualToValue={(option, value) => option === value}
           multiple
           disableCloseOnSelect
           renderInput={(params) => (
@@ -163,6 +164,21 @@ const AddMovementWarehouse = ({ data, onUpdateResetHandler }) => {
               label="Evaluation Permission"
               error={!!errors?.evaluation_permission}
               helperText={errors?.evaluation_permission?.message}
+            />
+          )}
+        />
+
+        <CustomAutoComplete
+          control={control}
+          name="type"
+          options={["Warehouse", "Service Provider"]}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              color={"secondary"}
+              label="Type"
+              error={!!errors?.type}
+              helperText={errors?.type?.message}
             />
           )}
         />
