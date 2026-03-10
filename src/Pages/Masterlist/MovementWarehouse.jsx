@@ -6,6 +6,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import {
   Box,
+  Chip,
   Dialog,
   Grow,
   Table,
@@ -26,7 +27,7 @@ import CustomTablePagination from "../../Components/Reusable/CustomTablePaginati
 import ActionMenu from "../../Components/Reusable/ActionMenu";
 import AddMovementWarehouse from "./AddEdit/AddMovementWarehouse";
 import { closeConfirm, onLoading, openConfirm } from "../../Redux/StateManagement/confirmSlice";
-import { Help, ReportProblem } from "@mui/icons-material";
+import { Help, ReportProblem, SupportAgent, Warehouse } from "@mui/icons-material";
 import { openToast } from "../../Redux/StateManagement/toastSlice";
 
 const MovementWarehouse = () => {
@@ -135,7 +136,7 @@ const MovementWarehouse = () => {
   };
 
   const onUpdateHandler = (props) => {
-    const { id, name, evaluation_permission, can_dispose, can_bid } = props;
+    const { id, name, evaluation_permission, can_dispose, can_bid, type } = props;
     setUpdateMovementWarehouse({
       status: true,
       id: id,
@@ -143,6 +144,7 @@ const MovementWarehouse = () => {
       evaluation_permission: evaluation_permission,
       can_dispose: can_dispose,
       can_bid: can_bid,
+      type: type,
     });
   };
 
@@ -154,6 +156,7 @@ const MovementWarehouse = () => {
       evaluation_permission: [],
       can_dispose: false,
       can_bid: false,
+      type: "",
     });
   };
 
@@ -183,7 +186,7 @@ const MovementWarehouse = () => {
                   >
                     <TableCell className="tbl-cell tr-cen-pad45">ID No.</TableCell>
                     <TableCell className="tbl-cell tr-cen-pad45">Movement Warehouse</TableCell>
-                    {/* <TableCell className="tbl-cell tr-cen-pad45">Code</TableCell> */}
+                    <TableCell className="tbl-cell tr-cen-pad45">Type</TableCell>
                     <TableCell className="tbl-cell tr-cen-pad45">Date Created</TableCell>
                     <TableCell className="tbl-cell tr-cen-pad45">Action</TableCell>
                   </TableRow>
@@ -208,7 +211,22 @@ const MovementWarehouse = () => {
                           >
                             <TableCell className="tbl-cell tr-cen-pad45">{data.id}</TableCell>
                             <TableCell className="tbl-cell tr-cen-pad45">{data.name}</TableCell>
-                            {/* <TableCell className="tbl-cell tr-cen-pad45">{data.code}</TableCell> */}
+                            <TableCell className="tbl-cell tr-cen-pad45">
+                              {
+                                <Chip
+                                  label={data.type}
+                                  size="small"
+                                  color="primary"
+                                  icon={
+                                    data.type == "Warehouse" ? (
+                                      <Warehouse />
+                                    ) : data.type == "Service Provider" ? (
+                                      <SupportAgent />
+                                    ) : null
+                                  }
+                                />
+                              }
+                            </TableCell>
                             <TableCell className="tbl-cell tr-cen-pad45">
                               {moment(data.created_at).format("MMMM DD, YYYY")}
                             </TableCell>
