@@ -33,4 +33,5 @@ export const deliveryTypeApi = createApi({
   }),
 });
 
-export const { useGetDeliveryTypeApiQuery, usePostDeliveryTypeApiMutation } = deliveryTypeApi;
+export const { useGetDeliveryTypeApiQuery, useLazyGetDeliveryTypeApiQuery, usePostDeliveryTypeApiMutation } =
+  deliveryTypeApi;
