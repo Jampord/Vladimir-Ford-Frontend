@@ -27,7 +27,7 @@ import NoDataFile from "../../Img/PNG/no-data.png";
 import Moment from "moment";
 
 const PulloutTimeline = (props) => {
-  const { data: transactionData, closeDialog1props } = props;
+  const { data: transactionData, closeDialog1props, noTimeline } = props;
   const dispatch = useDispatch();
 
   return (
@@ -50,63 +50,72 @@ const PulloutTimeline = (props) => {
         TRANSACTION NO. {transactionData?.id}
       </Typography>
 
-      <Stack flexDirection="row" alignItems="center" gap={1}>
-        <TimelineTwoTone color="primary" />
-        <Typography fontFamily={"Anton, Impact"} color={"secondary"} fontSize={20}>
-          TIMELINE
-        </Typography>
-      </Stack>
-
-      <Box className="timelineSteps__timeline" alignItems="flex-start">
-        <Stepper key={1} activeStep={transactionData ? transactionData?.process_count - 1 : 0} alternativeLabel>
-          {(transactionData?.status === "Cancelled"
-            ? ["Cancelled", ...transactionData?.steps]
-            : transactionData?.status === "Returned"
-            ? ["Returned", ...transactionData?.steps]
-            : transactionData?.status === "Rejected"
-            ? ["Rejected", ...transactionData?.steps]
-            : transactionData?.steps
-          )?.map((label, index) => (
-            <Step key={index} last>
-              <StepLabel
-                icon={
-                  (transactionData?.status === "Returned" ||
-                    transactionData?.status === "Cancelled" ||
-                    transactionData?.status === "Rejected") &&
-                  index === 0 ? (
-                    <Error />
-                  ) : null
-                }
-                sx={{
-                  ".Mui-completed > svg": { color: "success.main" },
-                  ".Mui-completed > p": { color: "text.light" },
-                  ".Mui-active": {
-                    color:
+      {!noTimeline && (
+        <>
+          {" "}
+          <Stack flexDirection="row" alignItems="center" gap={1}>
+            <TimelineTwoTone color="primary" />
+            <Typography fontFamily={"Anton, Impact"} color={"secondary"} fontSize={20}>
+              TIMELINE
+            </Typography>
+          </Stack>
+          <Box className="timelineSteps__timeline" alignItems="flex-start">
+            <Stepper key={1} activeStep={transactionData ? transactionData?.process_count - 1 : 0} alternativeLabel>
+              {(transactionData?.status === "Cancelled"
+                ? ["Cancelled", ...transactionData?.steps]
+                : transactionData?.status === "Returned"
+                ? ["Returned", ...transactionData?.steps]
+                : transactionData?.status === "Rejected"
+                ? ["Rejected", ...transactionData?.steps]
+                : transactionData?.steps
+              )?.map((label, index) => (
+                <Step key={index} last>
+                  <StepLabel
+                    icon={
                       (transactionData?.status === "Returned" ||
                         transactionData?.status === "Cancelled" ||
                         transactionData?.status === "Rejected") &&
-                      index === 0
-                        ? "error.main"
-                        : "primary.main",
-                  },
-                  ".Mui-active > p": { color: "secondary.main" },
-                  ".Mui-disabled": {
-                    color: "error.light",
-                  },
-                  ".Mui-disabled > p ": {
-                    color: "text.light",
-                  },
-                }}
-              >
-                <Typography fontSize={10} marginTop="-10px" fontWeight={600} textTransform="uppercase" minWidth={80}>
-                  {label}
-                </Typography>
-              </StepLabel>
-            </Step>
-          ))}
-        </Stepper>
-      </Box>
-
+                      index === 0 ? (
+                        <Error />
+                      ) : null
+                    }
+                    sx={{
+                      ".Mui-completed > svg": { color: "success.main" },
+                      ".Mui-completed > p": { color: "text.light" },
+                      ".Mui-active": {
+                        color:
+                          (transactionData?.status === "Returned" ||
+                            transactionData?.status === "Cancelled" ||
+                            transactionData?.status === "Rejected") &&
+                          index === 0
+                            ? "error.main"
+                            : "primary.main",
+                      },
+                      ".Mui-active > p": { color: "secondary.main" },
+                      ".Mui-disabled": {
+                        color: "error.light",
+                      },
+                      ".Mui-disabled > p ": {
+                        color: "text.light",
+                      },
+                    }}
+                  >
+                    <Typography
+                      fontSize={10}
+                      marginTop="-10px"
+                      fontWeight={600}
+                      textTransform="uppercase"
+                      minWidth={80}
+                    >
+                      {label}
+                    </Typography>
+                  </StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </Box>
+        </>
+      )}
       <Divider sx={{ mb: 1.5, width: "90%", alignSelf: "center" }} />
 
       <Stack sx={{ mt: -1.5 }} width="100%">
