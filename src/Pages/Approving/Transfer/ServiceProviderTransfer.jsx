@@ -1,0 +1,410 @@
+import {
+  Box,
+  Chip,
+  Dialog,
+  Grow,
+  IconButton,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import React, { useState } from "react";
+import MasterlistSkeleton from "../../Skeleton/MasterlistSkeleton";
+import ErrorFetching from "../../ErrorFetching";
+import MasterlistToolbar from "../../../Components/Reusable/MasterlistToolbar";
+import NoRecordsFound from "../../../Layout/NoRecordsFound";
+import { Attachment, Visibility } from "@mui/icons-material";
+import moment from "moment";
+import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
+import { closeDialog, openDialog } from "../../../Redux/StateManagement/booleanStateSlice";
+import TransferTimeline from "../../Asset Movement/TransferTimeline";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { useGetTransferApprovalApiQuery } from "../../../Redux/Query/Movement/Transfer";
+import { useDownloadTransferAttachment } from "../../../Hooks/useDownloadAttachment";
+
+const ServiceProviderTransfer = () => {
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("For Approval");
+  const [perPage, setPerPage] = useState(5);
+  const [page, setPage] = useState(1);
+  const [transactionIdData, setTransactionIdData] = useState();
+
+  const dialog = useSelector((state) => state.booleanState.dialog);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Table Sorting --------------------------------
+
+  const [order, setOrder] = useState("desc");
+  const [orderBy, setOrderBy] = useState("id");
+
+  // const [remarks, setRemarks] = useState("");
+
+  const descendingComparator = (a, b, orderBy) => {
+    if (b[orderBy] < a[orderBy]) {
+      return -1;
+    }
+    if (b[orderBy] > a[orderBy]) {
+      return 1;
+    }
+    return 0;
+  };
+
+  const comparator = (order, orderBy) => {
+    return order === "desc"
+      ? (a, b) => descendingComparator(a, b, orderBy)
+      : (a, b) => -descendingComparator(a, b, orderBy);
+  };
+
+  const onSort = (property) => {
+    const isAsc = orderBy === property && order === "asc";
+    setOrder(isAsc ? "desc" : "asc");
+    setOrderBy(property);
+  };
+
+  // Table Properties --------------------------------
+
+  const perPageHandler = (e) => {
+    setPage(1);
+    setPerPage(parseInt(e.target.value));
+  };
+
+  const pageHandler = (_, page) => {
+    // console.log(page + 1);
+    setPage(page + 1);
+  };
+
+  const onSetPage = () => {
+    setPage(1);
+  };
+
+  // CRUD -------------------------------------------
+
+  const {
+    data: pendingTransferData,
+    isLoading: approvalLoading,
+    isSuccess: approvalSuccess,
+    isError: approvalError,
+    error: errorData,
+    refetch,
+  } = useGetTransferApprovalApiQuery(
+    {
+      page: page,
+      per_page: perPage,
+      search: search,
+      status: status,
+      is_helper: 1,
+    },
+    { refetchOnMountOrArgChange: true }
+  );
+
+  const handleViewTransfer = (data) => {
+    // console.log("pendingtransferdata: ", data);
+    // const view = true;
+    navigate(`/approving/transfer/${data?.id}`, {
+      state: { ...data },
+    });
+  };
+
+  const DlAttachment = (transfer_number) => (
+    <Tooltip title="Download Attachment" placement="top" arrow>
+      <Box
+        sx={{
+          textDecoration: "underline",
+          cursor: "pointer",
+          color: "primary.main",
+          fontSize: "12px",
+        }}
+        onClick={() => handleDownloadAttachment({ value: "attachments", transfer_number: transfer_number })}
+      >
+        <Attachment />
+      </Box>
+    </Tooltip>
+  );
+
+  const handleDownloadAttachment = (value) =>
+    useDownloadTransferAttachment({
+      attachments: "attachments",
+      transfer_number: value?.transfer_number?.transfer_number,
+    });
+
+  const handleViewTimeline = (data) => {
+    dispatch(openDialog());
+    setTransactionIdData(data);
+  };
+
+  const transactionStatus = (data) => {
+    let statusColor, hoverColor, textColor, variant;
+
+    switch (data.status) {
+      case "Waiting to be Received":
+        statusColor = "success.light";
+        hoverColor = "success.main";
+        textColor = "white";
+        variant = "filled";
+        break;
+
+      case "Received":
+        statusColor = "success.dark";
+        hoverColor = "success.dark";
+        variant = "filled";
+        break;
+
+      case "Returned":
+      case "Cancelled":
+        statusColor = "error.light";
+        hoverColor = "error.main";
+        variant = "filled";
+        break;
+
+      default:
+        statusColor = "success.main";
+        hoverColor = "none";
+        textColor = "success.main";
+        variant = "outlined";
+    }
+
+    return (
+      <>
+        <Tooltip title={data?.current_approver} placement="top" arrow>
+          <Chip
+            placement="top"
+            onClick={() => handleViewTimeline(data)}
+            size="small"
+            variant={variant}
+            sx={{
+              ...(variant === "filled" && {
+                backgroundColor: statusColor,
+                color: "white",
+              }),
+              ...(variant === "outlined" && {
+                borderColor: statusColor,
+                color: textColor,
+              }),
+              fontSize: "11px",
+              px: 1,
+              ":hover": {
+                ...(variant === "filled" && { backgroundColor: hoverColor }),
+                ...(variant === "outlined" && { borderColor: hoverColor, color: textColor }),
+              },
+            }}
+            label={data.status}
+          />
+        </Tooltip>
+      </>
+    );
+  };
+
+  return (
+    <Stack className="category_height">
+      {approvalLoading && <MasterlistSkeleton category={true} />}
+      {approvalError && <ErrorFetching refetch={refetch} category={pendingTransferData} error={errorData} />}
+      {pendingTransferData && !approvalError && (
+        <Box className="mcontainer__wrapper">
+          <MasterlistToolbar
+            path="#"
+            onStatusChange={setStatus}
+            onSearchChange={setSearch}
+            onSetPage={setPage}
+            // onAdd={() => {}}
+            hideArchive
+          />
+
+          <Box>
+            <TableContainer className="mcontainer__th-body-category">
+              <Table className="mcontainer__table" stickyHeader>
+                <TableHead>
+                  <TableRow
+                    sx={{
+                      "& > *": {
+                        fontWeight: "bold!important",
+                        whiteSpace: "nowrap",
+                      },
+                    }}
+                  >
+                    <TableCell className="tbl-cell-category">
+                      {/* <TableSortLabel
+                    active={orderBy === `id`}
+                    direction={orderBy === `id` ? order : `asc`}
+                    onClick={() => onSort(`id`)}
+                  > */}
+                      Transfer No.
+                      {/* </TableSortLabel> */}
+                    </TableCell>
+
+                    <TableCell className="tbl-cell-category">Description</TableCell>
+
+                    <TableCell className="tbl-cell-category">
+                      {/* <TableSortLabel
+                    active={orderBy === `requestor`}
+                    direction={orderBy === `requestor` ? order : `asc`}
+                    onClick={() => onSort(`requestor`)}
+                  > */}
+                      Requestor
+                      {/* </TableSortLabel> */}
+                    </TableCell>
+                    {/* 
+                <TableCell className="tbl-cell-category">
+                  <TableSortLabel
+                    active={orderBy === `requestor`}
+                    direction={orderBy === `requestor` ? order : `asc`}
+                    onClick={() => onSort(`requestor`)}
+                  >
+                    Approver
+                  </TableSortLabel>
+                </TableCell> */}
+
+                    <TableCell className="tbl-cell-category" align="center">
+                      {/* <TableSortLabel
+                    active={orderBy === `quantity`}
+                    direction={orderBy === `quantity` ? order : `asc`}
+                    onClick={() => onSort(`quantity`)}
+                  > */}
+                      Quantity
+                      {/* </TableSortLabel> */}
+                    </TableCell>
+
+                    <TableCell className="tbl-cell-category" align="center">
+                      View
+                    </TableCell>
+
+                    <TableCell className="tbl-cell-category" align="center">
+                      Status
+                    </TableCell>
+
+                    <TableCell className="tbl-cell-category" align="center">
+                      Timeline & History
+                    </TableCell>
+
+                    <TableCell className="tbl-cell-category" align="center">
+                      Attachments
+                    </TableCell>
+
+                    <TableCell className="tbl-cell-category text-center">
+                      {/* <TableSortLabel
+                    active={orderBy === `date_requested`}
+                    direction={orderBy === `date_requested` ? order : `asc`}
+                    onClick={() => onSort(`date_requested`)}
+                  > */}
+                      Date Requested
+                      {/* </TableSortLabel> */}
+                    </TableCell>
+
+                    {/* <TableCell className="tbl-cell-category  text-center">Action</TableCell> */}
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {pendingTransferData?.data.length === 0 ? (
+                    <NoRecordsFound pendingTransferData={pendingTransferData} heightData="small" />
+                  ) : (
+                    <>
+                      {approvalSuccess &&
+                        [...pendingTransferData.data].sort(comparator(order, orderBy))?.map((data) => (
+                          <TableRow
+                            key={data?.id}
+                            hover={true}
+                            sx={{
+                              "&:last-child td, &:last-child th": {
+                                borderBottom: 0,
+                              },
+                            }}
+                          >
+                            <TableCell className="tbl-cell-category ">{data?.id}</TableCell>
+
+                            <TableCell className="tbl-cell-category ">{data?.description}</TableCell>
+
+                            <TableCell className="tbl-cell-category">
+                              <Typography fontSize={14} fontWeight={600} color={"secondary"} noWrap>
+                                {data.requester?.employee_id}
+                              </Typography>
+                              <Typography fontSize={12} color={"gray"}>
+                                {data.requester?.firstname}
+                              </Typography>
+                            </TableCell>
+
+                            <TableCell className="tbl-cell-category tr-cen-pad45">{data.quantity}</TableCell>
+
+                            <TableCell className="tbl-cell-category text-center">
+                              <IconButton onClick={() => handleViewTransfer(data)}>
+                                <Visibility color="secondary" />
+                              </IconButton>
+                            </TableCell>
+
+                            <TableCell className="tbl-cell-category text-center capitalized">
+                              <Chip
+                                size="small"
+                                variant="contained"
+                                sx={{
+                                  background: "#f5cc2a2f",
+                                  color: "#c59e00",
+                                  fontSize: "0.7rem",
+                                  px: 1,
+                                }}
+                                label="PENDING"
+                              />
+                            </TableCell>
+
+                            <TableCell className="tbl-cell" align="center">
+                              {transactionStatus(data)}
+                            </TableCell>
+
+                            <TableCell className="tbl-cell" align="center">
+                              <DlAttachment transfer_number={data?.id} />
+                            </TableCell>
+
+                            <TableCell className="tbl-cell-category tr-cen-pad45">
+                              {moment(data.asset_request?.date_requested).format("MMM DD, YYYY")}
+                            </TableCell>
+
+                            {/* <TableCell className="tbl-cell-category text-center">
+                          <ActionMenu
+                            status={status}
+                            data={data}
+                            showApprover
+                            onApprovalApproveHandler={onApprovalApproveHandler}
+                            onApprovalReturnHandler={onApprovalReturnHandler}
+                            hideArchive
+                          />
+                        </TableCell> */}
+                          </TableRow>
+                        ))}
+                    </>
+                  )}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </Box>
+
+          <CustomTablePagination
+            total={pendingTransferData?.total}
+            success={approvalSuccess}
+            current_page={pendingTransferData?.current_page}
+            per_page={pendingTransferData?.per_page}
+            onPageChange={pageHandler}
+            onRowsPerPageChange={perPageHandler}
+          />
+        </Box>
+      )}
+
+      <Dialog
+        open={dialog}
+        TransitionComponent={Grow}
+        onClose={() => dispatch(closeDialog())}
+        PaperProps={{ sx: { borderRadius: "10px", maxWidth: "700px" } }}
+      >
+        <TransferTimeline data={transactionIdData} />
+      </Dialog>
+    </Stack>
+  );
+};
+
+export default ServiceProviderTransfer;
