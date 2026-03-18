@@ -127,6 +127,7 @@ import { operationApi } from "../Query/Masterlist/Operation";
 import { deliveryTypeApi } from "../Query/Delivery Type/DeliveryType";
 import { biddingApi } from "../Query/Movement/Bidding";
 import { physicalInventoryApi } from "../Query/Physical Inventory/PhysicalInventory";
+import { assetTransferServiceProviderApi } from "../Query/Settings/AssetTransferServiceProvider";
 
 export const store = configureStore({
   reducer: {
@@ -217,6 +218,7 @@ export const store = configureStore({
     [unitApproversApi.reducerPath]: unitApproversApi.reducer,
     [assetTransferApi.reducerPath]: assetTransferApi.reducer,
     [assetTransferPulloutApi.reducerPath]: assetTransferPulloutApi.reducer,
+    [assetTransferServiceProviderApi.reducerPath]: assetTransferServiceProviderApi.reducer,
     [assetPulloutApi.reducerPath]: assetPulloutApi.reducer,
     [assetEvaluationApi.reducerPath]: assetEvaluationApi.reducer,
     [assetDisposalApi.reducerPath]: assetDisposalApi.reducer,
@@ -338,6 +340,7 @@ export const store = configureStore({
       unitApproversApi.middleware,
       assetTransferApi.middleware,
       assetTransferPulloutApi.middleware,
+      assetTransferServiceProviderApi.middleware,
       assetPulloutApi.middleware,
       assetEvaluationApi.middleware,
       assetDisposalApi.middleware,
