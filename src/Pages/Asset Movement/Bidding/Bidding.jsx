@@ -24,52 +24,21 @@ const Bidding = () => {
           <Tabs onChange={handleChange} value={value}>
             <Tab
               label={
-                <Badge color="error" badgeContent={notifData?.forDisposalForBookSlipCount}>
-                  For Disposal
+                <Badge color="error" badgeContent={notifData?.forBiddingForBookSlipCount}>
+                  For Bid
                 </Badge>
               }
               value="1"
               className={value === "1" ? "tab__background" : null}
             />
-            <Tab label="Disposed" value="2" className={value === "2" ? "tab__background" : null} />
-            <Tab
-              label={
-                <Badge color="error" badgeContent={notifData?.forBiddingForBookSlipCount}>
-                  For Bid
-                </Badge>
-              }
-              value="3"
-              className={value === "3" ? "tab__background" : null}
-            />
-            <Tab
-              label={
-                <Badge color="error" badgeContent={notifData?.forBiddingForSoldCount}>
-                  Bidding
-                </Badge>
-              }
-              value="4"
-              className={value === "4" ? "tab__background" : null}
-            />
-            <Tab label="Sold" value="5" className={value === "5" ? "tab__background" : null} />
+            <Tab label="Sold" value="2" className={value === "2" ? "tab__background" : null} />
           </Tabs>
 
           <TabPanel sx={{ p: 0 }} value="1" index="1">
-            <BiddingTabPanel tab="For Disposal" />
-          </TabPanel>
-
-          <TabPanel sx={{ p: 0 }} value="2" index="2">
-            <BiddingTabPanel tab="Disposed" />
-          </TabPanel>
-
-          <TabPanel sx={{ p: 0 }} value="3" index="3">
             <BiddingTabPanel tab="Bid" />
           </TabPanel>
 
-          <TabPanel sx={{ p: 0 }} value="4" index="4">
-            <BiddingTabPanel tab="Bidding" />
-          </TabPanel>
-
-          <TabPanel sx={{ p: 0 }} value="5" index="5">
+          <TabPanel sx={{ p: 0 }} value="2" index="2">
             <BiddingTabPanel tab="Sold" />
           </TabPanel>
         </TabContext>
