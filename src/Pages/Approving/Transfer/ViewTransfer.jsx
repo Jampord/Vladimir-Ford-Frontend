@@ -17,6 +17,7 @@ import {
   Avatar,
   Box,
   Button,
+  Chip,
   Dialog,
   Divider,
   IconButton,
@@ -38,6 +39,7 @@ import {
   Add,
   ArrowBackIosRounded,
   BorderColor,
+  CalendarMonth,
   Cancel,
   ChangeCircle,
   Check,
@@ -425,7 +427,7 @@ const ViewTransfer = (props) => {
       setValue("subunit_id", transferNumberData?.subunit);
       setValue("location_id", transferNumberData?.location);
       // setValue("account_title_id", transferNumberData?.account_title);
-      setValue("remarks", transferNumberData?.remarks);
+      setValue("remarks", transferNumberData?.remarks || "-");
       // setValue("depreciation_debit_id", transferNumberData?.depreciation_debit);
       setValue("attachments", attachmentFormat);
       setValue(
@@ -818,6 +820,11 @@ const ViewTransfer = (props) => {
     pb: "10px",
   };
 
+  const formatCost = (value) => {
+    const unitCost = Number(value);
+    return unitCost?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  };
+
   return (
     <>
       <Box className="mcontainer">
@@ -835,32 +842,6 @@ const ViewTransfer = (props) => {
           >
             Back
           </Button>
-
-          {/* {view && !edit
-            ? !transactionData?.approved && (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  startIcon={<BorderColor color="secondary" />}
-                  onClick={() => setEdit(true)}
-                  sx={{ color: "secondary.main", mb: "10px" }}
-                >
-                  Edit
-                </Button>
-              )
-            : !transactionData?.approved && (
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  size="small"
-                  startIcon={<Cancel color="secondary" />}
-                  onClick={() => setEdit(false)}
-                  sx={{ color: "secondary.main", mb: "10px" }}
-                >
-                  Cancel Edit
-                </Button>
-              )} */}
         </Stack>
 
         <Box className={isSmallScreen ? "request request__wrapper" : "request__wrapper"} p={2} component="form">
@@ -881,7 +862,9 @@ const ViewTransfer = (props) => {
                     <CustomTextField
                       control={control}
                       name="description"
-                      disabled={edit ? false : view}
+                      InputProps={{
+                        readOnly: true,
+                      }}
                       label="Description"
                       type="text"
                       error={!!errors?.description}
@@ -893,7 +876,9 @@ const ViewTransfer = (props) => {
                     <CustomTextField
                       control={control}
                       name="remarks"
-                      disabled={edit ? false : view}
+                      InputProps={{
+                        readOnly: true,
+                      }}
                       label="Remarks (Optional)"
                       optional
                       type="text"
@@ -944,59 +929,11 @@ const ViewTransfer = (props) => {
                       CHART OF ACCOUNTS
                     </Typography>
 
-                    {/* <CustomAutoComplete
-                    control={control}
-                    name="accountability"
-                    disabled={edit ? false : view}
-                    options={["Personal Issued", "Common"]}
-                    isOptionEqualToValue={(option, value) => option === value}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        color="secondary"
-                        label="Accountability  "
-                        error={!!errors?.accountability}
-                        helperText={errors?.accountability?.message}
-                      />
-                    )}
-                    onChange={(_, value) => {
-                      setValue("accountable", null);
-                      return value;
-                    }}
-                  />
-
-                  {watch("accountability") === "Personal Issued" && (
-                    <CustomAutoComplete
-                      name="accountable"
-                      disabled={edit ? false : view}
-                      control={control}
-                      includeInputInList
-                      disablePortal
-                      filterOptions={filterOptions}
-                      options={userData}
-                      onOpen={() => (isUserSuccess ? null : userAccountTrigger())}
-                      loading={isUserLoading}
-                      getOptionLabel={(option) => option?.full_id_number_full_name}
-                      isOptionEqualToValue={(option, value) =>
-                        option?.full_id_number_full_name === value?.full_id_number_full_name
-                      }
-                      renderInput={(params) => (
-                        <TextField
-                          {...params}
-                          color="secondary"
-                          label="New Custodian"
-                          error={!!errors?.accountable?.message}
-                          helperText={errors?.accountable?.message}
-                        />
-                      )}
-                    />
-                  )} */}
-
                     <CustomAutoComplete
                       autoComplete
                       control={control}
                       freeSolo
-                      disabled
+                      readOnly
                       name="one_charging_id"
                       options={oneChargingData || []}
                       onOpen={() => (isOneChargingSuccess ? null : oneChargingTrigger({ pagination: "none" }))}
@@ -1019,9 +956,9 @@ const ViewTransfer = (props) => {
                     <CustomAutoComplete
                       autoComplete
                       freeSolo
+                      readOnly
                       control={control}
                       name="department_id"
-                      disabled={edit ? false : view}
                       options={departmentData}
                       onOpen={() =>
                         isDepartmentSuccess ? null : (departmentTrigger(), companyTrigger(), businessUnitTrigger())
@@ -1045,6 +982,7 @@ const ViewTransfer = (props) => {
                     <CustomAutoComplete
                       name="company_id"
                       freeSolo
+                      readOnly
                       control={control}
                       options={companyData}
                       onOpen={() => (isCompanySuccess ? null : company())}
@@ -1063,12 +1001,12 @@ const ViewTransfer = (props) => {
                           helperText={errors?.company_id?.message}
                         />
                       )}
-                      disabled
                     />
 
                     <CustomAutoComplete
                       autoComplete
                       freeSolo
+                      readOnly
                       name="business_unit_id"
                       control={control}
                       options={businessUnitData}
@@ -1086,14 +1024,13 @@ const ViewTransfer = (props) => {
                           helperText={errors?.business_unit_id?.message}
                         />
                       )}
-                      disabled
                     />
 
                     <CustomAutoComplete
                       autoComplete
-                      freeSolo
                       name="unit_id"
-                      disabled={edit ? false : view}
+                      freeSolo
+                      readOnly
                       control={control}
                       options={departmentData?.filter((obj) => obj?.id === watch("department_id")?.id)[0]?.unit || []}
                       onOpen={() => (isUnitSuccess ? null : (unitTrigger(), subunitTrigger(), locationTrigger()))}
@@ -1120,9 +1057,9 @@ const ViewTransfer = (props) => {
 
                     <CustomAutoComplete
                       autoComplete
-                      freeSolo
                       name="subunit_id"
-                      disabled={edit ? false : view}
+                      freeSolo
+                      readOnly
                       control={control}
                       options={unitData?.filter((obj) => obj?.id === watch("unit_id")?.id)[0]?.subunit || []}
                       loading={isSubUnitLoading}
@@ -1145,9 +1082,9 @@ const ViewTransfer = (props) => {
 
                     <CustomAutoComplete
                       autoComplete
-                      freeSolo
                       name="location_id"
-                      disabled={edit ? false : view}
+                      freeSolo
+                      readOnly
                       control={control}
                       options={locationData?.filter((item) => {
                         return item.subunit.some((subunit) => {
@@ -1270,8 +1207,8 @@ const ViewTransfer = (props) => {
                     <TableCell className="tbl-cell">Transfer To</TableCell>
                     <TableCell className="tbl-cell">Accounting Entries</TableCell>
                     <TableCell className="tbl-cell">Accountability</TableCell>
+                    <TableCell className="tbl-cell">Chart of Accounts</TableCell>
                     <TableCell className="tbl-cell">Remaining Book Value</TableCell>
-                    <TableCell className="tbl-cell">Chart Of Accounts</TableCell>
                     <TableCell className="tbl-cell">Acquisition Date</TableCell>
                   </TableRow>
                 </TableHead>
@@ -1303,9 +1240,9 @@ const ViewTransfer = (props) => {
                                 options={vTagNumberData}
                                 onOpen={() => (isVTagNumberSuccess ? null : fixedAssetTrigger())}
                                 loading={isVTagNumberLoading}
-                                disabled={edit ? false : view}
                                 size="small"
                                 freeSolo
+                                readOnly
                                 value={value}
                                 filterOptions={filterOptions}
                                 getOptionLabel={(option) =>
@@ -1338,11 +1275,8 @@ const ViewTransfer = (props) => {
                                   ".MuiInputBase-root": {
                                     borderRadius: "10px",
                                   },
-                                  ".MuiInputLabel-root.Mui-disabled": {
-                                    backgroundColor: "transparent",
-                                  },
-                                  ".Mui-disabled": {
-                                    backgroundColor: "background.light",
+                                  ".MuiOutlinedInput-notchedOutline": {
+                                    bgcolor: "#f5c9861c",
                                   },
                                   minWidth: "200px",
                                   maxWidth: "550px",
@@ -1360,8 +1294,8 @@ const ViewTransfer = (props) => {
                               render={({ field: { ref, value, onChange } }) => (
                                 <Autocomplete
                                   options={["Personal Issued", "Common"]}
-                                  disabled
                                   freeSolo
+                                  readOnly
                                   size="small"
                                   value={value}
                                   renderInput={(params) => (
@@ -1403,12 +1337,6 @@ const ViewTransfer = (props) => {
                                     ".MuiInputBase-root": {
                                       borderRadius: "10px",
                                     },
-                                    ".MuiInputLabel-root.Mui-disabled": {
-                                      backgroundColor: "transparent",
-                                    },
-                                    ".Mui-disabled": {
-                                      backgroundColor: "background.light",
-                                    },
                                     ".MuiOutlinedInput-notchedOutline": {
                                       bgcolor: "#f5c9861c",
                                     },
@@ -1430,8 +1358,8 @@ const ViewTransfer = (props) => {
                                     size="small"
                                     value={value}
                                     options={userData}
-                                    disabled
                                     freeSolo
+                                    readOnly
                                     onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
                                     loading={isUserLoading}
                                     filterOptions={filterOptions}
@@ -1512,7 +1440,7 @@ const ViewTransfer = (props) => {
                                   size="small"
                                   value={value}
                                   options={userData}
-                                  disabled
+                                  readOnly
                                   freeSolo
                                   onOpen={() => userAccountTrigger({ unit: watch("unit_id")?.id })}
                                   loading={isUserLoading}
@@ -1564,12 +1492,6 @@ const ViewTransfer = (props) => {
                                   sx={{
                                     ".MuiInputBase-root": {
                                       borderRadius: "10px",
-                                    },
-                                    ".MuiInputLabel-root.Mui-disabled": {
-                                      backgroundColor: "transparent",
-                                    },
-                                    ".Mui-disabled": {
-                                      backgroundColor: "background.light",
                                     },
                                     ".MuiOutlinedInput-notchedOutline": {
                                       bgcolor: "#f5c9861c",
@@ -1634,299 +1556,54 @@ const ViewTransfer = (props) => {
                         </TableCell>
 
                         <TableCell className="tbl-cell">
-                          <TextField
-                            {...register(`assets.${index}.asset_accountable`)}
-                            variant="outlined"
-                            disabled
-                            multiline
-                            maxRows={2}
-                            type="text"
-                            error={!!errors?.accountableAccount}
-                            helperText={errors?.accountableAccount?.message}
-                            sx={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                  border: "none",
-                                },
-                              },
-                              "& .MuiInputBase-input": {
-                                backgroundColor: "transparent",
-                                textOverflow: "ellipsis",
-                                fontWeight: "500",
-                              },
-                              "& .MuiInputBase-inputMultiline": {
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                                // overflow: "hidden",
-                                // textOverflow: "ellipsis",
-                                // textAlign: "center",
-                              },
-
-                              ml: "-15px",
-                              minWidth: "150px",
-                            }}
-                            fullWidth
-                          />
-                        </TableCell>
-
-                        <TableCell className="tbl-cell">
-                          <TextField
-                            {...register(`assets.${index}.remaining_book_value`)}
-                            variant="outlined"
-                            disabled
-                            InputProps={{
-                              startAdornment: (
-                                <InputAdornment position="start">
-                                  <Typography sx={{ color: "gray", mt: "2px" }}>₱</Typography>
-                                </InputAdornment>
-                              ),
-                            }}
-                            sx={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              ml: "-10px",
-                              "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                  border: "none",
-                                },
-                              },
-                              "& .MuiInputBase-input": {
-                                backgroundColor: "transparent",
-                              },
-
-                              "& .Mui-disabled": {
-                                color: "red",
-                              },
-                            }}
-                          />
+                          <Typography fontFamily="Roboto" fontSize="13.5px" fontWeight={500}>
+                            {watch(`assets.${index}.asset_accountable`)}
+                          </Typography>
                         </TableCell>
 
                         <TableCell className="tbl-cell">
                           <Stack width="250px" rowGap={0}>
-                            <TextField
-                              {...register(`assets.${index}.one_charging_id`)}
-                              variant="outlined"
-                              disabled
-                              type="text"
-                              size="small"
-                              sx={{
-                                backgroundColor: "transparent",
-                                border: "none",
-
-                                ml: "-10px",
-                                "& .MuiOutlinedInput-root": {
-                                  "& fieldset": {
-                                    border: "none",
-                                  },
-                                },
-                                "& .MuiInputBase-input": {
-                                  backgroundColor: "transparent",
-                                  fontWeight: "bold",
-                                  fontSize: "11px",
-                                  textOverflow: "ellipsis",
-                                },
-                                "& .Mui-disabled": {
-                                  color: "red",
-                                },
-                                marginTop: "-15px",
-                              }}
-                            />
-
-                            <TextField
-                              {...register(`assets.${index}.company_id`)}
-                              variant="outlined"
-                              disabled
-                              type="text"
-                              size="small"
-                              sx={{
-                                backgroundColor: "transparent",
-                                border: "none",
-
-                                ml: "-10px",
-                                "& .MuiOutlinedInput-root": {
-                                  "& fieldset": {
-                                    border: "none",
-                                  },
-                                },
-                                "& .MuiInputBase-input": {
-                                  backgroundColor: "transparent",
-                                  fontWeight: "bold",
-                                  fontSize: "11px",
-                                  textOverflow: "ellipsis",
-                                },
-                                "& .Mui-disabled": {
-                                  color: "red",
-                                },
-                                marginTop: "-15px",
-                              }}
-                            />
-
-                            <TextField
-                              {...register(`assets.${index}.business_unit_id`)}
-                              variant="outlined"
-                              disabled
-                              type="text"
-                              size="small"
-                              sx={{
-                                backgroundColor: "transparent",
-                                border: "none",
-                                ml: "-10px",
-                                "& .MuiOutlinedInput-root": {
-                                  "& fieldset": {
-                                    border: "none",
-                                  },
-                                },
-                                "& .MuiInputBase-input": {
-                                  backgroundColor: "transparent",
-                                  fontWeight: "bold",
-                                  fontSize: "11px",
-                                  textOverflow: "ellipsis",
-                                },
-                                "& .Mui-disabled": {
-                                  color: "red",
-                                },
-                                marginTop: "-15px",
-                              }}
-                            />
-
-                            <TextField
-                              {...register(`assets.${index}.department_id`)}
-                              variant="outlined"
-                              disabled
-                              type="text"
-                              size="small"
-                              sx={{
-                                backgroundColor: "transparent",
-                                border: "none",
-                                ml: "-10px",
-                                "& .MuiOutlinedInput-root": {
-                                  "& fieldset": {
-                                    border: "none",
-                                  },
-                                },
-                                "& .MuiInputBase-input": {
-                                  backgroundColor: "transparent",
-                                  fontWeight: "bold",
-                                  fontSize: "11px",
-                                  textOverflow: "ellipsis",
-                                },
-                                "& .Mui-disabled": {
-                                  color: "red",
-                                },
-                                marginTop: "-15px",
-                              }}
-                            />
-
-                            <TextField
-                              {...register(`assets.${index}.unit_id`)}
-                              variant="outlined"
-                              disabled
-                              type="text"
-                              size="small"
-                              sx={{
-                                backgroundColor: "transparent",
-                                border: "none",
-                                ml: "-10px",
-                                "& .MuiOutlinedInput-root": {
-                                  "& fieldset": {
-                                    border: "none",
-                                  },
-                                },
-                                "& .MuiInputBase-input": {
-                                  backgroundColor: "transparent",
-                                  fontWeight: "bold",
-                                  fontSize: "11px",
-                                  textOverflow: "ellipsis",
-                                },
-                                "& .Mui-disabled": {
-                                  color: "red",
-                                },
-                                marginTop: "-15px",
-                              }}
-                            />
-
-                            <TextField
-                              {...register(`assets.${index}.sub_unit_id`)}
-                              variant="outlined"
-                              disabled
-                              type="text"
-                              size="small"
-                              sx={{
-                                backgroundColor: "transparent",
-                                border: "none",
-                                ml: "-10px",
-                                "& .MuiOutlinedInput-root": {
-                                  "& fieldset": {
-                                    border: "none",
-                                  },
-                                },
-                                "& .MuiInputBase-input": {
-                                  backgroundColor: "transparent",
-                                  fontWeight: "bold",
-                                  fontSize: "11px",
-                                  textOverflow: "ellipsis",
-                                },
-                                "& .Mui-disabled": {
-                                  color: "red",
-                                },
-                                marginTop: "-15px",
-                              }}
-                            />
-
-                            <TextField
-                              {...register(`assets.${index}.location_id`)}
-                              variant="outlined"
-                              disabled
-                              type="text"
-                              size="small"
-                              sx={{
-                                backgroundColor: "transparent",
-                                border: "none",
-                                ml: "-10px",
-                                "& .MuiOutlinedInput-root": {
-                                  "& fieldset": {
-                                    border: "none",
-                                  },
-                                },
-                                "& .MuiInputBase-input": {
-                                  backgroundColor: "transparent",
-                                  fontWeight: "bold",
-                                  fontSize: "11px",
-                                  textOverflow: "ellipsis",
-                                },
-                                "& .Mui-disabled": {
-                                  color: "red",
-                                },
-                                marginTop: "-15px",
-                                marginBottom: "-10px",
-                              }}
-                            />
+                            <Typography fontSize="11px" fontFamily="Roboto" fontWeight={400}>
+                              {watch(`assets.${index}.one_charging_id`)}
+                            </Typography>
+                            <Typography fontSize="11px" fontFamily="Roboto" fontWeight={400}>
+                              {watch(`assets.${index}.company_id`)}
+                            </Typography>
+                            <Typography fontSize="13px" fontFamily="Roboto" fontWeight={550}>
+                              {watch(`assets.${index}.business_unit_id`)}
+                            </Typography>
+                            <Typography fontSize="11px" fontFamily="Roboto" fontWeight={400}>
+                              {watch(`assets.${index}.department_id`)}
+                            </Typography>
+                            <Typography fontSize="11px" fontFamily="Roboto" fontWeight={400}>
+                              {watch(`assets.${index}.unit_id`)}
+                            </Typography>
+                            <Typography fontSize="11px" fontFamily="Roboto" fontWeight={400}>
+                              {watch(`assets.${index}.sub_unit_id`)}
+                            </Typography>
+                            <Typography fontSize="11px" fontFamily="Roboto" fontWeight={400}>
+                              {watch(`assets.${index}.location_id`)}
+                            </Typography>
                           </Stack>
                         </TableCell>
 
                         <TableCell className="tbl-cell">
-                          <TextField
-                            {...register(`assets.${index}.created_at`)}
-                            variant="outlined"
-                            disabled
-                            type="date"
-                            // error={!!errors?.dateCreated}
-                            // helperText={errors?.dateCreated?.message}
+                          <Typography fontFamily="Anton">
+                            ₱ {formatCost(watch(`assets.${index}.remaining_book_value`))}
+                          </Typography>
+                        </TableCell>
+
+                        <TableCell className="tbl-cell">
+                          <Chip
+                            color="primary"
+                            label={watch(`assets.${index}.created_at`)}
+                            icon={<CalendarMonth />}
                             sx={{
-                              backgroundColor: "transparent",
-                              border: "none",
-                              "& .MuiOutlinedInput-root": {
-                                "& fieldset": {
-                                  border: "none",
-                                },
+                              "& .MuiChip-label": {
+                                fontSize: "12px",
+                                fontWeight: 600,
+                                px: 1,
                               },
-                              "& .MuiInputBase-input": {
-                                backgroundColor: "transparent",
-                              },
-                              ml: "-10px",
                             }}
                           />
                         </TableCell>
