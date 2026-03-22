@@ -11,6 +11,7 @@ import {
   setTransferApprovalTabValue,
   setTransferSingleApprovalTabValue,
 } from "../../../Redux/StateManagement/tabSlice";
+import ServiceProviderTransfer from "./ServiceProviderTransfer";
 
 const TransferApproving = () => {
   const dispatch = useDispatch();
@@ -18,6 +19,8 @@ const TransferApproving = () => {
   const tabValue = useSelector((state) => state.tab.transferSingleApprovalTabValue);
   const { data: notifData, refetch } = useGetNotificationApiQuery();
   const permissions = useSelector((state) => state.userLogin?.user.role.access_permission);
+  const user = JSON.parse(localStorage.getItem("user")) || {};
+  const isUserServiceProvider = user?.movement_warehouse?.type === "Service Provider";
 
   useEffect(() => {
     refetch();
@@ -87,12 +90,23 @@ const TransferApproving = () => {
                 value="1"
                 className={tabValue === "1" ? "tab__background" : null}
               />
+              {isUserServiceProvider && (
+                <Tab
+                  label="Service Provider Transfer"
+                  value="3"
+                  className={tabValue === "3" ? "tab__background" : null}
+                />
+              )}
 
               <Tab label="Approved Transfer" value="2" className={tabValue === "2" ? "tab__background" : null} />
             </Tabs>
 
             <TabPanel sx={{ p: 0 }} value="1" index="1">
               <PendingTransfer refetch />
+            </TabPanel>
+
+            <TabPanel sx={{ p: 0 }} value="3" index="3">
+              <ServiceProviderTransfer />
             </TabPanel>
 
             <TabPanel sx={{ p: 0 }} value="2" index="2">
