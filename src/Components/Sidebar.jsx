@@ -120,6 +120,7 @@ import {
   Inventory,
   ChangeCircle,
   Build,
+  Preview,
 } from "@mui/icons-material";
 import { useGetNotificationApiQuery } from "../Redux/Query/Notification";
 import { resetGetData } from "../Redux/StateManagement/actionMenuSlice";
@@ -719,8 +720,9 @@ const Sidebar = () => {
         {
           label: "Disposal",
           icon: PlaylistRemoveRounded,
-          path: "/asset-movement/disposal",
-          permission: "disposal",
+          path: "/asset-movement/disposal-pullout",
+          permission: "disposal-pullout",
+          // notification: notifData?.disposalReceivingCount,
           setter: closeCollapse,
         },
         {
@@ -740,6 +742,13 @@ const Sidebar = () => {
             notifData?.forDisposalForBookSlipCount +
               notifData?.forBiddingForBookSlipCount +
               notifData?.forBiddingForSoldCount || null,
+          setter: closeCollapse,
+        },
+        {
+          label: "Disposal Viewing",
+          icon: Preview,
+          path: "/asset-movement/disposal",
+          permission: "disposal",
           setter: closeCollapse,
         },
       ],
