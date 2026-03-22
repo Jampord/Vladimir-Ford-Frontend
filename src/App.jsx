@@ -135,6 +135,7 @@ import PhysicalInventory from "./Pages/Physical Inventory/PhysicalInventory";
 import ChangeCareOf from "./Pages/Asset Movement/Pullout Confirmation/ChangeCareOf";
 import RepairMonitoring from "./Pages/Monitoring/RepairMonitoring";
 import Repaired from "./Pages/Asset Movement/Repaired/Repaired";
+import DisposalPullout from "./Pages/Asset Movement/Disposal/DisposalPullout";
 
 const userData = JSON.parse(localStorage.getItem("user"));
 const userRole = userData?.role?.access_permission.split(", ");
@@ -559,6 +560,11 @@ const router = createBrowserRouter([
                 path: "disposal",
                 element: <Disposal />,
                 handle: { permission: "disposal" },
+              },
+              {
+                path: "disposal-pullout",
+                element: <DisposalPullout />,
+                handle: { permission: "disposal-pullout" },
               },
               {
                 path: "disposal/add-disposal",
