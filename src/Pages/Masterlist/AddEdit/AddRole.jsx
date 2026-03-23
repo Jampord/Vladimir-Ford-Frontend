@@ -228,6 +228,7 @@ const AddRole = (props) => {
     "disposal-receiving",
     "transfer-pullout-releasing",
     "evaluation",
+    "disposal-pullout",
     "bidding",
     "repaired",
 
@@ -301,6 +302,7 @@ const AddRole = (props) => {
     "disposal-receiving",
     "transfer-pullout-releasing",
     "evaluation",
+    "disposal-pullout",
     "bidding",
     "repaired",
   ];
@@ -608,8 +610,9 @@ const AddRole = (props) => {
       { label: "Receiving of Transfer", value: "transfer-receiving" },
       { label: "Transfer Releasing (Pullout)", value: "transfer-pullout-releasing" },
       { label: "Asset Evaluation", value: "evaluation" },
-      { label: "Asset Disposal", value: "disposal" },
+      { label: "Disposal Viewing", value: "disposal" },
       { label: "Receiving of Disposal", value: "disposal-receiving" },
+      { label: "Disposal", value: "disposal-pullout" },
       { label: "Bidding", value: "bidding" },
       { label: "Repaired", value: "repaired" },
     ];
@@ -1275,6 +1278,7 @@ const AddRole = (props) => {
                                     "disposal-receiving",
                                     "transfer-pullout-releasing",
                                     "evaluation",
+                                    "disposal-pullout",
                                     "bidding",
                                     "repaired",
                                   ]),
