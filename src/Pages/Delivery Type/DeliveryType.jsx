@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   useGetDeliveryTypeApiQuery,
+  useLazyGetDeliveryTypeApiQuery,
   usePostDeliveryTypeApiMutation,
 } from "../../Redux/Query/Delivery Type/DeliveryType";
 import {
@@ -34,11 +35,14 @@ import NoRecordsFound from "../../Layout/NoRecordsFound";
 import FaStatusChange from "../../Components/Reusable/FaStatusComponent";
 import moment from "moment";
 import { LoadingData } from "../../Components/LottieFiles/LottieComponents";
-import { FmdGood, More, Warehouse, Warning } from "@mui/icons-material";
+import { FmdGood, IosShareRounded, More, Warehouse, Warning } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { closeConfirm, onLoading, openConfirm } from "../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../Redux/StateManagement/toastSlice";
 import { notificationApi } from "../../Redux/Query/Notification";
+import { openExport } from "../../Redux/StateManagement/booleanStateSlice";
+import useExcelJs from "../../Hooks/ExcelJs";
+import { LoadingButton } from "@mui/lab";
 
 const schema = yup.object().shape({
   fixed_assets: yup.array(),
@@ -51,6 +55,7 @@ const DeliveryType = () => {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const dispatch = useDispatch();
+  const { excelExport } = useExcelJs();
 
   const {
     data: deliveryTypeData,
@@ -68,6 +73,19 @@ const DeliveryType = () => {
     },
     { refetchOnMountOrArgChange: true }
   );
+
+  const [
+    exportTrigger,
+    {
+      data: deliveryTypeExportData,
+      isLoading: isDeliveryTypeExportLoading,
+      isFetching: isDeliveryTypeExportFetching,
+      isSuccess: isDeliveryTypeExportSuccess,
+      isError: isDeliveryTypeExportError,
+      error: errorExportData,
+      refetch: exportRefetch,
+    },
+  ] = useLazyGetDeliveryTypeApiQuery();
 
   const [postDeliveryType, { isLoading: isPatchLoading }] = usePostDeliveryTypeApiMutation();
 
@@ -187,6 +205,54 @@ const DeliveryType = () => {
         },
       })
     );
+  };
+
+  const handleExport = async () => {
+    try {
+      const res = await exportTrigger({ pagination: "none" });
+
+      const exportData = res.data?.map((item) => {
+        return {
+          "Vladimir Tag Number": item.vladimir_tag_number || `-`,
+          "Reference Number": item.reference_number || `-`,
+          "Asset Description": item.asset_description || `-`,
+          "Asset Specification": item.asset_specification || `-`,
+          Accountability: item.accountability || `-`,
+          Accountable: item.accountable || `-`,
+          "Charged Department": item.charged_department,
+          "PR Number": item.ymir_pr_number,
+          "PO Number": item.po_number,
+          "RR Number": item.rr_number,
+          "One Charging Code": item.one_charging.code,
+          "One Charging": item.one_charging.name,
+
+          "Company Code": item.one_charging.company_code,
+          Company: item.one_charging.company_name,
+
+          "Business Unit Code": item.one_charging.business_unit_code,
+          "Business Unit": item.one_charging.business_unit_name,
+
+          "Department Code": item.one_charging.department_code,
+          Department: item.one_charging.department_name,
+
+          "Unit Code": item.one_charging.unit_code,
+          Unit: item.one_charging.unit_name,
+
+          "Sub Unit Code": item.one_charging.subunit_code,
+          "Sub Unit": item.one_charging.subunit_name,
+
+          "Location Code": item.one_charging.location_code,
+          Location: item.one_charging.location_name,
+
+          "Type of Request": item?.type_of_request?.type_of_request_name || `-`,
+          "Major Category": item?.major_category?.major_category_name || `-`,
+          "Minor Category": item?.minor_category?.minor_category_name || `-`,
+        };
+      });
+      await excelExport(exportData, `Vladimir-Delivery-Type.xlsx`);
+    } catch (err) {
+      console.log(err.message);
+    }
   };
 
   return (
@@ -431,11 +497,34 @@ const DeliveryType = () => {
               </Table>
             </TableContainer>
 
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography fontFamily="Anton, Impact, Roboto" fontSize="16px" color="secondary.main" ml={2}>
-                No. of Selected Asset: {watch("fixed_assets").length} Asset
-                {watch("fixed_assets").length >= 2 ? "s" : null}
-              </Typography>
+            <Box className="mcontainer__pagination-export">
+              <Stack direction="row" alignItems="center" justifyContent="space-between">
+                <LoadingButton
+                  className="mcontainer__export"
+                  variant="outlined"
+                  size="small"
+                  color="text"
+                  loading={isDeliveryTypeExportLoading || isDeliveryTypeExportFetching}
+                  startIcon={
+                    (!isDeliveryTypeExportLoading || !isDeliveryTypeExportFetching) && (
+                      <IosShareRounded color="primary" />
+                    )
+                  }
+                  onClick={handleExport}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "10px 20px",
+                  }}
+                >
+                  EXPORT
+                </LoadingButton>
+                <Typography fontFamily="Anton, Impact, Roboto" fontSize="16px" color="secondary.main" ml={2}>
+                  No. of Selected Asset: {watch("fixed_assets").length} Asset
+                  {watch("fixed_assets").length >= 2 ? "s" : null}
+                </Typography>
+              </Stack>
 
               <CustomTablePagination
                 total={deliveryTypeData?.total}
@@ -445,7 +534,7 @@ const DeliveryType = () => {
                 onPageChange={pageHandler}
                 onRowsPerPageChange={perPageHandler}
               />
-            </Stack>
+            </Box>
           </Box>
         </Box>
       )}
