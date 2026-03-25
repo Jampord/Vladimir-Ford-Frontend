@@ -834,8 +834,7 @@ const Requisition = () => {
                                       {!isCancelled && (
                                         <TableCell className="tbl-cell ">
                                           {(data.status === "For Approval of Approver 1" ||
-                                            data.status === "Returned" ||
-                                            data.status === "Returned From Ymir") && (
+                                            data.status === "Returned") && (
                                             <ActionMenu
                                               status={data.status}
                                               data={data}
