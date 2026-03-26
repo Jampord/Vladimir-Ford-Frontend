@@ -33,7 +33,7 @@ export const pulloutApi = createApi({
     }),
 
     getFixedAssetPulloutAllApi: builder.query({
-      query: () => `fixed-asset?pagination=none&movement=pullout`,
+      query: (params) => ({ url: `fixed-asset?pagination=none&movement=pullout`, params }),
       transformResponse: (response) => response.data,
       providesTags: ["Pullout"],
     }),
@@ -125,6 +125,7 @@ export const {
   useDownloadAttachmentApiMutation,
   usePatchVoidPulloutApiMutation,
   useGetPulloutConfirmationApiQuery,
+  useLazyGetPulloutConfirmationApiQuery,
   usePostPulloutConfirmationApiMutation,
   useGetPulloutTransferReceivingApiQuery,
   usePatchTransferPulloutReleasingApiMutation,
