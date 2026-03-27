@@ -6,6 +6,7 @@ import {
   Delete,
   DeleteForever,
   EditOff,
+  EventRepeat,
   FileCopy,
   FindReplace,
   FolderDelete,
@@ -51,6 +52,20 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
           backgroundColor: "#61c3f831",
           color: "#0288d1",
 
+          p: "0 5px",
+        }}
+      />
+    );
+  } else if (faStatus === "For Re-evaluation") {
+    return (
+      <Chip
+        size="small"
+        variant="contained"
+        icon={<EventRepeat size="small" color="#0288d1" />}
+        label={faStatus}
+        sx={{
+          backgroundColor: "#61c3f831",
+          color: "#0288d1",
           p: "0 5px",
         }}
       />
@@ -147,12 +162,12 @@ const faStatusComponent = ({ faStatus, data, hover }) => {
     return (
       <Chip
         size="small"
-        variant="outlined"
-        icon={<Sell size="small" color="#00ba34" />}
+        variant="contained"
+        icon={<Sell size="small" color="primary" />}
         label="Sold"
         sx={{
-          borderColor: "#00ba34",
-          color: "#00ba34",
+          backgroundColor: "primary",
+          color: "primary",
           p: "0 5px",
         }}
       />
