@@ -722,7 +722,7 @@ const Sidebar = () => {
           icon: PlaylistRemoveRounded,
           path: "/asset-movement/disposal-pullout",
           permission: "disposal-pullout",
-          // notification: notifData?.disposalReceivingCount,
+          notification: notifData?.forDisposalForBookSlipCount || null,
           setter: closeCollapse,
         },
         {
@@ -738,10 +738,7 @@ const Sidebar = () => {
           icon: LocalAtm,
           path: "/asset-movement/bidding",
           permission: "bidding",
-          notification:
-            notifData?.forDisposalForBookSlipCount +
-              notifData?.forBiddingForBookSlipCount +
-              notifData?.forBiddingForSoldCount || null,
+          notification: notifData?.forBiddingForBookSlipCount + notifData?.forBiddingForSoldCount || null,
           setter: closeCollapse,
         },
         {
@@ -849,7 +846,10 @@ const Sidebar = () => {
           icon: MoveDown,
           path: "/approving/transfer",
           permission: "approving-transfer",
-          notification: notifData?.toTransferApproveCount + notifData?.toTransferFaApproval,
+          notification:
+            notifData?.toTransferApproveCount +
+            notifData?.toTransferFaApproval +
+            notifData?.toAssistTransferApproveCount,
           setter: closeCollapse,
         },
         // {
