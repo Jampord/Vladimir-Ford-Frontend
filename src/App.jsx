@@ -569,7 +569,7 @@ const router = createBrowserRouter([
               {
                 path: "disposal/add-disposal",
                 element: <AddDisposal />,
-                handle: { permission: "disposal" },
+                handle: { permission: "disposal" || "evaluation" },
               },
               {
                 path: "disposal/add-disposal/:disposal_number",
