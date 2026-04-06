@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   useGetBiddingApiQuery,
   usePatchReturnToDisposalApiMutation,
+  usePostMarkAsDisposedApiMutation,
   usePostMarkAsSoldApiMutation,
 } from "../../../Redux/Query/Movement/Bidding";
 import {
@@ -38,12 +39,13 @@ import { LoadingData } from "../../../Components/LottieFiles/LottieComponents";
 import moment from "moment";
 import CustomTablePagination from "../../../Components/Reusable/CustomTablePagination";
 import { useDispatch, useSelector } from "react-redux";
-import { CheckCircle, Info, MenuBook, More, Report, Undo } from "@mui/icons-material";
+import { CheckCircle, Delete, Info, MenuBook, More, Report, Undo } from "@mui/icons-material";
 import AddBookSlip from "./Component/AddBookSlip";
 import { openDialog1 } from "../../../Redux/StateManagement/booleanStateSlice";
 import { onLoading, openConfirm } from "../../../Redux/StateManagement/confirmSlice";
 import { openToast } from "../../../Redux/StateManagement/toastSlice";
 import { notificationApi } from "../../../Redux/Query/Notification";
+import HelpdeskDisplay from "../../../Components/Reusable/HelpdeskDisplay";
 
 const schema = yup.object().shape({
   item_id: yup.array(),
@@ -87,8 +89,9 @@ const BiddingTabPanel = ({ tab }) => {
   });
 
   const selectedItems = biddingData?.data?.filter((item) => watch("item_id").includes(item?.id?.toString()));
-  const fixed_asset_ids = selectedItems?.map((item) => item?.asset?.id);
+  const pullout_ids = selectedItems?.map((item) => item?.id);
   const [postMarkAsSold] = usePostMarkAsSoldApiMutation();
+  const [postMarkAsDisposed] = usePostMarkAsDisposedApiMutation();
   const [patchReturn] = usePatchReturnToDisposalApiMutation();
 
   const handleClick = (event) => {
@@ -266,6 +269,68 @@ const BiddingTabPanel = ({ tab }) => {
     );
   };
 
+  const handleDisposeClick = () => {
+    setAnchorEl(null);
+    dispatch(
+      openConfirm({
+        icon: Info,
+        iconColor: "info",
+        message: (
+          <Box>
+            <Typography> Are you sure you want to</Typography>
+            <Typography
+              sx={{
+                display: "inline-block",
+                color: "secondary.main",
+                fontWeight: "bold",
+              }}
+            >
+              DISPOSE
+            </Typography>{" "}
+            selected asset(s) ?
+          </Box>
+        ),
+        onConfirm: async () => {
+          try {
+            dispatch(onLoading());
+            const res = await postMarkAsDisposed({
+              pullout_id: pullout_ids,
+              status: "bidding",
+            }).unwrap();
+            dispatch(
+              openToast({
+                message: res?.message || "Item marked as disposed successfully!",
+                duration: 5000,
+              })
+            );
+            reset();
+            dispatch(notificationApi.util.invalidateTags(["Notif"]));
+          } catch (err) {
+            console.log({ err });
+            if (err?.status === 422) {
+              dispatch(
+                openToast({
+                  message: err?.response?.data?.errors?.detail || err?.message,
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            } else if (err?.status !== 422) {
+              console.error(err);
+              dispatch(
+                openToast({
+                  message: "Something went wrong. Please try again.",
+                  duration: 5000,
+                  variant: "error",
+                })
+              );
+            }
+          }
+        },
+      })
+    );
+  };
+
   return (
     <Stack className="category_height">
       {isBiddingLoading && <MasterlistSkeleton onAdd category />}
@@ -273,37 +338,6 @@ const BiddingTabPanel = ({ tab }) => {
       {biddingData && !isBiddingError && !isBiddingLoading && (
         <Box className="mcontainer__wrapper">
           <MasterlistToolbar onSearchChange={setSearch} onSetPage={setPage} hideArchive />
-
-          {(!isBiddingLoading || !isBiddingFetching) && tab === "For Disposal" && (
-            <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }} mr="10px">
-              <Button
-                onClick={handleClick}
-                variant="contained"
-                startIcon={isSmallScreen ? null : <More />}
-                size="small"
-                disabled={watch("item_id").length === 0}
-                sx={{ minWidth: isSmallScreen && "50px", top: isMediumScreen && -48 }}
-              >
-                {isSmallScreen ? <More color="black" sx={{ fontSize: "20px" }} /> : "Action"}
-              </Button>
-
-              <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                <MenuItem dense onClick={handleAddBookSlipClick}>
-                  <ListItemIcon>
-                    <MenuBook fontSize="small" color="secondary" />
-                  </ListItemIcon>
-                  <ListItemText>Add Bookslip</ListItemText>
-                </MenuItem>
-
-                <MenuItem dense onClick={handleReturnClick}>
-                  <ListItemIcon>
-                    <Undo fontSize="small" color="warning" />
-                  </ListItemIcon>
-                  <ListItemText>Return</ListItemText>
-                </MenuItem>
-              </Menu>
-            </Box>
-          )}
 
           {(!isBiddingLoading || !isBiddingFetching) && tab === "Bid" && (
             <Box className="masterlist-toolbar__addBtn" sx={{ mt: 0.8 }} mr="10px">
@@ -319,18 +353,24 @@ const BiddingTabPanel = ({ tab }) => {
               </Button>
 
               <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                <MenuItem dense onClick={handleAddBookSlipClick}>
+                {/* <MenuItem dense onClick={handleAddBookSlipClick}>
                   <ListItemIcon>
                     <MenuBook fontSize="small" color="secondary" />
                   </ListItemIcon>
                   <ListItemText>Add Bookslip</ListItemText>
-                </MenuItem>
+                </MenuItem> */}
 
-                <MenuItem dense onClick={handleReturnClick}>
+                {/* <MenuItem dense onClick={handleReturnClick}>
                   <ListItemIcon>
-                    <Undo fontSize="small" color="warning" />
+                  <Undo fontSize="small" color="warning" />
                   </ListItemIcon>
                   <ListItemText>Return</ListItemText>
+                  </MenuItem> */}
+                <MenuItem dense onClick={handleDisposeClick}>
+                  <ListItemIcon>
+                    <Delete fontSize="small" color="warning" />
+                  </ListItemIcon>
+                  <ListItemText>Dispose</ListItemText>
                 </MenuItem>
               </Menu>
             </Box>
@@ -398,9 +438,6 @@ const BiddingTabPanel = ({ tab }) => {
                     <TableCell className="tbl-cell">Helpdesk #</TableCell>
                     <TableCell className="tbl-cell">Asset</TableCell>
                     <TableCell className="tbl-cell">Chart of Account</TableCell>
-                    {(tab === "Disposed" || tab === "Bidding" || tab === "Sold") && (
-                      <TableCell className="tbl-cell">Bookslip #</TableCell>
-                    )}
                     <TableCell className="tbl-cell">Requestor</TableCell>
                     <TableCell className="tbl-cell">Date Created</TableCell>
                   </TableRow>
@@ -440,9 +477,22 @@ const BiddingTabPanel = ({ tab }) => {
                               />
                             </TableCell>
                           )}
-                          <TableCell className="tbl-cell">{item?.id}</TableCell>
+                          <TableCell className="tbl-cell">
+                            <Chip
+                              label={`${item?.id}`}
+                              size="small"
+                              sx={{
+                                fontWeight: 600,
+                                borderRadius: 1.5,
+                                bgcolor: "#f9aa3320", // soft primary
+                                color: "#ae7623", // primaryDark
+                              }}
+                            />
+                          </TableCell>
                           <TableCell className="tbl-cell">{item?.description}</TableCell>
-                          <TableCell className="tbl-cell">{item?.helpdesk_number}</TableCell>
+                          <TableCell className="tbl-cell">
+                            <HelpdeskDisplay id={item?.helpdesk_number} />
+                          </TableCell>
                           <TableCell className="tbl-cell ">
                             <Typography fontWeight={700} fontSize="13px" color="primary">
                               {item?.asset.vladimir_tag_number}
@@ -503,11 +553,6 @@ const BiddingTabPanel = ({ tab }) => {
                               }`}
                             </Typography>
                           </TableCell>
-                          {(tab === "Disposed" || tab === "Bidding" || tab === "Sold") && (
-                            <TableCell className="tbl-cell">
-                              <Chip label={item?.book_slip_number} size="small" color="info" variant="outlined" />
-                            </TableCell>
-                          )}
                           <TableCell className="tbl-cell">
                             <Typography fontSize={12} fontWeight={700} color="primary.main">
                               {item.requester.employee_id}
